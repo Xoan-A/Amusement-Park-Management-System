@@ -14,4 +14,4 @@ jobs:
     uses: IngSoft-DA2/workflows/.github/workflows/reusable-build-test.yml@self-hosted
     permissions: write-all
     with:
-      solution-name: "obligatorio_parque_tematico_virtual.sln"
+      solution-name: "obligatorio_parque_tematico_virtual/obligatorio_parque_tematico_virtual.sln"
