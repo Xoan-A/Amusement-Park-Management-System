@@ -1,0 +1,6 @@
+@obligatorio_parque_tematico_virtual_HostAddress = http://localhost:5020
+
+GET {{obligatorio_parque_tematico_virtual_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
