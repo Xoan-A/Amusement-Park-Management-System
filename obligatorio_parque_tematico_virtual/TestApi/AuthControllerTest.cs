@@ -16,10 +16,10 @@ namespace ApiTests
     [TestClass]
     public class AuthControllerTest
     {
-        private WebApplicationFactory<Program> _factory;
-        private HttpClient _client;
-        private Mock<IAuthLogic> _mockAuthLogic;
-        private Mock<IUserLogic> _mockUserLogic;
+        private WebApplicationFactory<Program> _factory = null!;
+        private HttpClient _client = null!;
+        private Mock<IAuthLogic> _mockAuthLogic = null!;
+        private Mock<IUserLogic> _mockUserLogic = null!;
 
         [TestInitialize]
         public void Setup()
