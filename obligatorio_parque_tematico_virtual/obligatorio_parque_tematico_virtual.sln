@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBusinessLogic", "IBusiness
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IDataAccess", "IDataAccess\IDataAccess.csproj", "{28B6E819-C524-4156-8A38-C82F68C33D18}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{78371EC0-8751-4A92-A0D9-A4852A68E372}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,5 +69,9 @@ Global
 		{28B6E819-C524-4156-8A38-C82F68C33D18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28B6E819-C524-4156-8A38-C82F68C33D18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28B6E819-C524-4156-8A38-C82F68C33D18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78371EC0-8751-4A92-A0D9-A4852A68E372}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78371EC0-8751-4A92-A0D9-A4852A68E372}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78371EC0-8751-4A92-A0D9-A4852A68E372}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78371EC0-8751-4A92-A0D9-A4852A68E372}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
