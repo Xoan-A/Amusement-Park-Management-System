@@ -59,8 +59,8 @@ namespace ApiTests
             {
                 Token = "valid_token",
                 Email = "admin@test.com",
-                Role = "Administrator",
-                Name = "Admin User"
+                Role = "User",
+                Name = "User Name"
             };
 
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
