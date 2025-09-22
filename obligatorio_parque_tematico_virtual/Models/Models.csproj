@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="In/*.cs" />
-    <Compile Include="Out/*.cs" />
+    <Compile Include="In\*.cs" />
+    <Compile Include="Out\*.cs" />
   </ItemGroup>
 
 </Project>
