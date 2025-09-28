@@ -41,4 +41,40 @@ public class AttractionServiceTest
         Assert.AreEqual(expectedAttraction.Name, result.Name);
         _mockAttractionRepository.Verify(r => r.GetById(expectedAttraction.Id), Times.Once);
     }
+
+    [TestMethod]
+    public void GetAllAttractions_ShouldReturnListOfAttractions()
+    {
+        List<Attraction> expectedAttractions = new List<Attraction>
+        {
+            new Attraction
+            {
+                Name = "Ferris Wheel",
+                Description = "A giant wheel with cabins",
+                Type = AttractionType.RollerCoaster,
+                MinAge = 0,
+                MaxCapacity = 40,
+                CurrentCapacity = 10,
+                IsActive = true
+            },
+            new Attraction
+            {
+                Name = "Haunted House",
+                Description = "A spooky experience",
+                Type = AttractionType.Simulator,
+                MinAge = 8,
+                MaxCapacity = 15,
+                CurrentCapacity = 3,
+                IsActive = false
+            }
+        };
+        
+        _mockAttractionRepository.Setup(r => r.GetAll()).Returns(expectedAttractions);
+        
+        List<Attraction> result = _attractionService.GetAllAttractions();
+        
+        Assert.IsNotNull(result);
+        Assert.AreEqual(2, result.Count);
+        _mockAttractionRepository.Verify(r => r.GetAll(), Times.Once);
+    }
 }
