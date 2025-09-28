@@ -10,4 +10,9 @@ public class Attraction
     public int MaxCapacity { get; set; }
     public int CurrentCapacity { get; set; }
     public bool IsActive { get; set; }
+
+    public Attraction()
+    {
+        this.Id = Guid.NewGuid();
+    }
 }
