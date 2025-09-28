@@ -109,4 +109,27 @@ public class AttractionRepositoryTest
 
             Assert.IsTrue(result);
         }
+        
+        [TestMethod]
+        public void GetAll_ShouldReturnAllAttractions()
+        {
+            Attraction attraction2 = new Attraction
+            {
+                Name = "Haunted House",
+                Description = "A spooky experience",
+                Type = AttractionType.Simulator,
+                MinAge = 8,
+                MaxCapacity = 15,
+                CurrentCapacity = 3,
+                IsActive = false
+            };
+            
+            _context.Attractions.Add(attraction);
+            _context.Attractions.Add(attraction2);
+            _context.SaveChanges();
+            List<Attraction> result = _attractionRepository.GetAll();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+        }
 }
