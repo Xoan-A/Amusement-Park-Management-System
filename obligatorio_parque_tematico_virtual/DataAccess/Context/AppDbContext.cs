@@ -6,6 +6,7 @@ namespace DataAccess.Context
     public class AppDbContext : DbContext
     {
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Ticket> Tickets { get; set; }
 
         public AppDbContext() { }
 
@@ -22,6 +23,16 @@ namespace DataAccess.Context
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+
+            modelBuilder.Entity<Ticket>()
+                .HasIndex(t => t.QRCode)
+                .IsUnique();
+
+            modelBuilder.Entity<Ticket>()
+                .HasOne(t => t.Visitor)
+                .WithMany()
+                .HasForeignKey(t => t.VisitorId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
         }
