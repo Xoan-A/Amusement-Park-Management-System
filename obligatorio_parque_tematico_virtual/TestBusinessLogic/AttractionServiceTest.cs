@@ -16,6 +16,6 @@ public class AttractionServiceTest
     public void Setup()
     {
         _mockAttractionRepository = new Mock<IAttractionRepository>();
-        _attractionService = new AttractionService(_mockAttractionRepository.Object, _mockAttractionRepository.Object);
+        _attractionService = new AttractionService(_mockAttractionRepository.Object);
     }
 }
