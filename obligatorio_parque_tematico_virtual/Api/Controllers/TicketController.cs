@@ -11,7 +11,7 @@ using Domain;
 namespace Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/tickets")]
     public class TicketController : ControllerBase
     {
         private readonly ITicketLogic _ticketLogic;
