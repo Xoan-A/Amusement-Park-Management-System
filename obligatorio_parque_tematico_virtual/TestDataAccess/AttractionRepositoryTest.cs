@@ -147,4 +147,15 @@ public class AttractionRepositoryTest
             Assert.IsNotNull(result);
             Assert.AreEqual("Updated Name", result.Name);
         }
+
+        [TestMethod]
+        public void Remove_ShouldRemoveAttractionFromDatabase()
+        {
+            _context.Attractions.Add(attraction);
+            _context.SaveChanges();
+
+            _attractionRepository.Remove(attraction);
+            
+            Assert.AreEqual(0, _context.Attractions.Count());
+        }
 }
