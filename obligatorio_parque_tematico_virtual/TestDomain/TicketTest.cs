@@ -13,11 +13,12 @@ namespace TestDomain
             DateTime purchaseDate = new DateTime(2025, 1, 1, 10, 0, 0);
             DateTime visitDate = new DateTime(2025, 1, 15, 0, 0, 0);
             Guid qrCode = Guid.NewGuid();
+            Guid visitorId = Guid.NewGuid();
 
             Ticket ticket = new Ticket
             {
                 Id = 1,
-                VisitorId = 123,
+                VisitorId = visitorId,
                 PurchaseDate = purchaseDate,
                 VisitDate = visitDate,
                 Type = TicketType.General,
@@ -25,7 +26,7 @@ namespace TestDomain
             };
 
             Assert.AreEqual(1, ticket.Id);
-            Assert.AreEqual(123, ticket.VisitorId);
+            Assert.AreEqual(visitorId, ticket.VisitorId);
             Assert.AreEqual(purchaseDate, ticket.PurchaseDate);
             Assert.AreEqual(visitDate, ticket.VisitDate);
             Assert.AreEqual(TicketType.General, ticket.Type);
@@ -36,10 +37,11 @@ namespace TestDomain
         [TestMethod]
         public void TestTicketWithEventId()
         {
+            Guid visitorId = Guid.NewGuid();
             Ticket ticket = new Ticket
             {
                 Id = 2,
-                VisitorId = 456,
+                VisitorId = visitorId,
                 PurchaseDate = DateTime.Now,
                 VisitDate = DateTime.Now.AddDays(5),
                 Type = TicketType.EventSpecial,
@@ -48,7 +50,7 @@ namespace TestDomain
             };
 
             Assert.AreEqual(2, ticket.Id);
-            Assert.AreEqual(456, ticket.VisitorId);
+            Assert.AreEqual(visitorId, ticket.VisitorId);
             Assert.AreEqual(TicketType.EventSpecial, ticket.Type);
             Assert.AreEqual(10, ticket.EventId);
         }
@@ -67,12 +69,14 @@ namespace TestDomain
         [TestMethod]
         public void TestTicketWithVisitorRelationship()
         {
+            Guid visitorGuid = Guid.NewGuid();
             Visitor visitor = new Visitor
             {
-                Id = 1,
+                Id = visitorGuid,
                 Name = "John",
                 LastName = "Doe",
                 Email = "john@test.com",
+                Password = "hashedpassword",
                 BirthDate = new DateTime(1990, 1, 1),
                 MembershipLevel = MembershipLevel.Standard
             };
@@ -89,7 +93,7 @@ namespace TestDomain
             };
 
             Assert.IsNotNull(ticket.Visitor);
-            Assert.AreEqual(visitor.Id, ticket.VisitorId);
+            Assert.AreEqual(visitorGuid, ticket.VisitorId);
             Assert.AreEqual("John", ticket.Visitor.Name);
         }
 
