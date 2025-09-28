@@ -136,10 +136,11 @@ public class AttractionServiceTest
             IsActive = false
         };
         
-        _mockAttractionRepository.Setup(r => r.Remove(attractionToDelete.Id));
+        _mockAttractionRepository.Setup(r => r.Remove(attractionToDelete));
+        _mockAttractionRepository.Setup(r => r.GetById(attractionToDelete.Id)).Returns(attractionToDelete);
         
         _attractionService.DeleteAttraction(attractionToDelete.Id);
         
-        _mockAttractionRepository.Verify(r => r.Delete(attractionToDelete.Id), Times.Once);
+        _mockAttractionRepository.Verify(r => r.Remove(attractionToDelete), Times.Once);
     }
 }

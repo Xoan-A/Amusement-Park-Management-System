@@ -8,4 +8,5 @@ public interface IAttractionService
     List<Attraction> GetAllAttractions();
     Attraction AddAttraction(Attraction newAttraction);
     void UpdateAttraction(Attraction existingAttraction);
+    void DeleteAttraction(Guid id);
 }

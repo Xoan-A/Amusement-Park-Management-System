@@ -32,4 +32,10 @@ public class AttractionService : IAttractionService
     {
         _attractionRepository.Update(existingAttraction);
     }
+    
+    public void DeleteAttraction(Guid id)
+    {
+        var attraction = _attractionRepository.GetById(id);
+        _attractionRepository.Remove(attraction);
+    }
 }
