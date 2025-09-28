@@ -77,4 +77,24 @@ public class AttractionServiceTest
         Assert.AreEqual(2, result.Count);
         _mockAttractionRepository.Verify(r => r.GetAll(), Times.Once);
     }
+    
+    [TestMethod]
+    public void AddAttraction_ShouldCreateAttraction_WhenDataIsValid()
+    {
+        Attraction newAttraction = new Attraction
+        {
+            Name = "Bumper Cars",
+            Description = "Fun driving experience",
+            Type = AttractionType.Simulator,
+            MinAge = 5,
+            MaxCapacity = 10,
+            CurrentCapacity = 0,
+            IsActive = true
+        };
+        
+        _attractionService.AddAttraction(newAttraction);
+        
+        Attraction result = _attractionService.GetAttractionById(newAttraction.Id);
+        Assert.AreEqual(newAttraction.Name, result.Name);
+    }
 }
