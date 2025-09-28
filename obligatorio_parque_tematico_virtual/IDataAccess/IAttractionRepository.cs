@@ -8,4 +8,5 @@ public interface IAttractionRepository
     Attraction GetByName(string name);
     Attraction GetById(Guid id);
     bool IsNameUnique(string name);
+    List<Attraction> GetAll();
 }

@@ -34,4 +34,9 @@ public class AttractionRepository : IAttractionRepository
     {
         return !_context.Attractions.Any(a => a.Name == name);
     }
+
+    public List<Attraction> GetAll()
+    {
+        return _context.Attractions.ToList();
+    }
 }
