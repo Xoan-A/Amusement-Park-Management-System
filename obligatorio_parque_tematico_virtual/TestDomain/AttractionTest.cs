@@ -10,22 +10,22 @@ public class AttractionTest
     {
         Attraction attraction = new Attraction();
         
-        attraction.id = Guid.NewGuid();
-        attraction.name = "Race simulator";
-        attraction.description = "average race simulator";
-        attraction.type = AttractionType.Simulator;
-        attraction.minAge = 18;
-        attraction.maxCapacity = 10;
-        attraction.currentCapacity = 0;
-        attraction.isActive = true;
+        attraction.Id = Guid.NewGuid();
+        attraction.Name = "Race simulator";
+        attraction.Description = "average race simulator";
+        attraction.Type = AttractionType.Simulator;
+        attraction.MinAge = 18;
+        attraction.MaxCapacity = 10;
+        attraction.CurrentCapacity = 0;
+        attraction.IsActive = true;
         
-        Assert.IsNotNull(attraction.id);
-        Assert.AreEqual("Race simulator", attraction.name);
-        Assert.AreEqual("average race simulator", attraction.description);
-        Assert.AreEqual(AttractionType.Simulator, attraction.type);
-        Assert.AreEqual(18, attraction.minAge);
-        Assert.AreEqual(10, attraction.maxCapacity);
-        Assert.AreEqual(0, attraction.currentCapacity);
-        Assert.AreEqual(true, attraction.isActive);
+        Assert.IsNotNull(attraction.Id);
+        Assert.AreEqual("Race simulator", attraction.Name);
+        Assert.AreEqual("average race simulator", attraction.Description);
+        Assert.AreEqual(AttractionType.Simulator, attraction.Type);
+        Assert.AreEqual(18, attraction.MinAge);
+        Assert.AreEqual(10, attraction.MaxCapacity);
+        Assert.AreEqual(0, attraction.CurrentCapacity);
+        Assert.AreEqual(true, attraction.IsActive);
     }
 }
