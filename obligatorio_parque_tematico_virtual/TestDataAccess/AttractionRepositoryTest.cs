@@ -132,4 +132,19 @@ public class AttractionRepositoryTest
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count);
         }
+        
+        [TestMethod]
+        public void Update_ShouldUpdateAttractionInDatabase()
+        {
+            _context.Attractions.Add(attraction);
+            _context.SaveChanges();
+            
+            attraction.Name = "Updated Name";
+            _attractionRepository.Update(attraction);
+
+            Attraction result = _attractionRepository.GetById(attraction.Id);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("Updated Name", result.Name);
+        }
 }
