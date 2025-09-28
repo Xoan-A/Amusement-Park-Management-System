@@ -9,4 +9,5 @@ public interface IAttractionRepository
     Attraction GetById(Guid id);
     bool IsNameUnique(string name);
     List<Attraction> GetAll();
+    void Update(Attraction attraction);
 }

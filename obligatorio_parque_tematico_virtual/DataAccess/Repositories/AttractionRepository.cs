@@ -39,4 +39,10 @@ public class AttractionRepository : IAttractionRepository
     {
         return _context.Attractions.ToList();
     }
+    
+    public void Update(Attraction attraction)
+    {
+        _context.Attractions.Update(attraction);
+        _context.SaveChanges();
+    }
 }
