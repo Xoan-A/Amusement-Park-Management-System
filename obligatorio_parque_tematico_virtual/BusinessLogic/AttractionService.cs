@@ -27,4 +27,9 @@ public class AttractionService : IAttractionService
     {
         return _attractionRepository.Create(newAttraction);
     }
+    
+    public void UpdateAttraction(Attraction existingAttraction)
+    {
+        _attractionRepository.Update(existingAttraction);
+    }
 }

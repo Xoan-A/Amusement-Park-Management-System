@@ -7,4 +7,5 @@ public interface IAttractionService
     Attraction GetAttractionById(Guid Id);
     List<Attraction> GetAllAttractions();
     Attraction AddAttraction(Attraction newAttraction);
+    void UpdateAttraction(Attraction existingAttraction);
 }
