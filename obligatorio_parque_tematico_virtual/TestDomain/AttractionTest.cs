@@ -28,4 +28,13 @@ public class AttractionTest
         Assert.AreEqual(0, attraction.CurrentCapacity);
         Assert.AreEqual(true, attraction.IsActive);
     }
+
+    [TestMethod]
+    public void Attraction_ShouldHaveUniqueId()
+    {
+        Attraction attraction1 = new Attraction();
+        Attraction attraction2 = new Attraction();
+        
+        Assert.AreNotEqual(attraction1.Id, attraction2.Id);
+    }
 }
