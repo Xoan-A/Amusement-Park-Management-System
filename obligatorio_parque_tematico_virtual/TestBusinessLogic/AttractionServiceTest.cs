@@ -91,10 +91,11 @@ public class AttractionServiceTest
             CurrentCapacity = 0,
             IsActive = true
         };
+        _mockAttractionRepository.Setup(r => r.Create(newAttraction)).Returns(newAttraction);
         
-        _attractionService.AddAttraction(newAttraction);
+        Attraction result = _attractionService.AddAttraction(newAttraction);
         
-        Attraction result = _attractionService.GetAttractionById(newAttraction.Id);
         Assert.AreEqual(newAttraction.Name, result.Name);
+        _mockAttractionRepository.Verify(r => r.Create(newAttraction), Times.Once);
     }
 }

@@ -22,4 +22,9 @@ public class AttractionService : IAttractionService
     {
         return _attractionRepository.GetAll();
     }
+    
+    public Attraction AddAttraction(Attraction newAttraction)
+    {
+        return _attractionRepository.Create(newAttraction);
+    }
 }
