@@ -121,4 +121,25 @@ public class AttractionServiceTest
         
         _mockAttractionRepository.Verify(r => r.Update(existingAttraction), Times.Once);
     }
+    
+    [TestMethod]
+    public void DeleteAttraction_ShouldRemoveAttraction_WhenIdIsValid()
+    {
+        Attraction attractionToDelete = new Attraction
+        {
+            Name = "Drop Tower",
+            Description = "A thrilling drop experience",
+            Type = AttractionType.RollerCoaster,
+            MinAge = 14,
+            MaxCapacity = 15,
+            CurrentCapacity = 0,
+            IsActive = false
+        };
+        
+        _mockAttractionRepository.Setup(r => r.Remove(attractionToDelete.Id));
+        
+        _attractionService.DeleteAttraction(attractionToDelete.Id);
+        
+        _mockAttractionRepository.Verify(r => r.Delete(attractionToDelete.Id), Times.Once);
+    }
 }
