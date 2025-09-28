@@ -12,4 +12,9 @@ public class AttractionService : IAttractionService
     {
         _attractionRepository = attractionRepository;
     }
+    
+    public Attraction GetAttractionById(Guid id)
+    {
+        return _attractionRepository.GetById(id);
+    }
 }
