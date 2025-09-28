@@ -11,6 +11,7 @@ public class AttractionRepositoryTest
 {
     private AppDbContext _context;
     private IAttractionRepository _attractionRepository;
+    private Attraction attraction;
     
     [TestInitialize]
     public void Setup()
@@ -21,7 +22,7 @@ public class AttractionRepositoryTest
         _context = new AppDbContext(options);
         _attractionRepository = new AttractionRepository(_context);
         
-        Attraction attraction = new Attraction();
+        attraction = new Attraction();
         
         attraction.Name = "Race simulator";
         attraction.Description = "average race simulator";
@@ -54,7 +55,7 @@ public class AttractionRepositoryTest
             _context.Attractions.Add(attraction);
             _context.SaveChanges();
 
-            User result = _attractionRepository.GetByName("Race simulator");
+            Attraction result = _attractionRepository.GetByName("Race simulator");
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Race simulator", result.Name);
@@ -63,7 +64,7 @@ public class AttractionRepositoryTest
         [TestMethod]
         public void GetByName_ShouldReturnNull_WhenAttractionDoesNotExist()
         {
-            User result = _attractionRepository.GetByName("nonexistent");
+            Attraction result = _attractionRepository.GetByName("nonexistent");
 
             Assert.IsNull(result);
         }
@@ -74,7 +75,7 @@ public class AttractionRepositoryTest
             _context.Attractions.Add(attraction);
             _context.SaveChanges();
 
-            User result = _attractionRepository.GetById(attraction.Id);
+            Attraction result = _attractionRepository.GetById(attraction.Id);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(attraction.Id, result.Id);
@@ -85,7 +86,7 @@ public class AttractionRepositoryTest
         {
             Guid nonExistentId = Guid.NewGuid();
 
-            User result = _attractionRepository.GetById(nonExistentId);
+            Attraction result = _attractionRepository.GetById(nonExistentId);
 
             Assert.IsNull(result);
         }

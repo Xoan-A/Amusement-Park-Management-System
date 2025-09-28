@@ -6,6 +6,7 @@ namespace DataAccess.Context
     public class AppDbContext : DbContext
     {
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Attraction> Attractions { get; set; }
 
         public AppDbContext() { }
 
@@ -21,6 +22,10 @@ namespace DataAccess.Context
 
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
+                .IsUnique();
+            
+            modelBuilder.Entity<Attraction>()
+                .HasIndex(a => a.Name)
                 .IsUnique();
 
             base.OnModelCreating(modelBuilder);
