@@ -98,4 +98,27 @@ public class AttractionServiceTest
         Assert.AreEqual(newAttraction.Name, result.Name);
         _mockAttractionRepository.Verify(r => r.Create(newAttraction), Times.Once);
     }
+    
+    [TestMethod]
+    public void UpdateAttraction_ShouldUpdateAttraction_WhenDataIsValid()
+    {
+        Attraction existingAttraction = new Attraction
+        {
+            Name = "Swing Ride",
+            Description = "A fun swinging experience",
+            Type = AttractionType.RollerCoaster,
+            MinAge = 7,
+            MaxCapacity = 25,
+            CurrentCapacity = 5,
+            IsActive = true
+        };
+        
+        existingAttraction.Description = "An exciting swinging experience";
+        
+        _mockAttractionRepository.Setup(r => r.Update(existingAttraction));
+        
+        _attractionService.UpdateAttraction(existingAttraction);
+        
+        _mockAttractionRepository.Verify(r => r.Update(existingAttraction), Times.Once);
+    }
 }
