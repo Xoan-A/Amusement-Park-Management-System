@@ -17,4 +17,9 @@ public class AttractionService : IAttractionService
     {
         return _attractionRepository.GetById(id);
     }
+    
+    public List<Attraction> GetAllAttractions()
+    {
+        return _attractionRepository.GetAll();
+    }
 }
