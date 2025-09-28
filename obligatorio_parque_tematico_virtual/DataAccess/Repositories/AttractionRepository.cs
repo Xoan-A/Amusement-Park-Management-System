@@ -45,4 +45,10 @@ public class AttractionRepository : IAttractionRepository
         _context.Attractions.Update(attraction);
         _context.SaveChanges();
     }
+    
+    public void Remove(Attraction attraction)
+    {
+        _context.Attractions.Remove(attraction);
+        _context.SaveChanges();
+    }
 }

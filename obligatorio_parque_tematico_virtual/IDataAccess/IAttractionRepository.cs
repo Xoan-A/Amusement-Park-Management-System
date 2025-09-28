@@ -10,4 +10,5 @@ public interface IAttractionRepository
     bool IsNameUnique(string name);
     List<Attraction> GetAll();
     void Update(Attraction attraction);
+    void Remove(Attraction attraction);
 }
