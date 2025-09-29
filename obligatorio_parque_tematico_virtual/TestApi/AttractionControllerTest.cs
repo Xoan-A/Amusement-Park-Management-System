@@ -17,6 +17,7 @@ public class AttractionControllerTest
 {
     private WebApplicationFactory<Program> _factory = null!;
     private HttpClient _client = null!;
+    private HttpClient _adminClient = null!;
     private Mock<IAttractionService> _mockAttractionService = null!;
 
     [TestInitialize]
@@ -30,6 +31,19 @@ public class AttractionControllerTest
         });
 
         _client = _factory.CreateClient();
+
+        var tokenService = new BusinessLogic.TokenService();
+
+        var adminUser = new Domain.Administrator
+        {
+            Id = Guid.NewGuid(),
+            Name = "Admin",
+            LastName = "User",
+            Email = "admin@example.com"
+        };
+        string adminToken = tokenService.GenerateToken(adminUser);
+        _adminClient = _factory.CreateClient();
+        _adminClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
     }
 
     [TestCleanup]
@@ -150,7 +164,7 @@ public class AttractionControllerTest
         _mockAttractionService.Setup(s => s.CreateAttraction(It.IsAny<AttractionRequest>())).ReturnsAsync(expectedId);
 
         var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
-        var response = await _client.PostAsync("/api/attractions", content);
+        var response = await _adminClient.PostAsync("/api/attractions", content);
 
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -200,7 +214,7 @@ public class AttractionControllerTest
     {
         Guid id = Guid.NewGuid();
         _mockAttractionService.Setup(s => s.DeleteAttraction(id)).Returns(Task.CompletedTask);
-        var response = await _client.DeleteAsync($"/api/attractions/{id}");
+        var response = await _adminClient.DeleteAsync($"/api/attractions/{id}");
         response.EnsureSuccessStatusCode();
         Assert.AreEqual(System.Net.HttpStatusCode.NoContent, response.StatusCode);
         _mockAttractionService.Verify(s => s.DeleteAttraction(id), Times.Once);

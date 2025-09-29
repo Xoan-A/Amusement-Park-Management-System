@@ -1,6 +1,7 @@
 ﻿using Domain;
 using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
+using Microsoft.AspNetCore.Authorization;
 using Models.In;
 using Models.Out;
 
@@ -49,6 +50,7 @@ public class AttractionController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> CreateAttraction([FromBody] AttractionRequest newAttraction)
     {
         Guid newId = await _attractionService.CreateAttraction(newAttraction);
