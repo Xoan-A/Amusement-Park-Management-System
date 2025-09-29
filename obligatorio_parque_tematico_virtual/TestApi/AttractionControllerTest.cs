@@ -18,23 +18,20 @@ public class AttractionControllerTest
     private WebApplicationFactory<Program> _factory = null!;
     private HttpClient _client = null!;
     private Mock<IAttractionService> _mockAttractionService = null!;
-    
+
     [TestInitialize]
     public void Setup()
     {
         _mockAttractionService = new Mock<IAttractionService>();
-        
+
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
-            builder.ConfigureServices(services =>
-            {
-                services.AddSingleton(_mockAttractionService.Object);
-            });
+            builder.ConfigureServices(services => { services.AddSingleton(_mockAttractionService.Object); });
         });
-        
+
         _client = _factory.CreateClient();
     }
-    
+
     [TestCleanup]
     public void Cleanup()
     {
@@ -46,48 +43,57 @@ public class AttractionControllerTest
     public async Task GetAttractions_ValidRequest_ReturnsAttractionResponse()
     {
         Guid id = Guid.NewGuid();
-        var expectedResponse = new AllAttractionsResponse
+        AllAttractionsResponse expectedResponse = new AllAttractionsResponse
         {
-            Id = id,
-            Name = "Eiffel Tower",
-            Description = "Paris",
-            Type = "InteractiveZone",
-            MinAge = 10,
-            MaxCapacity = 100,
-            CurrentCapacity = 50,
-            IsActive = true
-        };
-        
-        _mockAttractionService.Setup(s => s.GetAllAttractions())
-            .Returns(new List<Attraction> { new Attraction
+            Attractions =
             {
-                Id = id,
-                Name = "Eiffel Tower",
-                Description = "Paris",
-                Type = AttractionType.InteractiveZone,
-                MinAge = 10,
-                MaxCapacity = 100,
-                CurrentCapacity = 50,
-                IsActive = true
-            }});
-        
+                new AttractionResponse
+                {
+                    Id = id,
+                    Name = "Eiffel Tower",
+                    Description = "Paris",
+                    Type = "InteractiveZone",
+                    MinAge = 10,
+                    MaxCapacity = 100,
+                    CurrentCapacity = 50,
+                    IsActive = true
+                }
+            }
+        };
+
+        _mockAttractionService.Setup(s => s.GetAllAttractions())
+            .Returns(new List<Attraction>
+            {
+                new Attraction
+                {
+                    Id = id,
+                    Name = "Eiffel Tower",
+                    Description = "Paris",
+                    Type = AttractionType.InteractiveZone,
+                    MinAge = 10,
+                    MaxCapacity = 100,
+                    CurrentCapacity = 50,
+                    IsActive = true
+                }
+            });
+
         var response = await _client.GetAsync("/api/attractions");
-        
+
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync();
         var attractionsResponse = JsonSerializer.Deserialize<AllAttractionsResponse>(content, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
-        
+
         Assert.IsNotNull(attractionsResponse);
-        Assert.AreEqual(id, attractionsResponse[0].Id);
-        Assert.AreEqual("Eiffel Tower", attractionsResponse[0].Name);
-        Assert.AreEqual("Paris", attractionsResponse[0].Description);
-        Assert.AreEqual("InteractiveZone", attractionsResponse[0].Type);
-        Assert.AreEqual(10, attractionsResponse[0].MinAge);
-        Assert.AreEqual(100, attractionsResponse[0].MaxCapacity);
-        Assert.AreEqual(50, attractionsResponse[0].CurrentCapacity);
-        Assert.AreEqual(true, attractionsResponse[0].IsActive);
+        Assert.AreEqual(id, attractionsResponse.Attractions[0].Id);
+        Assert.AreEqual("Eiffel Tower", attractionsResponse.Attractions[0].Name);
+        Assert.AreEqual("Paris", attractionsResponse.Attractions[0].Description);
+        Assert.AreEqual("InteractiveZone", attractionsResponse.Attractions[0].Type);
+        Assert.AreEqual(10, attractionsResponse.Attractions[0].MinAge);
+        Assert.AreEqual(100, attractionsResponse.Attractions[0].MaxCapacity);
+        Assert.AreEqual(50, attractionsResponse.Attractions[0].CurrentCapacity);
+        Assert.AreEqual(true, attractionsResponse.Attractions[0].IsActive);
     }
 }
