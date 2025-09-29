@@ -96,4 +96,42 @@ public class AttractionControllerTest
         Assert.AreEqual(50, attractionsResponse.Attractions[0].CurrentCapacity);
         Assert.AreEqual(true, attractionsResponse.Attractions[0].IsActive);
     }
+    
+    [TestMethod]
+    public async Task GetAttractionById_ValidId_ReturnsAttractionResponse()
+    {
+        Guid id = Guid.NewGuid();
+        AttractionResponse expectedAttraction = new AttractionResponse
+        {
+            Id = id,
+            Name = "Eiffel Tower",
+            Description = "Paris",
+            Type = "InteractiveZone",
+            MinAge = 10,
+            MaxCapacity = 100,
+            CurrentCapacity = 50,
+            IsActive = true
+        };
+
+        _mockAttractionService.Setup(s => s.GetAttractionById(id)).Returns(expectedAttraction);
+
+        var response = await _client.GetAsync($"/api/attractions/{id}");
+
+        response.EnsureSuccessStatusCode();
+        var content = await response.Content.ReadAsStringAsync();
+        var attractionResponse = JsonSerializer.Deserialize<AttractionResponse>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        Assert.IsNotNull(attractionResponse);
+        Assert.AreEqual(id, attractionResponse.Id);
+        Assert.AreEqual("Eiffel Tower", attractionResponse.Name);
+        Assert.AreEqual("Paris", attractionResponse.Description);
+        Assert.AreEqual("InteractiveZone", attractionResponse.Type);
+        Assert.AreEqual(10, attractionResponse.MinAge);
+        Assert.AreEqual(100, attractionResponse.MaxCapacity);
+        Assert.AreEqual(50, attractionResponse.CurrentCapacity);
+        Assert.AreEqual(true, attractionResponse.IsActive);
+    }
 }
