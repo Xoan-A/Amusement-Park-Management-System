@@ -45,7 +45,7 @@ public class AttractionRepository : IAttractionRepository
         _context.SaveChanges();
     }
     
-    public void Remove(Attraction attraction)
+    public void Delete(Attraction attraction)
     {
         _context.Attractions.Remove(attraction);
         _context.SaveChanges();

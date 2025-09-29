@@ -155,7 +155,7 @@ public class AttractionRepositoryTest
             _context.Attractions.Add(attraction);
             _context.SaveChanges();
 
-            _attractionRepository.Remove(attraction);
+            _attractionRepository.Delete(attraction);
             
             Assert.AreEqual(0, _context.Attractions.Count());
         }

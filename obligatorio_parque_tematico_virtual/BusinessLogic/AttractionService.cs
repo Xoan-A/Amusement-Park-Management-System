@@ -80,9 +80,9 @@ public class AttractionService : IAttractionService
         _attractionRepository.Update(UpdatedAttraction);
     }
     
-    public void RemoveAttraction(Guid id)
+    public void DeleteAttraction(Guid id)
     {
         var attraction = _attractionRepository.GetById(id);
-        _attractionRepository.Remove(attraction);
+        _attractionRepository.Delete(attraction);
     }
 }

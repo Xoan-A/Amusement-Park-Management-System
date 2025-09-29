@@ -71,4 +71,11 @@ public class AttractionController : ControllerBase
         };
         return Ok(response);
     }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeleteAttraction(Guid id)
+    {
+        _attractionService.DeleteAttraction(id);
+        return NoContent();
+    }
 }

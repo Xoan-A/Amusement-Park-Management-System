@@ -10,5 +10,5 @@ public interface IAttractionService
     List<AttractionResponse> GetAllAttractions();
     Guid CreateAttraction(AttractionRequest newAttraction);
     void UpdateAttraction(Guid id, AttractionRequest existingAttraction);
-    void RemoveAttraction(Guid id);
+    void DeleteAttraction(Guid id);
 }
