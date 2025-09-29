@@ -93,9 +93,8 @@ public class AttractionServiceTest
             IsActive = true
         };
         
-        AttractionResponse result = _attractionService.AddAttraction(newAttraction);
+        _attractionService.CreateAttraction(newAttraction);
         
-        Assert.AreEqual(newAttraction.Name, result.Name);
         _mockAttractionRepository.Verify(r => r.Create(
             It.Is<Attraction>(a =>
                 a.Description == newAttraction.Description &&
@@ -163,7 +162,7 @@ public class AttractionServiceTest
         _mockAttractionRepository.Setup(r => r.Remove(attractionToDelete));
         _mockAttractionRepository.Setup(r => r.GetById(attractionToDelete.Id)).Returns(attractionToDelete);
         
-        _attractionService.DeleteAttraction(attractionToDelete.Id);
+        _attractionService.RemoveAttraction(attractionToDelete.Id);
         
         _mockAttractionRepository.Verify(r => r.Remove(attractionToDelete), Times.Once);
     }

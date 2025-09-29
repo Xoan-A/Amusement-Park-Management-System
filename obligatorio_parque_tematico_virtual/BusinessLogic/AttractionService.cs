@@ -46,9 +46,9 @@ public class AttractionService : IAttractionService
         }).ToList();
     }
     
-    public AttractionResponse AddAttraction(AttractionRequest newAttraction)
+    public Guid CreateAttraction(AttractionRequest newAttraction)
     {
-        var attraction = new Attraction()
+        Attraction attraction = new Attraction()
         {
             Name = newAttraction.Name,
             Description = newAttraction.Description,
@@ -59,18 +59,8 @@ public class AttractionService : IAttractionService
             IsActive = newAttraction.IsActive
         };
         _attractionRepository.Create(attraction);
-        
-        return new AttractionResponse()
-        {
-            Id = attraction.Id,
-            Name = attraction.Name,
-            Description = attraction.Description,
-            Type = attraction.Type.ToString(),
-            MinAge = attraction.MinAge,
-            MaxCapacity = attraction.MaxCapacity,
-            CurrentCapacity = attraction.CurrentCapacity,
-            IsActive = attraction.IsActive
-        };
+
+        return attraction.Id;
     }
     
     public void UpdateAttraction(Guid id, AttractionRequest existingAttraction)
@@ -90,7 +80,7 @@ public class AttractionService : IAttractionService
         _attractionRepository.Update(UpdatedAttraction);
     }
     
-    public void DeleteAttraction(Guid id)
+    public void RemoveAttraction(Guid id)
     {
         var attraction = _attractionRepository.GetById(id);
         _attractionRepository.Remove(attraction);

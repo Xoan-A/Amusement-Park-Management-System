@@ -8,7 +8,7 @@ public interface IAttractionService
 {
     AttractionResponse GetAttractionById(Guid id);
     List<AttractionResponse> GetAllAttractions();
-    AttractionResponse AddAttraction(AttractionRequest newAttraction);
+    Guid CreateAttraction(AttractionRequest newAttraction);
     void UpdateAttraction(Guid id, AttractionRequest existingAttraction);
-    void DeleteAttraction(Guid id);
+    void RemoveAttraction(Guid id);
 }
