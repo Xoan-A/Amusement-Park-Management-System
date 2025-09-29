@@ -91,7 +91,7 @@ public class AttractionControllerTest
                 }
             });
 
-        var response = await _client.GetAsync("/api/attractions");
+        var response = await _adminClient.GetAsync("/api/attractions");
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync();
         var attractionsResponse = JsonSerializer.Deserialize<AllAttractionsResponse>(content, new JsonSerializerOptions

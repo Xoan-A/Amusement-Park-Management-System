@@ -19,6 +19,7 @@ public class AttractionController : ControllerBase
     }
     
     [HttpGet]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetAttractions()
     {
         var attractions = await _attractionService.GetAllAttractions();
