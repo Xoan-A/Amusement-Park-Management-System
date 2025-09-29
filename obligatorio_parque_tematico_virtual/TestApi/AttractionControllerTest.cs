@@ -62,7 +62,7 @@ public class AttractionControllerTest
         };
 
         _mockAttractionService.Setup(s => s.GetAllAttractions())
-            .Returns(new List<AttractionResponse>
+            .ReturnsAsync(new List<AttractionResponse>
             {
                 new AttractionResponse()
                 {
@@ -78,7 +78,6 @@ public class AttractionControllerTest
             });
 
         var response = await _client.GetAsync("/api/attractions");
-
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync();
         var attractionsResponse = JsonSerializer.Deserialize<AllAttractionsResponse>(content, new JsonSerializerOptions
@@ -113,10 +112,9 @@ public class AttractionControllerTest
             IsActive = true
         };
 
-        _mockAttractionService.Setup(s => s.GetAttractionById(id)).Returns(expectedAttraction);
+        _mockAttractionService.Setup(s => s.GetAttractionById(id)).ReturnsAsync(expectedAttraction);
 
         var response = await _client.GetAsync($"/api/attractions/{id}");
-
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync();
         var attractionResponse = JsonSerializer.Deserialize<AttractionResponse>(content, new JsonSerializerOptions
@@ -149,7 +147,7 @@ public class AttractionControllerTest
             IsActive = true
         };
         
-        _mockAttractionService.Setup(s => s.CreateAttraction(It.IsAny<AttractionRequest>())).Returns(expectedId);
+        _mockAttractionService.Setup(s => s.CreateAttraction(It.IsAny<AttractionRequest>())).ReturnsAsync(expectedId);
 
         var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
         var response = await _client.PostAsync("/api/attractions", content);
@@ -181,6 +179,7 @@ public class AttractionControllerTest
             IsActive = true
         };
         
+        _mockAttractionService.Setup(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>())).Returns(Task.CompletedTask);
         var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
         var response = await _client.PutAsync($"/api/attractions/{id}", content);
         
@@ -200,9 +199,8 @@ public class AttractionControllerTest
     public async Task DeleteAttraction_ValidId_ReturnsNoContent()
     {
         Guid id = Guid.NewGuid();
-        
+        _mockAttractionService.Setup(s => s.DeleteAttraction(id)).Returns(Task.CompletedTask);
         var response = await _client.DeleteAsync($"/api/attractions/{id}");
-        
         response.EnsureSuccessStatusCode();
         Assert.AreEqual(System.Net.HttpStatusCode.NoContent, response.StatusCode);
         _mockAttractionService.Verify(s => s.DeleteAttraction(id), Times.Once);

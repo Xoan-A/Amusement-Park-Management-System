@@ -1,6 +1,7 @@
 ﻿using DataAccess.Context;
 using Domain;
 using IDataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories;
 
@@ -13,41 +14,41 @@ public class AttractionRepository : IAttractionRepository
         _context = context;
     }
     
-    public void Create(Attraction attraction)
+    public async Task Create(Attraction attraction)
     {
-        _context.Attractions.Add(attraction);
-        _context.SaveChanges();
+        await _context.Attractions.AddAsync(attraction);
+        await _context.SaveChangesAsync();
     }
 
-    public Attraction GetByName(string name)
+    public async Task<Attraction> GetByName(string name)
     {
-        return _context.Attractions.FirstOrDefault(a => a.Name == name);
+        return await _context.Attractions.FirstOrDefaultAsync(a => a.Name == name);
     }
 
-    public Attraction GetById(Guid id)
+    public async Task<Attraction> GetById(Guid id)
     {
-        return _context.Attractions.FirstOrDefault(a => a.Id == id);
+        return await _context.Attractions.FirstOrDefaultAsync(a => a.Id == id);
     }
 
-    public bool IsNameUnique(string name)
+    public async Task<bool> IsNameUnique(string name)
     {
-        return !_context.Attractions.Any(a => a.Name == name);
+        return !await _context.Attractions.AnyAsync(a => a.Name == name);
     }
 
-    public List<Attraction> GetAll()
+    public async Task<List<Attraction>> GetAll()
     {
-        return _context.Attractions.ToList();
+        return await _context.Attractions.ToListAsync();
     }
     
-    public void Update(Attraction attraction)
+    public async Task Update(Attraction attraction)
     {
         _context.Attractions.Update(attraction);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
     
-    public void Delete(Attraction attraction)
+    public async Task Delete(Attraction attraction)
     {
         _context.Attractions.Remove(attraction);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 }

@@ -18,9 +18,9 @@ public class AttractionController : ControllerBase
     }
     
     [HttpGet]
-    public IActionResult GetAttractions()
+    public async Task<IActionResult> GetAttractions()
     {
-        var attractions = _attractionService.GetAllAttractions();
+        var attractions = await _attractionService.GetAllAttractions();
         var response = new AllAttractionsResponse();
         
         foreach (var attraction in attractions)
@@ -42,16 +42,16 @@ public class AttractionController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetAttractionById(Guid id)
+    public async Task<IActionResult> GetAttractionById(Guid id)
     {
-        AttractionResponse attraction = _attractionService.GetAttractionById(id);
+        AttractionResponse attraction = await _attractionService.GetAttractionById(id);
         return Ok(attraction);
     }
 
     [HttpPost]
-    public IActionResult CreateAttraction([FromBody] AttractionRequest newAttraction)
+    public async Task<IActionResult> CreateAttraction([FromBody] AttractionRequest newAttraction)
     {
-        Guid newId = _attractionService.CreateAttraction(newAttraction);
+        Guid newId = await _attractionService.CreateAttraction(newAttraction);
         
         CreateAttractionResponse response = new CreateAttractionResponse
         {
@@ -62,9 +62,9 @@ public class AttractionController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public IActionResult UpdateAttraction(Guid id, [FromBody] AttractionRequest updatedAttraction)
+    public async Task<IActionResult> UpdateAttraction(Guid id, [FromBody] AttractionRequest updatedAttraction)
     {
-        _attractionService.UpdateAttraction(id, updatedAttraction);
+        await _attractionService.UpdateAttraction(id, updatedAttraction);
         MessageResponse response = new MessageResponse
         {
             Message = "Attraction updated successfully"
@@ -73,9 +73,9 @@ public class AttractionController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteAttraction(Guid id)
+    public async Task<IActionResult> DeleteAttraction(Guid id)
     {
-        _attractionService.DeleteAttraction(id);
+        await _attractionService.DeleteAttraction(id);
         return NoContent();
     }
 }

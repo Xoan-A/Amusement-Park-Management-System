@@ -40,123 +40,123 @@ public class AttractionRepositoryTest
     }
     
     [TestMethod]
-    public void GetById_ShouldReturnAttraction_WhenAttractionExists()
+    public async Task GetById_ShouldReturnAttraction_WhenAttractionExists()
     {
-        _context.Attractions.Add(attraction);
-        _context.SaveChanges();
+        await _context.Attractions.AddAsync(attraction);
+        await _context.SaveChangesAsync();
 
-        Attraction result = _attractionRepository.GetById(attraction.Id);
+        Attraction result = await _attractionRepository.GetById(attraction.Id);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(attraction.Id, result.Id);
     }
 
     [TestMethod]
-    public void GetById_ShouldReturnNull_WhenAttractionDoesNotExist()
+    public async Task GetById_ShouldReturnNull_WhenAttractionDoesNotExist()
     {
         Guid nonExistentId = Guid.NewGuid();
 
-        Attraction result = _attractionRepository.GetById(nonExistentId);
+        Attraction result = await _attractionRepository.GetById(nonExistentId);
 
         Assert.IsNull(result);
     }
-    
+
     [TestMethod]
-        public void Create_ShouldAddAttractionToDatabase()
-        {
-            _attractionRepository.Create(attraction);
-            Attraction result = _attractionRepository.GetById(attraction.Id);
-            
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Race simulator", result.Name);
-            Assert.AreEqual(1, _context.Attractions.Count());
-        }
-
-        [TestMethod]
-        public void GetByName_ShouldReturnAttraction_WhenAttractionExists()
-        {
-            _context.Attractions.Add(attraction);
-            _context.SaveChanges();
-
-            Attraction result = _attractionRepository.GetByName("Race simulator");
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Race simulator", result.Name);
-        }
-
-        [TestMethod]
-        public void GetByName_ShouldReturnNull_WhenAttractionDoesNotExist()
-        {
-            Attraction result = _attractionRepository.GetByName("nonexistent");
-
-            Assert.IsNull(result);
-        }
-
-        [TestMethod]
-        public void IsNameUnique_ShouldReturnFalse_WhenNameExists()
-        {
-            _context.Attractions.Add(attraction);
-            _context.SaveChanges();
-
-            bool result = _attractionRepository.IsNameUnique("Race simulator");
-
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public void IsNameUnique_ShouldReturnTrue_WhenNameDoesNotExist()
-        {
-            bool result = _attractionRepository.IsNameUnique("new name");
-
-            Assert.IsTrue(result);
-        }
+    public async Task Create_ShouldAddAttractionToDatabase()
+    {
+        await _attractionRepository.Create(attraction);
+        Attraction result = await _attractionRepository.GetById(attraction.Id);
         
-        [TestMethod]
-        public void GetAll_ShouldReturnAllAttractions()
-        {
-            Attraction attraction2 = new Attraction
-            {
-                Name = "Haunted House",
-                Description = "A spooky experience",
-                Type = AttractionType.Simulator,
-                MinAge = 8,
-                MaxCapacity = 15,
-                CurrentCapacity = 3,
-                IsActive = false
-            };
-            
-            _context.Attractions.Add(attraction);
-            _context.Attractions.Add(attraction2);
-            _context.SaveChanges();
-            List<Attraction> result = _attractionRepository.GetAll();
+        Assert.IsNotNull(result);
+        Assert.AreEqual("Race simulator", result.Name);
+        Assert.AreEqual(1, await _context.Attractions.CountAsync());
+    }
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.Count);
-        }
+    [TestMethod]
+    public async Task GetByName_ShouldReturnAttraction_WhenAttractionExists()
+    {
+        await _context.Attractions.AddAsync(attraction);
+        await _context.SaveChangesAsync();
+
+        Attraction result = await _attractionRepository.GetByName("Race simulator");
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(attraction.Name, result.Name);
+    }
+
+    [TestMethod]
+    public async Task GetByName_ShouldReturnNull_WhenAttractionDoesNotExist()
+    {
+        Attraction result = await _attractionRepository.GetByName("nonexistent");
+
+        Assert.IsNull(result);
+    }
+
+    [TestMethod]
+    public async Task IsNameUnique_ShouldReturnFalse_WhenNameExists()
+    {
+        await _context.Attractions.AddAsync(attraction);
+        await _context.SaveChangesAsync();
+
+        bool result = await _attractionRepository.IsNameUnique("Race simulator");
+
+        Assert.IsFalse(result);
+    }
+
+    [TestMethod]
+    public async Task IsNameUnique_ShouldReturnTrue_WhenNameDoesNotExist()
+    {
+        bool result = await _attractionRepository.IsNameUnique("new name");
+
+        Assert.IsTrue(result);
+    }
         
-        [TestMethod]
-        public void Update_ShouldUpdateAttractionInDatabase()
+    [TestMethod]
+    public async Task GetAll_ShouldReturnAllAttractions()
+    {
+        Attraction attraction2 = new Attraction
         {
-            _context.Attractions.Add(attraction);
-            _context.SaveChanges();
-            
-            attraction.Name = "Updated Name";
-            _attractionRepository.Update(attraction);
+            Name = "Haunted House",
+            Description = "A spooky experience",
+            Type = AttractionType.Simulator,
+            MinAge = 8,
+            MaxCapacity = 15,
+            CurrentCapacity = 3,
+            IsActive = false
+        };
+        
+        await _context.Attractions.AddAsync(attraction);
+        await _context.Attractions.AddAsync(attraction2);
+        await _context.SaveChangesAsync();
+        List<Attraction> result = await _attractionRepository.GetAll();
 
-            Attraction result = _attractionRepository.GetById(attraction.Id);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(2, result.Count);
+    }
+        
+    [TestMethod]
+    public async Task Update_ShouldUpdateAttractionInDatabase()
+    {
+        await _context.Attractions.AddAsync(attraction);
+        await _context.SaveChangesAsync();
+        
+        attraction.Name = "Updated Name";
+        await _attractionRepository.Update(attraction);
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Updated Name", result.Name);
-        }
+        Attraction result = await _attractionRepository.GetById(attraction.Id);
 
-        [TestMethod]
-        public void Remove_ShouldRemoveAttractionFromDatabase()
-        {
-            _context.Attractions.Add(attraction);
-            _context.SaveChanges();
+        Assert.IsNotNull(result);
+        Assert.AreEqual("Updated Name", result.Name);
+    }
 
-            _attractionRepository.Delete(attraction);
-            
-            Assert.AreEqual(0, _context.Attractions.Count());
-        }
+    [TestMethod]
+    public async Task Remove_ShouldRemoveAttractionFromDatabase()
+    {
+        await _context.Attractions.AddAsync(attraction);
+        await _context.SaveChangesAsync();
+
+        await _attractionRepository.Delete(attraction);
+        
+        Assert.AreEqual(0, await _context.Attractions.CountAsync());
+    }
 }

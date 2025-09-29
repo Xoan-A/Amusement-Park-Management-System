@@ -15,9 +15,9 @@ public class AttractionService : IAttractionService
         _attractionRepository = attractionRepository;
     }
     
-    public AttractionResponse GetAttractionById(Guid id)
+    public async Task<AttractionResponse> GetAttractionById(Guid id)
     {
-        Attraction attraction = _attractionRepository.GetById(id);
+        Attraction attraction = await _attractionRepository.GetById(id);
         return new AttractionResponse(){
             Id = attraction.Id,
             Name = attraction.Name,
@@ -30,9 +30,9 @@ public class AttractionService : IAttractionService
         };
     }
     
-    public List<AttractionResponse> GetAllAttractions()
+    public async Task<List<AttractionResponse>> GetAllAttractions()
     {
-        List<Attraction> attractions = _attractionRepository.GetAll();
+        List<Attraction> attractions = await _attractionRepository.GetAll();
         return attractions.Select(attraction => new AttractionResponse()
         {
             Id = attraction.Id,
@@ -46,7 +46,7 @@ public class AttractionService : IAttractionService
         }).ToList();
     }
     
-    public Guid CreateAttraction(AttractionRequest newAttraction)
+    public async Task<Guid> CreateAttraction(AttractionRequest newAttraction)
     {
         Attraction attraction = new Attraction()
         {
@@ -58,14 +58,14 @@ public class AttractionService : IAttractionService
             CurrentCapacity = 0,
             IsActive = newAttraction.IsActive
         };
-        _attractionRepository.Create(attraction);
+        await _attractionRepository.Create(attraction);
 
         return attraction.Id;
     }
     
-    public void UpdateAttraction(Guid id, AttractionRequest existingAttraction)
+    public async Task UpdateAttraction(Guid id, AttractionRequest existingAttraction)
     {
-        Attraction attraction = _attractionRepository.GetById(id);
+        Attraction attraction = await _attractionRepository.GetById(id);
         var UpdatedAttraction = new Attraction()
         {
             Id = id,
@@ -77,12 +77,12 @@ public class AttractionService : IAttractionService
             CurrentCapacity = attraction.CurrentCapacity,
             IsActive = existingAttraction.IsActive
         };
-        _attractionRepository.Update(UpdatedAttraction);
+        await _attractionRepository.Update(UpdatedAttraction);
     }
     
-    public void DeleteAttraction(Guid id)
+    public async Task DeleteAttraction(Guid id)
     {
-        var attraction = _attractionRepository.GetById(id);
-        _attractionRepository.Delete(attraction);
+        var attraction = await _attractionRepository.GetById(id);
+        await _attractionRepository.Delete(attraction);
     }
 }

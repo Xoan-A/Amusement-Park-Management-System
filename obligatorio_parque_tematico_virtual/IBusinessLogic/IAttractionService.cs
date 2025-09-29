@@ -6,9 +6,9 @@ namespace IBusinessLogic;
 
 public interface IAttractionService
 {
-    AttractionResponse GetAttractionById(Guid id);
-    List<AttractionResponse> GetAllAttractions();
-    Guid CreateAttraction(AttractionRequest newAttraction);
-    void UpdateAttraction(Guid id, AttractionRequest existingAttraction);
-    void DeleteAttraction(Guid id);
+    Task<AttractionResponse> GetAttractionById(Guid id);
+    Task<List<AttractionResponse>> GetAllAttractions();
+    Task<Guid> CreateAttraction(AttractionRequest newAttraction);
+    Task UpdateAttraction(Guid id, AttractionRequest existingAttraction);
+    Task DeleteAttraction(Guid id);
 }

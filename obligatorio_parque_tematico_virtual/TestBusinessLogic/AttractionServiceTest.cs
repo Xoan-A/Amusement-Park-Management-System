@@ -22,7 +22,7 @@ public class AttractionServiceTest
     }
     
     [TestMethod]
-    public void GetAttractionById_ShouldReturnAttraction_WhenIdIsValid()
+    public async Task GetAttractionById_ShouldReturnAttraction_WhenIdIsValid()
     {
         Attraction expectedAttraction = new Attraction
         {
@@ -34,18 +34,15 @@ public class AttractionServiceTest
             CurrentCapacity = 5,
             IsActive = true
         };
-        
-        _mockAttractionRepository.Setup(r => r.GetById(expectedAttraction.Id)).Returns(expectedAttraction);
-        
-        AttractionResponse result = _attractionService.GetAttractionById(expectedAttraction.Id);
-        
+        _mockAttractionRepository.Setup(r => r.GetById(expectedAttraction.Id)).ReturnsAsync(expectedAttraction);
+        AttractionResponse result = await _attractionService.GetAttractionById(expectedAttraction.Id);
         Assert.IsNotNull(result);
         Assert.AreEqual(expectedAttraction.Name, result.Name);
         _mockAttractionRepository.Verify(r => r.GetById(expectedAttraction.Id), Times.Once);
     }
 
     [TestMethod]
-    public void GetAllAttractions_ShouldReturnListOfAttractions()
+    public async Task GetAllAttractions_ShouldReturnListOfAttractions()
     {
         List<Attraction> expectedAttractions = new List<Attraction>
         {
@@ -70,18 +67,15 @@ public class AttractionServiceTest
                 IsActive = false
             }
         };
-        
-        _mockAttractionRepository.Setup(r => r.GetAll()).Returns(expectedAttractions);
-        
-        List<AttractionResponse> result = _attractionService.GetAllAttractions();
-        
+        _mockAttractionRepository.Setup(r => r.GetAll()).ReturnsAsync(expectedAttractions);
+        List<AttractionResponse> result = await _attractionService.GetAllAttractions();
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Count);
         _mockAttractionRepository.Verify(r => r.GetAll(), Times.Once);
     }
     
     [TestMethod]
-    public void AddAttraction_ShouldCreateAttraction_WhenDataIsValid()
+    public async Task AddAttraction_ShouldCreateAttraction_WhenDataIsValid()
     {
         AttractionRequest newAttraction = new AttractionRequest()
         {
@@ -108,7 +102,7 @@ public class AttractionServiceTest
     }
     
     [TestMethod]
-    public void UpdateAttraction_ShouldUpdateAttraction_WhenDataIsValid()
+    public async Task UpdateAttraction_ShouldUpdateAttraction_WhenDataIsValid()
     {
         Attraction existingAttraction = new Attraction
         {
@@ -133,7 +127,7 @@ public class AttractionServiceTest
         };
         
         _mockAttractionRepository.Setup(r => r.GetById(existingAttraction.Id))
-            .Returns(existingAttraction);
+            .ReturnsAsync(existingAttraction);
        
         _attractionService.UpdateAttraction(existingAttraction.Id, attractionRequest);
         
@@ -146,7 +140,7 @@ public class AttractionServiceTest
     }
     
     [TestMethod]
-    public void DeleteAttraction_ShouldRemoveAttraction_WhenIdIsValid()
+    public async Task DeleteAttraction_ShouldRemoveAttraction_WhenIdIsValid()
     {
         Attraction attractionToDelete = new Attraction
         {
@@ -160,7 +154,7 @@ public class AttractionServiceTest
         };
         
         _mockAttractionRepository.Setup(r => r.Delete(attractionToDelete));
-        _mockAttractionRepository.Setup(r => r.GetById(attractionToDelete.Id)).Returns(attractionToDelete);
+        _mockAttractionRepository.Setup(r => r.GetById(attractionToDelete.Id)).ReturnsAsync(attractionToDelete);
         
         _attractionService.DeleteAttraction(attractionToDelete.Id);
         
