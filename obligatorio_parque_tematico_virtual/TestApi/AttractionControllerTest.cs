@@ -239,4 +239,12 @@ public class AttractionControllerTest
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.CreateAttraction(It.IsAny<AttractionRequest>()), Times.Never);
     }
+    
+    [TestMethod]
+    public async Task GetAttractions_InvalidAuthentication_ReturnsUnauthorized()
+    {
+        var response = await _client.GetAsync("/api/attractions");
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+        _mockAttractionService.Verify(s => s.GetAllAttractions(), Times.Never);
+    }
 }
