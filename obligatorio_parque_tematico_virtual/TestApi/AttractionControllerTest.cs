@@ -167,4 +167,33 @@ public class AttractionControllerTest
         Assert.AreEqual(expectedId, createdResponse.Id);
         Assert.AreEqual("Attraction created successfully", createdResponse.Message);
     }
+
+    [TestMethod]
+    public async Task UpdateAttraction_ValidRequest_ReturnsUpdatedAttractionResponse()
+    {
+        Guid id = Guid.NewGuid();
+        AttractionRequest newAttraction = new AttractionRequest
+        {
+            Name = "Eiffel Tower",
+            Description = "Paris",
+            Type = "InteractiveZone",
+            MinAge = 10,
+            MaxCapacity = 100,
+            IsActive = true
+        };
+        
+        var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync($"/api/attractions/{id}", content);
+        
+        response.EnsureSuccessStatusCode();
+        var responseContent = await response.Content.ReadAsStringAsync();
+        MessageResponse? updatedResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+        
+        Assert.IsNotNull(updatedResponse);
+        Assert.AreEqual("Attraction updated successfully", updatedResponse.Message);
+        _mockAttractionService.Verify(s => s.UpdateAttraction(id, newAttraction), Times.Once);
+    }
 }
