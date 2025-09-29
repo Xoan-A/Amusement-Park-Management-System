@@ -128,7 +128,7 @@ public class AttractionControllerTest
 
         _mockAttractionService.Setup(s => s.GetAttractionById(id)).ReturnsAsync(expectedAttraction);
 
-        var response = await _client.GetAsync($"/api/attractions/{id}");
+        var response = await _adminClient.GetAsync($"/api/attractions/{id}");
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync();
         var attractionResponse = JsonSerializer.Deserialize<AttractionResponse>(content, new JsonSerializerOptions

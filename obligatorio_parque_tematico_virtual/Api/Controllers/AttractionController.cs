@@ -44,6 +44,7 @@ public class AttractionController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetAttractionById(Guid id)
     {
         AttractionResponse attraction = await _attractionService.GetAttractionById(id);
