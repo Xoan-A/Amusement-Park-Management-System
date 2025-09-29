@@ -3,6 +3,8 @@ using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using BusinessLogic;
+using Models.In;
+using Models.Out;
 
 namespace TestBusinessLogic;
 
@@ -35,7 +37,7 @@ public class AttractionServiceTest
         
         _mockAttractionRepository.Setup(r => r.GetById(expectedAttraction.Id)).Returns(expectedAttraction);
         
-        Attraction result = _attractionService.GetAttractionById(expectedAttraction.Id);
+        AttractionResponse result = _attractionService.GetAttractionById(expectedAttraction.Id);
         
         Assert.IsNotNull(result);
         Assert.AreEqual(expectedAttraction.Name, result.Name);
@@ -71,7 +73,7 @@ public class AttractionServiceTest
         
         _mockAttractionRepository.Setup(r => r.GetAll()).Returns(expectedAttractions);
         
-        List<Attraction> result = _attractionService.GetAllAttractions();
+        List<AttractionResponse> result = _attractionService.GetAllAttractions();
         
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Count);
@@ -81,22 +83,29 @@ public class AttractionServiceTest
     [TestMethod]
     public void AddAttraction_ShouldCreateAttraction_WhenDataIsValid()
     {
-        Attraction newAttraction = new Attraction
+        AttractionRequest newAttraction = new AttractionRequest()
         {
             Name = "Bumper Cars",
             Description = "Fun driving experience",
-            Type = AttractionType.Simulator,
+            Type = AttractionType.Simulator.ToString(),
             MinAge = 5,
             MaxCapacity = 10,
-            CurrentCapacity = 0,
             IsActive = true
         };
-        _mockAttractionRepository.Setup(r => r.Create(newAttraction)).Returns(newAttraction);
         
-        Attraction result = _attractionService.AddAttraction(newAttraction);
+        AttractionResponse result = _attractionService.AddAttraction(newAttraction);
         
         Assert.AreEqual(newAttraction.Name, result.Name);
-        _mockAttractionRepository.Verify(r => r.Create(newAttraction), Times.Once);
+        _mockAttractionRepository.Verify(r => r.Create(
+            It.Is<Attraction>(a =>
+                a.Description == newAttraction.Description &&
+                a.Name == newAttraction.Name &&
+                a.Type == AttractionType.Simulator &&
+                a.MinAge == newAttraction.MinAge &&
+                a.MaxCapacity == newAttraction.MaxCapacity &&
+                a.CurrentCapacity == 0 &&
+                a.IsActive == newAttraction.IsActive
+            )), Times.Once);
     }
     
     [TestMethod]
@@ -113,13 +122,28 @@ public class AttractionServiceTest
             IsActive = true
         };
         
-        existingAttraction.Description = "An exciting swinging experience";
         
-        _mockAttractionRepository.Setup(r => r.Update(existingAttraction));
+        AttractionRequest attractionRequest = new AttractionRequest
+        {
+            Name = existingAttraction.Name,
+            Description = "An exciting swinging experience",
+            Type = existingAttraction.Type.ToString(),
+            MinAge = existingAttraction.MinAge,
+            MaxCapacity = existingAttraction.MaxCapacity,
+            IsActive = existingAttraction.IsActive
+        };
         
-        _attractionService.UpdateAttraction(existingAttraction);
+        _mockAttractionRepository.Setup(r => r.GetById(existingAttraction.Id))
+            .Returns(existingAttraction);
+       
+        _attractionService.UpdateAttraction(existingAttraction.Id, attractionRequest);
         
-        _mockAttractionRepository.Verify(r => r.Update(existingAttraction), Times.Once);
+        _mockAttractionRepository.Verify(r => r.Update(
+            It.Is<Attraction>(a =>
+                    a.Id == existingAttraction.Id &&
+                    a.Description == "An exciting swinging experience" &&
+                    a.Name == existingAttraction.Name
+            )), Times.Once);
     }
     
     [TestMethod]

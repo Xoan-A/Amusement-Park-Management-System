@@ -40,10 +40,33 @@ public class AttractionRepositoryTest
     }
     
     [TestMethod]
+    public void GetById_ShouldReturnAttraction_WhenAttractionExists()
+    {
+        _context.Attractions.Add(attraction);
+        _context.SaveChanges();
+
+        Attraction result = _attractionRepository.GetById(attraction.Id);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(attraction.Id, result.Id);
+    }
+
+    [TestMethod]
+    public void GetById_ShouldReturnNull_WhenAttractionDoesNotExist()
+    {
+        Guid nonExistentId = Guid.NewGuid();
+
+        Attraction result = _attractionRepository.GetById(nonExistentId);
+
+        Assert.IsNull(result);
+    }
+    
+    [TestMethod]
         public void Create_ShouldAddAttractionToDatabase()
         {
-            Attraction result = _attractionRepository.Create(attraction);
-
+            _attractionRepository.Create(attraction);
+            Attraction result = _attractionRepository.GetById(attraction.Id);
+            
             Assert.IsNotNull(result);
             Assert.AreEqual("Race simulator", result.Name);
             Assert.AreEqual(1, _context.Attractions.Count());
@@ -65,28 +88,6 @@ public class AttractionRepositoryTest
         public void GetByName_ShouldReturnNull_WhenAttractionDoesNotExist()
         {
             Attraction result = _attractionRepository.GetByName("nonexistent");
-
-            Assert.IsNull(result);
-        }
-
-        [TestMethod]
-        public void GetById_ShouldReturnAttraction_WhenAttractionExists()
-        {
-            _context.Attractions.Add(attraction);
-            _context.SaveChanges();
-
-            Attraction result = _attractionRepository.GetById(attraction.Id);
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(attraction.Id, result.Id);
-        }
-
-        [TestMethod]
-        public void GetById_ShouldReturnNull_WhenAttractionDoesNotExist()
-        {
-            Guid nonExistentId = Guid.NewGuid();
-
-            Attraction result = _attractionRepository.GetById(nonExistentId);
 
             Assert.IsNull(result);
         }

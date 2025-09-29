@@ -13,11 +13,10 @@ public class AttractionRepository : IAttractionRepository
         _context = context;
     }
     
-    public Attraction Create(Attraction attraction)
+    public void Create(Attraction attraction)
     {
         _context.Attractions.Add(attraction);
         _context.SaveChanges();
-        return attraction;
     }
 
     public Attraction GetByName(string name)

@@ -1,12 +1,14 @@
 ﻿using Domain;
+using Models.In;
+using Models.Out;
 
 namespace IBusinessLogic;
 
 public interface IAttractionService
 {
-    Attraction GetAttractionById(Guid Id);
-    List<Attraction> GetAllAttractions();
-    Attraction AddAttraction(Attraction newAttraction);
-    void UpdateAttraction(Attraction existingAttraction);
+    AttractionResponse GetAttractionById(Guid id);
+    List<AttractionResponse> GetAllAttractions();
+    AttractionResponse AddAttraction(AttractionRequest newAttraction);
+    void UpdateAttraction(Guid id, AttractionRequest existingAttraction);
     void DeleteAttraction(Guid id);
 }

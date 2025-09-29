@@ -62,14 +62,14 @@ public class AttractionControllerTest
         };
 
         _mockAttractionService.Setup(s => s.GetAllAttractions())
-            .Returns(new List<Attraction>
+            .Returns(new List<AttractionResponse>
             {
-                new Attraction
+                new AttractionResponse()
                 {
                     Id = id,
                     Name = "Eiffel Tower",
                     Description = "Paris",
-                    Type = AttractionType.InteractiveZone,
+                    Type = AttractionType.InteractiveZone.ToString(),
                     MinAge = 10,
                     MaxCapacity = 100,
                     CurrentCapacity = 50,
