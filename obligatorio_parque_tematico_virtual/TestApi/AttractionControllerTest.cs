@@ -275,4 +275,13 @@ public class AttractionControllerTest
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>()), Times.Never);
     }
+    
+    [TestMethod]
+    public async Task DeleteAttraction_InvalidAuthentication_ReturnsUnauthorized()
+    {
+        Guid id = Guid.NewGuid();
+        var response = await _client.DeleteAsync($"/api/attractions/{id}");
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+        _mockAttractionService.Verify(s => s.DeleteAttraction(id), Times.Never);
+    }
 }
