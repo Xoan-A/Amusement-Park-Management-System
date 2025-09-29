@@ -136,7 +136,7 @@ public class AttractionControllerTest
     }
     
     [TestMethod]
-    public async Task CreateAttraction_ValidRequest_ReturnsCreatedAttractionId()
+    public async Task CreateAttraction_ValidRequest_ReturnsCreatedAttractionResponse()
     {
         Guid expectedId = Guid.NewGuid();
         AttractionRequest newAttraction = new AttractionRequest
@@ -158,12 +158,13 @@ public class AttractionControllerTest
 
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
-        var createdId = JsonSerializer.Deserialize<Guid>(responseContent, new JsonSerializerOptions
+        CreateAttractionResponse? createdResponse = JsonSerializer.Deserialize<CreateAttractionResponse>(responseContent, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
-        
-        Assert.IsNotNull(createdId);
-        Assert.AreEqual(expectedId, createdId);
+
+        Assert.IsNotNull(createdResponse);
+        Assert.AreEqual(expectedId, createdResponse.Id);
+        Assert.AreEqual("Attraction created successfully", createdResponse.Message);
     }
 }

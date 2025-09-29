@@ -47,4 +47,17 @@ public class AttractionController : ControllerBase
         AttractionResponse attraction = _attractionService.GetAttractionById(id);
         return Ok(attraction);
     }
+
+    [HttpPost]
+    public IActionResult CreateAttraction([FromBody] AttractionRequest newAttraction)
+    {
+        Guid newId = _attractionService.CreateAttraction(newAttraction);
+        
+        CreateAttractionResponse response = new CreateAttractionResponse
+        {
+            Id = newId,
+            Message = "Attraction created successfully"
+        };
+        return CreatedAtAction(nameof(GetAttractionById), new { id = newId }, response);
+    }
 }
