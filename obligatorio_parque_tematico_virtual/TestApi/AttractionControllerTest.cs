@@ -195,7 +195,7 @@ public class AttractionControllerTest
         
         _mockAttractionService.Setup(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>())).Returns(Task.CompletedTask);
         var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
-        var response = await _client.PutAsync($"/api/attractions/{id}", content);
+        var response = await _adminClient.PutAsync($"/api/attractions/{id}", content);
         
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();

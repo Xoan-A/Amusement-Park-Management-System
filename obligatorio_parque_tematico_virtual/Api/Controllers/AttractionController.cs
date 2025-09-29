@@ -66,6 +66,7 @@ public class AttractionController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> UpdateAttraction(Guid id, [FromBody] AttractionRequest updatedAttraction)
     {
         await _attractionService.UpdateAttraction(id, updatedAttraction);
