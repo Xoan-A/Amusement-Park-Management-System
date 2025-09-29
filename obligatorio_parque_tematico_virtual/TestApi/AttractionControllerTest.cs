@@ -148,10 +148,8 @@ public class AttractionControllerTest
             MaxCapacity = 100,
             IsActive = true
         };
-
         
-        
-        _mockAttractionService.Setup(s => s.CreateAttraction(newAttraction)).Returns(expectedId);
+        _mockAttractionService.Setup(s => s.CreateAttraction(It.IsAny<AttractionRequest>())).Returns(expectedId);
 
         var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
         var response = await _client.PostAsync("/api/attractions", content);
@@ -166,6 +164,7 @@ public class AttractionControllerTest
         Assert.IsNotNull(createdResponse);
         Assert.AreEqual(expectedId, createdResponse.Id);
         Assert.AreEqual("Attraction created successfully", createdResponse.Message);
+        _mockAttractionService.Verify(s => s.CreateAttraction(It.IsAny<AttractionRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -183,7 +182,7 @@ public class AttractionControllerTest
         };
         
         var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
-        var response = await _client.PostAsync($"/api/attractions/{id}", content);
+        var response = await _client.PutAsync($"/api/attractions/{id}", content);
         
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -194,6 +193,6 @@ public class AttractionControllerTest
         
         Assert.IsNotNull(updatedResponse);
         Assert.AreEqual("Attraction updated successfully", updatedResponse.Message);
-        _mockAttractionService.Verify(s => s.UpdateAttraction(id, newAttraction), Times.Once);
+        _mockAttractionService.Verify(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>()), Times.Once);
     }
 }

@@ -60,4 +60,15 @@ public class AttractionController : ControllerBase
         };
         return CreatedAtAction(nameof(GetAttractionById), new { id = newId }, response);
     }
+
+    [HttpPut("{id}")]
+    public IActionResult UpdateAttraction(Guid id, [FromBody] AttractionRequest updatedAttraction)
+    {
+        _attractionService.UpdateAttraction(id, updatedAttraction);
+        MessageResponse response = new MessageResponse
+        {
+            Message = "Attraction updated successfully"
+        };
+        return Ok(response);
+    }
 }
