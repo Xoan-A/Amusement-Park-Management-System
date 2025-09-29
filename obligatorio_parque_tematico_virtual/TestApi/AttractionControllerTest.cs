@@ -195,4 +195,16 @@ public class AttractionControllerTest
         Assert.AreEqual("Attraction updated successfully", updatedResponse.Message);
         _mockAttractionService.Verify(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>()), Times.Once);
     }
+    
+    [TestMethod]
+    public async Task DeleteAttraction_ValidId_ReturnsNoContent()
+    {
+        Guid id = Guid.NewGuid();
+        
+        var response = await _client.DeleteAsync($"/api/attractions/{id}");
+        
+        response.EnsureSuccessStatusCode();
+        Assert.AreEqual(System.Net.HttpStatusCode.NoContent, response.StatusCode);
+        _mockAttractionService.Verify(s => s.DeleteAttraction(id), Times.Once);
+    }
 }
