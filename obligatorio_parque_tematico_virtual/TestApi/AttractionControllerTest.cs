@@ -256,4 +256,23 @@ public class AttractionControllerTest
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.GetAttractionById(id), Times.Never);
     }
+
+    [TestMethod]
+    public async Task UpdateAttraction_InvalidAuthentication_ReturnsUnauthorized()
+    {
+        Guid id = Guid.NewGuid();
+        AttractionRequest newAttraction = new AttractionRequest
+        {
+            Name = "Eiffel Tower",
+            Description = "Paris",
+            Type = "InteractiveZone",
+            MinAge = 10,
+            MaxCapacity = 100,
+            IsActive = true
+        };
+        var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"/api/attractions/{id}", content);
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+        _mockAttractionService.Verify(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>()), Times.Never);
+    }
 }
