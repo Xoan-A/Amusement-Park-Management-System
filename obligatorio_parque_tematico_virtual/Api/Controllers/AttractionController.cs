@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Domain;
+using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
 using Models.In;
 using Models.Out;
@@ -38,5 +39,12 @@ public class AttractionController : ControllerBase
         }
         
         return Ok(response);
+    }
+
+    [HttpGet("{id}")]
+    public IActionResult GetAttractionById(Guid id)
+    {
+        AttractionResponse attraction = _attractionService.GetAttractionById(id);
+        return Ok(attraction);
     }
 }
