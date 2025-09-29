@@ -78,6 +78,7 @@ public class AttractionController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> DeleteAttraction(Guid id)
     {
         await _attractionService.DeleteAttraction(id);
