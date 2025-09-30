@@ -26,11 +26,14 @@ public class EventServiceTest
     {
         Event expectedEvent = new Event
         {
+            Id = Guid.NewGuid(),
             Name = "Music Festival",
-            Description = "A day of live music",
-            StartDate = DateTime.Now.AddDays(10),
-            EndDate = DateTime.Now.AddDays(11),
-            IsActive = true
+            Date = new DateTime(2024, 8, 15),
+            Hour = 10,
+            MaxCapacity = 5000,
+            CurrentCapacity = 0,
+            Cost = 100,
+            Attractions = []
         };
         _mockEventRepository.Setup(r => r.GetById(expectedEvent.Id)).ReturnsAsync(expectedEvent);
         EventResponse result = await _eventService.GetEventById(expectedEvent.Id);
