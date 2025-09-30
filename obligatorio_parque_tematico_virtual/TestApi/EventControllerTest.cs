@@ -148,17 +148,18 @@ public class EventControllerTest
     [TestMethod]
     public async Task CreateEvent_ValidRequest_ReturnsCreatedResult()
     {
+        Guid newEventId = Guid.NewGuid();
         var newEvent = new EventRequest
         {
             Name = "New Event",
             Date = DateTime.Now.AddDays(30),
             Hour = 4,
             MaxCapacity = 150,
-            Cost = 150
+            Cost = 150,
+            AttractionIds = new List<Guid>()
         };
         
-        Guid newEventId = Guid.NewGuid();
-        _mockEventService.Setup(service => service.CreateEvent(newEvent))
+        _mockEventService.Setup(service => service.CreateEvent(It.IsAny<EventRequest>()))
             .ReturnsAsync(newEventId);
         
         var content = new StringContent(JsonSerializer.Serialize(newEvent), Encoding.UTF8, "application/json");

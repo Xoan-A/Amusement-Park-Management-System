@@ -33,4 +33,18 @@ public class EventController : ControllerBase
         EventResponse eventResponse = await _eventService.GetEventById(id);
         return Ok(eventResponse);
     }
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateEvent([FromBody] EventRequest newEvent)
+    {
+        Guid newId = await _eventService.CreateEvent(newEvent);
+
+        CreateEventResponse response = new CreateEventResponse
+        {
+            Id = newId,
+            Message = "Event created successfully"
+        };
+
+        return CreatedAtAction(nameof(GetEventById), new { id = newId }, response);
+    }
 }
