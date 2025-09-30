@@ -85,4 +85,18 @@ public class EventRepositoryTest
         Assert.AreEqual(1, events.Count());
         Assert.AreEqual(eventEntity.Name, events.First().Name);
     }
+
+    [TestMethod]
+    public async Task Update_ShouldUpdateEventInDatabase()
+    {
+        await _eventRepository.Create(eventEntity);
+        
+        eventEntity.Name = "Updated Music Festival";
+
+        await _eventRepository.Update(eventEntity);
+
+        Event result = await _eventRepository.GetById(eventEntity.Id);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(eventEntity.Name, result.Name);
+    }
 }
