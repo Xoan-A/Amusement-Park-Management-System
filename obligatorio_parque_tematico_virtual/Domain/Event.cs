@@ -36,4 +36,9 @@ public class Event
 
         this.Attractions.Remove(eventAttraction);
     }
+
+    public bool HasAttraction(Guid attractionId)
+    {
+        return true;
+    }
 }
