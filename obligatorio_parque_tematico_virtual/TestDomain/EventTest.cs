@@ -70,4 +70,27 @@ public class EventTest
         Assert.AreEqual(1, newEvent.Attractions.Count);
         Assert.AreEqual(attraction, newEvent.Attractions[0]);
     }
+
+    [TestMethod]
+    public void Event_ShouldAllowRemovingAttractions()
+    {
+        Event newEvent = new Event();
+        Attraction attraction = new Attraction
+        {
+            Id = Guid.NewGuid(),
+            Name = "Roller Coaster",
+            Description = "A thrilling ride",
+            Type = AttractionType.RollerCoaster,
+            MinAge = 12,
+            MaxCapacity = 20,
+            CurrentCapacity = 0,
+            IsActive = true
+        };
+        newEvent.AddAttraction(attraction);
+
+        newEvent.RemoveAttraction(attraction);
+        
+        Assert.AreEqual(0, newEvent.Attractions.Count);
+    }
+   
 }
