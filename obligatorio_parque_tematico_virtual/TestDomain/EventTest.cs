@@ -48,4 +48,26 @@ public class EventTest
         Assert.IsNotNull(newEvent.Attractions);
         Assert.AreEqual(0, newEvent.Attractions.Count);
     }
+
+    [TestMethod]
+    public void Event_ShouldAllowAddingAttractions()
+    {
+        Event newEvent = new Event();
+        Attraction attraction = new Attraction
+        {
+            Id = Guid.NewGuid(),
+            Name = "Roller Coaster",
+            Description = "A thrilling ride",
+            Type = AttractionType.Ride,
+            MinAge = 12,
+            MaxCapacity = 20,
+            CurrentCapacity = 0,
+            IsActive = true
+        };
+        
+        newEvent.AddAttraction(attraction);
+        
+        Assert.AreEqual(1, newEvent.Attractions.Count);
+        Assert.AreEqual(attraction, newEvent.Attractions[0]);
+    }
 }
