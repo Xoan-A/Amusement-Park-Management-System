@@ -35,6 +35,7 @@ public class EventController : ControllerBase
     }
     
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> CreateEvent([FromBody] EventRequest newEvent)
     {
         Guid newId = await _eventService.CreateEvent(newEvent);
