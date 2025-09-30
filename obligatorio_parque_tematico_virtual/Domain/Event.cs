@@ -14,5 +14,6 @@ public class Event
     public Event()
     {
         this.Id = Guid.NewGuid();
+        this.Attractions = new List<Attraction>();
     }
 }
