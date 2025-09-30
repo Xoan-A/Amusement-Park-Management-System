@@ -93,4 +93,25 @@ public class EventTest
         Assert.AreEqual(0, newEvent.Attractions.Count);
     }
    
+    [TestMethod]
+    public void Event_HasAttraction_ShouldReturnTrueIfAttractionExists()
+    {
+        Event newEvent = new Event();
+        Attraction attraction = new Attraction
+        {
+            Id = Guid.NewGuid(),
+            Name = "Roller Coaster",
+            Description = "A thrilling ride",
+            Type = AttractionType.RollerCoaster,
+            MinAge = 12,
+            MaxCapacity = 20,
+            CurrentCapacity = 0,
+            IsActive = true
+        };
+        newEvent.AddAttraction(attraction);
+        
+        bool hasAttraction = newEvent.HasAttraction(attraction.Id);
+        
+        Assert.IsTrue(hasAttraction);
+    }
 }
