@@ -114,4 +114,48 @@ public class EventServiceTest
         Assert.AreEqual("Art Expo", result[1].Name);
         _mockEventRepository.Verify(r => r.GetAll(), Times.Once);
     }
+    
+    [TestMethod]
+    public async Task CreateEvent_ShouldCreateEvent_WhenDataIsValid()
+    {
+        EventRequest newEvent = new EventRequest()
+        {
+            Name = "Tech Conference",
+            Date = new DateTime(2024, 11, 15),
+            Hour = 9,
+            MaxCapacity = 1000,
+            Cost = 150
+        };
+        
+        Event createdEvent = new Event
+        {
+            Id = Guid.NewGuid(),
+            Name = newEvent.Name,
+            Date = newEvent.Date,
+            Hour = newEvent.Hour,
+            MaxCapacity = newEvent.MaxCapacity,
+            CurrentCapacity = 0,
+            Cost = newEvent.Cost,
+            Attractions = []
+        };
+        
+        _mockEventRepository.Setup(r => r.Create(It.IsAny<Event>()))
+            .Callback<Event>(e =>
+            {
+                e.Id = createdEvent.Id;
+            })
+            .Returns(Task.CompletedTask);
+        
+        Guid resultId = await _eventService.CreateEvent(newEvent);
+        
+        Assert.AreEqual(createdEvent.Id, resultId);
+        _mockEventRepository.Verify(r => r.Create(It.Is<Event>(e => 
+            e.Name == newEvent.Name &&
+            e.Date == newEvent.Date &&
+            e.Hour == newEvent.Hour &&
+            e.MaxCapacity == newEvent.MaxCapacity &&
+            e.Cost == newEvent.Cost &&
+            e.CurrentCapacity == 0
+        )), Times.Once);
+    }
 }
