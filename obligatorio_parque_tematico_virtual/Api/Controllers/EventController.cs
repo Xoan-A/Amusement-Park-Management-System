@@ -18,6 +18,7 @@ public class EventController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetEvents()
     {
         List<EventResponse> events = await _eventService.GetAllEvents();
