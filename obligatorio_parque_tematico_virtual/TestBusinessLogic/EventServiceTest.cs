@@ -13,13 +13,13 @@ public class EventServiceTest
 {
     private Mock<IEventRepository> _mockEventRepository;
     private IEventService _eventService;
-    private Mock<IAttractionServiceEntitys> _mockAttractionService;
+    private Mock<IAttractionServiceEntity> _mockAttractionService;
     
     [TestInitialize]
     public void Setup()
     {
         _mockEventRepository = new Mock<IEventRepository>();
-        _mockAttractionService = new Mock<IAttractionServiceEntitys>();
+        _mockAttractionService = new Mock<IAttractionServiceEntity>();
         _eventService = new EventService(_mockEventRepository.Object, _mockAttractionService.Object);
     }
 

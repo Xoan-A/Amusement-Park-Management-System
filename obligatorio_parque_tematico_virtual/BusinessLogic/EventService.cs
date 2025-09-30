@@ -9,8 +9,8 @@ namespace BusinessLogic;
 public class EventService : IEventService
 {
     IEventRepository _eventRepository;
-    IAttractionServiceEntitys _attractionService;
-    public EventService(IEventRepository eventRepository, IAttractionServiceEntitys attractionService)
+    IAttractionServiceEntity _attractionService;
+    public EventService(IEventRepository eventRepository, IAttractionServiceEntity attractionService)
     {
         _eventRepository = eventRepository;
         _attractionService = attractionService;
