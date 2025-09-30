@@ -97,4 +97,12 @@ public class EventControllerTest
         Assert.AreEqual("Event 1", eventsResponse[0].Name);
         Assert.AreEqual("Event 2", eventsResponse[1].Name);
     }
+    
+    [TestMethod]
+    public async Task GetEvents_InvalidAuthentication_ReturnsUnauthorized()
+    {
+        var response = await _client.GetAsync("/api/events");
+        
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+    }
 }
