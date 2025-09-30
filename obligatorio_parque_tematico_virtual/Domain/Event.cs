@@ -21,4 +21,9 @@ public class Event
     {
         this.Attractions.Add(attraction);
     }
+
+    public void RemoveAttraction(Attraction attraction)
+    {
+        this.Attractions.Remove(attraction);
+    }
 }
