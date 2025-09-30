@@ -71,4 +71,18 @@ public class EventRepositoryTest
         Assert.IsNotNull(result);
         Assert.AreEqual(eventEntity.Name, result.Name);
     }
+
+    [TestMethod]
+    public async Task GetAll_ShouldReturnAllEvents_WhenEventsExist()
+    {
+        await _context.Events.AddAsync(eventEntity);
+        await _context.SaveChangesAsync();
+
+        var events = await _eventRepository.GetAll();
+
+        Assert.IsNotNull(events);
+        Assert.IsTrue(events.Any());
+        Assert.AreEqual(1, events.Count());
+        Assert.AreEqual(eventEntity.Name, events.First().Name);
+    }
 }
