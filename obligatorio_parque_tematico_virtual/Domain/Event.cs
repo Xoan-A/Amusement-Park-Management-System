@@ -10,4 +10,9 @@ public class Event
     public int CurrentCapacity { get; set; }
     public decimal Cost { get; set; }
     public List<Attraction> Attractions { get; set; }
+    
+    public Event()
+    {
+        this.Id = Guid.NewGuid();
+    }
 }
