@@ -20,9 +20,9 @@ public class EventRepositoryTest
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         _context = new AppDbContext(options);
-        
+
         _eventRepository = new EventRepository(_context);
-        
+
         eventEntity = new Event
         {
             Name = "Music Festival",
@@ -33,7 +33,7 @@ public class EventRepositoryTest
             Cost = 100
         };
     }
-    
+
     [TestCleanup]
     public void Cleanup()
     {
@@ -45,9 +45,9 @@ public class EventRepositoryTest
     {
         await _context.Events.AddAsync(eventEntity);
         await _context.SaveChangesAsync();
-        
+
         Event result = await _eventRepository.GetById(eventEntity.Id);
-        
+
         Assert.IsNotNull(result);
         Assert.AreEqual(eventEntity.Id, result.Id);
         Assert.AreEqual(eventEntity.Name, result.Name);
@@ -57,17 +57,17 @@ public class EventRepositoryTest
     public async Task GetById_ShouldReturnNull_WhenEventDoesNotExist()
     {
         Event result = await _eventRepository.GetById(Guid.NewGuid());
-        
+
         Assert.IsNull(result);
     }
-    
+
     [TestMethod]
     public async Task Create_ShouldAddEventToDatabase()
     {
         await _eventRepository.Create(eventEntity);
-        
+
         Event result = await _context.Events.FindAsync(eventEntity.Id);
-        
+
         Assert.IsNotNull(result);
         Assert.AreEqual(eventEntity.Name, result.Name);
     }
@@ -90,7 +90,7 @@ public class EventRepositoryTest
     public async Task Update_ShouldUpdateEventInDatabase()
     {
         await _eventRepository.Create(eventEntity);
-        
+
         eventEntity.Name = "Updated Music Festival";
 
         await _eventRepository.Update(eventEntity);
@@ -98,5 +98,17 @@ public class EventRepositoryTest
         Event result = await _eventRepository.GetById(eventEntity.Id);
         Assert.IsNotNull(result);
         Assert.AreEqual(eventEntity.Name, result.Name);
+    }
+
+    [TestMethod]
+    public async Task Delete_ShouldDeleteEventFromDatabase()
+    {
+        await _eventRepository.Create(eventEntity);
+
+        await _eventRepository.Delete(eventEntity);
+
+        Event result = await _eventRepository.GetById(eventEntity.Id);
+
+        Assert.IsNull(result);
     }
 }
