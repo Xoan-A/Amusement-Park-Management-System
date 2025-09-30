@@ -79,7 +79,7 @@ public class EventServiceTest
         
         _mockEventRepository.Verify(r => r.GetById(expectedEvent.Id), Times.Once);
     }
-    
+
     [TestMethod]
     public async Task GetAllEvents_ShouldReturnListOfEvents()
     {
@@ -114,3 +114,4 @@ public class EventServiceTest
         Assert.AreEqual("Art Expo", result[1].Name);
         _mockEventRepository.Verify(r => r.GetAll(), Times.Once);
     }
+}
