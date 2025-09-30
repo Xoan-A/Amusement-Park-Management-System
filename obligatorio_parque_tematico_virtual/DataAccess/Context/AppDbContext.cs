@@ -37,10 +37,19 @@ namespace DataAccess.Context
             modelBuilder.Entity<Event>()
                 .HasIndex(e => e.Name)
                 .IsUnique();
-            
-            modelBuilder.Entity<Event>()
-                .HasMany(e => e.Attractions)
-                .WithMany();
+
+            modelBuilder.Entity<EventAttraction>()
+                .HasKey(ea => new { ea.EventId, ea.AttractionId });
+
+            modelBuilder.Entity<EventAttraction>()
+                .HasOne(ea => ea.Event)
+                .WithMany(e => e.Attractions)
+                .HasForeignKey(ea => ea.EventId);
+
+            modelBuilder.Entity<EventAttraction>()
+                .HasOne(ea => ea.Attraction)
+                .WithMany()
+                .HasForeignKey(ea => ea.AttractionId);
 
             modelBuilder.Entity<Ticket>()
                 .HasIndex(t => t.QRCode)

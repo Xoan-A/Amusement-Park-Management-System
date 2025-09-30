@@ -68,7 +68,7 @@ public class EventTest
         newEvent.AddAttraction(attraction);
         
         Assert.AreEqual(1, newEvent.Attractions.Count);
-        Assert.AreEqual(attraction, newEvent.Attractions[0]);
+        Assert.AreEqual(attraction, newEvent.Attractions[0].Attraction);
     }
 
     [TestMethod]

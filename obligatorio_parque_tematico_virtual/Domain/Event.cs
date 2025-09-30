@@ -9,21 +9,31 @@ public class Event
     public int MaxCapacity { get; set; }
     public int CurrentCapacity { get; set; }
     public decimal Cost { get; set; }
-    public List<Attraction> Attractions { get; set; }
-    
+    public List<EventAttraction> Attractions { get; set; }
+
     public Event()
     {
         this.Id = Guid.NewGuid();
-        this.Attractions = new List<Attraction>();
+        this.Attractions = new List<EventAttraction>();
     }
 
     public void AddAttraction(Attraction attraction)
     {
-        this.Attractions.Add(attraction);
+        var eventAttraction = new EventAttraction
+        {
+            EventId = this.Id,
+            Event = this,
+            AttractionId = attraction.Id,
+            Attraction = attraction
+        };
+        this.Attractions.Add(eventAttraction);
     }
 
     public void RemoveAttraction(Attraction attraction)
     {
-        this.Attractions.Remove(attraction);
+        EventAttraction eventAttraction = this.Attractions
+            .FirstOrDefault(ea => ea.AttractionId == attraction.Id);
+
+        this.Attractions.Remove(eventAttraction);
     }
 }
