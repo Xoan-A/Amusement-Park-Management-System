@@ -6,7 +6,7 @@ using Models.Out;
 
 namespace BusinessLogic;
 
-public class AttractionService : IAttractionService
+public class AttractionService : IAttractionService, IAttractionServiceEntity
 {
     private readonly IAttractionRepository _attractionRepository;
 
@@ -85,5 +85,10 @@ public class AttractionService : IAttractionService
     {
         var attraction = await _attractionRepository.GetById(id);
         await _attractionRepository.Delete(attraction);
+    }
+
+    public async Task<Attraction> GetAttractionEntityById(Guid expectedAttractionId)
+    {
+        return await _attractionRepository.GetById(expectedAttractionId);
     }
 }

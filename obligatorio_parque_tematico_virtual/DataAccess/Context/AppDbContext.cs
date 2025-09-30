@@ -7,6 +7,7 @@ namespace DataAccess.Context
     {
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Attraction> Attractions { get; set; }
+        public virtual DbSet<Event> Events { get; set; }
         public virtual DbSet<Ticket> Tickets { get; set; }
 
         public AppDbContext()
@@ -32,6 +33,23 @@ namespace DataAccess.Context
             modelBuilder.Entity<Attraction>()
                 .HasIndex(a => a.Name)
                 .IsUnique();
+
+            modelBuilder.Entity<Event>()
+                .HasIndex(e => e.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<EventAttraction>()
+                .HasKey(ea => new { ea.EventId, ea.AttractionId });
+
+            modelBuilder.Entity<EventAttraction>()
+                .HasOne(ea => ea.Event)
+                .WithMany(e => e.Attractions)
+                .HasForeignKey(ea => ea.EventId);
+
+            modelBuilder.Entity<EventAttraction>()
+                .HasOne(ea => ea.Attraction)
+                .WithMany()
+                .HasForeignKey(ea => ea.AttractionId);
 
             modelBuilder.Entity<Ticket>()
                 .HasIndex(t => t.QRCode)

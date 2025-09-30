@@ -13,12 +13,14 @@ public class AttractionServiceTest
 {
     private Mock<IAttractionRepository> _mockAttractionRepository;
     private IAttractionService _attractionService;
+    private IAttractionServiceEntity _attractionServiceEntity;
 
     [TestInitialize]
     public void Setup()
     {
         _mockAttractionRepository = new Mock<IAttractionRepository>();
         _attractionService = new AttractionService(_mockAttractionRepository.Object);
+        _attractionServiceEntity = new AttractionService(_mockAttractionRepository.Object);
     }
 
     [TestMethod]
@@ -159,5 +161,25 @@ public class AttractionServiceTest
         _attractionService.DeleteAttraction(attractionToDelete.Id);
 
         _mockAttractionRepository.Verify(r => r.Delete(attractionToDelete), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task GetAttractionEntityById_ShouldReturnAttraction_WhenIdIsValid()
+    {
+        Attraction expectedAttraction = new Attraction
+        {
+            Name = "Log Flume",
+            Description = "A water ride",
+            Type = AttractionType.RollerCoaster,
+            MinAge = 10,
+            MaxCapacity = 30,
+            CurrentCapacity = 8,
+            IsActive = true
+        };
+        _mockAttractionRepository.Setup(r => r.GetById(expectedAttraction.Id)).ReturnsAsync(expectedAttraction);
+        Attraction result = await _attractionServiceEntity.GetAttractionEntityById(expectedAttraction.Id);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(expectedAttraction.Name, result.Name);
+        _mockAttractionRepository.Verify(r => r.GetById(expectedAttraction.Id), Times.Once);
     }
 }

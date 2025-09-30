@@ -51,6 +51,7 @@ public class AttractionControllerTest
     public void Cleanup()
     {
         _client?.Dispose();
+        _adminClient?.Dispose();
         _factory?.Dispose();
     }
 

@@ -24,6 +24,8 @@ builder.Services.AddScoped<IAuthLogic, AuthLogic>();
 builder.Services.AddScoped<IUserLogic, UserLogic>();
 builder.Services.AddScoped<ITicketLogic, TicketLogic>();
 builder.Services.AddScoped<IAttractionService, AttractionService>();
+builder.Services.AddScoped<IAttractionServiceEntity, AttractionService>();
+builder.Services.AddScoped<IEventService, EventService>();
 
 // Register data access services
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -31,6 +33,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<IAttractionRepository, AttractionRepository>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
 
 // Configuración de autenticación JWT
 var jwtSecretKey = "MySecretKeyForJWTTokenGeneration1234567890";
