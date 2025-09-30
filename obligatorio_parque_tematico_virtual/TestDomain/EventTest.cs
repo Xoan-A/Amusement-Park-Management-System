@@ -114,4 +114,14 @@ public class EventTest
         
         Assert.IsTrue(hasAttraction);
     }
+
+    [TestMethod]
+    public void Event_HasAttraction_ShouldReturnFalseIfAttractionDoesNotExist()
+    {
+        Event newEvent = new Event();
+        
+        bool hasAttraction = newEvent.HasAttraction(Guid.NewGuid());
+        
+        Assert.IsFalse(hasAttraction);
+    }
 }
