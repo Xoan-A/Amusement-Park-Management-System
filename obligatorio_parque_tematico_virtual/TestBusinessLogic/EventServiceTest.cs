@@ -158,4 +158,31 @@ public class EventServiceTest
             e.CurrentCapacity == 0
         )), Times.Once);
     }
+    
+    [TestMethod]
+    public async Task CreateEvent_ShouldAddAttractions_WhenEventHasAttractions()
+    {
+        var attractionIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+        EventRequest newEvent = new EventRequest()
+        {
+            Name = "Carnival",
+            Date = new DateTime(2024, 12, 1),
+            Hour = 15,
+            MaxCapacity = 4000,
+            Cost = 80,
+            AttractionIds = attractionIds
+        };
+
+        _mockEventRepository.Setup(r => r.Create(It.IsAny<Event>()))
+            .Callback<Event>(e =>
+            {
+                Assert.AreEqual(attractionIds.Count, e.Attractions.Count);
+                Assert.AreEqual(attractionIds[0], e.Attractions[0].AttractionId);
+                Assert.AreEqual(attractionIds[1], e.Attractions[1].AttractionId);
+            })
+            .Returns(Task.CompletedTask);
+
+        await _eventService.CreateEvent(newEvent);
+    }
+
 }
