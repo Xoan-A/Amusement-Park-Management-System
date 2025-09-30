@@ -134,4 +134,14 @@ public class EventControllerTest
         Assert.IsNotNull(eventResponse);
         Assert.AreEqual("Event 1", eventResponse.Name);
     }
+
+    [TestMethod]
+    public async Task GetEventById_InvalidAuthentication_ReturnsUnauthorized()
+    {
+        Guid eventId = Guid.NewGuid();
+        
+        var response = await _client.GetAsync($"/api/events/{eventId}");
+        
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+    }
 }
