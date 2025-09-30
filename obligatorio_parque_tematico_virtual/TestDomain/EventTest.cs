@@ -30,4 +30,13 @@ public class EventTest
         Assert.AreEqual(100, newEvent.Cost);
         Assert.IsNotNull(newEvent.Attractions);
     }
+
+    [TestMethod]
+    public void Event_ShouldHaveUniqueId()
+    {
+        Event event1 = new Event();
+        Event event2 = new Event();
+        
+        Assert.AreNotEqual(event1.Id, event2.Id);
+    }
 }
