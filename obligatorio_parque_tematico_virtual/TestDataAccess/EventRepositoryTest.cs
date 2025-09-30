@@ -52,4 +52,23 @@ public class EventRepositoryTest
         Assert.AreEqual(eventEntity.Id, result.Id);
         Assert.AreEqual(eventEntity.Name, result.Name);
     }
+
+    [TestMethod]
+    public async Task GetById_ShouldReturnNull_WhenEventDoesNotExist()
+    {
+        Event result = await _eventRepository.GetById(Guid.NewGuid());
+        
+        Assert.IsNull(result);
+    }
+    
+    [TestMethod]
+    public async Task Create_ShouldAddEventToDatabase()
+    {
+        await _eventRepository.Create(eventEntity);
+        
+        Event result = await _context.Events.FindAsync(eventEntity.Id);
+        
+        Assert.IsNotNull(result);
+        Assert.AreEqual(eventEntity.Name, result.Name);
+    }
 }
