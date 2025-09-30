@@ -27,6 +27,7 @@ public class EventController : ControllerBase
     }
     
     [HttpGet("{id}")]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetEventById(Guid id)
     {
         EventResponse eventResponse = await _eventService.GetEventById(id);
