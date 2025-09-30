@@ -58,7 +58,7 @@ public class EventTest
             Id = Guid.NewGuid(),
             Name = "Roller Coaster",
             Description = "A thrilling ride",
-            Type = AttractionType.Ride,
+            Type = AttractionType.RollerCoaster,
             MinAge = 12,
             MaxCapacity = 20,
             CurrentCapacity = 0,
