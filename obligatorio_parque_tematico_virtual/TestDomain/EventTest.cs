@@ -39,4 +39,13 @@ public class EventTest
         
         Assert.AreNotEqual(event1.Id, event2.Id);
     }
+    
+    [TestMethod]
+    public void Event_ShouldInitializeAttractionCollection()
+    {
+        Event newEvent = new Event();
+        
+        Assert.IsNotNull(newEvent.Attractions);
+        Assert.AreEqual(0, newEvent.Attractions.Count);
+    }
 }
