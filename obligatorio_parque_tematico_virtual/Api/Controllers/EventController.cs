@@ -25,4 +25,11 @@ public class EventController : ControllerBase
         
         return Ok(events);
     }
+    
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetEventById(Guid id)
+    {
+        EventResponse eventResponse = await _eventService.GetEventById(id);
+        return Ok(eventResponse);
+    }
 }
