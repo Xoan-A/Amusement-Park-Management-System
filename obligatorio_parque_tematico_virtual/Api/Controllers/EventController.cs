@@ -48,4 +48,11 @@ public class EventController : ControllerBase
 
         return CreatedAtAction(nameof(GetEventById), new { id = newId }, response);
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteEventById(Guid id)
+    {
+        await _eventService.DeleteEvent(id);
+        return NoContent();
+    }
 }
