@@ -208,4 +208,15 @@ public class EventControllerTest
         Assert.AreEqual(System.Net.HttpStatusCode.NoContent, response.StatusCode);
         _mockEventService.Verify(service => service.DeleteEvent(eventId), Times.Once);
     }
+    
+    [TestMethod]
+    public async Task DeleteEvent_InvalidAuthentication_ReturnsUnauthorized()
+    {
+        Guid eventId = Guid.NewGuid();
+        
+        var response = await _client.DeleteAsync($"/api/events/{eventId}");
+        
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+        _mockEventService.Verify(service => service.DeleteEvent(eventId), Times.Never);
+    }
 }
