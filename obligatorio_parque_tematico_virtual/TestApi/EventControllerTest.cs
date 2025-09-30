@@ -174,4 +174,24 @@ public class EventControllerTest
         Assert.AreEqual(newEventId, createResponse.Id);
         Assert.AreEqual("Event created successfully", createResponse.Message);
     }
+
+    [TestMethod]
+    public async Task CreateEvent_InvalidAuthentication_ReturnsUnauthorized()
+    {
+        Guid newEventId = Guid.NewGuid();
+        var newEvent = new EventRequest
+        {
+            Name = "New Event",
+            Date = DateTime.Now.AddDays(30),
+            Hour = 4,
+            MaxCapacity = 150,
+            Cost = 150,
+            AttractionIds = new List<Guid>()
+        };
+        var content = new StringContent(JsonSerializer.Serialize(newEvent), Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("/api/events", content);
+        
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+        _mockEventService.Verify(service => service.CreateEvent(It.IsAny<EventRequest>()), Times.Never);
+    }
 }
