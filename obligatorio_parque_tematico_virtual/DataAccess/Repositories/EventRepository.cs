@@ -15,4 +15,10 @@ public class EventRepository : IEventRepository
     {
         return await _context.Events.FindAsync(id);
     }
+
+    public async Task Create(Event eventEntity)
+    {
+        _context.Events.Add(eventEntity);
+        await _context.SaveChangesAsync();
+    }
 }

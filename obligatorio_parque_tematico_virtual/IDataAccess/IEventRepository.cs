@@ -5,4 +5,5 @@ namespace IDataAccess;
 public interface IEventRepository
 {
     public Task<Event> GetById(Guid id);
+    Task Create(Event eventEntity);
 }
