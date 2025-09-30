@@ -2,6 +2,7 @@
 using IDataAccess;
 using Models.Out;
 using Domain;
+using Models.In;
 
 namespace BusinessLogic;
 
@@ -73,5 +74,22 @@ public class EventService : IEventService
         }).ToList();
     
         return eventResponses;
+    }
+
+    public async Task<Guid> CreateEvent(EventRequest newEvent)
+    {
+        Event eventEntity = new Event()
+        {
+            Name = newEvent.Name,
+            Date = newEvent.Date,
+            Hour = newEvent.Hour,
+            MaxCapacity = newEvent.MaxCapacity,
+            CurrentCapacity = 0,
+            Cost = newEvent.Cost,
+            Attractions = new List<EventAttraction>()
+        };
+        await _eventRepository.Create(eventEntity);
+        
+        return eventEntity.Id;
     }
 }
