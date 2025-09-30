@@ -6,11 +6,16 @@ namespace DataAccess.Context
     public class AppDbContext : DbContext
     {
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Attraction> Attractions { get; set; }
         public virtual DbSet<Ticket> Tickets { get; set; }
 
-        public AppDbContext() { }
+        public AppDbContext()
+        {
+        }
 
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,6 +27,10 @@ namespace DataAccess.Context
 
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
+                .IsUnique();
+
+            modelBuilder.Entity<Attraction>()
+                .HasIndex(a => a.Name)
                 .IsUnique();
 
             modelBuilder.Entity<Ticket>()
