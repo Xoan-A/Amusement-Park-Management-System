@@ -36,15 +36,15 @@ public class EventTest
     {
         Event event1 = new Event();
         Event event2 = new Event();
-        
+
         Assert.AreNotEqual(event1.Id, event2.Id);
     }
-    
+
     [TestMethod]
     public void Event_ShouldInitializeAttractionCollection()
     {
         Event newEvent = new Event();
-        
+
         Assert.IsNotNull(newEvent.Attractions);
         Assert.AreEqual(0, newEvent.Attractions.Count);
     }
@@ -64,9 +64,9 @@ public class EventTest
             CurrentCapacity = 0,
             IsActive = true
         };
-        
+
         newEvent.AddAttraction(attraction);
-        
+
         Assert.AreEqual(1, newEvent.Attractions.Count);
         Assert.AreEqual(attraction, newEvent.Attractions[0].Attraction);
     }
@@ -89,10 +89,10 @@ public class EventTest
         newEvent.AddAttraction(attraction);
 
         newEvent.RemoveAttraction(attraction);
-        
+
         Assert.AreEqual(0, newEvent.Attractions.Count);
     }
-   
+
     [TestMethod]
     public void Event_HasAttraction_ShouldReturnTrueIfAttractionExists()
     {
@@ -109,9 +109,9 @@ public class EventTest
             IsActive = true
         };
         newEvent.AddAttraction(attraction);
-        
+
         bool hasAttraction = newEvent.HasAttraction(attraction.Id);
-        
+
         Assert.IsTrue(hasAttraction);
     }
 
@@ -119,9 +119,9 @@ public class EventTest
     public void Event_HasAttraction_ShouldReturnFalseIfAttractionDoesNotExist()
     {
         Event newEvent = new Event();
-        
+
         bool hasAttraction = newEvent.HasAttraction(Guid.NewGuid());
-        
+
         Assert.IsFalse(hasAttraction);
     }
 }

@@ -162,7 +162,7 @@ public class AttractionServiceTest
 
         _mockAttractionRepository.Verify(r => r.Delete(attractionToDelete), Times.Once);
     }
-    
+
     [TestMethod]
     public async Task GetAttractionEntityById_ShouldReturnAttraction_WhenIdIsValid()
     {

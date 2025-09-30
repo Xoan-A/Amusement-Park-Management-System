@@ -22,10 +22,10 @@ public class EventController : ControllerBase
     public async Task<IActionResult> GetEvents()
     {
         List<EventResponse> events = await _eventService.GetAllEvents();
-        
+
         return Ok(events);
     }
-    
+
     [HttpGet("{id}")]
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetEventById(Guid id)
@@ -33,7 +33,7 @@ public class EventController : ControllerBase
         EventResponse eventResponse = await _eventService.GetEventById(id);
         return Ok(eventResponse);
     }
-    
+
     [HttpPost]
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> CreateEvent([FromBody] EventRequest newEvent)
