@@ -39,6 +39,6 @@ public class Event
 
     public bool HasAttraction(Guid attractionId)
     {
-        return true;
+        return this.Attractions.Any(ea => ea.AttractionId == attractionId);
     }
 }
