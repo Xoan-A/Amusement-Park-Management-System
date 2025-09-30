@@ -33,4 +33,10 @@ public class EventRepository : IEventRepository
         _context.Events.Update(eventEntity);
         await _context.SaveChangesAsync();
     }
+
+    public async Task Delete(Event eventEntity)
+    {
+        _context.Events.Remove(eventEntity);
+        await _context.SaveChangesAsync();
+    }
 }

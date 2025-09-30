@@ -8,4 +8,5 @@ public interface IEventRepository
     Task Create(Event eventEntity);
     Task<List<Event>> GetAll();
     Task Update(Event eventEntity);
+    Task Delete(Event eventEntity);
 }
