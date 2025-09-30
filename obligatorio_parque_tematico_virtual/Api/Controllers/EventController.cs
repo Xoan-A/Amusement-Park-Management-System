@@ -50,6 +50,7 @@ public class EventController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> DeleteEventById(Guid id)
     {
         await _eventService.DeleteEvent(id);
