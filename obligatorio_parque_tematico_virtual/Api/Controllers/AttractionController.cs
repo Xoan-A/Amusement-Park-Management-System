@@ -12,19 +12,19 @@ namespace Api.Controllers;
 public class AttractionController : ControllerBase
 {
     private readonly IAttractionService _attractionService;
-    
+
     public AttractionController(IAttractionService attractionService)
     {
         _attractionService = attractionService;
     }
-    
+
     [HttpGet]
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetAttractions()
     {
         var attractions = await _attractionService.GetAllAttractions();
         var response = new AllAttractionsResponse();
-        
+
         foreach (var attraction in attractions)
         {
             response.Attractions.Add(new AttractionResponse()
@@ -39,7 +39,7 @@ public class AttractionController : ControllerBase
                 IsActive = attraction.IsActive
             });
         }
-        
+
         return Ok(response);
     }
 
@@ -56,7 +56,7 @@ public class AttractionController : ControllerBase
     public async Task<IActionResult> CreateAttraction([FromBody] AttractionRequest newAttraction)
     {
         Guid newId = await _attractionService.CreateAttraction(newAttraction);
-        
+
         CreateAttractionResponse response = new CreateAttractionResponse
         {
             Id = newId,

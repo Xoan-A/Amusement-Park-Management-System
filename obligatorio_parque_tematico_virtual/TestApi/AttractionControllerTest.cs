@@ -43,7 +43,8 @@ public class AttractionControllerTest
         };
         string adminToken = tokenService.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();
-        _adminClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
+        _adminClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
     }
 
     [TestCleanup]
@@ -109,7 +110,7 @@ public class AttractionControllerTest
         Assert.AreEqual(50, attractionsResponse.Attractions[0].CurrentCapacity);
         Assert.AreEqual(true, attractionsResponse.Attractions[0].IsActive);
     }
-    
+
     [TestMethod]
     public async Task GetAttractionById_ValidId_ReturnsAttractionResponse()
     {
@@ -146,7 +147,7 @@ public class AttractionControllerTest
         Assert.AreEqual(50, attractionResponse.CurrentCapacity);
         Assert.AreEqual(true, attractionResponse.IsActive);
     }
-    
+
     [TestMethod]
     public async Task CreateAttraction_ValidRequest_ReturnsCreatedAttractionResponse()
     {
@@ -160,7 +161,7 @@ public class AttractionControllerTest
             MaxCapacity = 100,
             IsActive = true
         };
-        
+
         _mockAttractionService.Setup(s => s.CreateAttraction(It.IsAny<AttractionRequest>())).ReturnsAsync(expectedId);
 
         var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
@@ -168,10 +169,11 @@ public class AttractionControllerTest
 
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
-        CreateAttractionResponse? createdResponse = JsonSerializer.Deserialize<CreateAttractionResponse>(responseContent, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        CreateAttractionResponse? createdResponse = JsonSerializer.Deserialize<CreateAttractionResponse>(
+            responseContent, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
 
         Assert.IsNotNull(createdResponse);
         Assert.AreEqual(expectedId, createdResponse.Id);
@@ -192,23 +194,25 @@ public class AttractionControllerTest
             MaxCapacity = 100,
             IsActive = true
         };
-        
-        _mockAttractionService.Setup(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>())).Returns(Task.CompletedTask);
+
+        _mockAttractionService.Setup(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>()))
+            .Returns(Task.CompletedTask);
         var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
         var response = await _adminClient.PutAsync($"/api/attractions/{id}", content);
-        
+
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
-        MessageResponse? updatedResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
-        
+        MessageResponse? updatedResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
         Assert.IsNotNull(updatedResponse);
         Assert.AreEqual("Attraction updated successfully", updatedResponse.Message);
         _mockAttractionService.Verify(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>()), Times.Once);
     }
-    
+
     [TestMethod]
     public async Task DeleteAttraction_ValidId_ReturnsNoContent()
     {
@@ -219,7 +223,7 @@ public class AttractionControllerTest
         Assert.AreEqual(System.Net.HttpStatusCode.NoContent, response.StatusCode);
         _mockAttractionService.Verify(s => s.DeleteAttraction(id), Times.Once);
     }
-    
+
     [TestMethod]
     public async Task CreateAttraction_InvalidAuthentication_ReturnsUnauthorized()
     {
@@ -239,7 +243,7 @@ public class AttractionControllerTest
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.CreateAttraction(It.IsAny<AttractionRequest>()), Times.Never);
     }
-    
+
     [TestMethod]
     public async Task GetAttractions_InvalidAuthentication_ReturnsUnauthorized()
     {
@@ -247,7 +251,7 @@ public class AttractionControllerTest
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.GetAllAttractions(), Times.Never);
     }
-    
+
     [TestMethod]
     public async Task GetAttractionById_InvalidAuthentication_ReturnsUnauthorized()
     {
@@ -275,7 +279,7 @@ public class AttractionControllerTest
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>()), Times.Never);
     }
-    
+
     [TestMethod]
     public async Task DeleteAttraction_InvalidAuthentication_ReturnsUnauthorized()
     {

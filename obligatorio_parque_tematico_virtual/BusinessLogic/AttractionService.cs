@@ -9,16 +9,17 @@ namespace BusinessLogic;
 public class AttractionService : IAttractionService
 {
     private readonly IAttractionRepository _attractionRepository;
-    
+
     public AttractionService(IAttractionRepository attractionRepository)
     {
         _attractionRepository = attractionRepository;
     }
-    
+
     public async Task<AttractionResponse> GetAttractionById(Guid id)
     {
         Attraction attraction = await _attractionRepository.GetById(id);
-        return new AttractionResponse(){
+        return new AttractionResponse()
+        {
             Id = attraction.Id,
             Name = attraction.Name,
             Description = attraction.Description,
@@ -29,7 +30,7 @@ public class AttractionService : IAttractionService
             IsActive = attraction.IsActive
         };
     }
-    
+
     public async Task<List<AttractionResponse>> GetAllAttractions()
     {
         List<Attraction> attractions = await _attractionRepository.GetAll();
@@ -45,7 +46,7 @@ public class AttractionService : IAttractionService
             IsActive = attraction.IsActive
         }).ToList();
     }
-    
+
     public async Task<Guid> CreateAttraction(AttractionRequest newAttraction)
     {
         Attraction attraction = new Attraction()
@@ -62,7 +63,7 @@ public class AttractionService : IAttractionService
 
         return attraction.Id;
     }
-    
+
     public async Task UpdateAttraction(Guid id, AttractionRequest existingAttraction)
     {
         Attraction attraction = await _attractionRepository.GetById(id);
@@ -79,7 +80,7 @@ public class AttractionService : IAttractionService
         };
         await _attractionRepository.Update(UpdatedAttraction);
     }
-    
+
     public async Task DeleteAttraction(Guid id)
     {
         var attraction = await _attractionRepository.GetById(id);

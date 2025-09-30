@@ -13,14 +13,14 @@ public class AttractionServiceTest
 {
     private Mock<IAttractionRepository> _mockAttractionRepository;
     private IAttractionService _attractionService;
-    
+
     [TestInitialize]
     public void Setup()
     {
         _mockAttractionRepository = new Mock<IAttractionRepository>();
         _attractionService = new AttractionService(_mockAttractionRepository.Object);
     }
-    
+
     [TestMethod]
     public async Task GetAttractionById_ShouldReturnAttraction_WhenIdIsValid()
     {
@@ -73,7 +73,7 @@ public class AttractionServiceTest
         Assert.AreEqual(2, result.Count);
         _mockAttractionRepository.Verify(r => r.GetAll(), Times.Once);
     }
-    
+
     [TestMethod]
     public async Task AddAttraction_ShouldCreateAttraction_WhenDataIsValid()
     {
@@ -86,9 +86,9 @@ public class AttractionServiceTest
             MaxCapacity = 10,
             IsActive = true
         };
-        
+
         _attractionService.CreateAttraction(newAttraction);
-        
+
         _mockAttractionRepository.Verify(r => r.Create(
             It.Is<Attraction>(a =>
                 a.Description == newAttraction.Description &&
@@ -100,7 +100,7 @@ public class AttractionServiceTest
                 a.IsActive == newAttraction.IsActive
             )), Times.Once);
     }
-    
+
     [TestMethod]
     public async Task UpdateAttraction_ShouldUpdateAttraction_WhenDataIsValid()
     {
@@ -114,8 +114,8 @@ public class AttractionServiceTest
             CurrentCapacity = 5,
             IsActive = true
         };
-        
-        
+
+
         AttractionRequest attractionRequest = new AttractionRequest
         {
             Name = existingAttraction.Name,
@@ -125,20 +125,20 @@ public class AttractionServiceTest
             MaxCapacity = existingAttraction.MaxCapacity,
             IsActive = existingAttraction.IsActive
         };
-        
+
         _mockAttractionRepository.Setup(r => r.GetById(existingAttraction.Id))
             .ReturnsAsync(existingAttraction);
-       
+
         _attractionService.UpdateAttraction(existingAttraction.Id, attractionRequest);
-        
+
         _mockAttractionRepository.Verify(r => r.Update(
             It.Is<Attraction>(a =>
-                    a.Id == existingAttraction.Id &&
-                    a.Description == "An exciting swinging experience" &&
-                    a.Name == existingAttraction.Name
+                a.Id == existingAttraction.Id &&
+                a.Description == "An exciting swinging experience" &&
+                a.Name == existingAttraction.Name
             )), Times.Once);
     }
-    
+
     [TestMethod]
     public async Task DeleteAttraction_ShouldRemoveAttraction_WhenIdIsValid()
     {
@@ -152,12 +152,12 @@ public class AttractionServiceTest
             CurrentCapacity = 0,
             IsActive = false
         };
-        
+
         _mockAttractionRepository.Setup(r => r.Delete(attractionToDelete));
         _mockAttractionRepository.Setup(r => r.GetById(attractionToDelete.Id)).ReturnsAsync(attractionToDelete);
-        
+
         _attractionService.DeleteAttraction(attractionToDelete.Id);
-        
+
         _mockAttractionRepository.Verify(r => r.Delete(attractionToDelete), Times.Once);
     }
 }

@@ -12,7 +12,7 @@ public class AttractionRepositoryTest
     private AppDbContext _context;
     private IAttractionRepository _attractionRepository;
     private Attraction attraction;
-    
+
     [TestInitialize]
     public void Setup()
     {
@@ -21,9 +21,9 @@ public class AttractionRepositoryTest
             .Options;
         _context = new AppDbContext(options);
         _attractionRepository = new AttractionRepository(_context);
-        
+
         attraction = new Attraction();
-        
+
         attraction.Name = "Race simulator";
         attraction.Description = "average race simulator";
         attraction.Type = AttractionType.Simulator;
@@ -32,13 +32,13 @@ public class AttractionRepositoryTest
         attraction.CurrentCapacity = 0;
         attraction.IsActive = true;
     }
-    
+
     [TestCleanup]
     public void Cleanup()
     {
         _context.Dispose();
     }
-    
+
     [TestMethod]
     public async Task GetById_ShouldReturnAttraction_WhenAttractionExists()
     {
@@ -66,7 +66,7 @@ public class AttractionRepositoryTest
     {
         await _attractionRepository.Create(attraction);
         Attraction result = await _attractionRepository.GetById(attraction.Id);
-        
+
         Assert.IsNotNull(result);
         Assert.AreEqual("Race simulator", result.Name);
         Assert.AreEqual(1, await _context.Attractions.CountAsync());
@@ -110,7 +110,7 @@ public class AttractionRepositoryTest
 
         Assert.IsTrue(result);
     }
-        
+
     [TestMethod]
     public async Task GetAll_ShouldReturnAllAttractions()
     {
@@ -124,7 +124,7 @@ public class AttractionRepositoryTest
             CurrentCapacity = 3,
             IsActive = false
         };
-        
+
         await _context.Attractions.AddAsync(attraction);
         await _context.Attractions.AddAsync(attraction2);
         await _context.SaveChangesAsync();
@@ -133,13 +133,13 @@ public class AttractionRepositoryTest
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Count);
     }
-        
+
     [TestMethod]
     public async Task Update_ShouldUpdateAttractionInDatabase()
     {
         await _context.Attractions.AddAsync(attraction);
         await _context.SaveChangesAsync();
-        
+
         attraction.Name = "Updated Name";
         await _attractionRepository.Update(attraction);
 
@@ -156,7 +156,7 @@ public class AttractionRepositoryTest
         await _context.SaveChangesAsync();
 
         await _attractionRepository.Delete(attraction);
-        
+
         Assert.AreEqual(0, await _context.Attractions.CountAsync());
     }
 }

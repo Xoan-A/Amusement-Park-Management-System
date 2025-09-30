@@ -13,7 +13,7 @@ public class AttractionRepository : IAttractionRepository
     {
         _context = context;
     }
-    
+
     public async Task Create(Attraction attraction)
     {
         await _context.Attractions.AddAsync(attraction);
@@ -39,13 +39,13 @@ public class AttractionRepository : IAttractionRepository
     {
         return await _context.Attractions.ToListAsync();
     }
-    
+
     public async Task Update(Attraction attraction)
     {
         _context.Attractions.Update(attraction);
         await _context.SaveChangesAsync();
     }
-    
+
     public async Task Delete(Attraction attraction)
     {
         _context.Attractions.Remove(attraction);
