@@ -27,4 +27,10 @@ public class EventRepository : IEventRepository
     {
         return await _context.Events.ToListAsync();
     }
+
+    public async Task Update(Event eventEntity)
+    {
+        _context.Events.Update(eventEntity);
+        await _context.SaveChangesAsync();
+    }
 }
