@@ -105,4 +105,33 @@ public class EventControllerTest
         
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
+    
+    [TestMethod]
+    public async Task GetEventById_ValidId_ReturnsOkResult_WithEvent()
+    {
+        Guid eventId = Guid.NewGuid();
+        EventResponse mockEvent = new EventResponse
+        {
+            Id = eventId,
+            Name = "Event 1",
+            Date = DateTime.Now.AddDays(10),
+            Hour = 2,
+            MaxCapacity = 100,
+            CurrentCapacity = 50,
+            Cost = 100
+        };
+        
+        _mockEventService.Setup(service => service.GetEventById(eventId))
+            .ReturnsAsync(mockEvent);
+        
+        var response = await _adminClient.GetAsync($"/api/events/{eventId}");
+        
+        response.EnsureSuccessStatusCode();
+        var responseString = await response.Content.ReadAsStringAsync();
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var eventResponse = JsonSerializer.Deserialize<EventResponse>(responseString, options);
+        
+        Assert.IsNotNull(eventResponse);
+        Assert.AreEqual("Event 1", eventResponse.Name);
+    }
 }
