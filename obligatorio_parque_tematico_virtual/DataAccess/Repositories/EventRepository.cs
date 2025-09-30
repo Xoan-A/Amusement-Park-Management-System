@@ -1,6 +1,7 @@
 ﻿using DataAccess.Context;
 using Domain;
 using IDataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories;
 
@@ -20,5 +21,10 @@ public class EventRepository : IEventRepository
     {
         _context.Events.Add(eventEntity);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<Event>> GetAll()
+    {
+        return await _context.Events.ToListAsync();
     }
 }
