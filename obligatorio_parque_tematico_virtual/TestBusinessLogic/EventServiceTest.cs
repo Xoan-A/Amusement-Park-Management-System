@@ -13,12 +13,14 @@ public class EventServiceTest
 {
     private Mock<IEventRepository> _mockEventRepository;
     private IEventService _eventService;
+    private Mock<IAttractionServiceEntitys> _mockAttractionService;
     
     [TestInitialize]
     public void Setup()
     {
         _mockEventRepository = new Mock<IEventRepository>();
-        _eventService = new EventService(_mockEventRepository.Object);
+        _mockAttractionService = new Mock<IAttractionServiceEntitys>();
+        _eventService = new EventService(_mockEventRepository.Object, _mockAttractionService.Object);
     }
 
     [TestMethod]
@@ -173,6 +175,10 @@ public class EventServiceTest
             AttractionIds = attractionIds
         };
 
+        _mockAttractionService.Setup(s => s.GetAttractionEntityById(It.IsAny<Guid>()))
+            .ReturnsAsync((Guid id) => new Attraction { Id = id, Name = $"Attraction-{id}" });
+
+        
         _mockEventRepository.Setup(r => r.Create(It.IsAny<Event>()))
             .Callback<Event>(e =>
             {

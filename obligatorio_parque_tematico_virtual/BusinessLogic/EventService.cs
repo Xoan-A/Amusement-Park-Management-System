@@ -9,9 +9,11 @@ namespace BusinessLogic;
 public class EventService : IEventService
 {
     IEventRepository _eventRepository;
-    public EventService(IEventRepository eventRepository)
+    IAttractionServiceEntitys _attractionService;
+    public EventService(IEventRepository eventRepository, IAttractionServiceEntitys attractionService)
     {
         _eventRepository = eventRepository;
+        _attractionService = attractionService;
     }
 
     public async Task<EventResponse> GetEventById(Guid expectedEventId)
@@ -88,6 +90,16 @@ public class EventService : IEventService
             Cost = newEvent.Cost,
             Attractions = new List<EventAttraction>()
         };
+        
+        if (newEvent.AttractionIds != null)
+        {
+            foreach (var attractionId in newEvent.AttractionIds)
+            {
+                Attraction attraction = await _attractionService.GetAttractionEntityById(attractionId);
+                eventEntity.AddAttraction(attraction);
+            }
+        }
+        
         await _eventRepository.Create(eventEntity);
         
         return eventEntity.Id;
