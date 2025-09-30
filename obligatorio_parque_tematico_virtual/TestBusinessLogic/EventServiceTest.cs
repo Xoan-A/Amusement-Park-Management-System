@@ -190,5 +190,29 @@ public class EventServiceTest
 
         await _eventService.CreateEvent(newEvent);
     }
-
+    
+    [TestMethod]
+    public async Task DeleteEvent_ShouldCallRepositoryDelete_WhenEventExists()
+    {
+        Guid eventId = Guid.NewGuid();
+        Event existingEvent = new Event
+        {
+            Id = eventId,
+            Name = "Sample Event",
+            Date = DateTime.Now,
+            Hour = 10,
+            MaxCapacity = 100,
+            CurrentCapacity = 0,
+            Cost = 20,
+            Attractions = []
+        };
+        
+        _mockEventRepository.Setup(r => r.GetById(eventId)).ReturnsAsync(existingEvent);
+        _mockEventRepository.Setup(r => r.Delete(existingEvent)).Returns(Task.CompletedTask);
+        
+        await _eventService.DeleteEvent(eventId);
+        
+        _mockEventRepository.Verify(r => r.GetById(eventId), Times.Once);
+        _mockEventRepository.Verify(r => r.Delete(existingEvent), Times.Once);
+    }
 }
