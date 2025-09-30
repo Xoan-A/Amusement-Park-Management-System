@@ -10,6 +10,7 @@ public class EventService : IEventService
 {
     IEventRepository _eventRepository;
     IAttractionServiceEntity _attractionService;
+
     public EventService(IEventRepository eventRepository, IAttractionServiceEntity attractionService)
     {
         _eventRepository = eventRepository;
@@ -19,7 +20,7 @@ public class EventService : IEventService
     public async Task<EventResponse> GetEventById(Guid expectedEventId)
     {
         Event eventEntity = await _eventRepository.GetById(expectedEventId);
-    
+
         var eventResponse = new EventResponse
         {
             Id = eventEntity.Id,
@@ -43,14 +44,14 @@ public class EventService : IEventService
                 })
                 .ToList()
         };
-    
+
         return eventResponse;
     }
 
     public async Task<List<EventResponse>> GetAllEvents()
     {
         var events = await _eventRepository.GetAll();
-    
+
         var eventResponses = events.Select(eventEntity => new EventResponse
         {
             Id = eventEntity.Id,
@@ -74,7 +75,7 @@ public class EventService : IEventService
                 })
                 .ToList()
         }).ToList();
-    
+
         return eventResponses;
     }
 
@@ -90,7 +91,7 @@ public class EventService : IEventService
             Cost = newEvent.Cost,
             Attractions = new List<EventAttraction>()
         };
-        
+
         if (newEvent.AttractionIds != null)
         {
             foreach (var attractionId in newEvent.AttractionIds)
@@ -99,9 +100,15 @@ public class EventService : IEventService
                 eventEntity.AddAttraction(attraction);
             }
         }
-        
+
         await _eventRepository.Create(eventEntity);
-        
+
         return eventEntity.Id;
+    }
+
+    public async Task DeleteEvent(Guid eventId)
+    {
+        Event eventEntity = await _eventRepository.GetById(eventId);
+        await _eventRepository.Delete(eventEntity);
     }
 }
