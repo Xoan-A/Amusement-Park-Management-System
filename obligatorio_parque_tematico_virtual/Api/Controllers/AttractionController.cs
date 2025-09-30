@@ -1,5 +1,4 @@
-﻿using Domain;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
 using Microsoft.AspNetCore.Authorization;
 using Models.In;
