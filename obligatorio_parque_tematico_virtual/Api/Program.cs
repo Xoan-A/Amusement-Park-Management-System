@@ -1,12 +1,7 @@
-using IBusinessLogic;
-using BusinessLogic;
-using IDataAccess;
-using DataAccess.Repositories;
-using DataAccess.Context;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ApiServiceFactory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,24 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Register business logic services
-builder.Services.AddSingleton<IDateTimeLogic>(provider => DateTimeLogic.Instance);
-builder.Services.AddSingleton<IPasswordService, PasswordService>();
-builder.Services.AddSingleton<ITokenService, TokenService>();
-builder.Services.AddScoped<IAuthLogic, AuthLogic>();
-builder.Services.AddScoped<IUserLogic, UserLogic>();
-builder.Services.AddScoped<ITicketLogic, TicketLogic>();
-builder.Services.AddScoped<IAttractionService, AttractionService>();
-builder.Services.AddScoped<IAttractionServiceEntity, AttractionService>();
-builder.Services.AddScoped<IEventService, EventService>();
-
-// Register data access services
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseInMemoryDatabase("TestDb"));
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ITicketRepository, TicketRepository>();
-builder.Services.AddScoped<IAttractionRepository, AttractionRepository>();
-builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddServices();
 
 // Configuración de autenticación JWT
 var jwtSecretKey = "MySecretKeyForJWTTokenGeneration1234567890";

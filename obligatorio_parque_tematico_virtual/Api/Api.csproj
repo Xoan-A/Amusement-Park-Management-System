@@ -15,6 +15,7 @@
 
 
     <ItemGroup>
+      <ProjectReference Include="..\ApiServiceFactory\ApiServiceFactory.csproj" />
       <ProjectReference Include="..\Models\Models.csproj" />
       <ProjectReference Include="..\IBusinessLogic\IBusinessLogic.csproj" />
       <ProjectReference Include="..\BusinessLogic\BusinessLogic.csproj" />
