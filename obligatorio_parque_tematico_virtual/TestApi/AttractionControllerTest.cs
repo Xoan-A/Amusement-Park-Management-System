@@ -347,4 +347,56 @@ public class AttractionControllerTest
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockUserLogic.Verify(s => s.RegisterEntry(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>()), Times.Never);
     }
+
+    [TestMethod]
+    public async Task RegisterExit_ValidRequest_ReturnsSuccessMessage()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+        DateTime exitDate = new DateTime(2025, 10, 1, 12, 0, 0);
+
+        _mockUserLogic.Setup(s => s.RegisterExit(userId, attractionId, exitDate))
+            .Returns(Task.CompletedTask);
+
+        RegisterExitRequest requestBody = new RegisterExitRequest
+        {
+            exitDate = exitDate,
+            userId = userId
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        var response = await _adminClient.PutAsync($"/api/attractions/registerExit/{attractionId}", content);
+
+        response.EnsureSuccessStatusCode();
+        var responseContent = await response.Content.ReadAsStringAsync();
+        MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+        Assert.IsNotNull(messageResponse);
+        Assert.AreEqual("Exit registered successfully", messageResponse.Message);
+        _mockUserLogic.Verify(s => s.RegisterExit(userId, attractionId, exitDate), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task RegisterExit_InvalidAuthentication_ReturnsUnauthorized()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+        DateTime exitDate = new DateTime(2025, 10, 1, 12, 0, 0);
+
+        RegisterExitRequest requestBody = new RegisterExitRequest
+        {
+            exitDate = exitDate,
+            userId = userId
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"/api/attractions/registerExit/{attractionId}", content);
+
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+        _mockUserLogic.Verify(s => s.RegisterExit(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>()), Times.Never);
+    }
 }
