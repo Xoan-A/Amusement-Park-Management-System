@@ -98,4 +98,17 @@ public class AttractionController : ControllerBase
         };
         return Ok(response);
     }
+
+    [HttpPut("registerExit/{id}")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> RegisterExit(Guid id, [FromBody] RegisterExitRequest registerExitRequest)
+    {
+        await _userService.RegisterExit(registerExitRequest.userId, id, registerExitRequest.exitDate);
+        
+        MessageResponse response = new MessageResponse
+        {
+            Message = "Exit registered successfully"
+        };
+        return Ok(response);
+    }
 }
