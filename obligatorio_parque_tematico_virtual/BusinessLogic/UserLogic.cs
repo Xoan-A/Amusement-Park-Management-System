@@ -63,5 +63,18 @@ namespace BusinessLogic
           
             user.RegisterEntry(attraction, enterDate);
         }
+
+        public async Task RegisterExit(Guid userId, Guid attractionId, DateTime exitDate)
+        {
+            User user = _userRepository.GetById(userId);
+            if (user == null)
+                throw new ArgumentException("User not found.");
+
+            Attraction attraction = await _attractionRepository.GetById(attractionId);
+            if (attraction == null)
+                throw new ArgumentException("Attraction not found.");
+
+            user.RegisterExit(attraction, exitDate);
+        }
     }
 }
