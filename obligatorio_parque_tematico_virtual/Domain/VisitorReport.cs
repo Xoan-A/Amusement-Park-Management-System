@@ -13,5 +13,10 @@ namespace Domain
             Reports = new List<Report>();
             Reports.Add(report);
         }
+
+        public void AddReport(Report report)
+        {
+            Reports.Add(report);
+        }
     }
 }
