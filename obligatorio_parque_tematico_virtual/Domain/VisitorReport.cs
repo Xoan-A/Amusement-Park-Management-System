@@ -2,14 +2,16 @@ using System;
 
 namespace Domain
 {
-    public class Visitor : User
+    public class VisitorReport
     {
-        public DateTime BirthDate { get; set; }
-        public MembershipLevel MembershipLevel { get; set; }
-
-        public Visitor()
+        public DateTime Date { get; set; }
+        public List<Report> Reports { get; set; }
+        
+        public VisitorReport(DateTime date, Report report)
         {
-            MembershipLevel = MembershipLevel.Standard;
+            Date = date;
+            Reports = new List<Report>();
+            Reports.Add(report);
         }
     }
 }
