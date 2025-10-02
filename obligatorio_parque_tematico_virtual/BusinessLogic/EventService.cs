@@ -8,8 +8,13 @@ namespace BusinessLogic;
 
 public class EventService : IEventService
 {
-    IEventRepository _eventRepository;
-    IAttractionServiceEntity _attractionService;
+    private IEventRepository _eventRepository;
+    private IAttractionServiceEntity _attractionService;
+    private const int MinCapacityLimit = 1;
+    private const int MaxCapacityLimit = 10000;
+    private const int MinHour = 0;
+    private const int MaxHour = 23;
+    private const int MinCost = 1;
 
     public EventService(IEventRepository eventRepository, IAttractionServiceEntity attractionService)
     {
@@ -20,7 +25,10 @@ public class EventService : IEventService
     public async Task<EventResponse> GetEventById(Guid expectedEventId)
     {
         Event eventEntity = await _eventRepository.GetById(expectedEventId);
-
+        if (eventEntity == null)
+        {
+            throw new KeyNotFoundException($"No se encontró el evento con id {expectedEventId}");
+        }
         var eventResponse = new EventResponse
         {
             Id = eventEntity.Id,
@@ -44,14 +52,12 @@ public class EventService : IEventService
                 })
                 .ToList()
         };
-
         return eventResponse;
     }
 
     public async Task<List<EventResponse>> GetAllEvents()
     {
         var events = await _eventRepository.GetAll();
-
         var eventResponses = events.Select(eventEntity => new EventResponse
         {
             Id = eventEntity.Id,
@@ -75,12 +81,12 @@ public class EventService : IEventService
                 })
                 .ToList()
         }).ToList();
-
         return eventResponses;
     }
 
     public async Task<Guid> CreateEvent(EventRequest newEvent)
     {
+        await ValidateEventRequest(newEvent);
         Event eventEntity = new Event()
         {
             Name = newEvent.Name,
@@ -91,7 +97,6 @@ public class EventService : IEventService
             Cost = newEvent.Cost,
             Attractions = new List<EventAttraction>()
         };
-
         if (newEvent.AttractionIds != null)
         {
             foreach (var attractionId in newEvent.AttractionIds)
@@ -100,15 +105,39 @@ public class EventService : IEventService
                 eventEntity.AddAttraction(attraction);
             }
         }
-
         await _eventRepository.Create(eventEntity);
-
         return eventEntity.Id;
     }
 
     public async Task DeleteEvent(Guid eventId)
     {
         Event eventEntity = await _eventRepository.GetById(eventId);
+        if (eventEntity == null)
+        {
+            throw new KeyNotFoundException($"No se encontró el evento con id {eventId}");
+        }
         await _eventRepository.Delete(eventEntity);
+    }
+
+    private async Task ValidateEventRequest(EventRequest newEvent)
+    {
+        if (string.IsNullOrWhiteSpace(newEvent.Name))
+            throw new ArgumentException("El nombre del evento no puede estar vacío.");
+        if (!await IsEventNameUnique(newEvent.Name))
+            throw new ArgumentException("El nombre del evento ya existe.");
+        if (newEvent.Date <= DateTime.Now)
+            throw new ArgumentException("La fecha del evento debe ser futura.");
+        if (newEvent.Hour < MinHour || newEvent.Hour > MaxHour)
+            throw new ArgumentException("La hora debe estar entre 0 y 23.");
+        if (newEvent.MaxCapacity <= MinCapacityLimit || newEvent.MaxCapacity > MaxCapacityLimit)
+            throw new ArgumentException($"La capacidad máxima debe ser mayor a 0 y menor o igual a {MaxCapacityLimit}.");
+        if (newEvent.Cost <= MinCost)
+            throw new ArgumentException("El coste debe ser mayor a 0.");
+    }
+
+    private async Task<bool> IsEventNameUnique(string name)
+    {
+        var events = await _eventRepository.GetAll() ?? new List<Event>();
+        return !events.Any(e => e.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 }
