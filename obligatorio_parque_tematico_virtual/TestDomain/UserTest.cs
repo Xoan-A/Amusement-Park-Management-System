@@ -203,7 +203,7 @@ namespace TestDomain
             };
             visitor.RegisterEntry(attraction, enterDate);
 
-            visitor.RegisterExit(enterDate, exitDate);
+            visitor.RegisterExit(attraction, exitDate);
 
             Assert.AreEqual(exitDate, visitor.VisitorReports[0].Reports[0].ExitDate);
         }
@@ -212,7 +212,11 @@ namespace TestDomain
         [ExpectedException(typeof(ArgumentException))]
         public void RegisterExit_ShouldThrowExceptionWhenNoVisitorReportExists()
         {
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+            Attraction attraction = new Attraction
+            {
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster
+            };
             DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
             Visitor visitor = new Visitor
             {
@@ -220,17 +224,17 @@ namespace TestDomain
                 LastName = "Doe",
                 VisitorReports = new List<VisitorReport>()
             };
-
-            visitor.RegisterExit(enterDate, exitDate);
+            
+            visitor.RegisterExit(attraction, exitDate);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void RegisterExit_ShouldThrowExceptionWhenNoReportWithEnterDateExists()
+        public void RegisterExit_ShouldThrowExceptionWhenNoReportWithNoExitDateExists()
         {
-            DateTime enterDate1 = new DateTime(2025, 10, 1, 10, 0, 0);
-            DateTime enterDate2 = new DateTime(2025, 10, 1, 14, 0, 0);
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
             DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
+            DateTime exitDate2 = new DateTime(2025, 10, 1, 15, 30, 0);
             Attraction attraction = new Attraction
             {
                 Name = "Roller Coaster",
@@ -242,9 +246,10 @@ namespace TestDomain
                 LastName = "Doe",
                 VisitorReports = new List<VisitorReport>()
             };
-            visitor.RegisterEntry(attraction, enterDate1);
+            visitor.RegisterEntry(attraction, enterDate);
 
-            visitor.RegisterExit(enterDate2, exitDate);
+            visitor.RegisterExit(attraction, exitDate);
+            visitor.RegisterExit(attraction, exitDate2);
         }
     }
 }
