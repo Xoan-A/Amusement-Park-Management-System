@@ -185,6 +185,66 @@ namespace TestDomain
             Assert.AreEqual(enterDate2.Date, visitor.VisitorReports[1].Date.Date);
         }
 
-        
+        [TestMethod]
+        public void RegisterExit_ShouldSetExitTimeForReport()
+        {
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
+            Attraction attraction = new Attraction
+            {
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster
+            };
+            Visitor visitor = new Visitor
+            {
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+            visitor.RegisterEntry(attraction, enterDate);
+
+            visitor.RegisterExit(enterDate, exitDate);
+
+            Assert.AreEqual(exitDate, visitor.VisitorReports[0].Reports[0].ExitDate);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void RegisterExit_ShouldThrowExceptionWhenNoVisitorReportExists()
+        {
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
+            Visitor visitor = new Visitor
+            {
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+
+            visitor.RegisterExit(enterDate, exitDate);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void RegisterExit_ShouldThrowExceptionWhenNoReportWithEnterDateExists()
+        {
+            DateTime enterDate1 = new DateTime(2025, 10, 1, 10, 0, 0);
+            DateTime enterDate2 = new DateTime(2025, 10, 1, 14, 0, 0);
+            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
+            Attraction attraction = new Attraction
+            {
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster
+            };
+            Visitor visitor = new Visitor
+            {
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+            visitor.RegisterEntry(attraction, enterDate1);
+
+            visitor.RegisterExit(enterDate2, exitDate);
+        }
     }
 }
