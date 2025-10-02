@@ -20,4 +20,9 @@ public class Report
         
         ExitDate = date;
     }
+    
+    public void AddAttraction(Attraction attraction)
+    {
+        Attractions.Add(attraction);
+    }
 }
