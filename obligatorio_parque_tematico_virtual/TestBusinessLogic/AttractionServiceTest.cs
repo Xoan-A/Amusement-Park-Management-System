@@ -89,7 +89,9 @@ public class AttractionServiceTest
             IsActive = true
         };
 
-        _attractionService.CreateAttraction(newAttraction);
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(newAttraction.Name)).ReturnsAsync(true);
+        
+        await _attractionService.CreateAttraction(newAttraction);
 
         _mockAttractionRepository.Verify(r => r.Create(
             It.Is<Attraction>(a =>
@@ -130,8 +132,9 @@ public class AttractionServiceTest
 
         _mockAttractionRepository.Setup(r => r.GetById(existingAttraction.Id))
             .ReturnsAsync(existingAttraction);
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(attractionRequest.Name)).ReturnsAsync(true);
 
-        _attractionService.UpdateAttraction(existingAttraction.Id, attractionRequest);
+        await _attractionService.UpdateAttraction(existingAttraction.Id, attractionRequest);
 
         _mockAttractionRepository.Verify(r => r.Update(
             It.Is<Attraction>(a =>
@@ -181,5 +184,242 @@ public class AttractionServiceTest
         Assert.IsNotNull(result);
         Assert.AreEqual(expectedAttraction.Name, result.Name);
         _mockAttractionRepository.Verify(r => r.GetById(expectedAttraction.Id), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task CreateAttraction_ShouldThrowException_WhenNameIsInvalid()
+    {
+        AttractionRequest invalidRequest = new AttractionRequest
+        {
+            Name = "",
+            Description = "desc",
+            Type = AttractionType.RollerCoaster.ToString(),
+            MinAge = 10,
+            MaxCapacity = 10,
+            IsActive = true
+        };
+        
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.CreateAttraction(invalidRequest));
+    }
+
+    [TestMethod]
+    public async Task CreateAttraction_ShouldThrowException_WhenNameIsNotUnique()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "Duplicado",
+            Description = "desc",
+            Type = AttractionType.RollerCoaster.ToString(),
+            MinAge = 10,
+            MaxCapacity = 10,
+            IsActive = true
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(false);
+        
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.CreateAttraction(request));
+    }
+
+    [TestMethod]
+    public async Task CreateAttraction_ShouldThrowException_WhenDescriptionIsInvalid()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "ValidName",
+            Description = "", 
+            Type = AttractionType.RollerCoaster.ToString(),
+            MinAge = 10,
+            MaxCapacity = 10,
+            IsActive = true
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
+        
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.CreateAttraction(request));
+    }
+
+    [TestMethod]
+    public async Task CreateAttraction_ShouldThrowException_WhenMinAgeIsInvalid()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "ValidName",
+            Description = "desc",
+            Type = AttractionType.RollerCoaster.ToString(),
+            MinAge = -1,
+            MaxCapacity = 10,
+            IsActive = true
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
+        
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.CreateAttraction(request));
+    }
+
+    [TestMethod]
+    public async Task CreateAttraction_ShouldThrowException_WhenMaxCapacityIsInvalid()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "ValidName",
+            Description = "desc",
+            Type = AttractionType.RollerCoaster.ToString(),
+            MinAge = 10,
+            MaxCapacity = 0,
+            IsActive = true
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
+        
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.CreateAttraction(request));
+    }
+
+    [TestMethod]
+    public async Task CreateAttraction_ShouldThrowException_WhenTypeIsInvalid()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "ValidName",
+            Description = "desc",
+            Type = "TipoInvalido",
+            MinAge = 10,
+            MaxCapacity = 10,
+            IsActive = true
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
+        
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.CreateAttraction(request));
+    }
+
+    [TestMethod]
+    public async Task UpdateAttraction_ShouldThrowException_WhenNameIsInvalid()
+    {
+        AttractionRequest invalidRequest = new AttractionRequest
+        {
+            Name = "",
+            Description = "desc",
+            Type = AttractionType.RollerCoaster.ToString(),
+            MinAge = 10,
+            MaxCapacity = 10,
+            IsActive = true,
+            CurrentCapacity = 0
+        };
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(Guid.NewGuid(), invalidRequest));
+    }
+
+    [TestMethod]
+    public async Task UpdateAttraction_ShouldThrowException_WhenNameIsNotUnique()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "Duplicado",
+            Description = "desc",
+            Type = AttractionType.RollerCoaster.ToString(),
+            MinAge = 10,
+            MaxCapacity = 10,
+            IsActive = true,
+            CurrentCapacity = 0
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(false);
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(Guid.NewGuid(), request));
+    }
+
+    [TestMethod]
+    public async Task UpdateAttraction_ShouldThrowException_WhenDescriptionIsInvalid()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "ValidName",
+            Description = "",
+            Type = AttractionType.RollerCoaster.ToString(),
+            MinAge = 10,
+            MaxCapacity = 10,
+            IsActive = true,
+            CurrentCapacity = 0
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
+        
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(Guid.NewGuid(), request));
+    }
+
+    [TestMethod]
+    public async Task UpdateAttraction_ShouldThrowException_WhenMinAgeIsInvalid()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "ValidName",
+            Description = "desc",
+            Type = AttractionType.RollerCoaster.ToString(),
+            MinAge = -1,
+            MaxCapacity = 10,
+            IsActive = true,
+            CurrentCapacity = 0
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
+        
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(Guid.NewGuid(), request));
+    }
+
+    [TestMethod]
+    public async Task UpdateAttraction_ShouldThrowException_WhenMaxCapacityIsInvalid()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "ValidName",
+            Description = "desc",
+            Type = AttractionType.RollerCoaster.ToString(),
+            MinAge = 10,
+            MaxCapacity = 0,
+            IsActive = true,
+            CurrentCapacity = 0
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
+        
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(Guid.NewGuid(), request));
+    }
+
+    [TestMethod]
+    public async Task UpdateAttraction_ShouldThrowException_WhenCurrentCapacityIsInvalid()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "ValidName",
+            Description = "desc",
+            Type = AttractionType.RollerCoaster.ToString(),
+            MinAge = 10,
+            MaxCapacity = 10,
+            IsActive = true,
+            CurrentCapacity = 20
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
+        Attraction attraction = new Attraction { Id = Guid.NewGuid(), CurrentCapacity = 0 };
+        _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
+        
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(attraction.Id, request));
+    }
+
+    [TestMethod]
+    public async Task UpdateAttraction_ShouldThrowException_WhenTypeIsInvalid()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "ValidName",
+            Description = "desc",
+            Type = "TipoInvalido",
+            MinAge = 10,
+            MaxCapacity = 10,
+            IsActive = true,
+            CurrentCapacity = 0
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
+        Attraction attraction = new Attraction { Id = Guid.NewGuid(), CurrentCapacity = 0 };
+        _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
+        
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(attraction.Id, request));
+    }
+
+    [TestMethod]
+    public async Task GetAttractionById_ShouldThrowException_WhenIdDoesNotExist()
+    {
+        Guid newId = Guid.NewGuid();
+        _mockAttractionRepository.Setup(r => r.GetById(newId)).ReturnsAsync((Attraction)null);
+        
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () => await _attractionService.GetAttractionById(newId));
     }
 }
