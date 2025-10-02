@@ -3,14 +3,13 @@ namespace Domain;
 public class Report
 {
     public DateTime EnterDate { get; set; }
-    public DateTime ExitDate { get; set; }
-    public List<Attraction> Attractions { get; set; }
+    public DateTime? ExitDate { get; set; }
+    public Attraction Attraction { get; set; }
     
     public Report(DateTime enterDate, Attraction attraction)
     {
         EnterDate = enterDate;
-        Attractions = new List<Attraction>();
-        Attractions.Add(attraction);
+        Attraction = attraction;
     }
 
     public void SetExitTime(DateTime date)
@@ -19,10 +18,5 @@ public class Report
             throw new ArgumentException("Enter date must be greater than or equal to EnterDate");
         
         ExitDate = date;
-    }
-    
-    public void AddAttraction(Attraction attraction)
-    {
-        Attractions.Add(attraction);
     }
 }
