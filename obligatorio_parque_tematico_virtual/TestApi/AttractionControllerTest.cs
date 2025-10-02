@@ -19,15 +19,21 @@ public class AttractionControllerTest
     private HttpClient _client = null!;
     private HttpClient _adminClient = null!;
     private Mock<IAttractionService> _mockAttractionService = null!;
+    private Mock<IUserLogic> _mockUserLogic = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _mockAttractionService = new Mock<IAttractionService>();
+        _mockUserLogic = new Mock<IUserLogic>();
 
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
-            builder.ConfigureServices(services => { services.AddSingleton(_mockAttractionService.Object); });
+            builder.ConfigureServices(services =>
+            {
+                services.AddSingleton(_mockAttractionService.Object);
+                services.AddSingleton(_mockUserLogic.Object);
+            });
         });
 
         _client = _factory.CreateClient();
@@ -288,5 +294,57 @@ public class AttractionControllerTest
         var response = await _client.DeleteAsync($"/api/attractions/{id}");
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.DeleteAttraction(id), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task RegisterEntry_ValidRequest_ReturnsSuccessMessage()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate))
+            .Returns(Task.CompletedTask);
+
+        RegisterEntryRequest requestBody = new RegisterEntryRequest
+        {
+            EnterDate = enterDate,
+            UserId = userId
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        var response = await _adminClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+
+        response.EnsureSuccessStatusCode();
+        var responseContent = await response.Content.ReadAsStringAsync();
+        MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+        Assert.IsNotNull(messageResponse);
+        Assert.AreEqual("Entry registered successfully", messageResponse.Message);
+        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task RegisterEntry_InvalidAuthentication_ReturnsUnauthorized()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+        RegisterEntryRequest requestBody = new RegisterEntryRequest
+        {
+            EnterDate = enterDate,
+            UserId = userId
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+        _mockUserLogic.Verify(s => s.RegisterEntry(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>()), Times.Never);
     }
 }
