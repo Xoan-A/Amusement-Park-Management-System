@@ -15,6 +15,9 @@ public class Report
 
     public void SetExitTime(DateTime date)
     {
+        if (date < EnterDate)
+            throw new ArgumentException("Enter date must be greater than or equal to EnterDate");
+        
         ExitDate = date;
     }
 }

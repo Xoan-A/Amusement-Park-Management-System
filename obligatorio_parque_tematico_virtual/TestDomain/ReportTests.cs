@@ -39,4 +39,26 @@ public class ReportTests
 
         Assert.AreEqual(exitDate, report.ExitDate);
     }
+
+    [TestMethod]
+    public void Report_ExitDate_ShouldBeDefaultBeforeSet()
+    {
+        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+        Attraction attraction = new Attraction { Name = "Test Attraction" };
+        Report report = new Report(enterDate, attraction);
+
+        Assert.AreEqual(default(DateTime), report.ExitDate);
+    }
+    
+    [TestMethod]
+    [ExpectedException(typeof(ArgumentException))]
+    public void Report_ExitDate_CanNotBeSetBeforeStartDate()
+    {
+        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+        DateTime exitDate = new DateTime(2025, 10, 1, 9, 30, 0);
+        Attraction attraction = new Attraction { Name = "Test Attraction" };
+        Report report = new Report(enterDate, attraction);
+
+        report.SetExitTime(exitDate);
+    }
 }
