@@ -295,5 +295,74 @@ namespace TestBusinessLogic
 
             await _userLogic.RegisterEntry(userId, attractionId, enterDate);
         }
+
+        [TestMethod]
+        public async Task RegisterExit_ShouldSetExitTimeForReport()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster
+            };
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+            visitor.RegisterEntry(attraction, enterDate);
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+
+            await _userLogic.RegisterExit(userId, attractionId, exitDate);
+
+            Assert.AreEqual(exitDate, visitor.VisitorReports[0].Reports[0].ExitDate);
+            _mockUserRepository.Verify(r => r.GetById(userId), Times.Once);
+            _mockAttractionRepository.Verify(r => r.GetById(attractionId), Times.Once);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterExit_ShouldThrowExceptionWhenUserNotFound()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns((User)null);
+
+            await _userLogic.RegisterExit(userId, attractionId, exitDate);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterExit_ShouldThrowExceptionWhenAttractionNotFound()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync((Attraction)null);
+
+            await _userLogic.RegisterExit(userId, attractionId, exitDate);
+        }
     }
 }
