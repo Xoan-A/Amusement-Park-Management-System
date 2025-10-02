@@ -12,4 +12,9 @@ public class Report
         Attractions = new List<Attraction>();
         Attractions.Add(attraction);
     }
+
+    public void SetExitTime(DateTime date)
+    {
+        ExitDate = date;
+    }
 }
