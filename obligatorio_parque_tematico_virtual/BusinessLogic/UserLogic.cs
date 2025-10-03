@@ -81,6 +81,9 @@ namespace BusinessLogic
                 throw new ArgumentException("Attraction not found.");
 
             user.RegisterExit(attraction, exitDate);
+
+            if (attraction.CurrentCapacity > 0)
+                attraction.CurrentCapacity--;
         }
     }
 }
