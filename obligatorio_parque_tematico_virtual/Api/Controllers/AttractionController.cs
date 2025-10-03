@@ -111,4 +111,12 @@ public class AttractionController : ControllerBase
         };
         return Ok(response);
     }
+
+    [HttpGet("capacity/{id}")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> GetCapacity(Guid id)
+    {
+        CapacityResponse capacity = await _attractionService.GetCapacity(id);
+        return Ok(capacity);
+    }
 }
