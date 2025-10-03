@@ -399,4 +399,41 @@ public class AttractionControllerTest
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockUserLogic.Verify(s => s.RegisterExit(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>()), Times.Never);
     }
+
+    [TestMethod]
+    public async Task GetCapacity_ValidRequest_ReturnsCapacityResponse()
+    {
+        Guid attractionId = Guid.NewGuid();
+        CapacityResponse expectedCapacity = new CapacityResponse
+        {
+            Id = attractionId,
+            Capacity = 100,
+            CurrentCapacity = 45
+        };
+
+        _mockAttractionService.Setup(s => s.GetCapacity(attractionId)).ReturnsAsync(expectedCapacity);
+
+        var response = await _adminClient.GetAsync($"/api/attractions/capacity/{attractionId}");
+        response.EnsureSuccessStatusCode();
+        var content = await response.Content.ReadAsStringAsync();
+        var capacityResponse = JsonSerializer.Deserialize<CapacityResponse>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        Assert.IsNotNull(capacityResponse);
+        Assert.AreEqual(attractionId, capacityResponse.Id);
+        Assert.AreEqual(100, capacityResponse.Capacity);
+        Assert.AreEqual(45, capacityResponse.CurrentCapacity);
+        _mockAttractionService.Verify(s => s.GetCapacity(attractionId), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task GetCapacity_InvalidAuthentication_ReturnsUnauthorized()
+    {
+        Guid attractionId = Guid.NewGuid();
+        var response = await _client.GetAsync($"/api/attractions/capacity/{attractionId}");
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+        _mockAttractionService.Verify(s => s.GetCapacity(It.IsAny<Guid>()), Times.Never);
+    }
 }
