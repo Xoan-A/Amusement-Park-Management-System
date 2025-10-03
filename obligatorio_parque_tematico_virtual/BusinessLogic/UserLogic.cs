@@ -60,8 +60,14 @@ namespace BusinessLogic
             Attraction attraction = await _attractionRepository.GetById(attractionId);
             if (attraction == null)
                 throw new ArgumentException("Attraction not found.");
-          
-            user.RegisterEntry(attraction, enterDate);
+
+            if (attraction.CurrentCapacity < attraction.MaxCapacity)
+            {
+                user.RegisterEntry(attraction, enterDate);
+                attraction.CurrentCapacity++;
+            }
+            else
+                throw new ArgumentException("Attraction is at full capacity.");
         }
 
         public async Task RegisterExit(Guid userId, Guid attractionId, DateTime exitDate)
