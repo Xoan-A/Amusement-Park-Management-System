@@ -297,6 +297,102 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
+        public async Task RegisterEntry_ShouldIncreaseCurrentCapacity()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 5
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+
+            Assert.AreEqual(6, attraction.CurrentCapacity);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterEntry_ShouldThrowExceptionWhenAttractionIsAtFullCapacity()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 10
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+        }
+
+        [TestMethod]
+        public async Task RegisterEntry_ShouldAllowEntryWhenCurrentCapacityIsJustBelowMax()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 9
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+
+            Assert.AreEqual(10, attraction.CurrentCapacity);
+            Assert.AreEqual(1, visitor.VisitorReports.Count);
+        }
+
+        [TestMethod]
         public async Task RegisterExit_ShouldSetExitTimeForReport()
         {
             Guid userId = Guid.NewGuid();
