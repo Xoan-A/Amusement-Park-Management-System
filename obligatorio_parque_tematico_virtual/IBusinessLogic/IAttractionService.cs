@@ -11,4 +11,5 @@ public interface IAttractionService
     Task<Guid> CreateAttraction(AttractionRequest newAttraction);
     Task UpdateAttraction(Guid id, AttractionRequest existingAttraction);
     Task DeleteAttraction(Guid id);
+    Task<CapacityResponse> GetCapacity(Guid id);
 }
