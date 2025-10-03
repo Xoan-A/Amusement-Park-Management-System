@@ -13,12 +13,7 @@ namespace ApiTests;
 public class ExceptionFilterTest
 {
     private ExceptionContext _context;
-    private ExceptionFilter _attribute;
-
-    public ExceptionFilterTest()
-    {
-        _attribute = new ExceptionFilter();
-    }
+    private ExceptionFilter _attribute = new ExceptionFilter();
 
     [TestInitialize]
     public void Initialize()
@@ -60,6 +55,30 @@ public class ExceptionFilterTest
         Assert.AreEqual("Not implemented", GetMessage(concreteResponse.Value));
     }
 
+    [TestMethod]
+    public void OnException_WhenExceptionIsKeyNotFound_ShouldResponseNotFound()
+    {
+        _context.Exception = new KeyNotFoundException("No se encontró la atracción");
+        _attribute.OnException(_context);
+
+        var response = _context.Result as ObjectResult;
+        Assert.AreEqual((int)HttpStatusCode.NotFound, response.StatusCode);
+        Assert.AreEqual("404", response.StatusCode.ToString());
+        Assert.AreEqual("No se encontró la atracción", GetMessage(response.Value));
+    }
+
+    [TestMethod]
+    public void OnException_WhenExceptionIsArgument_ShouldResponseBadRequest()
+    {
+        _context.Exception = new ArgumentException("Datos inválidos");
+        _attribute.OnException(_context);
+
+        var response = _context.Result as ObjectResult;
+        Assert.AreEqual((int)HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.AreEqual("400", response.StatusCode.ToString());
+        Assert.AreEqual("Datos inválidos", GetMessage(response.Value));
+    }
+
     private string GetMessage(object value) =>
-        value.GetType().GetProperty("Message").GetValue(value).ToString();
+        value?.GetType().GetProperty("Message")?.GetValue(value)?.ToString() ?? string.Empty;
 }
