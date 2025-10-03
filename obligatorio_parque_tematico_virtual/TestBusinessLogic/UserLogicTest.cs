@@ -205,7 +205,9 @@ namespace TestBusinessLogic
             {
                 Id = attractionId,
                 Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
             };
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
@@ -240,14 +242,18 @@ namespace TestBusinessLogic
             {
                 Id = attractionId1,
                 Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
             };
 
             Attraction attraction2 = new Attraction
             {
                 Id = attractionId2,
                 Name = "Simulator",
-                Type = AttractionType.Simulator
+                Type = AttractionType.Simulator,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
             };
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
@@ -404,7 +410,9 @@ namespace TestBusinessLogic
             {
                 Id = attractionId,
                 Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
             };
 
             Visitor visitor = new Visitor
@@ -414,16 +422,16 @@ namespace TestBusinessLogic
                 LastName = "Doe",
                 VisitorReports = new List<VisitorReport>()
             };
-            visitor.RegisterEntry(attraction, enterDate);
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
 
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
             await _userLogic.RegisterExit(userId, attractionId, exitDate);
-
+            
             Assert.AreEqual(exitDate, visitor.VisitorReports[0].Reports[0].ExitDate);
-            _mockUserRepository.Verify(r => r.GetById(userId), Times.Once);
-            _mockAttractionRepository.Verify(r => r.GetById(attractionId), Times.Once);
+            _mockUserRepository.Verify(r => r.GetById(userId), Times.Exactly(2));
+            _mockAttractionRepository.Verify(r => r.GetById(attractionId), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -459,6 +467,108 @@ namespace TestBusinessLogic
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync((Attraction)null);
 
             await _userLogic.RegisterExit(userId, attractionId, exitDate);
+        }
+
+        [TestMethod]
+        public async Task RegisterExit_ShouldDecreaseCurrentCapacity()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 5
+            };
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterExit(userId, attractionId, exitDate);
+
+            Assert.AreEqual(5, attraction.CurrentCapacity);
+        }
+
+        [TestMethod]
+        public async Task RegisterExit_ShouldDecreaseCurrentCapacityToZero()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
+            };
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterExit(userId, attractionId, exitDate);
+
+            Assert.AreEqual(0, attraction.CurrentCapacity);
+        }
+
+        [TestMethod]
+        public async Task RegisterExit_ShouldDecreaseCurrentCapacityFromMaxCapacity()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 9
+            };
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterExit(userId, attractionId, exitDate);
+
+            Assert.AreEqual(9, attraction.CurrentCapacity);
         }
     }
 }
