@@ -182,4 +182,28 @@ public class AttractionServiceTest
         Assert.AreEqual(expectedAttraction.Name, result.Name);
         _mockAttractionRepository.Verify(r => r.GetById(expectedAttraction.Id), Times.Once);
     }
+
+    [TestMethod]
+    public async Task GetCapacity_ShouldReturnCapacityResponse_WhenIdIsValid()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Attraction expectedAttraction = new Attraction
+        {
+            Id = attractionId,
+            Name = "Carousel",
+            Description = "A classic merry-go-round",
+            Type = AttractionType.RollerCoaster,
+            MinAge = 3,
+            MaxCapacity = 50,
+            CurrentCapacity = 20,
+            IsActive = true
+        };
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(expectedAttraction);
+        CapacityResponse result = await _attractionService.GetCapacity(attractionId);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(attractionId, result.Id);
+        Assert.AreEqual(50, result.Capacity);
+        Assert.AreEqual(20, result.CurrentCapacity);
+        _mockAttractionRepository.Verify(r => r.GetById(attractionId), Times.Once);
+    }
 }
