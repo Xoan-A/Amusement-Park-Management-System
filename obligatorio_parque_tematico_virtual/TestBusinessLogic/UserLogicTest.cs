@@ -22,7 +22,8 @@ namespace TestBusinessLogic
             _mockUserRepository = new Mock<IUserRepository>();
             _mockPasswordService = new Mock<IPasswordService>();
             _mockAttractionRepository = new Mock<IAttractionRepository>();
-            _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object, _mockAttractionRepository.Object);
+            _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
+                _mockAttractionRepository.Object);
         }
 
         [TestMethod]
@@ -177,7 +178,8 @@ namespace TestBusinessLogic
                 MembershipLevel = MembershipLevel.Standard
             };
 
-            _mockUserRepository.Setup(r => r.Create(It.Is<Visitor>(v => v.Password == hashedPassword))).Returns(createdVisitor);
+            _mockUserRepository.Setup(r => r.Create(It.Is<Visitor>(v => v.Password == hashedPassword)))
+                .Returns(createdVisitor);
 
             Visitor result = _userLogic.RegisterVisitor(name, lastName, email, plainPassword, birthDate);
 
@@ -428,7 +430,7 @@ namespace TestBusinessLogic
 
             await _userLogic.RegisterEntry(userId, attractionId, enterDate);
             await _userLogic.RegisterExit(userId, attractionId, exitDate);
-            
+
             Assert.AreEqual(exitDate, visitor.VisitorReports[0].Reports[0].ExitDate);
             _mockUserRepository.Verify(r => r.GetById(userId), Times.Exactly(2));
             _mockAttractionRepository.Verify(r => r.GetById(attractionId), Times.Exactly(2));

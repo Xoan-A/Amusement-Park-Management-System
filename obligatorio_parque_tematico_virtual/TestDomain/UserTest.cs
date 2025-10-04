@@ -224,7 +224,7 @@ namespace TestDomain
                 LastName = "Doe",
                 VisitorReports = new List<VisitorReport>()
             };
-            
+
             visitor.RegisterExit(attraction, exitDate);
         }
 

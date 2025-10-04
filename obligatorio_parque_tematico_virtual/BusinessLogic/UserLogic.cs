@@ -11,7 +11,8 @@ namespace BusinessLogic
         private readonly IPasswordService _passwordService;
         private readonly IAttractionRepository _attractionRepository;
 
-        public UserLogic(IUserRepository userRepository, IPasswordService passwordService, IAttractionRepository attractionRepository)
+        public UserLogic(IUserRepository userRepository, IPasswordService passwordService,
+            IAttractionRepository attractionRepository)
         {
             _userRepository = userRepository;
             _passwordService = passwordService;
@@ -50,13 +51,13 @@ namespace BusinessLogic
 
             return _userRepository.Create(visitor) as Visitor;
         }
-        
+
         public async Task RegisterEntry(Guid userId, Guid attractionId, DateTime enterDate)
         {
             User user = _userRepository.GetById(userId);
             if (user == null)
                 throw new ArgumentException("User not found.");
-            
+
             Attraction attraction = await _attractionRepository.GetById(attractionId);
             if (attraction == null)
                 throw new ArgumentException("Attraction not found.");

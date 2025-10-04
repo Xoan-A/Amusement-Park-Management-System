@@ -29,16 +29,18 @@ namespace Domain
             else
                 visitorReport.AddReport(report);
         }
-        
+
         public void RegisterExit(Attraction attraction, DateTime exitDate)
         {
             VisitorReport visitorReport = VisitorReports.OrderByDescending(vr => vr.Date).FirstOrDefault();
             if (visitorReport == null)
                 throw new ArgumentException("There is no report for the given enter date.");
 
-            Report report = visitorReport.Reports.FirstOrDefault(r => r.ExitDate == null && r.Attraction.Id == attraction.Id);
+            Report report =
+                visitorReport.Reports.FirstOrDefault(r => r.ExitDate == null && r.Attraction.Id == attraction.Id);
             if (report == null)
-                throw new ArgumentException("There is no report available to set an ExitDate regarding that attraction.");
+                throw new ArgumentException(
+                    "There is no report available to set an ExitDate regarding that attraction.");
 
             report.SetExitTime(exitDate);
         }

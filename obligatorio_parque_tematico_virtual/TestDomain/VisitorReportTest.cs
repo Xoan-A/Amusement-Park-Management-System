@@ -24,7 +24,7 @@ public class VisitorReportTests
         Assert.AreEqual(1, visitorReport.Reports.Count);
         Assert.AreEqual(report, visitorReport.Reports[0]);
     }
-    
+
     [TestMethod]
     public void AddReport_ShouldAddReportToList()
     {
