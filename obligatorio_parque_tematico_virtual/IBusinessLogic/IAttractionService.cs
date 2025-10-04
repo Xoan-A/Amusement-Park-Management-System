@@ -11,4 +11,7 @@ public interface IAttractionService
     Task<Guid> CreateAttraction(AttractionRequest newAttraction);
     Task UpdateAttraction(Guid id, AttractionRequest existingAttraction);
     Task DeleteAttraction(Guid id);
+    Task AddIncident(Guid id, string incident);
+    Task RemoveIncident(Guid id, string incident);
+    Task<List<string>> GetAttractionIncidents(Guid id);
 }

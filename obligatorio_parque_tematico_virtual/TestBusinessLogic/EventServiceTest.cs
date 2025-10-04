@@ -66,7 +66,6 @@ public class EventServiceTest
             MinAge = 12,
             MaxCapacity = 20,
             CurrentCapacity = 5,
-            IsActive = true
         };
         baseEvent.AddAttraction(attraction1);
         _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
@@ -123,7 +122,6 @@ public class EventServiceTest
             MinAge = 10,
             MaxCapacity = 20,
             CurrentCapacity = 5,
-            IsActive = true
         };
 
         baseEvent.AddAttraction(attraction);
@@ -188,7 +186,8 @@ public class EventServiceTest
     {
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
         baseEventRequest.Name = String.Empty;
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _eventService.CreateEvent(baseEventRequest));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]

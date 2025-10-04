@@ -16,6 +16,7 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
     private readonly int _maxCapacityLimit = 1000;
     private readonly int _minCapacityLimit = 0;
     private readonly int _minCurrentCapacity = 0;
+    private readonly int _noIncidents = 0;
 
     public AttractionService(IAttractionRepository attractionRepository)
     {
@@ -70,7 +71,6 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
             MinAge = newAttraction.MinAge,
             MaxCapacity = newAttraction.MaxCapacity,
             CurrentCapacity = 0,
-            IsActive = newAttraction.IsActive
         };
         await _attractionRepository.Create(attraction);
 
@@ -90,20 +90,59 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
             MinAge = existingAttraction.MinAge,
             MaxCapacity = existingAttraction.MaxCapacity,
             CurrentCapacity = existingAttraction.CurrentCapacity ?? attraction.CurrentCapacity,
-            IsActive = existingAttraction.IsActive
         };
         await _attractionRepository.Update(updatedAttraction);
     }
 
     public async Task DeleteAttraction(Guid id)
     {
-        var attraction = await _attractionRepository.GetById(id);
+        Attraction attraction = await _attractionRepository.GetById(id);
         await _attractionRepository.Delete(attraction);
     }
 
     public async Task<Attraction> GetAttractionEntityById(Guid expectedAttractionId)
     {
         return await _attractionRepository.GetById(expectedAttractionId);
+    }
+
+    public async Task<List<string>> GetAttractionIncidents(Guid attractionId)
+    {
+        Attraction attraction = await _attractionRepository.GetById(attractionId);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+        }
+
+        if (attraction.Incidents.Count == _noIncidents)
+        {
+            throw new KeyNotFoundException($"La atracción con id {attractionId} no tiene incidencias");
+        }
+
+        return attraction.Incidents;
+    }
+
+    public async Task AddIncident(Guid attractionId, string incidence)
+    {
+        Attraction attraction = await _attractionRepository.GetById(attractionId);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+        }
+
+        attraction.AddIncident(incidence);
+        await _attractionRepository.Update(attraction);
+    }
+
+    public async Task RemoveIncident(Guid attractionId, string incidence)
+    {
+        Attraction attraction = await _attractionRepository.GetById(attractionId);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+        }
+
+        attraction.RemoveIncident(incidence);
+        await _attractionRepository.Update(attraction);
     }
 
     private async Task ValidateAttractionRequest(AttractionRequest request, bool checkCurrentCapacity = false)
