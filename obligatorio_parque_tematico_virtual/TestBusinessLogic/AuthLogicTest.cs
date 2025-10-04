@@ -138,5 +138,32 @@ namespace TestBusinessLogic
             Assert.IsNull(result3);
             Assert.IsNull(result4);
         }
+
+        [TestMethod]
+        public void Login_ShouldLoadUserWithRoles()
+        {
+            string email = "admin@test.com";
+            string password = "password123";
+            string hashedPassword = "hashedPassword123";
+            string expectedToken = "jwt.token.here";
+
+            User user = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = "Admin",
+                LastName = "User",
+                Email = email,
+                Password = hashedPassword
+            };
+
+            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(user);
+            _mockPasswordService.Setup(p => p.VerifyPassword(password, hashedPassword)).Returns(true);
+            _mockTokenService.Setup(t => t.GenerateToken(user)).Returns(expectedToken);
+
+            string result = _authLogic.Login(email, password);
+
+            Assert.AreEqual(expectedToken, result);
+            _mockUserRepository.Verify(r => r.GetByEmailWithRoles(email), Times.Once);
+        }
     }
 }
