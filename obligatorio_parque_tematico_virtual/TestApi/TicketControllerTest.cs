@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -285,6 +286,43 @@ namespace TestApi
             Assert.IsNotNull(tickets);
             Assert.AreEqual(2, tickets.Count);
             Assert.IsTrue(tickets.All(t => t.VisitorId == registerResult.Id));
+        }
+
+        [TestMethod]
+        public async Task TestPurchaseTicket_Unauthorized()
+        {
+            PurchaseTicketRequest request = new PurchaseTicketRequest
+            {
+                VisitorId = Guid.NewGuid(),
+                VisitDate = DateTime.Now.AddDays(7),
+                TicketType = TicketType.General
+            };
+
+            HttpContent content = new StringContent(
+                JsonSerializer.Serialize(request),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            HttpResponseMessage response = await _client.PostAsync("/api/tickets", content);
+
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task TestGetTicketById_Unauthorized()
+        {
+            HttpResponseMessage response = await _client.GetAsync("/api/tickets/1");
+
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task TestGetVisitorTickets_Unauthorized()
+        {
+            HttpResponseMessage response = await _client.GetAsync($"/api/tickets/visitor/{Guid.NewGuid()}");
+
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
     }
 }

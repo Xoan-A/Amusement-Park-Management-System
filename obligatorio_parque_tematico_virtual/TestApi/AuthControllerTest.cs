@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -55,16 +57,23 @@ namespace ApiTests
                 Email = "admin@test.com",
                 Password = "password123"
             };
-            var expectedResponse = new LoginResponse
+
+            var adminRole = new Domain.Role { Id = 1, Name = Domain.Role.ADMINISTRATOR };
+            var user = new Domain.User
             {
-                Token = "valid_token",
+                Id = Guid.NewGuid(),
+                Name = "Admin",
+                LastName = "User",
                 Email = "admin@test.com",
-                Role = "User",
-                Name = "User Name"
+                Password = "hashed_password",
+                UserRoles = new List<Domain.UserRole>
+                {
+                    new Domain.UserRole { RoleId = 1, Role = adminRole }
+                }
             };
 
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
-                         .Returns("valid_token");
+                         .Returns(user);
 
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -75,10 +84,13 @@ namespace ApiTests
             var responseContent = await response.Content.ReadAsStringAsync();
             var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.AreEqual(expectedResponse.Token, loginResponse.Token);
-            Assert.AreEqual(expectedResponse.Email, loginResponse.Email);
-            Assert.AreEqual(expectedResponse.Role, loginResponse.Role);
-            Assert.AreEqual(expectedResponse.Name, loginResponse.Name);
+            Assert.IsNotNull(loginResponse);
+            Assert.IsNotNull(loginResponse.Token);
+            Assert.AreEqual("admin@test.com", loginResponse.Email);
+            Assert.AreEqual("Admin User", loginResponse.Name);
+            Assert.IsNotNull(loginResponse.Roles);
+            Assert.AreEqual(1, loginResponse.Roles.Length);
+            Assert.AreEqual(Domain.Role.ADMINISTRATOR, loginResponse.Roles[0]);
         }
 
         [TestMethod]
@@ -99,7 +111,7 @@ namespace ApiTests
                 Message = "Registration successful"
             };
 
-            var visitor = new Domain.Visitor
+            var user = new Domain.User
             {
                 Id = expectedResponse.Id,
                 Name = request.Name,
@@ -110,7 +122,7 @@ namespace ApiTests
             };
 
             _mockUserLogic.Setup(x => x.RegisterVisitor(request.Name, request.LastName, request.Email, request.Password, request.BirthDate))
-                         .Returns(visitor);
+                         .Returns(user);
 
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
