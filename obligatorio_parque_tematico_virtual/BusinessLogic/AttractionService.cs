@@ -9,6 +9,14 @@ namespace BusinessLogic;
 public class AttractionService : IAttractionService, IAttractionServiceEntity
 {
     private readonly IAttractionRepository _attractionRepository;
+    private readonly int _nameMaxLength = 100;
+    private readonly int _maxDescriptionLength = 500;
+    private readonly int _maxMinAge = 25;
+    private readonly int _minMinAge = 0;
+    private readonly int _maxCapacityLimit = 1000;
+    private readonly int _minCapacityLimit = 0;
+    private readonly int _minCurrentCapacity = 0;
+    private readonly int _noIncidents = 0;
 
     public AttractionService(IAttractionRepository attractionRepository)
     {
@@ -18,6 +26,11 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
     public async Task<AttractionResponse> GetAttractionById(Guid id)
     {
         Attraction attraction = await _attractionRepository.GetById(id);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
+        }
+
         return new AttractionResponse()
         {
             Id = attraction.Id,
@@ -49,6 +62,7 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
 
     public async Task<Guid> CreateAttraction(AttractionRequest newAttraction)
     {
+        await ValidateAttractionRequest(newAttraction);
         Attraction attraction = new Attraction()
         {
             Name = newAttraction.Name,
@@ -57,7 +71,6 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
             MinAge = newAttraction.MinAge,
             MaxCapacity = newAttraction.MaxCapacity,
             CurrentCapacity = 0,
-            IsActive = newAttraction.IsActive
         };
         await _attractionRepository.Create(attraction);
 
@@ -66,8 +79,9 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
 
     public async Task UpdateAttraction(Guid id, AttractionRequest existingAttraction)
     {
+        await ValidateAttractionRequest(existingAttraction, true);
         Attraction attraction = await _attractionRepository.GetById(id);
-        var UpdatedAttraction = new Attraction()
+        Attraction updatedAttraction = new Attraction()
         {
             Id = id,
             Name = existingAttraction.Name,
@@ -75,15 +89,14 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
             Type = Enum.Parse<AttractionType>(existingAttraction.Type),
             MinAge = existingAttraction.MinAge,
             MaxCapacity = existingAttraction.MaxCapacity,
-            CurrentCapacity = attraction.CurrentCapacity,
-            IsActive = existingAttraction.IsActive
+            CurrentCapacity = existingAttraction.CurrentCapacity ?? attraction.CurrentCapacity,
         };
-        await _attractionRepository.Update(UpdatedAttraction);
+        await _attractionRepository.Update(updatedAttraction);
     }
 
     public async Task DeleteAttraction(Guid id)
     {
-        var attraction = await _attractionRepository.GetById(id);
+        Attraction attraction = await _attractionRepository.GetById(id);
         await _attractionRepository.Delete(attraction);
     }
 
@@ -101,5 +114,103 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
             Capacity = attraction.MaxCapacity,
             CurrentCapacity = attraction.CurrentCapacity
         };
+    }
+
+    public async Task<List<string>> GetAttractionIncidents(Guid attractionId)
+    {
+        Attraction attraction = await _attractionRepository.GetById(attractionId);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+        }
+
+        if (attraction.Incidents.Count == _noIncidents)
+        {
+            throw new KeyNotFoundException($"La atracción con id {attractionId} no tiene incidencias");
+        }
+
+        return attraction.Incidents;
+    }
+
+    public async Task AddIncident(Guid attractionId, string incidence)
+    {
+        Attraction attraction = await _attractionRepository.GetById(attractionId);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+        }
+
+        attraction.AddIncident(incidence);
+        await _attractionRepository.Update(attraction);
+    }
+
+    public async Task RemoveIncident(Guid attractionId, string incidence)
+    {
+        Attraction attraction = await _attractionRepository.GetById(attractionId);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+        }
+
+        attraction.RemoveIncident(incidence);
+        await _attractionRepository.Update(attraction);
+    }
+
+    private async Task ValidateAttractionRequest(AttractionRequest request, bool checkCurrentCapacity = false)
+    {
+        if (!await IsValidNameAsync(request.Name))
+        {
+            throw new ArgumentException("Invalid or duplicate attraction name.");
+        }
+
+        if (!IsValidDescription(request.Description))
+        {
+            throw new ArgumentException("Invalid attraction description.");
+        }
+
+        if (!IsValidMinAge(request.MinAge))
+        {
+            throw new ArgumentException("Invalid minimum age.");
+        }
+
+        if (!IsValidMaxCapacity(request.MaxCapacity))
+        {
+            throw new ArgumentException("Invalid maximum capacity.");
+        }
+
+        if (checkCurrentCapacity)
+        {
+            if (request.CurrentCapacity < _minCurrentCapacity || request.CurrentCapacity > request.MaxCapacity)
+            {
+                throw new ArgumentException("Invalid current capacity.");
+            }
+        }
+    }
+
+    private async Task<bool> IsAttractionNameUnique(string name)
+    {
+        return await _attractionRepository.IsNameUnique(name);
+    }
+
+    private async Task<bool> IsValidNameAsync(string name)
+    {
+        return !string.IsNullOrWhiteSpace(name)
+               && name.Length <= _nameMaxLength
+               && await IsAttractionNameUnique(name);
+    }
+
+    private bool IsValidDescription(string description)
+    {
+        return !string.IsNullOrWhiteSpace(description) && description.Length <= _maxDescriptionLength;
+    }
+
+    private bool IsValidMinAge(int minAge)
+    {
+        return minAge >= _minMinAge && minAge <= _maxMinAge;
+    }
+
+    private bool IsValidMaxCapacity(int maxCapacity)
+    {
+        return maxCapacity > _minCapacityLimit && maxCapacity <= _maxCapacityLimit;
     }
 }

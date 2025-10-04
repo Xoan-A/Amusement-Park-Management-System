@@ -14,6 +14,8 @@ public class EventServiceTest
     private Mock<IEventRepository> _mockEventRepository;
     private IEventService _eventService;
     private Mock<IAttractionServiceEntity> _mockAttractionService;
+    private Event baseEvent;
+    private EventRequest baseEventRequest;
 
     [TestInitialize]
     public void Setup()
@@ -21,27 +23,35 @@ public class EventServiceTest
         _mockEventRepository = new Mock<IEventRepository>();
         _mockAttractionService = new Mock<IAttractionServiceEntity>();
         _eventService = new EventService(_mockEventRepository.Object, _mockAttractionService.Object);
+        baseEvent = new Event
+        {
+            Name = "Base Event",
+            Date = new DateTime(2025, 10, 10),
+            Hour = 10,
+            MaxCapacity = 1000,
+            CurrentCapacity = 100,
+            Cost = 50,
+            Attractions = new List<EventAttraction>()
+        };
+        baseEventRequest = new EventRequest
+        {
+            Name = "Base Event",
+            Date = new DateTime(2025, 10, 10),
+            Hour = 10,
+            MaxCapacity = 1000,
+            Cost = 50,
+            AttractionIds = new List<Guid>()
+        };
     }
 
     [TestMethod]
     public async Task GetEventById_ShouldReturnEvent_WhenIdIsValid()
     {
-        Event expectedEvent = new Event
-        {
-            Id = Guid.NewGuid(),
-            Name = "Music Festival",
-            Date = new DateTime(2024, 8, 15),
-            Hour = 10,
-            MaxCapacity = 5000,
-            CurrentCapacity = 0,
-            Cost = 100,
-            Attractions = []
-        };
-        _mockEventRepository.Setup(r => r.GetById(expectedEvent.Id)).ReturnsAsync(expectedEvent);
-        EventResponse result = await _eventService.GetEventById(expectedEvent.Id);
+        _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
+        EventResponse result = await _eventService.GetEventById(baseEvent.Id);
         Assert.IsNotNull(result);
-        Assert.AreEqual(expectedEvent.Name, result.Name);
-        _mockEventRepository.Verify(r => r.GetById(expectedEvent.Id), Times.Once);
+        Assert.AreEqual(baseEvent.Name, result.Name);
+        _mockEventRepository.Verify(r => r.GetById(baseEvent.Id), Times.Once);
     }
 
     [TestMethod]
@@ -56,121 +66,95 @@ public class EventServiceTest
             MinAge = 12,
             MaxCapacity = 20,
             CurrentCapacity = 5,
-            IsActive = true
         };
+        baseEvent.AddAttraction(attraction1);
+        _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
+        EventResponse result = await _eventService.GetEventById(baseEvent.Id);
 
-        Event expectedEvent = new Event
-        {
-            Name = "Fun Fair",
-            Date = new DateTime(2024, 9, 10),
-            Hour = 14,
-            MaxCapacity = 3000,
-            CurrentCapacity = 0,
-            Cost = 50,
-        };
-
-        expectedEvent.AddAttraction(attraction1);
-
-        _mockEventRepository.Setup(r => r.GetById(expectedEvent.Id)).ReturnsAsync(expectedEvent);
-        EventResponse result = await _eventService.GetEventById(expectedEvent.Id);
-
-        Assert.IsNotNull(result);
-        Assert.AreEqual(expectedEvent.Name, result.Name);
+        Assert.AreEqual(baseEvent.Name, result.Name);
         Assert.AreEqual(1, result.Attractions.Count);
         Assert.IsTrue(result.Attractions.Any(a => a.Name == "Roller Coaster"));
+    }
 
-        _mockEventRepository.Verify(r => r.GetById(expectedEvent.Id), Times.Once);
+    [TestMethod]
+    public async Task GetEventById_ShouldThrowException_WhenEventIsNull()
+    {
+        Guid eventId = Guid.NewGuid();
+        _mockEventRepository.Setup(r => r.GetById(eventId)).ReturnsAsync((Event)null);
+
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () => await _eventService.GetEventById(eventId));
     }
 
     [TestMethod]
     public async Task GetAllEvents_ShouldReturnListOfEvents()
     {
-        List<Event> expectedEvents = new List<Event>
+        Event event2 = new Event
         {
-            new Event
-            {
-                Name = "Food Festival",
-                Date = new DateTime(2024, 7, 20),
-                Hour = 12,
-                MaxCapacity = 2000,
-                CurrentCapacity = 0,
-                Cost = 30,
-                Attractions = []
-            },
-            new Event
-            {
-                Name = "Art Expo",
-                Date = new DateTime(2024, 10, 5),
-                Hour = 9,
-                MaxCapacity = 1500,
-                CurrentCapacity = 0,
-                Cost = 20,
-                Attractions = []
-            }
+            Id = Guid.NewGuid(),
+            Name = "Art Expo",
+            Date = baseEvent.Date,
+            Hour = baseEvent.Hour,
+            MaxCapacity = baseEvent.MaxCapacity,
+            CurrentCapacity = baseEvent.CurrentCapacity,
+            Cost = baseEvent.Cost,
+            Attractions = new List<EventAttraction>()
         };
+        List<Event> expectedEvents = new List<Event> { baseEvent, event2 };
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(expectedEvents);
+
         List<EventResponse> result = await _eventService.GetAllEvents();
-        Assert.IsNotNull(result);
+
         Assert.AreEqual(2, result.Count);
-        Assert.AreEqual("Food Festival", result[0].Name);
-        Assert.AreEqual("Art Expo", result[1].Name);
+        Assert.AreEqual(baseEvent.Name, result[0].Name);
+        Assert.AreEqual(event2.Name, result[1].Name);
         _mockEventRepository.Verify(r => r.GetAll(), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task GetAllEvents_ShouldReturnEventsWithAttractions()
+    {
+        Attraction attraction = new Attraction
+        {
+            Id = Guid.NewGuid(),
+            Name = "Montaña Rusa",
+            Description = "Atracción rápida",
+            Type = AttractionType.RollerCoaster,
+            MinAge = 10,
+            MaxCapacity = 20,
+            CurrentCapacity = 5,
+        };
+
+        baseEvent.AddAttraction(attraction);
+
+        List<Event> eventsList = new List<Event> { baseEvent };
+        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(eventsList);
+
+        var result = await _eventService.GetAllEvents();
+
+        Assert.AreEqual(1, result.Count);
+        EventResponse returnedEvent = result[0];
+        Assert.AreEqual(baseEvent.Name, returnedEvent.Name);
+        AttractionResponse returnedAttraction = returnedEvent.Attractions[0];
+        Assert.AreEqual(attraction.Name, returnedAttraction.Name);
     }
 
     [TestMethod]
     public async Task CreateEvent_ShouldCreateEvent_WhenDataIsValid()
     {
-        EventRequest newEvent = new EventRequest()
-        {
-            Name = "Tech Conference",
-            Date = new DateTime(2024, 11, 15),
-            Hour = 9,
-            MaxCapacity = 1000,
-            Cost = 150
-        };
-
-        Event createdEvent = new Event
-        {
-            Id = Guid.NewGuid(),
-            Name = newEvent.Name,
-            Date = newEvent.Date,
-            Hour = newEvent.Hour,
-            MaxCapacity = newEvent.MaxCapacity,
-            CurrentCapacity = 0,
-            Cost = newEvent.Cost,
-            Attractions = []
-        };
-
-        _mockEventRepository.Setup(r => r.Create(It.IsAny<Event>()))
-            .Callback<Event>(e => { e.Id = createdEvent.Id; })
+        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        _mockEventRepository.Setup(r => r.Create(It.IsAny<Event>())).Callback<Event>(e => e.Id = baseEvent.Id)
             .Returns(Task.CompletedTask);
 
-        Guid resultId = await _eventService.CreateEvent(newEvent);
+        Guid resultId = await _eventService.CreateEvent(baseEventRequest);
 
-        Assert.AreEqual(createdEvent.Id, resultId);
-        _mockEventRepository.Verify(r => r.Create(It.Is<Event>(e =>
-            e.Name == newEvent.Name &&
-            e.Date == newEvent.Date &&
-            e.Hour == newEvent.Hour &&
-            e.MaxCapacity == newEvent.MaxCapacity &&
-            e.Cost == newEvent.Cost &&
-            e.CurrentCapacity == 0
-        )), Times.Once);
+        Assert.AreEqual(baseEvent.Id, resultId);
     }
 
     [TestMethod]
     public async Task CreateEvent_ShouldAddAttractions_WhenEventHasAttractions()
     {
-        var attractionIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
-        EventRequest newEvent = new EventRequest()
-        {
-            Name = "Carnival",
-            Date = new DateTime(2024, 12, 1),
-            Hour = 15,
-            MaxCapacity = 4000,
-            Cost = 80,
-            AttractionIds = attractionIds
-        };
+        List<Guid> attractionIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+        baseEventRequest.AttractionIds = attractionIds;
 
         _mockAttractionService.Setup(s => s.GetAttractionEntityById(It.IsAny<Guid>()))
             .ReturnsAsync((Guid id) => new Attraction { Id = id, Name = $"Attraction-{id}" });
@@ -185,31 +169,83 @@ public class EventServiceTest
             })
             .Returns(Task.CompletedTask);
 
-        await _eventService.CreateEvent(newEvent);
+        await _eventService.CreateEvent(baseEventRequest);
+    }
+
+    [TestMethod]
+    public async Task CreateEvent_ShouldThrowException_WhenNameIsNotUnique()
+    {
+        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event> { baseEvent });
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
+    }
+
+    [TestMethod]
+    public async Task CreateEvent_ShouldThrowException_WhenNameIsEmpty()
+    {
+        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        baseEventRequest.Name = String.Empty;
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
+    }
+
+    [TestMethod]
+    public async Task CreateEvent_ShouldThrowException_WhenDateIsNotFuture()
+    {
+        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        baseEventRequest.Date = DateTime.Now.AddDays(-1);
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
+    }
+
+    [TestMethod]
+    public async Task CreateEvent_ShouldThrowException_WhenHourIsInvalid()
+    {
+        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        baseEventRequest.Hour = -1;
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
+    }
+
+    [TestMethod]
+    public async Task CreateEvent_ShouldThrowException_WhenMaxCapacityIsInvalid()
+    {
+        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        baseEventRequest.MaxCapacity = -1;
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
+        baseEventRequest.MaxCapacity = 10001;
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
+    }
+
+    [TestMethod]
+    public async Task CreateEvent_ShouldThrowException_WhenCostIsInvalid()
+    {
+        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        baseEventRequest.Cost = -1;
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
     public async Task DeleteEvent_ShouldCallRepositoryDelete_WhenEventExists()
     {
+        _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
+        _mockEventRepository.Setup(r => r.Delete(baseEvent)).Returns(Task.CompletedTask);
+
+        await _eventService.DeleteEvent(baseEvent.Id);
+
+        _mockEventRepository.Verify(r => r.GetById(baseEvent.Id), Times.Once);
+        _mockEventRepository.Verify(r => r.Delete(baseEvent), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task DeleteEvent_ShouldThrowException_WhenEventDoesNotExist()
+    {
         Guid eventId = Guid.NewGuid();
-        Event existingEvent = new Event
-        {
-            Id = eventId,
-            Name = "Sample Event",
-            Date = DateTime.Now,
-            Hour = 10,
-            MaxCapacity = 100,
-            CurrentCapacity = 0,
-            Cost = 20,
-            Attractions = []
-        };
-
-        _mockEventRepository.Setup(r => r.GetById(eventId)).ReturnsAsync(existingEvent);
-        _mockEventRepository.Setup(r => r.Delete(existingEvent)).Returns(Task.CompletedTask);
-
-        await _eventService.DeleteEvent(eventId);
-
-        _mockEventRepository.Verify(r => r.GetById(eventId), Times.Once);
-        _mockEventRepository.Verify(r => r.Delete(existingEvent), Times.Once);
+        _mockEventRepository.Setup(r => r.GetById(eventId)).ReturnsAsync((Event)null);
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () => await _eventService.DeleteEvent(eventId));
     }
 }

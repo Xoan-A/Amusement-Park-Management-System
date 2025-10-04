@@ -30,7 +30,6 @@ public class AttractionRepositoryTest
         attraction.MinAge = 18;
         attraction.MaxCapacity = 10;
         attraction.CurrentCapacity = 0;
-        attraction.IsActive = true;
     }
 
     [TestCleanup]
@@ -122,7 +121,6 @@ public class AttractionRepositoryTest
             MinAge = 8,
             MaxCapacity = 15,
             CurrentCapacity = 3,
-            IsActive = false
         };
 
         await _context.Attractions.AddAsync(attraction);

@@ -62,7 +62,6 @@ public class EventTest
             MinAge = 12,
             MaxCapacity = 20,
             CurrentCapacity = 0,
-            IsActive = true
         };
 
         newEvent.AddAttraction(attraction);
@@ -84,7 +83,6 @@ public class EventTest
             MinAge = 12,
             MaxCapacity = 20,
             CurrentCapacity = 0,
-            IsActive = true
         };
         newEvent.AddAttraction(attraction);
 
@@ -106,7 +104,6 @@ public class EventTest
             MinAge = 12,
             MaxCapacity = 20,
             CurrentCapacity = 0,
-            IsActive = true
         };
         newEvent.AddAttraction(attraction);
 

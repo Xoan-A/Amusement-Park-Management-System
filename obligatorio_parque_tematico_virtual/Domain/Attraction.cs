@@ -9,10 +9,21 @@ public class Attraction
     public int MinAge { get; set; }
     public int MaxCapacity { get; set; }
     public int CurrentCapacity { get; set; }
-    public bool IsActive { get; set; }
+    public bool IsActive => Incidents.Count == 0;
+    public List<String> Incidents { get; set; } = new List<String>();
 
     public Attraction()
     {
         this.Id = Guid.NewGuid();
+    }
+
+    public void AddIncident(string incident)
+    {
+        Incidents.Add(incident);
+    }
+
+    public void RemoveIncident(string incident)
+    {
+        Incidents.Remove(incident);
     }
 }
