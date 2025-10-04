@@ -99,7 +99,7 @@ public class IncidentControllerTest
         var incidentRequest = new { incident = "Incidente" };
         var content = new StringContent(JsonSerializer.Serialize(incidentRequest), Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/incidents/{_attractionId}")
-            { Content = content };
+        { Content = content };
         var response = await _operatorClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
         string respContent = await response.Content.ReadAsStringAsync();
@@ -113,7 +113,7 @@ public class IncidentControllerTest
         var incidentRequest = new { incident = "Incidente" };
         var content = new StringContent(JsonSerializer.Serialize(incidentRequest), Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/incidents/{_attractionId}")
-            { Content = content };
+        { Content = content };
         var response = await _operatorClient.SendAsync(request);
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
