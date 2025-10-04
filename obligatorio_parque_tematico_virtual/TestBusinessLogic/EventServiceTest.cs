@@ -66,7 +66,6 @@ public class EventServiceTest
             MinAge = 12,
             MaxCapacity = 20,
             CurrentCapacity = 5,
-            IsActive = true
         };
         baseEvent.AddAttraction(attraction1);
         _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
@@ -123,7 +122,6 @@ public class EventServiceTest
             MinAge = 10,
             MaxCapacity = 20,
             CurrentCapacity = 5,
-            IsActive = true
         };
 
         baseEvent.AddAttraction(attraction);

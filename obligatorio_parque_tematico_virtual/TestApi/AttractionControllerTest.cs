@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
+using BusinessLogic;
 using Domain;
 using IBusinessLogic;
 using Models.In;
@@ -32,9 +31,9 @@ public class AttractionControllerTest
 
         _client = _factory.CreateClient();
 
-        var tokenService = new BusinessLogic.TokenService();
+        TokenService tokenService = new TokenService();
 
-        var adminUser = new Domain.Administrator
+        Administrator adminUser = new Administrator
         {
             Id = Guid.NewGuid(),
             Name = "Admin",
@@ -95,8 +94,8 @@ public class AttractionControllerTest
 
         var response = await _adminClient.GetAsync("/api/attractions");
         response.EnsureSuccessStatusCode();
-        var content = await response.Content.ReadAsStringAsync();
-        var attractionsResponse = JsonSerializer.Deserialize<AllAttractionsResponse>(content, new JsonSerializerOptions
+        string content = await response.Content.ReadAsStringAsync();
+        AllAttractionsResponse attractionsResponse = JsonSerializer.Deserialize<AllAttractionsResponse>(content, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
@@ -132,8 +131,8 @@ public class AttractionControllerTest
 
         var response = await _adminClient.GetAsync($"/api/attractions/{id}");
         response.EnsureSuccessStatusCode();
-        var content = await response.Content.ReadAsStringAsync();
-        var attractionResponse = JsonSerializer.Deserialize<AttractionResponse>(content, new JsonSerializerOptions
+        string content = await response.Content.ReadAsStringAsync();
+        AttractionResponse attractionResponse = JsonSerializer.Deserialize<AttractionResponse>(content, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
@@ -160,7 +159,6 @@ public class AttractionControllerTest
             Type = "InteractiveZone",
             MinAge = 10,
             MaxCapacity = 100,
-            IsActive = true
         };
 
         _mockAttractionService.Setup(s => s.CreateAttraction(It.IsAny<AttractionRequest>())).ReturnsAsync(expectedId);
@@ -169,7 +167,7 @@ public class AttractionControllerTest
         var response = await _adminClient.PostAsync("/api/attractions", content);
 
         response.EnsureSuccessStatusCode();
-        var responseContent = await response.Content.ReadAsStringAsync();
+        string responseContent = await response.Content.ReadAsStringAsync();
         CreateAttractionResponse? createdResponse = JsonSerializer.Deserialize<CreateAttractionResponse>(
             responseContent, new JsonSerializerOptions
             {
@@ -193,7 +191,6 @@ public class AttractionControllerTest
             Type = "InteractiveZone",
             MinAge = 10,
             MaxCapacity = 100,
-            IsActive = true
         };
 
         _mockAttractionService.Setup(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>()))
@@ -202,7 +199,7 @@ public class AttractionControllerTest
         var response = await _adminClient.PutAsync($"/api/attractions/{id}", content);
 
         response.EnsureSuccessStatusCode();
-        var responseContent = await response.Content.ReadAsStringAsync();
+        string responseContent = await response.Content.ReadAsStringAsync();
         MessageResponse? updatedResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
             new JsonSerializerOptions
             {
@@ -235,7 +232,6 @@ public class AttractionControllerTest
             Type = "InteractiveZone",
             MinAge = 10,
             MaxCapacity = 100,
-            IsActive = true
         };
 
         var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
@@ -273,7 +269,6 @@ public class AttractionControllerTest
             Type = "InteractiveZone",
             MinAge = 10,
             MaxCapacity = 100,
-            IsActive = true
         };
         var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
         var response = await _client.PutAsync($"/api/attractions/{id}", content);
