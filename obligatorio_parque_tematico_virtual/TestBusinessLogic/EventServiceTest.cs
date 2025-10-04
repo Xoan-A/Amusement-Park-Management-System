@@ -187,11 +187,8 @@ public class EventServiceTest
     public async Task CreateEvent_ShouldThrowException_WhenNameIsEmpty()
     {
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
-        EventRequest newEvent = new EventRequest
-        {
-            Name = "", Date = DateTime.Now.AddDays(1), Hour = 10, MaxCapacity = 100, Cost = 10
-        };
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _eventService.CreateEvent(newEvent));
+        baseEventRequest.Name = String.Empty;
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _eventService.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
