@@ -90,7 +90,7 @@ public class AttractionServiceTest
         };
 
         _mockAttractionRepository.Setup(r => r.IsNameUnique(newAttraction.Name)).ReturnsAsync(true);
-        
+
         await _attractionService.CreateAttraction(newAttraction);
 
         _mockAttractionRepository.Verify(r => r.Create(
@@ -198,8 +198,9 @@ public class AttractionServiceTest
             MaxCapacity = 10,
             IsActive = true
         };
-        
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.CreateAttraction(invalidRequest));
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.CreateAttraction(invalidRequest));
     }
 
     [TestMethod]
@@ -215,8 +216,9 @@ public class AttractionServiceTest
             IsActive = true
         };
         _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(false);
-        
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.CreateAttraction(request));
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.CreateAttraction(request));
     }
 
     [TestMethod]
@@ -225,15 +227,16 @@ public class AttractionServiceTest
         AttractionRequest request = new AttractionRequest
         {
             Name = "ValidName",
-            Description = "", 
+            Description = "",
             Type = AttractionType.RollerCoaster.ToString(),
             MinAge = 10,
             MaxCapacity = 10,
             IsActive = true
         };
         _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
-        
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.CreateAttraction(request));
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.CreateAttraction(request));
     }
 
     [TestMethod]
@@ -249,8 +252,9 @@ public class AttractionServiceTest
             IsActive = true
         };
         _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
-        
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.CreateAttraction(request));
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.CreateAttraction(request));
     }
 
     [TestMethod]
@@ -266,8 +270,9 @@ public class AttractionServiceTest
             IsActive = true
         };
         _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
-        
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.CreateAttraction(request));
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.CreateAttraction(request));
     }
 
     [TestMethod]
@@ -283,8 +288,9 @@ public class AttractionServiceTest
             IsActive = true
         };
         _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
-        
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.CreateAttraction(request));
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.CreateAttraction(request));
     }
 
     [TestMethod]
@@ -300,7 +306,8 @@ public class AttractionServiceTest
             IsActive = true,
             CurrentCapacity = 0
         };
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(Guid.NewGuid(), invalidRequest));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.UpdateAttraction(Guid.NewGuid(), invalidRequest));
     }
 
     [TestMethod]
@@ -317,7 +324,8 @@ public class AttractionServiceTest
             CurrentCapacity = 0
         };
         _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(false);
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(Guid.NewGuid(), request));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.UpdateAttraction(Guid.NewGuid(), request));
     }
 
     [TestMethod]
@@ -334,8 +342,9 @@ public class AttractionServiceTest
             CurrentCapacity = 0
         };
         _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
-        
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(Guid.NewGuid(), request));
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.UpdateAttraction(Guid.NewGuid(), request));
     }
 
     [TestMethod]
@@ -352,8 +361,9 @@ public class AttractionServiceTest
             CurrentCapacity = 0
         };
         _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
-        
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(Guid.NewGuid(), request));
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.UpdateAttraction(Guid.NewGuid(), request));
     }
 
     [TestMethod]
@@ -370,8 +380,9 @@ public class AttractionServiceTest
             CurrentCapacity = 0
         };
         _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
-        
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(Guid.NewGuid(), request));
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.UpdateAttraction(Guid.NewGuid(), request));
     }
 
     [TestMethod]
@@ -390,8 +401,9 @@ public class AttractionServiceTest
         _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
         Attraction attraction = new Attraction { Id = Guid.NewGuid(), CurrentCapacity = 0 };
         _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
-        
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(attraction.Id, request));
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.UpdateAttraction(attraction.Id, request));
     }
 
     [TestMethod]
@@ -410,8 +422,9 @@ public class AttractionServiceTest
         _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
         Attraction attraction = new Attraction { Id = Guid.NewGuid(), CurrentCapacity = 0 };
         _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
-        
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _attractionService.UpdateAttraction(attraction.Id, request));
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionService.UpdateAttraction(attraction.Id, request));
     }
 
     [TestMethod]
@@ -419,7 +432,8 @@ public class AttractionServiceTest
     {
         Guid newId = Guid.NewGuid();
         _mockAttractionRepository.Setup(r => r.GetById(newId)).ReturnsAsync((Attraction)null);
-        
-        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () => await _attractionService.GetAttractionById(newId));
+
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
+            await _attractionService.GetAttractionById(newId));
     }
 }

@@ -29,6 +29,7 @@ public class EventService : IEventService
         {
             throw new KeyNotFoundException($"No se encontró el evento con id {expectedEventId}");
         }
+
         var eventResponse = new EventResponse
         {
             Id = eventEntity.Id,
@@ -105,6 +106,7 @@ public class EventService : IEventService
                 eventEntity.AddAttraction(attraction);
             }
         }
+
         await _eventRepository.Create(eventEntity);
         return eventEntity.Id;
     }
@@ -116,6 +118,7 @@ public class EventService : IEventService
         {
             throw new KeyNotFoundException($"No se encontró el evento con id {eventId}");
         }
+
         await _eventRepository.Delete(eventEntity);
     }
 
@@ -130,7 +133,8 @@ public class EventService : IEventService
         if (newEvent.Hour < MinHour || newEvent.Hour > MaxHour)
             throw new ArgumentException("La hora debe estar entre 0 y 23.");
         if (newEvent.MaxCapacity <= MinCapacityLimit || newEvent.MaxCapacity > MaxCapacityLimit)
-            throw new ArgumentException($"La capacidad máxima debe ser mayor a 0 y menor o igual a {MaxCapacityLimit}.");
+            throw new ArgumentException(
+                $"La capacidad máxima debe ser mayor a 0 y menor o igual a {MaxCapacityLimit}.");
         if (newEvent.Cost <= MinCost)
             throw new ArgumentException("El coste debe ser mayor a 0.");
     }

@@ -29,6 +29,7 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
         {
             throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
         }
+
         return new AttractionResponse()
         {
             Id = attraction.Id,
@@ -57,7 +58,7 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
             IsActive = attraction.IsActive
         }).ToList();
     }
-    
+
     public async Task<Guid> CreateAttraction(AttractionRequest newAttraction)
     {
         await ValidateAttractionRequest(newAttraction);
@@ -104,25 +105,29 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
     {
         return await _attractionRepository.GetById(expectedAttractionId);
     }
-    
+
     private async Task ValidateAttractionRequest(AttractionRequest request, bool checkCurrentCapacity = false)
     {
         if (!await IsValidNameAsync(request.Name))
         {
             throw new ArgumentException("Invalid or duplicate attraction name.");
         }
+
         if (!IsValidDescription(request.Description))
         {
             throw new ArgumentException("Invalid attraction description.");
         }
+
         if (!IsValidMinAge(request.MinAge))
         {
             throw new ArgumentException("Invalid minimum age.");
         }
+
         if (!IsValidMaxCapacity(request.MaxCapacity))
         {
             throw new ArgumentException("Invalid maximum capacity.");
         }
+
         if (checkCurrentCapacity)
         {
             if (request.CurrentCapacity < _minCurrentCapacity || request.CurrentCapacity > request.MaxCapacity)
@@ -131,29 +136,29 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
             }
         }
     }
-    
+
     private async Task<bool> IsAttractionNameUnique(string name)
     {
         return await _attractionRepository.IsNameUnique(name);
     }
-    
+
     private async Task<bool> IsValidNameAsync(string name)
     {
-        return !string.IsNullOrWhiteSpace(name) 
-               && name.Length <= _nameMaxLength 
+        return !string.IsNullOrWhiteSpace(name)
+               && name.Length <= _nameMaxLength
                && await IsAttractionNameUnique(name);
     }
-    
+
     private bool IsValidDescription(string description)
     {
         return !string.IsNullOrWhiteSpace(description) && description.Length <= _maxDescriptionLength;
     }
-    
+
     private bool IsValidMinAge(int minAge)
     {
         return minAge >= _minMinAge && minAge <= _maxMinAge;
     }
-    
+
     private bool IsValidMaxCapacity(int maxCapacity)
     {
         return maxCapacity > _minCapacityLimit && maxCapacity <= _maxCapacityLimit;

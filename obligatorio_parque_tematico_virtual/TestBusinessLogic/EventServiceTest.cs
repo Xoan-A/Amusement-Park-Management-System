@@ -71,7 +71,7 @@ public class EventServiceTest
         baseEvent.AddAttraction(attraction1);
         _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
         EventResponse result = await _eventService.GetEventById(baseEvent.Id);
-        
+
         Assert.AreEqual(baseEvent.Name, result.Name);
         Assert.AreEqual(1, result.Attractions.Count);
         Assert.IsTrue(result.Attractions.Any(a => a.Name == "Roller Coaster"));
@@ -102,9 +102,9 @@ public class EventServiceTest
         };
         List<Event> expectedEvents = new List<Event> { baseEvent, event2 };
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(expectedEvents);
-        
+
         List<EventResponse> result = await _eventService.GetAllEvents();
-        
+
         Assert.AreEqual(2, result.Count);
         Assert.AreEqual(baseEvent.Name, result[0].Name);
         Assert.AreEqual(event2.Name, result[1].Name);
@@ -125,9 +125,9 @@ public class EventServiceTest
             CurrentCapacity = 5,
             IsActive = true
         };
-        
+
         baseEvent.AddAttraction(attraction);
-        
+
         List<Event> eventsList = new List<Event> { baseEvent };
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(eventsList);
 
@@ -148,7 +148,7 @@ public class EventServiceTest
             .Returns(Task.CompletedTask);
 
         Guid resultId = await _eventService.CreateEvent(baseEventRequest);
-        
+
         Assert.AreEqual(baseEvent.Id, resultId);
     }
 
@@ -179,7 +179,8 @@ public class EventServiceTest
     {
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event> { baseEvent });
 
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _eventService.CreateEvent(baseEventRequest));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
@@ -198,7 +199,8 @@ public class EventServiceTest
     {
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
         baseEventRequest.Date = DateTime.Now.AddDays(-1);
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _eventService.CreateEvent(baseEventRequest));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
@@ -206,7 +208,8 @@ public class EventServiceTest
     {
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
         baseEventRequest.Hour = -1;
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _eventService.CreateEvent(baseEventRequest));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
@@ -214,9 +217,11 @@ public class EventServiceTest
     {
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
         baseEventRequest.MaxCapacity = -1;
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _eventService.CreateEvent(baseEventRequest));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
         baseEventRequest.MaxCapacity = 10001;
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _eventService.CreateEvent(baseEventRequest));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
@@ -224,7 +229,8 @@ public class EventServiceTest
     {
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
         baseEventRequest.Cost = -1;
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _eventService.CreateEvent(baseEventRequest));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
