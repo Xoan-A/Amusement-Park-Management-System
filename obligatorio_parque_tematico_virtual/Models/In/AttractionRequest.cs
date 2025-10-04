@@ -7,5 +7,6 @@ public class AttractionRequest
     public string Type { get; set; }
     public int MinAge { get; set; }
     public int MaxCapacity { get; set; }
+    public int? CurrentCapacity { get; set; }
     public bool IsActive { get; set; }
 }
