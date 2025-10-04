@@ -133,5 +133,61 @@ namespace TestDataAccess
 
             Assert.IsTrue(result);
         }
+
+        [TestMethod]
+        public void GetByIdWithRoles_ShouldReturnUser_WithRoles()
+        {
+            _context.Database.EnsureCreated();
+
+            User user = new User
+            {
+                Name = "MultiRole",
+                LastName = "User",
+                Email = "multi@test.com",
+                Password = "password"
+            };
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            Role adminRole = _context.Roles.First(r => r.Name == Role.ADMINISTRATOR);
+            UserRole userRole = new UserRole { UserId = user.Id, RoleId = adminRole.Id };
+            _context.UserRoles.Add(userRole);
+            _context.SaveChanges();
+
+            User result = _userRepository.GetByIdWithRoles(user.Id);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(user.Id, result.Id);
+            Assert.AreEqual(1, result.UserRoles.Count);
+            Assert.AreEqual(Role.ADMINISTRATOR, result.UserRoles.First().Role.Name);
+        }
+
+        [TestMethod]
+        public void GetByEmailWithRoles_ShouldReturnUser_WithRoles()
+        {
+            _context.Database.EnsureCreated();
+
+            User user = new User
+            {
+                Name = "Test",
+                LastName = "User",
+                Email = "test@test.com",
+                Password = "password"
+            };
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+            UserRole userRole = new UserRole { UserId = user.Id, RoleId = visitorRole.Id };
+            _context.UserRoles.Add(userRole);
+            _context.SaveChanges();
+
+            User result = _userRepository.GetByEmailWithRoles("test@test.com");
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("test@test.com", result.Email);
+            Assert.AreEqual(1, result.UserRoles.Count);
+            Assert.AreEqual(Role.VISITOR, result.UserRoles.First().Role.Name);
+        }
     }
 }
