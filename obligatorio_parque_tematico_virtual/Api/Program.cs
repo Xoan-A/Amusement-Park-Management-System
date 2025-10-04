@@ -45,6 +45,13 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Initialize database and seed data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<DataAccess.Context.AppDbContext>();
+    context.Database.EnsureCreated();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

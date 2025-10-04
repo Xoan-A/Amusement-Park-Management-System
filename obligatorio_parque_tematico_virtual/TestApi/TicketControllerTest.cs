@@ -45,6 +45,24 @@ namespace TestApi
             _factory.Dispose();
         }
 
+        private async Task<HttpClient> CreateAuthenticatedClient(string email, string password)
+        {
+            LoginRequest loginRequest = new LoginRequest { Email = email, Password = password };
+            HttpContent loginContent = new StringContent(
+                JsonSerializer.Serialize(loginRequest),
+                Encoding.UTF8,
+                "application/json"
+            );
+            HttpResponseMessage loginResponse = await _client.PostAsync("/api/auth/login", loginContent);
+            loginResponse.EnsureSuccessStatusCode();
+            String loginResponseBody = await loginResponse.Content.ReadAsStringAsync();
+            LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            HttpClient authenticatedClient = _factory.CreateClient();
+            authenticatedClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.Token);
+            return authenticatedClient;
+        }
+
         [TestMethod]
         public async Task TestPurchaseTicket_Success()
         {
@@ -69,6 +87,8 @@ namespace TestApi
             String registerResponseBody = await registerResponse.Content.ReadAsStringAsync();
             RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
+            HttpClient authenticatedClient = await CreateAuthenticatedClient("testuser@test.com", "password123");
+
             PurchaseTicketRequest purchaseRequest = new PurchaseTicketRequest
             {
                 VisitorId = registerResult.Id,
@@ -82,7 +102,7 @@ namespace TestApi
                 "application/json"
             );
 
-            HttpResponseMessage purchaseResponse = await _client.PostAsync("/api/tickets", purchaseContent);
+            HttpResponseMessage purchaseResponse = await authenticatedClient.PostAsync("/api/tickets", purchaseContent);
 
             Assert.AreEqual(HttpStatusCode.OK, purchaseResponse.StatusCode);
 
@@ -98,6 +118,21 @@ namespace TestApi
         [TestMethod]
         public async Task TestPurchaseTicket_VisitorNotFound()
         {
+            // Register and login a user for authentication
+            await _client.PostAsync("/api/auth/register", new StringContent(
+                JsonSerializer.Serialize(new RegisterVisitorRequest
+                {
+                    Name = "Auth",
+                    LastName = "User",
+                    Email = "authuser1@test.com",
+                    Password = "password123",
+                    BirthDate = new DateTime(1990, 1, 1)
+                }),
+                Encoding.UTF8,
+                "application/json"
+            ));
+            HttpClient authenticatedClient = await CreateAuthenticatedClient("authuser1@test.com", "password123");
+
             PurchaseTicketRequest request = new PurchaseTicketRequest
             {
                 VisitorId = Guid.NewGuid(),
@@ -111,7 +146,7 @@ namespace TestApi
                 "application/json"
             );
 
-            HttpResponseMessage response = await _client.PostAsync("/api/tickets", content);
+            HttpResponseMessage response = await authenticatedClient.PostAsync("/api/tickets", content);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
@@ -140,6 +175,8 @@ namespace TestApi
             String registerResponseBody = await registerResponse.Content.ReadAsStringAsync();
             RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
+            HttpClient authenticatedClient = await CreateAuthenticatedClient("testuser2@test.com", "password123");
+
             PurchaseTicketRequest purchaseRequest = new PurchaseTicketRequest
             {
                 VisitorId = registerResult.Id,
@@ -153,7 +190,7 @@ namespace TestApi
                 "application/json"
             );
 
-            HttpResponseMessage purchaseResponse = await _client.PostAsync("/api/tickets", purchaseContent);
+            HttpResponseMessage purchaseResponse = await authenticatedClient.PostAsync("/api/tickets", purchaseContent);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, purchaseResponse.StatusCode);
         }
@@ -182,6 +219,8 @@ namespace TestApi
             String registerResponseBody = await registerResponse.Content.ReadAsStringAsync();
             RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
+            HttpClient authenticatedClient = await CreateAuthenticatedClient("testuser3@test.com", "password123");
+
             PurchaseTicketRequest purchaseRequest = new PurchaseTicketRequest
             {
                 VisitorId = registerResult.Id,
@@ -195,13 +234,13 @@ namespace TestApi
                 "application/json"
             );
 
-            HttpResponseMessage purchaseResponse = await _client.PostAsync("/api/tickets", purchaseContent);
+            HttpResponseMessage purchaseResponse = await authenticatedClient.PostAsync("/api/tickets", purchaseContent);
             purchaseResponse.EnsureSuccessStatusCode();
 
             String purchaseResponseBody = await purchaseResponse.Content.ReadAsStringAsync();
             TicketResponse purchaseResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            HttpResponseMessage getResponse = await _client.GetAsync($"/api/tickets/{purchaseResult.Id}");
+            HttpResponseMessage getResponse = await authenticatedClient.GetAsync($"/api/tickets/{purchaseResult.Id}");
 
             Assert.AreEqual(HttpStatusCode.OK, getResponse.StatusCode);
 
@@ -216,7 +255,22 @@ namespace TestApi
         [TestMethod]
         public async Task TestGetTicketById_NotFound()
         {
-            HttpResponseMessage response = await _client.GetAsync("/api/tickets/99999");
+            // Register and login a user for authentication
+            await _client.PostAsync("/api/auth/register", new StringContent(
+                JsonSerializer.Serialize(new RegisterVisitorRequest
+                {
+                    Name = "Auth",
+                    LastName = "User",
+                    Email = "authuser2@test.com",
+                    Password = "password123",
+                    BirthDate = new DateTime(1990, 1, 1)
+                }),
+                Encoding.UTF8,
+                "application/json"
+            ));
+            HttpClient authenticatedClient = await CreateAuthenticatedClient("authuser2@test.com", "password123");
+
+            HttpResponseMessage response = await authenticatedClient.GetAsync("/api/tickets/99999");
 
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
         }
@@ -245,6 +299,8 @@ namespace TestApi
             String registerResponseBody = await registerResponse.Content.ReadAsStringAsync();
             RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
+            HttpClient authenticatedClient = await CreateAuthenticatedClient("testuser4@test.com", "password123");
+
             PurchaseTicketRequest purchaseRequest1 = new PurchaseTicketRequest
             {
                 VisitorId = registerResult.Id,
@@ -258,7 +314,7 @@ namespace TestApi
                 "application/json"
             );
 
-            await _client.PostAsync("/api/tickets", purchaseContent1);
+            await authenticatedClient.PostAsync("/api/tickets", purchaseContent1);
 
             PurchaseTicketRequest purchaseRequest2 = new PurchaseTicketRequest
             {
@@ -274,9 +330,9 @@ namespace TestApi
                 "application/json"
             );
 
-            await _client.PostAsync("/api/tickets", purchaseContent2);
+            await authenticatedClient.PostAsync("/api/tickets", purchaseContent2);
 
-            HttpResponseMessage getResponse = await _client.GetAsync($"/api/tickets/visitor/{registerResult.Id}");
+            HttpResponseMessage getResponse = await authenticatedClient.GetAsync($"/api/tickets/visitor/{registerResult.Id}");
 
             Assert.AreEqual(HttpStatusCode.OK, getResponse.StatusCode);
 
