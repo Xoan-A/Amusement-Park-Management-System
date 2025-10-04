@@ -11,10 +11,12 @@ namespace Api.Controllers;
 public class AttractionController : ControllerBase
 {
     private readonly IAttractionService _attractionService;
+    private readonly IUserLogic _userService;
 
-    public AttractionController(IAttractionService attractionService)
+    public AttractionController(IAttractionService attractionService, IUserLogic userService)
     {
         _attractionService = attractionService;
+        _userService = userService;
     }
 
     [HttpGet]
@@ -82,5 +84,39 @@ public class AttractionController : ControllerBase
     {
         await _attractionService.DeleteAttraction(id);
         return NoContent();
+    }
+
+    [HttpPost("registerEntry/{id}")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> RegisterEntry(Guid id, [FromBody] RegisterEntryRequest registerEntryRequest)
+    {
+        await _userService.RegisterEntry(registerEntryRequest.UserId, id, registerEntryRequest.EnterDate);
+
+        MessageResponse response = new MessageResponse
+        {
+            Message = "Entry registered successfully"
+        };
+        return Ok(response);
+    }
+
+    [HttpPut("registerExit/{id}")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> RegisterExit(Guid id, [FromBody] RegisterExitRequest registerExitRequest)
+    {
+        await _userService.RegisterExit(registerExitRequest.userId, id, registerExitRequest.exitDate);
+
+        MessageResponse response = new MessageResponse
+        {
+            Message = "Exit registered successfully"
+        };
+        return Ok(response);
+    }
+
+    [HttpGet("capacity/{id}")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> GetCapacity(Guid id)
+    {
+        CapacityResponse capacity = await _attractionService.GetCapacity(id);
+        return Ok(capacity);
     }
 }

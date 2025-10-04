@@ -105,6 +105,17 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
         return await _attractionRepository.GetById(expectedAttractionId);
     }
 
+    public async Task<CapacityResponse> GetCapacity(Guid id)
+    {
+        Attraction attraction = await _attractionRepository.GetById(id);
+        return new CapacityResponse()
+        {
+            Id = attraction.Id,
+            Capacity = attraction.MaxCapacity,
+            CurrentCapacity = attraction.CurrentCapacity
+        };
+    }
+
     public async Task<List<string>> GetAttractionIncidents(Guid attractionId)
     {
         Attraction attraction = await _attractionRepository.GetById(attractionId);

@@ -14,4 +14,5 @@ public interface IAttractionService
     Task AddIncident(Guid id, string incident);
     Task RemoveIncident(Guid id, string incident);
     Task<List<string>> GetAttractionIncidents(Guid id);
+    Task<CapacityResponse> GetCapacity(Guid id);
 }
