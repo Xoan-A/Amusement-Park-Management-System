@@ -186,7 +186,8 @@ public class EventServiceTest
     {
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
         baseEventRequest.Name = String.Empty;
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _eventService.CreateEvent(baseEventRequest));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _eventService.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]

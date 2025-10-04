@@ -95,10 +95,11 @@ public class AttractionControllerTest
         var response = await _adminClient.GetAsync("/api/attractions");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
-        AllAttractionsResponse attractionsResponse = JsonSerializer.Deserialize<AllAttractionsResponse>(content, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        AllAttractionsResponse attractionsResponse = JsonSerializer.Deserialize<AllAttractionsResponse>(content,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
 
         Assert.IsNotNull(attractionsResponse);
         Assert.AreEqual(id, attractionsResponse.Attractions[0].Id);
@@ -132,10 +133,11 @@ public class AttractionControllerTest
         var response = await _adminClient.GetAsync($"/api/attractions/{id}");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
-        AttractionResponse attractionResponse = JsonSerializer.Deserialize<AttractionResponse>(content, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        AttractionResponse attractionResponse = JsonSerializer.Deserialize<AttractionResponse>(content,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
 
         Assert.IsNotNull(attractionResponse);
         Assert.AreEqual(id, attractionResponse.Id);

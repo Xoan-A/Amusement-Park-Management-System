@@ -104,7 +104,7 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
     {
         return await _attractionRepository.GetById(expectedAttractionId);
     }
-    
+
     public async Task<List<string>> GetAttractionIncidents(Guid attractionId)
     {
         Attraction attraction = await _attractionRepository.GetById(attractionId);
@@ -112,13 +112,15 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
         {
             throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
         }
+
         if (attraction.Incidents.Count == _noIncidents)
         {
             throw new KeyNotFoundException($"La atracción con id {attractionId} no tiene incidencias");
         }
+
         return attraction.Incidents;
     }
-    
+
     public async Task AddIncident(Guid attractionId, string incidence)
     {
         Attraction attraction = await _attractionRepository.GetById(attractionId);
@@ -126,10 +128,11 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
         {
             throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
         }
+
         attraction.AddIncident(incidence);
         await _attractionRepository.Update(attraction);
     }
-    
+
     public async Task RemoveIncident(Guid attractionId, string incidence)
     {
         Attraction attraction = await _attractionRepository.GetById(attractionId);
@@ -137,6 +140,7 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
         {
             throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
         }
+
         attraction.RemoveIncident(incidence);
         await _attractionRepository.Update(attraction);
     }

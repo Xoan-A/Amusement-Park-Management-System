@@ -56,7 +56,8 @@ public class IncidentControllerTest
         var response = await _operatorClient.GetAsync($"/api/incidents/{_attractionId}");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
-        List<string> result = JsonSerializer.Deserialize<List<string>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        List<string> result = JsonSerializer.Deserialize<List<string>>(content,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         Assert.AreEqual(1, result.Count);
         Assert.AreEqual("Incidente1", result[0]);
     }
@@ -97,7 +98,8 @@ public class IncidentControllerTest
         _mockService.Setup(s => s.RemoveIncident(_attractionId, "Incidente")).Returns(Task.CompletedTask);
         var incidentRequest = new { incident = "Incidente" };
         var content = new StringContent(JsonSerializer.Serialize(incidentRequest), Encoding.UTF8, "application/json");
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/incidents/{_attractionId}") { Content = content };
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/incidents/{_attractionId}")
+            { Content = content };
         var response = await _operatorClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
         string respContent = await response.Content.ReadAsStringAsync();
@@ -110,7 +112,8 @@ public class IncidentControllerTest
         _mockService.Setup(s => s.RemoveIncident(_attractionId, "Incidente")).ThrowsAsync(new KeyNotFoundException());
         var incidentRequest = new { incident = "Incidente" };
         var content = new StringContent(JsonSerializer.Serialize(incidentRequest), Encoding.UTF8, "application/json");
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/incidents/{_attractionId}") { Content = content };
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/incidents/{_attractionId}")
+            { Content = content };
         var response = await _operatorClient.SendAsync(request);
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }

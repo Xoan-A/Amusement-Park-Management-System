@@ -414,69 +414,69 @@ public class AttractionServiceTest
         await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
             await _attractionService.GetAttractionById(newId));
     }
-    
+
     [TestMethod]
-public async Task GetAttractionIncidents_ShouldThrowException_WhenAttractionNotFound()
-{
-    Guid id = Guid.NewGuid();
-    _mockAttractionRepository.Setup(r => r.GetById(id)).ReturnsAsync((Attraction)null);
-    await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
-        await _attractionService.GetAttractionIncidents(id));
-}
+    public async Task GetAttractionIncidents_ShouldThrowException_WhenAttractionNotFound()
+    {
+        Guid id = Guid.NewGuid();
+        _mockAttractionRepository.Setup(r => r.GetById(id)).ReturnsAsync((Attraction)null);
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
+            await _attractionService.GetAttractionIncidents(id));
+    }
 
-[TestMethod]
-public async Task GetAttractionIncidents_ShouldThrowException_WhenNoIncidents()
-{
-    Attraction attraction = new Attraction { Incidents = new List<string>() };
-    _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
-    await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
-        await _attractionService.GetAttractionIncidents(attraction.Id));
-}
+    [TestMethod]
+    public async Task GetAttractionIncidents_ShouldThrowException_WhenNoIncidents()
+    {
+        Attraction attraction = new Attraction { Incidents = new List<string>() };
+        _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
+            await _attractionService.GetAttractionIncidents(attraction.Id));
+    }
 
-[TestMethod]
-public async Task GetAttractionIncidents_ShouldReturnIncidents_WhenHasIncidents()
-{
-    Attraction attraction = new Attraction { Incidents = new List<string> { "Incidente1" } };
-    _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
-    List<string> incidents = await _attractionService.GetAttractionIncidents(attraction.Id);
-    
-    Assert.AreEqual(1, incidents.Count);
-    Assert.AreEqual("Incidente1", incidents[0]);
-}
+    [TestMethod]
+    public async Task GetAttractionIncidents_ShouldReturnIncidents_WhenHasIncidents()
+    {
+        Attraction attraction = new Attraction { Incidents = new List<string> { "Incidente1" } };
+        _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
+        List<string> incidents = await _attractionService.GetAttractionIncidents(attraction.Id);
 
-[TestMethod]
-public async Task AddIncidence_ShouldThrowException_WhenAttractionNotFound()
-{
-    Guid id = Guid.NewGuid();
-    _mockAttractionRepository.Setup(r => r.GetById(id)).ReturnsAsync((Attraction)null);
-    await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
-        await _attractionService.AddIncident(id, "Incidente"));
-}
+        Assert.AreEqual(1, incidents.Count);
+        Assert.AreEqual("Incidente1", incidents[0]);
+    }
 
-[TestMethod]
-public async Task AddIncidence_ShouldAddIncident_WhenAttractionExists()
-{
-    Attraction attraction = new Attraction { Incidents = new List<string>() };
-    _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
-    await _attractionService.AddIncident(attraction.Id, "Incidente");
-    _mockAttractionRepository.Verify(r => r.Update(attraction), Times.Once);
-}
+    [TestMethod]
+    public async Task AddIncidence_ShouldThrowException_WhenAttractionNotFound()
+    {
+        Guid id = Guid.NewGuid();
+        _mockAttractionRepository.Setup(r => r.GetById(id)).ReturnsAsync((Attraction)null);
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
+            await _attractionService.AddIncident(id, "Incidente"));
+    }
 
-[TestMethod]
-public async Task RemoveIncidence_ShouldThrowException_WhenAttractionNotFound()
-{
-    Guid id = Guid.NewGuid();
-    _mockAttractionRepository.Setup(r => r.GetById(id)).ReturnsAsync((Attraction)null);
-    await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
-        await _attractionService.RemoveIncident(id, "Incidente"));
-}
+    [TestMethod]
+    public async Task AddIncidence_ShouldAddIncident_WhenAttractionExists()
+    {
+        Attraction attraction = new Attraction { Incidents = new List<string>() };
+        _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
+        await _attractionService.AddIncident(attraction.Id, "Incidente");
+        _mockAttractionRepository.Verify(r => r.Update(attraction), Times.Once);
+    }
 
-[TestMethod]
-public async Task RemoveIncidence_ShouldRemoveIncident_WhenAttractionExists()
-{
-    Attraction attraction = new Attraction { Incidents = new List<string> { "Incidente" } };
-    _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
-    await _attractionService.RemoveIncident(attraction.Id, "Incidente");
-    _mockAttractionRepository.Verify(r => r.Update(attraction), Times.Once);
-}
+    [TestMethod]
+    public async Task RemoveIncidence_ShouldThrowException_WhenAttractionNotFound()
+    {
+        Guid id = Guid.NewGuid();
+        _mockAttractionRepository.Setup(r => r.GetById(id)).ReturnsAsync((Attraction)null);
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
+            await _attractionService.RemoveIncident(id, "Incidente"));
+    }
+
+    [TestMethod]
+    public async Task RemoveIncidence_ShouldRemoveIncident_WhenAttractionExists()
+    {
+        Attraction attraction = new Attraction { Incidents = new List<string> { "Incidente" } };
+        _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
+        await _attractionService.RemoveIncident(attraction.Id, "Incidente");
+        _mockAttractionRepository.Verify(r => r.Update(attraction), Times.Once);
+    }
 }

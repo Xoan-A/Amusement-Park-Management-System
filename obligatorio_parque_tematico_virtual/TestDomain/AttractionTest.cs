@@ -42,10 +42,10 @@ public class AttractionTest
     {
         Attraction attraction1 = new Attraction();
         attraction1.AddIncident("Incident 1");
-        
+
         Assert.AreEqual("Incident 1", attraction1.Incidents[0]);
-        
-        
+
+
         attraction1.RemoveIncident("Incident 1");
         Assert.AreEqual(0, attraction1.Incidents.Count);
     }

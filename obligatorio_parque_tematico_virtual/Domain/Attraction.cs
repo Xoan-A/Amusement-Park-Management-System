@@ -16,13 +16,13 @@ public class Attraction
     {
         this.Id = Guid.NewGuid();
     }
-    
-    public void AddIncident (string incident)
+
+    public void AddIncident(string incident)
     {
         Incidents.Add(incident);
     }
-    
-    public void RemoveIncident (string incident)
+
+    public void RemoveIncident(string incident)
     {
         Incidents.Remove(incident);
     }
