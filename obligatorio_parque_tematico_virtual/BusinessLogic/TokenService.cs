@@ -42,6 +42,12 @@ namespace BusinessLogic
                     claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
                 }
             }
+            else
+            {
+                // Fallback to class name for backward compatibility (legacy Administrator/Operator/Visitor classes)
+                string role = user.GetType().Name;
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
             SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
