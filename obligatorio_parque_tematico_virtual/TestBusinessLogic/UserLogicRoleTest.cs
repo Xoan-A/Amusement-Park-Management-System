@@ -15,6 +15,8 @@ public class UserLogicRoleTest
     private Mock<IUserRepository> _mockUserRepository = null!;
     private Mock<IRoleRepository> _mockRoleRepository = null!;
     private Mock<IPasswordService> _mockPasswordService = null!;
+    private Mock<IAttractionRepository> _mockAttractionRepository = null!;
+    private Mock<ITicketLogic> _mockTicketLogic = null!;
     private IUserLogic _userLogic = null!;
 
     [TestInitialize]
@@ -23,7 +25,10 @@ public class UserLogicRoleTest
         _mockUserRepository = new Mock<IUserRepository>();
         _mockRoleRepository = new Mock<IRoleRepository>();
         _mockPasswordService = new Mock<IPasswordService>();
-        _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object, _mockRoleRepository.Object);
+        _mockAttractionRepository = new Mock<IAttractionRepository>();
+        _mockTicketLogic = new Mock<ITicketLogic>();
+        _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
+            _mockAttractionRepository.Object, _mockTicketLogic.Object, _mockRoleRepository.Object);
     }
 
     [TestMethod]
