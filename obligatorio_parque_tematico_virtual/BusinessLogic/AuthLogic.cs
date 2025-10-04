@@ -24,7 +24,7 @@ namespace BusinessLogic
                 return null;
             }
 
-            User user = _userRepository.GetByEmail(email);
+            User user = _userRepository.GetByEmailWithRoles(email);
             if (user == null)
             {
                 return null;
