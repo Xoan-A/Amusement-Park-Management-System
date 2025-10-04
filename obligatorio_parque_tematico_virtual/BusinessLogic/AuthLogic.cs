@@ -8,16 +8,14 @@ namespace BusinessLogic
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordService _passwordService;
-        private readonly ITokenService _tokenService;
 
-        public AuthLogic(IUserRepository userRepository, IPasswordService passwordService, ITokenService tokenService)
+        public AuthLogic(IUserRepository userRepository, IPasswordService passwordService)
         {
             _userRepository = userRepository;
             _passwordService = passwordService;
-            _tokenService = tokenService;
         }
 
-        public string Login(string email, string password)
+        public User Login(string email, string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
@@ -36,7 +34,7 @@ namespace BusinessLogic
                 return null;
             }
 
-            return _tokenService.GenerateToken(user);
+            return user;
         }
     }
 }
