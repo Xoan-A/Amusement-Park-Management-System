@@ -46,7 +46,7 @@ public class ReportTests
         Attraction attraction = new Attraction { Name = "Test Attraction" };
         Report report = new Report(enterDate, attraction);
 
-        Assert.AreEqual(default(DateTime), report.ExitDate);
+        Assert.AreEqual(null, report.ExitDate);
     }
 
     [TestMethod]

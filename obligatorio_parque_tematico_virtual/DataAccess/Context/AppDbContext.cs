@@ -9,6 +9,8 @@ namespace DataAccess.Context
         public virtual DbSet<Attraction> Attractions { get; set; }
         public virtual DbSet<Event> Events { get; set; }
         public virtual DbSet<Ticket> Tickets { get; set; }
+        public virtual DbSet<VisitorReport> VisitorReports { get; set; }
+        public virtual DbSet<Report> Reports { get; set; }
 
         public AppDbContext()
         {
@@ -59,6 +61,24 @@ namespace DataAccess.Context
                 .HasOne(t => t.Visitor)
                 .WithMany()
                 .HasForeignKey(t => t.VisitorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<VisitorReport>()
+                .HasOne(vr => vr.Visitor)
+                .WithMany(v => v.VisitorReports)
+                .HasForeignKey(vr => vr.VisitorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Report>()
+                .HasOne(r => r.VisitorReport)
+                .WithMany(vr => vr.Reports)
+                .HasForeignKey(r => r.VisitorReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Report>()
+                .HasOne(r => r.Attraction)
+                .WithMany()
+                .HasForeignKey(r => r.AttractionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
