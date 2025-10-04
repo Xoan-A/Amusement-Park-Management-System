@@ -12,6 +12,8 @@ namespace Domain
         public string Email { get; set; }
         public string Password { get; set; }
         public List<VisitorReport> VisitorReports { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public MembershipLevel? MembershipLevel { get; set; }
         public ICollection<UserRole> UserRoles { get; set; }
 
         public User()
