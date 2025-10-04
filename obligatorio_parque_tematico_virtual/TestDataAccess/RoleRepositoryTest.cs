@@ -19,6 +19,7 @@ public class RoleRepositoryTest
             .Options;
 
         _context = new AppDbContext(options);
+        _context.Database.EnsureCreated();
         _repository = new RoleRepository(_context);
     }
 
