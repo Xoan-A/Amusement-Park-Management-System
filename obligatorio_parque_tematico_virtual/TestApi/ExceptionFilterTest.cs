@@ -79,6 +79,30 @@ public class ExceptionFilterTest
         Assert.AreEqual("Datos inválidos", GetMessage(response.Value));
     }
 
+    [TestMethod]
+    public void OnException_WhenExceptionIsUnauthorized_ShouldResponse401()
+    {
+        _context.Exception = new Domain.Exceptions.UnauthorizedException("Unauthorized access");
+        _attribute.OnException(_context);
+
+        var response = _context.Result as ObjectResult;
+        Assert.AreEqual((int)HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.AreEqual("401", response.StatusCode.ToString());
+        Assert.AreEqual("Unauthorized access", GetMessage(response.Value));
+    }
+
+    [TestMethod]
+    public void OnException_WhenExceptionIsForbidden_ShouldResponse403()
+    {
+        _context.Exception = new Domain.Exceptions.ForbiddenException("Forbidden access");
+        _attribute.OnException(_context);
+
+        var response = _context.Result as ObjectResult;
+        Assert.AreEqual((int)HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.AreEqual("403", response.StatusCode.ToString());
+        Assert.AreEqual("Forbidden access", GetMessage(response.Value));
+    }
+
     private string GetMessage(object value) =>
         value?.GetType().GetProperty("Message")?.GetValue(value)?.ToString() ?? string.Empty;
 }
