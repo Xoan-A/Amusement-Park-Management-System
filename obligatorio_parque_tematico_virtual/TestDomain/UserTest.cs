@@ -51,6 +51,17 @@ namespace TestDomain
         }
 
         [TestMethod]
+        public void User_ShouldInitializeVisitorReportsCollection()
+        {
+            // Arrange & Act
+            User user = new User();
+
+            // Assert
+            Assert.IsNotNull(user.VisitorReports);
+            Assert.AreEqual(0, user.VisitorReports.Count);
+        }
+
+        [TestMethod]
         public void User_ShouldSupportBirthDate_ForVisitors()
         {
             // Arrange
