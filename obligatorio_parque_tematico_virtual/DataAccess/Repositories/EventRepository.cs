@@ -39,4 +39,13 @@ public class EventRepository : IEventRepository
         _context.Events.Remove(eventEntity);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<Event?> GetEventByAttractionAndDate(Guid attractionId, DateTime date)
+    {
+        return await _context.Events
+            .Include(e => e.Attractions)
+            .FirstOrDefaultAsync(e =>
+                e.Date.Date == date.Date &&
+                e.Attractions.Any(ea => ea.AttractionId == attractionId));
+    }
 }
