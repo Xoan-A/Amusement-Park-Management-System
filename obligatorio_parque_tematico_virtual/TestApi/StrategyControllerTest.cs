@@ -75,10 +75,16 @@ namespace ApiTests
             var mockStrategy = new Mock<IContreteStrategy>();
             mockStrategy.Setup(s => s.Name).Returns("PerAttraction");
 
-            _mockActiveStrategy.Setup(x => x.GetStrategy())
+            _mockActiveStrategy.Setup(x => x.GetStrategy(It.IsAny<DateTime>()))
                 .Returns(mockStrategy.Object);
 
-            var response = await _adminClient.GetAsync("/api/strategy");
+            var getRequest = new GetStrategyRequest { CurrentDate = new DateTime(2024, 1, 15, 10, 0, 0) };
+            var json = JsonSerializer.Serialize(getRequest);
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy")
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+            var response = await _adminClient.SendAsync(requestMessage);
 
             response.EnsureSuccessStatusCode();
 
@@ -94,10 +100,16 @@ namespace ApiTests
         [TestMethod]
         public async Task GetStrategy_WhenNoStrategySet_ShouldReturnInternalServerError()
         {
-            _mockActiveStrategy.Setup(x => x.GetStrategy())
+            _mockActiveStrategy.Setup(x => x.GetStrategy(It.IsAny<DateTime>()))
                 .Throws(new InvalidOperationException("Strategy not set"));
 
-            var response = await _adminClient.GetAsync("/api/strategy");
+            var getRequest = new GetStrategyRequest { CurrentDate = new DateTime(2024, 1, 15, 10, 0, 0) };
+            var json = JsonSerializer.Serialize(getRequest);
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy")
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+            var response = await _adminClient.SendAsync(requestMessage);
 
             Assert.AreEqual(HttpStatusCode.InternalServerError, response.StatusCode);
         }
@@ -105,7 +117,13 @@ namespace ApiTests
         [TestMethod]
         public async Task GetStrategy_WithoutAuth_ShouldReturnUnauthorized()
         {
-            var response = await _client.GetAsync("/api/strategy");
+            var getRequest = new GetStrategyRequest { CurrentDate = new DateTime(2024, 1, 15, 10, 0, 0) };
+            var json = JsonSerializer.Serialize(getRequest);
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy")
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+            var response = await _client.SendAsync(requestMessage);
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
@@ -277,7 +295,7 @@ namespace ApiTests
             mockStrategy.Setup(s => s.Name).Returns("Combo");
 
             _mockActiveStrategy.Setup(x => x.SetStrategy(It.IsAny<SetStrategyRequest>()));
-            _mockActiveStrategy.Setup(x => x.GetStrategy()).Returns(mockStrategy.Object);
+            _mockActiveStrategy.Setup(x => x.GetStrategy(It.IsAny<DateTime>())).Returns(mockStrategy.Object);
 
             var json = JsonSerializer.Serialize(setRequest);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -285,7 +303,13 @@ namespace ApiTests
             var setResponse = await _adminClient.PutAsync("/api/strategy/set", content);
             setResponse.EnsureSuccessStatusCode();
 
-            var getResponse = await _adminClient.GetAsync("/api/strategy");
+            var getRequest = new GetStrategyRequest { CurrentDate = new DateTime(2024, 1, 15, 10, 0, 0) };
+            var getJson = JsonSerializer.Serialize(getRequest);
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy")
+            {
+                Content = new StringContent(getJson, Encoding.UTF8, "application/json")
+            };
+            var getResponse = await _adminClient.SendAsync(requestMessage);
             getResponse.EnsureSuccessStatusCode();
 
             var responseContent = await getResponse.Content.ReadAsStringAsync();

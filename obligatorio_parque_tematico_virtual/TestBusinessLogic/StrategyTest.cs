@@ -14,12 +14,14 @@ namespace TestBusinessLogic
             var activeStrategy = new ActiveStrategy();
             var perAttractionStrategy = new PerAttraction();
 
+            var currentDate = new DateTime(2024, 1, 15, 10, 0, 0);
             activeStrategy.SetStrategy(new SetStrategyRequest
             {
-                StrategyName = "PerAttraction"
+                StrategyName = "PerAttraction",
+                CurrentDate = currentDate
             });
 
-            IContreteStrategy result = activeStrategy.GetStrategy();
+            IContreteStrategy result = activeStrategy.GetStrategy(currentDate);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("PerAttraction", result.Name);
@@ -29,22 +31,25 @@ namespace TestBusinessLogic
         public void ActiveStrategy_GetStrategy_ShouldThrowWhenNoStrategySet()
         {
             var activeStrategy = new ActiveStrategy();
+            var currentDate = new DateTime(2024, 1, 15, 10, 0, 0);
 
-            Assert.ThrowsException<InvalidOperationException>(() => activeStrategy.GetStrategy());
+            Assert.ThrowsException<InvalidOperationException>(() => activeStrategy.GetStrategy(currentDate));
         }
 
         [TestMethod]
         public void ActiveStrategy_SetStrategy_WithCombo_ShouldSetComboWithN()
         {
             var activeStrategy = new ActiveStrategy();
+            var currentDate = new DateTime(2024, 1, 15, 10, 0, 0);
 
             activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "Combo",
-                N = 30
+                N = 30,
+                CurrentDate = currentDate
             });
 
-            IContreteStrategy result = activeStrategy.GetStrategy();
+            IContreteStrategy result = activeStrategy.GetStrategy(currentDate);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Combo", result.Name);
@@ -56,12 +61,14 @@ namespace TestBusinessLogic
         public void ActiveStrategy_SetStrategy_WithCombo_ShouldThrowWhenNIsNull()
         {
             var activeStrategy = new ActiveStrategy();
+            var currentDate = new DateTime(2024, 1, 15, 10, 0, 0);
 
             Assert.ThrowsException<ArgumentException>(() =>
                 activeStrategy.SetStrategy(new SetStrategyRequest
                 {
                     StrategyName = "Combo",
-                    N = null
+                    N = null,
+                    CurrentDate = currentDate
                 }));
         }
 
@@ -69,11 +76,13 @@ namespace TestBusinessLogic
         public void ActiveStrategy_SetStrategy_ShouldThrowForInvalidStrategyName()
         {
             var activeStrategy = new ActiveStrategy();
+            var currentDate = new DateTime(2024, 1, 15, 10, 0, 0);
 
             Assert.ThrowsException<ArgumentException>(() =>
                 activeStrategy.SetStrategy(new SetStrategyRequest
                 {
-                    StrategyName = "InvalidStrategy"
+                    StrategyName = "InvalidStrategy",
+                    CurrentDate = currentDate
                 }));
         }
 
