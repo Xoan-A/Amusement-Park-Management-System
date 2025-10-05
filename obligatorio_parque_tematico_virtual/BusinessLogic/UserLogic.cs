@@ -54,15 +54,16 @@ namespace BusinessLogic
             return _userRepository.Create(visitor) as Visitor;
         }
 
-        public async Task RegisterEntry(Guid userId, Guid attractionId, DateTime enterDate, Guid? qr, Guid? nfc, int? eventId)
+        public async Task RegisterEntry(Guid userId, Guid attractionId, DateTime enterDate, Guid? qr, Guid? nfc,
+            int? eventId)
         {
             if (qr == null && nfc == null)
                 throw new ArgumentException("QR code or NFC must be provided.");
-            
+
             bool isValidTicket = await _ticketLogic.ValidateTicketAsync(qr, nfc, enterDate, eventId);
             if (!isValidTicket)
                 throw new ArgumentException("User does not have a valid ticket.");
-            
+
             User user = _userRepository.GetById(userId);
             if (user == null)
                 throw new ArgumentException("User not found.");

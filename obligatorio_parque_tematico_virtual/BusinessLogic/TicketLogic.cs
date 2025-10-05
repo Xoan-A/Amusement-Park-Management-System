@@ -13,14 +13,16 @@ namespace BusinessLogic
         private readonly IUserRepository _userRepository;
         private readonly IDateTimeLogic _dateTimeLogic;
 
-        public TicketLogic(ITicketRepository ticketRepository, IUserRepository userRepository, IDateTimeLogic dateTimeLogic)
+        public TicketLogic(ITicketRepository ticketRepository, IUserRepository userRepository,
+            IDateTimeLogic dateTimeLogic)
         {
             _ticketRepository = ticketRepository;
             _userRepository = userRepository;
             _dateTimeLogic = dateTimeLogic;
         }
 
-        public async Task<Ticket> PurchaseTicketAsync(Guid visitorId, DateTime visitDate, TicketType ticketType, int? eventId)
+        public async Task<Ticket> PurchaseTicketAsync(Guid visitorId, DateTime visitDate, TicketType ticketType,
+            int? eventId)
         {
             User visitor = _userRepository.GetById(visitorId);
             if (visitor == null || visitor is not Visitor)
@@ -61,14 +63,14 @@ namespace BusinessLogic
         {
             return await _ticketRepository.GetByQRCodeAsync(qrCode);
         }
-        
+
         public async Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, int? eventId)
         {
             bool isValid = false;
 
             if (qr == null && nfc == null)
                 return isValid;
-            
+
             Ticket? ticket;
             if (qr != null)
             {
