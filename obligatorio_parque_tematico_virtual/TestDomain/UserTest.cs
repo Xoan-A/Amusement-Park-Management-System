@@ -251,5 +251,58 @@ namespace TestDomain
             visitor.RegisterExit(attraction, exitDate);
             visitor.RegisterExit(attraction, exitDate2);
         }
+
+        [TestMethod]
+        public void User_Score_ShouldBeZeroByDefault()
+        {
+            Visitor visitor = new Visitor
+            {
+                Name = "John",
+                LastName = "Doe"
+            };
+
+            Assert.AreEqual(0, visitor.Score);
+        }
+
+        [TestMethod]
+        public void User_Score_ShouldBeSettable()
+        {
+            Visitor visitor = new Visitor
+            {
+                Name = "John",
+                LastName = "Doe",
+                Score = 50
+            };
+
+            Assert.AreEqual(50, visitor.Score);
+        }
+
+        [TestMethod]
+        public void User_Score_CanBeIncremented()
+        {
+            Visitor visitor = new Visitor
+            {
+                Name = "John",
+                LastName = "Doe",
+                Score = 10
+            };
+
+            visitor.Score += 5;
+
+            Assert.AreEqual(15, visitor.Score);
+        }
+
+        [TestMethod]
+        public void User_Score_CanBeSetToNegative()
+        {
+            Visitor visitor = new Visitor
+            {
+                Name = "John",
+                LastName = "Doe",
+                Score = -10
+            };
+
+            Assert.AreEqual(-10, visitor.Score);
+        }
     }
 }
