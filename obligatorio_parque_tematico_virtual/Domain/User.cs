@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Domain
 {
-    public abstract class User
+    public class User
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -10,11 +12,15 @@ namespace Domain
         public string Email { get; set; }
         public string Password { get; set; }
         public List<VisitorReport> VisitorReports { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public MembershipLevel? MembershipLevel { get; set; }
+        public ICollection<UserRole> UserRoles { get; set; }
         public int Score { get; set; }
 
         public User()
         {
             Id = Guid.NewGuid();
+            UserRoles = new List<UserRole>();
             VisitorReports = new List<VisitorReport>();
         }
 

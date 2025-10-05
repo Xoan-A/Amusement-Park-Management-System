@@ -25,7 +25,7 @@ namespace BusinessLogic
             int? eventId)
         {
             User visitor = _userRepository.GetById(visitorId);
-            if (visitor == null || visitor is not Visitor)
+            if (visitor == null)
             {
                 return null;
             }

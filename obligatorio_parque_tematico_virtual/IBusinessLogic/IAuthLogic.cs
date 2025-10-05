@@ -1,7 +1,9 @@
+using Domain;
+
 namespace IBusinessLogic
 {
     public interface IAuthLogic
     {
-        string Login(string email, string password);
+        User Login(string email, string password);
     }
 }

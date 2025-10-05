@@ -44,9 +44,23 @@ namespace ApiTests
         [TestMethod]
         public async Task LoginEndpoint_RequiresNoAuthentication()
         {
+            // First register a user
+            var registerRequest = new RegisterVisitorRequest
+            {
+                Name = "Test",
+                LastName = "User",
+                Email = "testlogin@test.com",
+                Password = "password123",
+                BirthDate = new System.DateTime(1990, 1, 1)
+            };
+            var registerJson = JsonSerializer.Serialize(registerRequest);
+            var registerContent = new StringContent(registerJson, Encoding.UTF8, "application/json");
+            await _client.PostAsync("/api/auth/register", registerContent);
+
+            // Now login with the registered user
             var request = new LoginRequest
             {
-                Email = "admin@test.com",
+                Email = "testlogin@test.com",
                 Password = "password123"
             };
 
