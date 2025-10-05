@@ -17,6 +17,7 @@ public class AttractionControllerTest
     private WebApplicationFactory<Program> _factory = null!;
     private HttpClient _client = null!;
     private HttpClient _adminClient = null!;
+    private HttpClient _operatorClient = null!;
     private Mock<IAttractionService> _mockAttractionService = null!;
     private Mock<IUserLogic> _mockUserLogic = null!;
 
@@ -50,6 +51,18 @@ public class AttractionControllerTest
         _adminClient = _factory.CreateClient();
         _adminClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
+
+        Operator operatorUser = new Operator
+        {
+            Id = Guid.NewGuid(),
+            Name = "Operator",
+            LastName = "User",
+            Email = "operator@example.com"
+        };
+        string operatorToken = tokenService.GenerateToken(operatorUser);
+        _operatorClient = _factory.CreateClient();
+        _operatorClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", operatorToken);
     }
 
     [TestCleanup]
@@ -57,6 +70,7 @@ public class AttractionControllerTest
     {
         _client?.Dispose();
         _adminClient?.Dispose();
+        _operatorClient?.Dispose();
         _factory?.Dispose();
     }
 
@@ -300,7 +314,7 @@ public class AttractionControllerTest
         Guid userId = Guid.NewGuid();
         DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate))
+        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, It.IsAny<Guid?>(), It.IsAny<Guid?>(), It.IsAny<int?>()))
             .Returns(Task.CompletedTask);
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
@@ -310,7 +324,7 @@ public class AttractionControllerTest
         };
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _adminClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+        var response = await _operatorClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -322,7 +336,7 @@ public class AttractionControllerTest
 
         Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate), Times.Once);
+        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, It.IsAny<Guid?>(), It.IsAny<Guid?>(), It.IsAny<int?>()), Times.Once);
     }
 
     [TestMethod]
@@ -342,7 +356,170 @@ public class AttractionControllerTest
         var response = await _client.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
-        _mockUserLogic.Verify(s => s.RegisterEntry(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>()), Times.Never);
+        _mockUserLogic.Verify(s => s.RegisterEntry(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<Guid?>(), It.IsAny<Guid?>(), It.IsAny<int?>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task RegisterEntry_WithQrCode_ReturnsSuccessMessage()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+        Guid qrCode = Guid.NewGuid();
+        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null))
+            .Returns(Task.CompletedTask);
+
+        RegisterEntryRequest requestBody = new RegisterEntryRequest
+        {
+            EnterDate = enterDate,
+            UserId = userId,
+            Qr = qrCode
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        var response = await _operatorClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+
+        response.EnsureSuccessStatusCode();
+        var responseContent = await response.Content.ReadAsStringAsync();
+        MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+        Assert.IsNotNull(messageResponse);
+        Assert.AreEqual("Entry registered successfully", messageResponse.Message);
+        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task RegisterEntry_WithNfc_ReturnsSuccessMessage()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, null, userId, null))
+            .Returns(Task.CompletedTask);
+
+        RegisterEntryRequest requestBody = new RegisterEntryRequest
+        {
+            EnterDate = enterDate,
+            UserId = userId,
+            NFC = userId
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        var response = await _operatorClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+
+        response.EnsureSuccessStatusCode();
+        var responseContent = await response.Content.ReadAsStringAsync();
+        MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+        Assert.IsNotNull(messageResponse);
+        Assert.AreEqual("Entry registered successfully", messageResponse.Message);
+        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, null, userId, null), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task RegisterEntry_WithEventId_ReturnsSuccessMessage()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+        Guid qrCode = Guid.NewGuid();
+        int eventId = 5;
+        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, eventId))
+            .Returns(Task.CompletedTask);
+
+        RegisterEntryRequest requestBody = new RegisterEntryRequest
+        {
+            EnterDate = enterDate,
+            UserId = userId,
+            Qr = qrCode,
+            EventId = eventId
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        var response = await _operatorClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+
+        response.EnsureSuccessStatusCode();
+        var responseContent = await response.Content.ReadAsStringAsync();
+        MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+        Assert.IsNotNull(messageResponse);
+        Assert.AreEqual("Entry registered successfully", messageResponse.Message);
+        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, eventId), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task RegisterEntry_WithNfcAndEventId_ReturnsSuccessMessage()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+        int eventId = 10;
+        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, null, userId, eventId))
+            .Returns(Task.CompletedTask);
+
+        RegisterEntryRequest requestBody = new RegisterEntryRequest
+        {
+            EnterDate = enterDate,
+            UserId = userId,
+            NFC = userId,
+            EventId = eventId
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        var response = await _operatorClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+
+        response.EnsureSuccessStatusCode();
+        var responseContent = await response.Content.ReadAsStringAsync();
+        MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+        Assert.IsNotNull(messageResponse);
+        Assert.AreEqual("Entry registered successfully", messageResponse.Message);
+        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, null, userId, eventId), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task RegisterEntry_WhenUserLogicThrowsException_ReturnsBadRequest()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+        Guid qrCode = Guid.NewGuid();
+        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null))
+            .ThrowsAsync(new ArgumentException("User does not have a valid ticket."));
+
+        RegisterEntryRequest requestBody = new RegisterEntryRequest
+        {
+            EnterDate = enterDate,
+            UserId = userId,
+            Qr = qrCode
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        var response = await _operatorClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+
+        Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null), Times.Once);
     }
 
     [TestMethod]
@@ -362,7 +539,7 @@ public class AttractionControllerTest
         };
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _adminClient.PutAsync($"/api/attractions/registerExit/{attractionId}", content);
+        var response = await _operatorClient.PutAsync($"/api/attractions/registerExit/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();

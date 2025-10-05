@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Domain;
 
 namespace Models.In
 {
@@ -10,5 +11,8 @@ namespace Models.In
 
         [Required]
         public Guid UserId { get; set; }
+        public Guid? Qr { get; set; }
+        public Guid? NFC { get; set; }
+        public int? EventId { get; set; }
     }
 }
