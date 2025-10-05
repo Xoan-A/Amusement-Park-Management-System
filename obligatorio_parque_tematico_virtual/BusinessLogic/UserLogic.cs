@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -11,17 +12,19 @@ namespace BusinessLogic
         private readonly IPasswordService _passwordService;
         private readonly IAttractionRepository _attractionRepository;
         private readonly ITicketLogic _ticketLogic;
+        private readonly IRoleRepository _roleRepository;
 
         public UserLogic(IUserRepository userRepository, IPasswordService passwordService,
-            IAttractionRepository attractionRepository, ITicketLogic ticketLogic)
+            IAttractionRepository attractionRepository, ITicketLogic ticketLogic, IRoleRepository roleRepository)
         {
             _userRepository = userRepository;
             _passwordService = passwordService;
             _attractionRepository = attractionRepository;
             _ticketLogic = ticketLogic;
+            _roleRepository = roleRepository;
         }
 
-        public Visitor RegisterVisitor(string name, string lastName, string email, string password, DateTime birthDate)
+        public User RegisterVisitor(string name, string lastName, string email, string password, DateTime birthDate)
         {
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
@@ -41,7 +44,7 @@ namespace BusinessLogic
 
             string hashedPassword = _passwordService.HashPassword(password);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Name = name,
                 LastName = lastName,
@@ -51,7 +54,51 @@ namespace BusinessLogic
                 MembershipLevel = MembershipLevel.Standard
             };
 
-            return _userRepository.Create(visitor) as Visitor;
+            Role visitorRole = _roleRepository.GetByName(Role.VISITOR);
+            if (visitorRole != null)
+            {
+                visitor.UserRoles.Add(new UserRole { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
+            }
+
+            return _userRepository.Create(visitor);
+        }
+
+        public User CreateUser(string name, string lastName, string email, string password, string[] roles)
+        {
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
+                string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                return null;
+            }
+
+            if (!_userRepository.IsEmailUnique(email))
+            {
+                return null;
+            }
+
+            string hashedPassword = _passwordService.HashPassword(password);
+
+            User user = new User
+            {
+                Name = name,
+                LastName = lastName,
+                Email = email,
+                Password = hashedPassword
+            };
+
+            if (roles != null && roles.Length > 0)
+            {
+                foreach (string roleName in roles)
+                {
+                    Role role = _roleRepository.GetByName(roleName);
+                    if (role != null)
+                    {
+                        user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = role.Id, Role = role });
+                    }
+                }
+            }
+
+            return _userRepository.Create(user);
         }
 
         public async Task RegisterEntry(Guid userId, Guid attractionId, DateTime enterDate, Guid? qr, Guid? nfc,

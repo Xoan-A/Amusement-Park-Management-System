@@ -15,6 +15,7 @@ namespace TestBusinessLogic
         private Mock<IPasswordService> _mockPasswordService;
         private Mock<IAttractionRepository> _mockAttractionRepository;
         private Mock<ITicketLogic> _mockTicketLogic;
+        private Mock<IRoleRepository> _mockRoleRepository;
         private IUserLogic _userLogic;
 
         [TestInitialize]
@@ -24,8 +25,9 @@ namespace TestBusinessLogic
             _mockPasswordService = new Mock<IPasswordService>();
             _mockAttractionRepository = new Mock<IAttractionRepository>();
             _mockTicketLogic = new Mock<ITicketLogic>();
+            _mockRoleRepository = new Mock<IRoleRepository>();
             _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
-                _mockAttractionRepository.Object, _mockTicketLogic.Object);
+                _mockAttractionRepository.Object, _mockTicketLogic.Object, _mockRoleRepository.Object);
         }
 
         [TestMethod]
@@ -41,7 +43,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(password)).Returns(hashedPassword);
 
-            Visitor expectedVisitor = new Visitor
+            User expectedUser = new User
             {
                 Name = name,
                 LastName = lastName,
@@ -51,9 +53,9 @@ namespace TestBusinessLogic
                 MembershipLevel = MembershipLevel.Standard
             };
 
-            _mockUserRepository.Setup(r => r.Create(It.IsAny<Visitor>())).Returns(expectedVisitor);
+            _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).Returns(expectedUser);
 
-            Visitor result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+            User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(name, result.Name);
@@ -65,7 +67,7 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Verify(r => r.IsEmailUnique(email), Times.Once);
             _mockPasswordService.Verify(p => p.HashPassword(password), Times.Once);
-            _mockUserRepository.Verify(r => r.Create(It.IsAny<Visitor>()), Times.Once);
+            _mockUserRepository.Verify(r => r.Create(It.IsAny<User>()), Times.Once);
         }
 
         [TestMethod]
@@ -79,12 +81,12 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(false);
 
-            Visitor result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+            User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
             Assert.IsNull(result);
             _mockUserRepository.Verify(r => r.IsEmailUnique(email), Times.Once);
             _mockPasswordService.Verify(p => p.HashPassword(It.IsAny<string>()), Times.Never);
-            _mockUserRepository.Verify(r => r.Create(It.IsAny<Visitor>()), Times.Never);
+            _mockUserRepository.Verify(r => r.Create(It.IsAny<User>()), Times.Never);
         }
 
         [TestMethod]
@@ -96,7 +98,7 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
-            Visitor result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+            User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
             Assert.IsNull(result);
         }
@@ -110,7 +112,7 @@ namespace TestBusinessLogic
             string password = "";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
-            Visitor result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+            User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
             Assert.IsNull(result);
         }
@@ -124,7 +126,7 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
-            Visitor result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+            User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
             Assert.IsNull(result);
         }
@@ -138,7 +140,7 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
-            Visitor result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+            User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
             Assert.IsNull(result);
         }
@@ -152,7 +154,7 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime futureBirthDate = DateTime.Now.AddDays(1);
 
-            Visitor result = _userLogic.RegisterVisitor(name, lastName, email, password, futureBirthDate);
+            User result = _userLogic.RegisterVisitor(name, lastName, email, password, futureBirthDate);
 
             Assert.IsNull(result);
         }
@@ -170,7 +172,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(plainPassword)).Returns(hashedPassword);
 
-            Visitor createdVisitor = new Visitor
+            User createdUser = new User
             {
                 Name = name,
                 LastName = lastName,
@@ -180,10 +182,10 @@ namespace TestBusinessLogic
                 MembershipLevel = MembershipLevel.Standard
             };
 
-            _mockUserRepository.Setup(r => r.Create(It.Is<Visitor>(v => v.Password == hashedPassword)))
-                .Returns(createdVisitor);
+            _mockUserRepository.Setup(r => r.Create(It.Is<User>(v => v.Password == hashedPassword)))
+                .Returns(createdUser);
 
-            Visitor result = _userLogic.RegisterVisitor(name, lastName, email, plainPassword, birthDate);
+            User result = _userLogic.RegisterVisitor(name, lastName, email, plainPassword, birthDate);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(hashedPassword, result.Password);

@@ -3,6 +3,7 @@ using System.Linq;
 using DataAccess.Context;
 using Domain;
 using IDataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories
 {
@@ -30,6 +31,22 @@ namespace DataAccess.Repositories
         public User GetById(Guid id)
         {
             return _context.Users.FirstOrDefault(u => u.Id == id);
+        }
+
+        public User GetByIdWithRoles(Guid id)
+        {
+            return _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefault(u => u.Id == id);
+        }
+
+        public User GetByEmailWithRoles(string email)
+        {
+            return _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefault(u => u.Email == email);
         }
 
         public bool IsEmailUnique(string email)

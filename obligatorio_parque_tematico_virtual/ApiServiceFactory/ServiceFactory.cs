@@ -25,6 +25,7 @@ public static class ServiceFactory
         services.AddDbContext<AppDbContext>(options =>
             options.UseInMemoryDatabase("TestDb"));
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
         services.AddScoped<IAttractionRepository, AttractionRepository>();
         services.AddScoped<IEventRepository, EventRepository>();

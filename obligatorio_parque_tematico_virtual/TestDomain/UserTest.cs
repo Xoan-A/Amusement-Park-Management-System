@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Linq;
 using Domain;
 
 namespace TestDomain
@@ -8,16 +9,18 @@ namespace TestDomain
     public class UserTest
     {
         [TestMethod]
-        public void User_ShouldHaveRequiredProperties()
+        public void User_ShouldCreateUser_WithRequiredProperties()
         {
-            User user = new Administrator();
+            // Arrange & Act
+            User user = new User
+            {
+                Name = "John",
+                LastName = "Doe",
+                Email = "john.doe@example.com",
+                Password = "hashedPassword123"
+            };
 
-            user.Id = Guid.NewGuid();
-            user.Name = "John";
-            user.LastName = "Doe";
-            user.Email = "john.doe@example.com";
-            user.Password = "hashedPassword123";
-
+            // Assert
             Assert.IsNotNull(user.Id);
             Assert.AreEqual("John", user.Name);
             Assert.AreEqual("Doe", user.LastName);
@@ -26,93 +29,136 @@ namespace TestDomain
         }
 
         [TestMethod]
-        public void Administrator_ShouldInheritFromUser()
+        public void User_ShouldHaveUniqueId()
         {
-            Administrator admin = new Administrator
-            {
-                Id = Guid.NewGuid(),
-                Name = "Admin",
-                LastName = "User",
-                Email = "admin@example.com",
-                Password = "adminPass"
-            };
+            // Arrange & Act
+            User user1 = new User();
+            User user2 = new User();
 
-            Assert.IsInstanceOfType(admin, typeof(User));
-            Assert.IsNotNull(admin.Id);
-            Assert.AreEqual("Admin", admin.Name);
+            // Assert
+            Assert.AreNotEqual(user1.Id, user2.Id);
         }
 
         [TestMethod]
-        public void Operator_ShouldInheritFromUser()
+        public void User_ShouldInitializeUserRolesCollection()
         {
-            Operator op = new Operator
-            {
-                Id = Guid.NewGuid(),
-                Name = "Operator",
-                LastName = "User",
-                Email = "operator@example.com",
-                Password = "operatorPass"
-            };
+            // Arrange & Act
+            User user = new User();
 
-            Assert.IsInstanceOfType(op, typeof(User));
-            Assert.IsNotNull(op.Id);
-            Assert.AreEqual("Operator", op.Name);
+            // Assert
+            Assert.IsNotNull(user.UserRoles);
+            Assert.AreEqual(0, user.UserRoles.Count);
         }
 
         [TestMethod]
-        public void Visitor_ShouldInheritFromUser_WithAdditionalProperties()
+        public void User_ShouldInitializeVisitorReportsCollection()
         {
+            // Arrange & Act
+            User user = new User();
+
+            // Assert
+            Assert.IsNotNull(user.VisitorReports);
+            Assert.AreEqual(0, user.VisitorReports.Count);
+        }
+
+        [TestMethod]
+        public void User_ShouldSupportBirthDate_ForVisitors()
+        {
+            // Arrange
             DateTime birthDate = new DateTime(1990, 1, 1);
-            Visitor visitor = new Visitor
+
+            // Act
+            User user = new User
             {
-                Id = Guid.NewGuid(),
                 Name = "Visitor",
                 LastName = "User",
                 Email = "visitor@example.com",
                 Password = "visitorPass",
-                BirthDate = birthDate,
+                BirthDate = birthDate
+            };
+
+            // Assert
+            Assert.AreEqual(birthDate, user.BirthDate);
+        }
+
+        [TestMethod]
+        public void User_ShouldSupportMembershipLevel_ForVisitors()
+        {
+            // Arrange & Act
+            User user = new User
+            {
+                Name = "Visitor",
+                LastName = "User",
+                Email = "visitor@example.com",
+                Password = "visitorPass",
                 MembershipLevel = MembershipLevel.Premium
             };
 
-            Assert.IsInstanceOfType(visitor, typeof(User));
-            Assert.IsNotNull(visitor.Id);
-            Assert.AreEqual("Visitor", visitor.Name);
-            Assert.AreEqual(birthDate, visitor.BirthDate);
-            Assert.AreEqual(MembershipLevel.Premium, visitor.MembershipLevel);
+            // Assert
+            Assert.AreEqual(MembershipLevel.Premium, user.MembershipLevel);
+        }
+
+        [TestMethod]
+        public void User_ShouldSupportMultipleRoles()
+        {
+            // Arrange
+            User user = new User
+            {
+                Name = "MultiRole",
+                LastName = "User",
+                Email = "multi@example.com",
+                Password = "pass"
+            };
+
+            Role adminRole = new Role { Id = 1, Name = "Administrator" };
+            Role operatorRole = new Role { Id = 2, Name = "Operator" };
+
+            UserRole userRole1 = new UserRole { User = user, Role = adminRole, UserId = user.Id, RoleId = adminRole.Id };
+            UserRole userRole2 = new UserRole { User = user, Role = operatorRole, UserId = user.Id, RoleId = operatorRole.Id };
+
+            // Act
+            user.UserRoles.Add(userRole1);
+            user.UserRoles.Add(userRole2);
+
+            // Assert
+            Assert.AreEqual(2, user.UserRoles.Count);
+            Assert.IsTrue(user.UserRoles.Any(ur => ur.Role.Name == "Administrator"));
+            Assert.IsTrue(user.UserRoles.Any(ur => ur.Role.Name == "Operator"));
+        }
+
+        [TestMethod]
+        public void User_BirthDateAndMembershipLevel_ShouldBeNullable()
+        {
+            // Arrange & Act
+            User user = new User
+            {
+                Name = "Admin",
+                LastName = "User",
+                Email = "admin@example.com",
+                Password = "pass"
+            };
+
+            // Assert - Should not have BirthDate or MembershipLevel set for non-visitors
+            Assert.IsNull(user.BirthDate);
+            Assert.IsNull(user.MembershipLevel);
         }
 
         [TestMethod]
         public void MembershipLevel_ShouldHaveCorrectValues()
         {
+            // Assert
             Assert.AreEqual(0, (int)MembershipLevel.Standard);
             Assert.AreEqual(1, (int)MembershipLevel.Premium);
             Assert.AreEqual(2, (int)MembershipLevel.VIP);
         }
 
         [TestMethod]
-        public void Visitor_DefaultMembershipLevel_ShouldBeStandard()
-        {
-            Visitor visitor = new Visitor();
-            Assert.AreEqual(MembershipLevel.Standard, visitor.MembershipLevel);
-        }
-
-        [TestMethod]
-        public void User_ShouldHaveUniqueId()
-        {
-            Administrator user1 = new Administrator();
-            Administrator user2 = new Administrator();
-
-            Assert.AreNotEqual(user1.Id, user2.Id);
-        }
-
-        [TestMethod]
         public void RegisterEntry_ShouldCreateNewVisitorReportWhenNoneExists()
         {
-            Visitor visitor = new Visitor
+            User user = new User
             {
                 Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
+                LastName = "Doe"
             };
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
             Attraction attraction = new Attraction
@@ -121,12 +167,12 @@ namespace TestDomain
                 Type = AttractionType.RollerCoaster
             };
 
-            visitor.RegisterEntry(attraction, enterDate);
+            user.RegisterEntry(attraction, enterDate);
 
-            Assert.AreEqual(1, visitor.VisitorReports.Count);
-            Assert.AreEqual(enterDate.Date, visitor.VisitorReports[0].Date.Date);
-            Assert.AreEqual(1, visitor.VisitorReports[0].Reports.Count);
-            Assert.AreEqual(enterDate, visitor.VisitorReports[0].Reports[0].EnterDate);
+            Assert.AreEqual(1, user.VisitorReports.Count);
+            Assert.AreEqual(enterDate.Date, user.VisitorReports[0].Date.Date);
+            Assert.AreEqual(1, user.VisitorReports[0].Reports.Count);
+            Assert.AreEqual(enterDate, user.VisitorReports[0].Reports[0].EnterDate);
         }
 
         [TestMethod]
@@ -144,20 +190,19 @@ namespace TestDomain
                 Name = "Simulator",
                 Type = AttractionType.Simulator
             };
-            Visitor visitor = new Visitor
+            User user = new User
             {
                 Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
+                LastName = "Doe"
             };
 
-            visitor.RegisterEntry(attraction1, enterDate1);
-            visitor.RegisterEntry(attraction2, enterDate2);
+            user.RegisterEntry(attraction1, enterDate1);
+            user.RegisterEntry(attraction2, enterDate2);
 
-            Assert.AreEqual(1, visitor.VisitorReports.Count);
-            Assert.AreEqual(2, visitor.VisitorReports[0].Reports.Count);
-            Assert.AreEqual(enterDate1, visitor.VisitorReports[0].Reports[0].EnterDate);
-            Assert.AreEqual(enterDate2, visitor.VisitorReports[0].Reports[1].EnterDate);
+            Assert.AreEqual(1, user.VisitorReports.Count);
+            Assert.AreEqual(2, user.VisitorReports[0].Reports.Count);
+            Assert.AreEqual(enterDate1, user.VisitorReports[0].Reports[0].EnterDate);
+            Assert.AreEqual(enterDate2, user.VisitorReports[0].Reports[1].EnterDate);
         }
 
         [TestMethod]
@@ -170,19 +215,18 @@ namespace TestDomain
                 Name = "Roller Coaster",
                 Type = AttractionType.RollerCoaster
             };
-            Visitor visitor = new Visitor
+            User user = new User
             {
                 Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
+                LastName = "Doe"
             };
 
-            visitor.RegisterEntry(attraction, enterDate1);
-            visitor.RegisterEntry(attraction, enterDate2);
+            user.RegisterEntry(attraction, enterDate1);
+            user.RegisterEntry(attraction, enterDate2);
 
-            Assert.AreEqual(2, visitor.VisitorReports.Count);
-            Assert.AreEqual(enterDate1.Date, visitor.VisitorReports[0].Date.Date);
-            Assert.AreEqual(enterDate2.Date, visitor.VisitorReports[1].Date.Date);
+            Assert.AreEqual(2, user.VisitorReports.Count);
+            Assert.AreEqual(enterDate1.Date, user.VisitorReports[0].Date.Date);
+            Assert.AreEqual(enterDate2.Date, user.VisitorReports[1].Date.Date);
         }
 
         [TestMethod]
@@ -195,17 +239,16 @@ namespace TestDomain
                 Name = "Roller Coaster",
                 Type = AttractionType.RollerCoaster
             };
-            Visitor visitor = new Visitor
+            User user = new User
             {
                 Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
+                LastName = "Doe"
             };
-            visitor.RegisterEntry(attraction, enterDate);
+            user.RegisterEntry(attraction, enterDate);
 
-            visitor.RegisterExit(attraction, exitDate);
+            user.RegisterExit(attraction, exitDate);
 
-            Assert.AreEqual(exitDate, visitor.VisitorReports[0].Reports[0].ExitDate);
+            Assert.AreEqual(exitDate, user.VisitorReports[0].Reports[0].ExitDate);
         }
 
         [TestMethod]
@@ -218,14 +261,13 @@ namespace TestDomain
                 Type = AttractionType.RollerCoaster
             };
             DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
-            Visitor visitor = new Visitor
+            User user = new User
             {
                 Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
+                LastName = "Doe"
             };
 
-            visitor.RegisterExit(attraction, exitDate);
+            user.RegisterExit(attraction, exitDate);
         }
 
         [TestMethod]
@@ -240,16 +282,15 @@ namespace TestDomain
                 Name = "Roller Coaster",
                 Type = AttractionType.RollerCoaster
             };
-            Visitor visitor = new Visitor
+            User user = new User
             {
                 Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
+                LastName = "Doe"
             };
-            visitor.RegisterEntry(attraction, enterDate);
+            user.RegisterEntry(attraction, enterDate);
 
-            visitor.RegisterExit(attraction, exitDate);
-            visitor.RegisterExit(attraction, exitDate2);
+            user.RegisterExit(attraction, exitDate);
+            user.RegisterExit(attraction, exitDate2);
         }
     }
 }

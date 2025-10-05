@@ -6,6 +6,8 @@ namespace DataAccess.Context
     public class AppDbContext : DbContext
     {
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Role> Roles { get; set; }
+        public virtual DbSet<UserRole> UserRoles { get; set; }
         public virtual DbSet<Attraction> Attractions { get; set; }
         public virtual DbSet<Event> Events { get; set; }
         public virtual DbSet<Ticket> Tickets { get; set; }
@@ -22,20 +24,48 @@ namespace DataAccess.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>()
-                .HasDiscriminator<string>("UserType")
-                .HasValue<Administrator>("Administrator")
-                .HasValue<Operator>("Operator")
-                .HasValue<Visitor>("Visitor");
+            // Ignore old inheritance-based classes (backward compatibility during migration)
+            modelBuilder.Ignore<Administrator>();
+            modelBuilder.Ignore<Operator>();
+            modelBuilder.Ignore<Visitor>();
 
+            // User configuration
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
+            // Role configuration
+            modelBuilder.Entity<Role>()
+                .HasIndex(r => r.Name)
+                .IsUnique();
+
+            // UserRole configuration (many-to-many)
+            modelBuilder.Entity<UserRole>()
+                .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+            modelBuilder.Entity<UserRole>()
+                .HasOne(ur => ur.User)
+                .WithMany(u => u.UserRoles)
+                .HasForeignKey(ur => ur.UserId);
+
+            modelBuilder.Entity<UserRole>()
+                .HasOne(ur => ur.Role)
+                .WithMany()
+                .HasForeignKey(ur => ur.RoleId);
+
+            // Seed Roles
+            modelBuilder.Entity<Role>().HasData(
+                new Role { Id = 1, Name = Role.ADMINISTRATOR },
+                new Role { Id = 2, Name = Role.OPERATOR },
+                new Role { Id = 3, Name = Role.VISITOR }
+            );
+
+            // Attraction configuration
             modelBuilder.Entity<Attraction>()
                 .HasIndex(a => a.Name)
                 .IsUnique();
 
+            // Event configuration
             modelBuilder.Entity<Event>()
                 .HasIndex(e => e.Name)
                 .IsUnique();
@@ -53,6 +83,7 @@ namespace DataAccess.Context
                 .WithMany()
                 .HasForeignKey(ea => ea.AttractionId);
 
+            // Ticket configuration
             modelBuilder.Entity<Ticket>()
                 .HasIndex(t => t.QRCode)
                 .IsUnique();

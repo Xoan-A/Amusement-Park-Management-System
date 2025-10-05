@@ -32,7 +32,14 @@ public class EventControllerTest
 
         _client = _factory.CreateClient();
 
-        var tokenService = new BusinessLogic.TokenService();
+        var jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+        {
+            SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+            Issuer = "ParqueTematico",
+            Audience = "ParqueTematico",
+            ExpirationHours = 1
+        });
+        var tokenService = new BusinessLogic.TokenService(jwtSettings);
 
         var adminUser = new Domain.Administrator
         {

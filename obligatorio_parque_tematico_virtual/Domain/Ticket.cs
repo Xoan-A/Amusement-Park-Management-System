@@ -11,6 +11,6 @@ namespace Domain
         public TicketType Type { get; set; }
         public Guid QRCode { get; set; }
         public int? EventId { get; set; }
-        public virtual Visitor Visitor { get; set; }
+        public virtual User Visitor { get; set; }
     }
 }
