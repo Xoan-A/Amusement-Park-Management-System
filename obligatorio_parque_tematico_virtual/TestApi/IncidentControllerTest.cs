@@ -26,7 +26,15 @@ public class IncidentControllerTest
         {
             builder.ConfigureServices(services => { services.AddSingleton(_mockService.Object); });
         });
-        TokenService tokenService = new TokenService();
+
+        var jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+        {
+            SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+            Issuer = "ParqueTematico",
+            Audience = "ParqueTematico",
+            ExpirationHours = 1
+        });
+        TokenService tokenService = new TokenService(jwtSettings);
         Operator operatorUser = new Operator
         {
             Id = Guid.NewGuid(),

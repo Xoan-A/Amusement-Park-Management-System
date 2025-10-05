@@ -17,7 +17,14 @@ namespace TestBusinessLogic
         [TestInitialize]
         public void Setup()
         {
-            _tokenService = new TokenService();
+            var jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+            {
+                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+                Issuer = "ParqueTematico",
+                Audience = "ParqueTematico",
+                ExpirationHours = 1
+            });
+            _tokenService = new TokenService(jwtSettings);
         }
 
         [TestMethod]
