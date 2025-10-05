@@ -10,10 +10,12 @@ namespace Domain
         public string Email { get; set; }
         public string Password { get; set; }
         public List<VisitorReport> VisitorReports { get; set; }
+        public int Score { get; set; }
 
         public User()
         {
             Id = Guid.NewGuid();
+            VisitorReports = new List<VisitorReport>();
         }
 
         public void RegisterEntry(Attraction attraction, DateTime enterDate)
