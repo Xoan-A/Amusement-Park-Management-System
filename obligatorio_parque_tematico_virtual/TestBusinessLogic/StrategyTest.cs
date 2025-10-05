@@ -9,6 +9,143 @@ namespace TestBusinessLogic
     public class StrategyTest
     {
         [TestMethod]
+        public void ActiveStrategy_SetStrategy_ShouldSetStrategy()
+        {
+            var activeStrategy = new ActiveStrategy();
+            var perAttractionStrategy = new PerAttraction();
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "PerAttraction"
+            });
+
+            IContreteStrategy result = activeStrategy.GetStrategy();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("PerAttraction", result.Name);
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_GetStrategy_ShouldThrowWhenNoStrategySet()
+        {
+            var activeStrategy = new ActiveStrategy();
+
+            Assert.ThrowsException<InvalidOperationException>(() => activeStrategy.GetStrategy());
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_SetStrategy_WithCombo_ShouldSetComboWithN()
+        {
+            var activeStrategy = new ActiveStrategy();
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "Combo",
+                N = 30
+            });
+
+            IContreteStrategy result = activeStrategy.GetStrategy();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("Combo", result.Name);
+            Assert.IsInstanceOfType(result, typeof(Combo));
+            Assert.AreEqual(30, ((Combo)result).N);
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_SetStrategy_WithCombo_ShouldThrowWhenNIsNull()
+        {
+            var activeStrategy = new ActiveStrategy();
+
+            Assert.ThrowsException<ArgumentException>(() =>
+                activeStrategy.SetStrategy(new SetStrategyRequest
+                {
+                    StrategyName = "Combo",
+                    N = null
+                }));
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_SetStrategy_ShouldThrowForInvalidStrategyName()
+        {
+            var activeStrategy = new ActiveStrategy();
+
+            Assert.ThrowsException<ArgumentException>(() =>
+                activeStrategy.SetStrategy(new SetStrategyRequest
+                {
+                    StrategyName = "InvalidStrategy"
+                }));
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_BasicCalculation_RollerCoaster_ShouldReturn2()
+        {
+            var user = new Visitor { Name = "Test" };
+            var attraction = new Attraction { Type = AttractionType.RollerCoaster };
+
+            var request = new StrategyRequest
+            {
+                User = user,
+                Attraction = attraction
+            };
+
+            int score = ActiveStrategy.BasicCalculation(request);
+
+            Assert.AreEqual(2, score);
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_BasicCalculation_Simulator_ShouldReturn2()
+        {
+            var user = new Visitor { Name = "Test" };
+            var attraction = new Attraction { Type = AttractionType.Simulator };
+
+            var request = new StrategyRequest
+            {
+                User = user,
+                Attraction = attraction
+            };
+
+            int score = ActiveStrategy.BasicCalculation(request);
+
+            Assert.AreEqual(2, score);
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_BasicCalculation_Performance_ShouldReturn3()
+        {
+            var user = new Visitor { Name = "Test" };
+            var attraction = new Attraction { Type = AttractionType.Performance };
+
+            var request = new StrategyRequest
+            {
+                User = user,
+                Attraction = attraction
+            };
+
+            int score = ActiveStrategy.BasicCalculation(request);
+
+            Assert.AreEqual(3, score);
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_BasicCalculation_InteractiveZone_ShouldReturn4()
+        {
+            var user = new Visitor { Name = "Test" };
+            var attraction = new Attraction { Type = AttractionType.InteractiveZone };
+
+            var request = new StrategyRequest
+            {
+                User = user,
+                Attraction = attraction
+            };
+
+            int score = ActiveStrategy.BasicCalculation(request);
+
+            Assert.AreEqual(4, score);
+        }
+        
+        [TestMethod]
         public void PerAttraction_CalculateScore_ShouldReturnBasicCalculation()
         {
             var strategy = new PerAttraction();
