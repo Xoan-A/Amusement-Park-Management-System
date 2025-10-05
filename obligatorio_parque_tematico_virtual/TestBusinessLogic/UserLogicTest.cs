@@ -14,6 +14,7 @@ namespace TestBusinessLogic
         private Mock<IUserRepository> _mockUserRepository;
         private Mock<IPasswordService> _mockPasswordService;
         private Mock<IAttractionRepository> _mockAttractionRepository;
+        private Mock<ITicketLogic> _mockTicketLogic;
         private IUserLogic _userLogic;
 
         [TestInitialize]
@@ -22,8 +23,9 @@ namespace TestBusinessLogic
             _mockUserRepository = new Mock<IUserRepository>();
             _mockPasswordService = new Mock<IPasswordService>();
             _mockAttractionRepository = new Mock<IAttractionRepository>();
+            _mockTicketLogic = new Mock<ITicketLogic>();
             _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
-                _mockAttractionRepository.Object);
+                _mockAttractionRepository.Object, _mockTicketLogic.Object);
         }
 
         [TestMethod]
@@ -189,10 +191,36 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterEntry_ShouldThrowExceptionWhenBothQrAndNfcAreNull()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, null, null, null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterEntry_ShouldThrowExceptionWhenTicketValidationFails()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(false);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
+        }
+
+        [TestMethod]
         public async Task RegisterEntry_ShouldCreateNewVisitorReportWhenNoneExists()
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
             Visitor visitor = new Visitor
@@ -214,13 +242,15 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
-            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
 
             Assert.AreEqual(1, visitor.VisitorReports.Count);
             Assert.AreEqual(enterDate.Date, visitor.VisitorReports[0].Date.Date);
             _mockUserRepository.Verify(r => r.GetById(userId), Times.Once);
             _mockAttractionRepository.Verify(r => r.GetById(attractionId), Times.Once);
+            _mockTicketLogic.Verify(t => t.ValidateTicketAsync(qrCode, null, enterDate, null), Times.Once);
         }
 
         [TestMethod]
@@ -229,6 +259,7 @@ namespace TestBusinessLogic
             Guid userId = Guid.NewGuid();
             Guid attractionId1 = Guid.NewGuid();
             Guid attractionId2 = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
             DateTime enterDate1 = new DateTime(2025, 10, 1, 10, 0, 0);
             DateTime enterDate2 = new DateTime(2025, 10, 1, 14, 0, 0);
 
@@ -261,9 +292,11 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).ReturnsAsync(attraction1);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).ReturnsAsync(attraction2);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate1, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate2, null)).ReturnsAsync(true);
 
-            await _userLogic.RegisterEntry(userId, attractionId1, enterDate1);
-            await _userLogic.RegisterEntry(userId, attractionId2, enterDate2);
+            await _userLogic.RegisterEntry(userId, attractionId1, enterDate1, qrCode, null, null);
+            await _userLogic.RegisterEntry(userId, attractionId2, enterDate2, qrCode, null, null);
 
             Assert.AreEqual(1, visitor.VisitorReports.Count);
             Assert.AreEqual(2, visitor.VisitorReports[0].Reports.Count);
@@ -275,11 +308,13 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns((User)null);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
-            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
         }
 
         [TestMethod]
@@ -288,6 +323,7 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
             Visitor visitor = new Visitor
@@ -300,8 +336,9 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync((Attraction)null);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
-            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
         }
 
         [TestMethod]
@@ -309,6 +346,7 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
             Visitor visitor = new Visitor
@@ -330,8 +368,9 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
-            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
 
             Assert.AreEqual(6, attraction.CurrentCapacity);
         }
@@ -342,6 +381,7 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
             Visitor visitor = new Visitor
@@ -363,8 +403,9 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
-            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
         }
 
         [TestMethod]
@@ -372,6 +413,7 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
             Visitor visitor = new Visitor
@@ -393,8 +435,9 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
-            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
 
             Assert.AreEqual(10, attraction.CurrentCapacity);
             Assert.AreEqual(1, visitor.VisitorReports.Count);
@@ -405,6 +448,7 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
             DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
 
@@ -427,8 +471,9 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
-            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
             await _userLogic.RegisterExit(userId, attractionId, exitDate);
 
             Assert.AreEqual(exitDate, visitor.VisitorReports[0].Reports[0].ExitDate);
@@ -476,6 +521,7 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
             DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
 
@@ -498,8 +544,9 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
-            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
             await _userLogic.RegisterExit(userId, attractionId, exitDate);
 
             Assert.AreEqual(5, attraction.CurrentCapacity);
@@ -510,6 +557,7 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
             DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
 
@@ -532,8 +580,9 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
-            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
             await _userLogic.RegisterExit(userId, attractionId, exitDate);
 
             Assert.AreEqual(0, attraction.CurrentCapacity);
@@ -544,6 +593,7 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
             DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
 
@@ -566,11 +616,136 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
-            await _userLogic.RegisterEntry(userId, attractionId, enterDate);
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
             await _userLogic.RegisterExit(userId, attractionId, exitDate);
 
             Assert.AreEqual(9, attraction.CurrentCapacity);
+        }
+
+        [TestMethod]
+        public async Task RegisterEntry_ShouldWorkWithNfcInsteadOfQr()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(null, userId, enterDate, null)).ReturnsAsync(true);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, null, userId, null);
+
+            Assert.AreEqual(1, visitor.VisitorReports.Count);
+            Assert.AreEqual(1, attraction.CurrentCapacity);
+            _mockTicketLogic.Verify(t => t.ValidateTicketAsync(null, userId, enterDate, null), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task RegisterEntry_ShouldWorkWithEventId()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+            int eventId = 5;
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                VisitorReports = new List<VisitorReport>()
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(true);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, eventId);
+
+            Assert.AreEqual(1, visitor.VisitorReports.Count);
+            Assert.AreEqual(1, attraction.CurrentCapacity);
+            _mockTicketLogic.Verify(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task RegisterEntry_ShouldWorkWithBothQrAndEventId()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+            int eventId = 10;
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "Jane",
+                LastName = "Smith",
+                VisitorReports = new List<VisitorReport>()
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Water Slide",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 20,
+                CurrentCapacity = 5
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(true);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, eventId);
+
+            Assert.AreEqual(1, visitor.VisitorReports.Count);
+            Assert.AreEqual(6, attraction.CurrentCapacity);
+            _mockTicketLogic.Verify(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId), Times.Once);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterEntry_ShouldThrowExceptionWhenTicketInvalidForEvent()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+            int eventId = 5;
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(false);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, eventId);
         }
     }
 }
