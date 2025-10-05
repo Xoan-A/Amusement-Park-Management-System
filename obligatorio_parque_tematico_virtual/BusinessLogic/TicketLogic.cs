@@ -61,5 +61,28 @@ namespace BusinessLogic
         {
             return await _ticketRepository.GetByQRCodeAsync(qrCode);
         }
+        
+        public async Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, int? eventId)
+        {
+            bool isValid = false;
+
+            if (qr == null && nfc == null)
+                return isValid;
+            
+            Ticket? ticket;
+            if (qr != null)
+            {
+                ticket = await GetTicketByQRCodeAsync(qr.Value);
+                isValid = ticket != null && ticket.VisitDate.Date == enterDate.Date && ticket.EventId == eventId;
+            }
+            else
+            {
+                IEnumerable<Ticket> tickets = await GetVisitorTicketsAsync(nfc!.Value);
+                ticket = tickets.FirstOrDefault(t => t.VisitDate.Date == enterDate.Date && t.EventId == eventId);
+                isValid = ticket != null;
+            }
+
+            return isValid;
+        }
     }
 }

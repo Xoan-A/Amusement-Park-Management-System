@@ -11,5 +11,6 @@ namespace IBusinessLogic
         Task<Ticket> GetTicketByIdAsync(int id);
         Task<IEnumerable<Ticket>> GetVisitorTicketsAsync(Guid visitorId);
         Task<Ticket> GetTicketByQRCodeAsync(Guid qrCode);
+        Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, int? eventId);
     }
 }
