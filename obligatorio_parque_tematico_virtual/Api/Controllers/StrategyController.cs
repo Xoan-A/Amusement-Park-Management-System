@@ -1,6 +1,7 @@
 using BusinessLogic;
 using IBusinessLogic;
 using IBusinessLogic.Strategy;
+using IDataAccess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.In;
@@ -13,10 +14,12 @@ namespace Api.Controllers;
 public class StrategyController : ControllerBase
 {
     private readonly IActiveStrategy _activeStrategy;
+    private readonly IUserLogic _userLogic;
 
-    public StrategyController(IActiveStrategy activeStrategy)
+    public StrategyController(IActiveStrategy activeStrategy, IUserLogic userLogic)
     {
         _activeStrategy = activeStrategy;
+        _userLogic = userLogic;
     }
 
     [HttpGet]
@@ -44,6 +47,14 @@ public class StrategyController : ControllerBase
             Message = "Strategy setted successfully"
         };
 
+        return Ok(response);
+    }
+
+    [HttpGet("topTen")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> GetTopTen()
+    {
+        TopTenResponse response = await _userLogic.GetTopTenUsers();
         return Ok(response);
     }
 }
