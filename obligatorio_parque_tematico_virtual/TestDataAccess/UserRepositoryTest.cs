@@ -235,6 +235,7 @@ namespace TestDataAccess
                 };
                 _context.Users.Add(visitor);
             }
+
             _context.SaveChanges();
 
             var result = await _userRepository.GetTopTen();
@@ -248,7 +249,7 @@ namespace TestDataAccess
                 Assert.IsTrue(result[i].Score >= result[i + 1].Score);
             }
         }
-        
+
         [TestMethod]
         public async Task GetTopTen_ShouldReturnEmptyList_WhenNoUsersExist()
         {
@@ -260,7 +261,7 @@ namespace TestDataAccess
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
         }
-        
+
         [TestMethod]
         public async Task GetTopTen_ShouldReturnFewerThanTenUsers_WhenLessThanTenExist()
         {
@@ -280,6 +281,7 @@ namespace TestDataAccess
                 };
                 _context.Users.Add(visitor);
             }
+
             _context.SaveChanges();
 
             var result = await _userRepository.GetTopTen();
@@ -289,7 +291,7 @@ namespace TestDataAccess
             Assert.AreEqual(100, result[0].Score);
             Assert.AreEqual(20, result[4].Score);
         }
-        
+
         [TestMethod]
         public async Task GetTopTen_ShouldReturnExactlyTenUsers_WhenExactlyTenExist()
         {
@@ -309,6 +311,7 @@ namespace TestDataAccess
                 };
                 _context.Users.Add(visitor);
             }
+
             _context.SaveChanges();
 
             var result = await _userRepository.GetTopTen();
@@ -338,6 +341,7 @@ namespace TestDataAccess
                 };
                 _context.Users.Add(visitor);
             }
+
             _context.SaveChanges();
 
             var result = await _userRepository.GetTopTen();
@@ -348,6 +352,5 @@ namespace TestDataAccess
             Assert.AreEqual(100, result[5].Score);
             Assert.AreEqual(50, result[6].Score);
         }
-
     }
 }
