@@ -241,6 +241,9 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
@@ -261,7 +264,8 @@ namespace DataAccess.Migrations
                             LastName = "User",
                             MembershipLevel = 2,
                             Name = "Admin",
-                            Password = "$2a$11$8K1p/a0dL3LHqJKvB5UFFe1CVJ0L4tGvAC2w6UO0m9l.KGJQhKGHi"
+                            Password = "$2a$11$8K1p/a0dL3LHqJKvB5UFFe1CVJ0L4tGvAC2w6UO0m9l.KGJQhKGHi",
+                            Score = 0
                         },
                         new
                         {
@@ -271,7 +275,8 @@ namespace DataAccess.Migrations
                             LastName = "User",
                             MembershipLevel = 0,
                             Name = "Operator",
-                            Password = "$2a$11$X2y.8K1u0/W.M9nGJU5LneF5JbYjQ2vYMz8R8qLq9.pU2wXTQZrjK"
+                            Password = "$2a$11$X2y.8K1u0/W.M9nGJU5LneF5JbYjQ2vYMz8R8qLq9.pU2wXTQZrjK",
+                            Score = 0
                         });
                 });
 

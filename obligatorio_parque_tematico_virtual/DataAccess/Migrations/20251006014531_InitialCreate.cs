@@ -72,6 +72,7 @@ namespace DataAccess.Migrations
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     MembershipLevel = table.Column<int>(type: "int", nullable: true),
+                    Score = table.Column<int>(type: "int", nullable: false),
                     Discriminator = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false)
                 },
                 constraints: table =>
@@ -209,11 +210,11 @@ namespace DataAccess.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "BirthDate", "Discriminator", "Email", "LastName", "MembershipLevel", "Name", "Password" },
+                columns: new[] { "Id", "BirthDate", "Discriminator", "Email", "LastName", "MembershipLevel", "Name", "Password", "Score" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), new DateTime(1980, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "User", "admin@test.com", "User", 2, "Admin", "$2a$11$8K1p/a0dL3LHqJKvB5UFFe1CVJ0L4tGvAC2w6UO0m9l.KGJQhKGHi" },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), new DateTime(1985, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "User", "operator@test.com", "User", 0, "Operator", "$2a$11$X2y.8K1u0/W.M9nGJU5LneF5JbYjQ2vYMz8R8qLq9.pU2wXTQZrjK" }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), new DateTime(1980, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "User", "admin@test.com", "User", 2, "Admin", "$2a$11$8K1p/a0dL3LHqJKvB5UFFe1CVJ0L4tGvAC2w6UO0m9l.KGJQhKGHi", 0 },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), new DateTime(1985, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "User", "operator@test.com", "User", 0, "Operator", "$2a$11$X2y.8K1u0/W.M9nGJU5LneF5JbYjQ2vYMz8R8qLq9.pU2wXTQZrjK", 0 }
                 });
 
             migrationBuilder.InsertData(
