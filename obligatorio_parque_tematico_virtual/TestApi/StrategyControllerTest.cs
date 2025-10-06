@@ -393,5 +393,28 @@ namespace ApiTests
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
+        [TestMethod]
+        public async Task GetTopTen_WithNoUsers_ShouldReturnEmptyList()
+        {
+            var topTenResponse = new TopTenResponse
+            {
+                TopTenUsers = new List<User>()
+            };
+
+            _mockUserLogic.Setup(x => x.GetTopTenUsers()).ReturnsAsync(topTenResponse);
+
+            var response = await _adminClient.GetAsync("/api/strategy/topTen");
+
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<TopTenResponse>(
+                responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(0, result.TopTenUsers.Count);
+        }
     }
 }
