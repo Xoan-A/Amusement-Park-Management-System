@@ -5,6 +5,7 @@ using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using BusinessLogic;
+using Models.Out;
 
 namespace TestBusinessLogic
 {
@@ -936,6 +937,35 @@ namespace TestBusinessLogic
             await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
 
             Assert.AreEqual(5, visitor.Score);
+        }
+
+        [TestMethod]
+        public async Task GetTopTenUsers_ShouldReturnTopTenUsersOrderedByScore()
+        {
+            List<User> expectedUsers = new List<User>
+            {
+                new User { Id = Guid.NewGuid(), Name = "User1", Score = 100 },
+                new User { Id = Guid.NewGuid(), Name = "User2", Score = 90 },
+                new User { Id = Guid.NewGuid(), Name = "User3", Score = 80 },
+                new User { Id = Guid.NewGuid(), Name = "User4", Score = 70 },
+                new User { Id = Guid.NewGuid(), Name = "User5", Score = 60 },
+                new User { Id = Guid.NewGuid(), Name = "User6", Score = 50 },
+                new User { Id = Guid.NewGuid(), Name = "User7", Score = 40 },
+                new User { Id = Guid.NewGuid(), Name = "User8", Score = 30 },
+                new User { Id = Guid.NewGuid(), Name = "User9", Score = 20 },
+                new User { Id = Guid.NewGuid(), Name = "User10", Score = 10 }
+            };
+
+            _mockUserRepository.Setup(r => r.GetTopTen()).ReturnsAsync(expectedUsers);
+
+            TopTenResponse result = await _userLogic.GetTopTenUsers();
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(10, result.TopTenUsers.Count);
+            Assert.AreEqual(100, result.TopTenUsers[0].Score);
+            Assert.AreEqual(10, result.TopTenUsers[9].Score);
+            _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
         }
     }
 }
