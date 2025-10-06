@@ -153,7 +153,7 @@ namespace TestBusinessLogic
 
             Assert.AreEqual(4, score);
         }
-        
+
         [TestMethod]
         public void PerAttraction_CalculateScore_ShouldReturnBasicCalculation()
         {
@@ -179,7 +179,7 @@ namespace TestBusinessLogic
 
             Assert.AreEqual("PerAttraction", strategy.Name);
         }
-        
+
         [TestMethod]
         public void PerEvent_CalculateScore_NotSpecialEvent_ShouldReturnBaseScore()
         {
@@ -225,7 +225,7 @@ namespace TestBusinessLogic
 
             Assert.AreEqual("PerEvent", strategy.Name);
         }
-        
+
         [TestMethod]
         public void Combo_CalculateScore_FirstVisit_ShouldReturnBaseScore()
         {

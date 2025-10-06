@@ -62,7 +62,8 @@ namespace BusinessLogic
             Role visitorRole = _roleRepository.GetByName(Role.VISITOR);
             if (visitorRole != null)
             {
-                visitor.UserRoles.Add(new UserRole { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
+                visitor.UserRoles.Add(new UserRole
+                    { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
             }
 
             return _userRepository.Create(visitor);
@@ -131,11 +132,11 @@ namespace BusinessLogic
             }
             else
                 throw new ArgumentException("Attraction is at full capacity.");
-            
+
             Event even = await _eventRepository.GetEventByAttractionAndDate(attractionId, enterDate.Date);
 
             bool isEvent = even != null;
-            
+
             var strategyRequest = new StrategyRequest
             {
                 User = user,
@@ -145,7 +146,7 @@ namespace BusinessLogic
             };
 
             int score = _activeStrategy.CalculateScore(strategyRequest);
-            
+
             user.Score += score;
         }
 

@@ -30,10 +30,7 @@ namespace ApiTests
             _factory = new WebApplicationFactory<Program>()
                 .WithWebHostBuilder(builder =>
                 {
-                    builder.ConfigureServices(services =>
-                    {
-                        services.AddSingleton(_mockActiveStrategy.Object);
-                    });
+                    builder.ConfigureServices(services => { services.AddSingleton(_mockActiveStrategy.Object); });
                 });
 
             _client = _factory.CreateClient();
@@ -45,7 +42,7 @@ namespace ApiTests
                 Audience = "ParqueTematico",
                 ExpirationHours = 1
             });
-            
+
             TokenService tokenService = new TokenService(jwtSettings);
 
             Administrator adminUser = new Administrator

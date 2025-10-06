@@ -12,7 +12,7 @@ public class Combo : IContreteStrategy
     {
         N = n;
     }
-    
+
     public int CalculateScore(StrategyRequest strategyRequest)
     {
         User visitor = strategyRequest.User;
