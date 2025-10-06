@@ -269,7 +269,7 @@ namespace TestDataAccess
 
             for (int i = 1; i <= 5; i++)
             {
-                Visitor visitor = new Visitor
+                User visitor = new User
                 {
                     Name = $"User{i}",
                     LastName = "Test",
@@ -298,7 +298,7 @@ namespace TestDataAccess
 
             for (int i = 1; i <= 10; i++)
             {
-                Visitor visitor = new Visitor
+                User visitor = new User
                 {
                     Name = $"User{i}",
                     LastName = "Test",
@@ -327,7 +327,7 @@ namespace TestDataAccess
 
             for (int i = 1; i <= 12; i++)
             {
-                Visitor visitor = new Visitor
+                User visitor = new User
                 {
                     Name = $"User{i}",
                     LastName = "Test",
