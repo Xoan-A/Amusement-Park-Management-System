@@ -227,5 +227,18 @@ namespace TestDataAccess
                 Assert.IsTrue(result[i].Score >= result[i + 1].Score);
             }
         }
+        
+        [TestMethod]
+        public async Task GetTopTen_ShouldReturnEmptyList_WhenNoUsersExist()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            var result = await _userRepository.GetTopTen();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
     }
 }
