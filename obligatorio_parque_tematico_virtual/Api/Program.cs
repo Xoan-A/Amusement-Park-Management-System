@@ -50,7 +50,16 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<DataAccess.Context.AppDbContext>();
-    context.Database.Migrate();
+
+    // Use EnsureCreated for SQLite, Migrate for SQL Server
+    if (context.Database.IsSqlite())
+    {
+        context.Database.EnsureCreated();
+    }
+    else
+    {
+        context.Database.Migrate();
+    }
 }
 
 // Configure the HTTP request pipeline.
