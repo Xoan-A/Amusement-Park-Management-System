@@ -416,5 +416,36 @@ namespace ApiTests
             Assert.IsNotNull(result.TopTenUsers);
             Assert.AreEqual(0, result.TopTenUsers.Count);
         }
+        
+        [TestMethod]
+        public async Task GetTopTen_WithFewerThanTenUsers_ShouldReturnAllUsers()
+        {
+            var topTenResponse = new TopTenResponse
+            {
+                TopTenUsers = new List<User>
+                {
+                    new User { Id = Guid.NewGuid(), Name = "User1", LastName = "Test", Email = "user1@test.com", Score = 50 },
+                    new User { Id = Guid.NewGuid(), Name = "User2", LastName = "Test", Email = "user2@test.com", Score = 40 },
+                    new User { Id = Guid.NewGuid(), Name = "User3", LastName = "Test", Email = "user3@test.com", Score = 30 }
+                }
+            };
+
+            _mockUserLogic.Setup(x => x.GetTopTenUsers()).ReturnsAsync(topTenResponse);
+
+            var response = await _adminClient.GetAsync("/api/strategy/topTen");
+
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<TopTenResponse>(
+                responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(3, result.TopTenUsers.Count);
+            Assert.AreEqual(50, result.TopTenUsers[0].Score);
+            Assert.AreEqual(30, result.TopTenUsers[2].Score);
+        }
     }
 }
