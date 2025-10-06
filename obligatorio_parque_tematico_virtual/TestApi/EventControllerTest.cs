@@ -9,12 +9,16 @@ using Domain;
 using IBusinessLogic;
 using Models.In;
 using Models.Out;
+using Microsoft.EntityFrameworkCore;
+using DataAccess.Context;
+using Microsoft.Data.Sqlite;
 
 namespace ApiTests;
 
 [TestClass]
 public class EventControllerTest
 {
+    private SqliteConnection _connection = null!;
     private WebApplicationFactory<Program> _factory = null!;
     private HttpClient _client = null!;
     private HttpClient _adminClient = null!;
@@ -23,12 +27,31 @@ public class EventControllerTest
     [TestInitialize]
     public void Setup()
     {
+        _connection = new SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
         _mockEventService = new Mock<IEventService>();
 
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
-            builder.ConfigureServices(services => { services.AddSingleton(_mockEventService.Object); });
+            builder.ConfigureServices(services =>
+            {
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                if (descriptor != null) services.Remove(descriptor);
+
+                services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlite(_connection));
+
+                services.AddSingleton(_mockEventService.Object);
+            });
         });
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            context.Database.EnsureCreated();
+        }
 
         _client = _factory.CreateClient();
 
@@ -60,6 +83,8 @@ public class EventControllerTest
         _client?.Dispose();
         _adminClient?.Dispose();
         _factory?.Dispose();
+        _connection?.Close();
+        _connection?.Dispose();
     }
 
     [TestMethod]

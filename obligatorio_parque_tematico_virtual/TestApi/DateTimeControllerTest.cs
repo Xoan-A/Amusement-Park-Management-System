@@ -10,6 +10,9 @@ using BusinessLogic;
 using IBusinessLogic;
 using Models.In;
 using Models.Out;
+using Microsoft.EntityFrameworkCore;
+using DataAccess.Context;
+using Microsoft.Data.Sqlite;
 
 namespace ApiTests
 {
@@ -19,10 +22,14 @@ namespace ApiTests
         private WebApplicationFactory<Program> _factory;
         private HttpClient _client;
         private Mock<IDateTimeLogic> _mockDateTimeLogic;
+        private SqliteConnection _connection = null!;
 
         [TestInitialize]
         public void Setup()
         {
+            _connection = new SqliteConnection("DataSource=:memory:");
+            _connection.Open();
+
             _mockDateTimeLogic = new Mock<IDateTimeLogic>();
 
             _factory = new WebApplicationFactory<Program>()
@@ -30,9 +37,22 @@ namespace ApiTests
                 {
                     builder.ConfigureServices(services =>
                     {
+                        var descriptor = services.SingleOrDefault(
+                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                        if (descriptor != null) services.Remove(descriptor);
+
+                        services.AddDbContext<AppDbContext>(options =>
+                            options.UseSqlite(_connection));
+
                         services.AddSingleton(_mockDateTimeLogic.Object);
                     });
                 });
+
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                context.Database.EnsureCreated();
+            }
 
             _client = _factory.CreateClient();
         }
@@ -42,6 +62,8 @@ namespace ApiTests
         {
             _client?.Dispose();
             _factory?.Dispose();
+            _connection?.Close();
+            _connection?.Dispose();
         }
 
         [TestMethod]
