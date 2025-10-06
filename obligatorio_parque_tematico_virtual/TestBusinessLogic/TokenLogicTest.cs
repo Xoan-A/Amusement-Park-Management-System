@@ -10,9 +10,9 @@ using BusinessLogic;
 namespace TestBusinessLogic
 {
     [TestClass]
-    public class TokenServiceTest
+    public class TokenLogicTest
     {
-        private ITokenService _tokenService;
+        private ITokenLogic _tokenLogic;
 
         [TestInitialize]
         public void Setup()
@@ -24,13 +24,13 @@ namespace TestBusinessLogic
                 Audience = "ParqueTematico",
                 ExpirationHours = 1
             });
-            _tokenService = new TokenService(jwtSettings);
+            _tokenLogic = new TokenLogic(jwtSettings);
         }
 
         [TestMethod]
         public void GenerateToken_ShouldReturnValidJwtToken_ForAdministrator()
         {
-            Administrator admin = new Administrator
+            User admin = new User
             {
                 Id = Guid.NewGuid(),
                 Name = "Admin",
@@ -38,8 +38,12 @@ namespace TestBusinessLogic
                 Email = "admin@test.com",
                 Password = "hashedPassword"
             };
+            admin.UserRoles = new System.Collections.Generic.List<UserRole>
+            {
+                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+            };
 
-            string token = _tokenService.GenerateToken(admin);
+            string token = _tokenLogic.GenerateToken(admin);
 
             Assert.IsNotNull(token);
             Assert.IsTrue(token.Length > 50);
@@ -55,7 +59,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GenerateToken_ShouldReturnValidJwtToken_ForOperator()
         {
-            Operator op = new Operator
+            User op = new User
             {
                 Id = Guid.NewGuid(),
                 Name = "Operator",
@@ -63,8 +67,12 @@ namespace TestBusinessLogic
                 Email = "operator@test.com",
                 Password = "hashedPassword"
             };
+            op.UserRoles = new System.Collections.Generic.List<UserRole>
+            {
+                new UserRole { Role = new Role { Name = Role.OPERATOR } }
+            };
 
-            string token = _tokenService.GenerateToken(op);
+            string token = _tokenLogic.GenerateToken(op);
 
             Assert.IsNotNull(token);
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -77,7 +85,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GenerateToken_ShouldReturnValidJwtToken_ForVisitor()
         {
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = Guid.NewGuid(),
                 Name = "Visitor",
@@ -87,8 +95,12 @@ namespace TestBusinessLogic
                 BirthDate = new DateTime(1990, 1, 1),
                 MembershipLevel = MembershipLevel.Premium
             };
+            visitor.UserRoles = new System.Collections.Generic.List<UserRole>
+            {
+                new UserRole { Role = new Role { Name = Role.VISITOR } }
+            };
 
-            string token = _tokenService.GenerateToken(visitor);
+            string token = _tokenLogic.GenerateToken(visitor);
 
             Assert.IsNotNull(token);
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -102,7 +114,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GenerateToken_ShouldIncludeExpirationClaim()
         {
-            Administrator admin = new Administrator
+            User admin = new User
             {
                 Id = Guid.NewGuid(),
                 Name = "Test",
@@ -110,8 +122,12 @@ namespace TestBusinessLogic
                 Email = "test@test.com",
                 Password = "password"
             };
+            admin.UserRoles = new System.Collections.Generic.List<UserRole>
+            {
+                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+            };
 
-            string token = _tokenService.GenerateToken(admin);
+            string token = _tokenLogic.GenerateToken(admin);
 
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
@@ -123,7 +139,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GenerateToken_ShouldGenerateDifferentTokens_ForSameUser()
         {
-            Administrator admin = new Administrator
+            User admin = new User
             {
                 Id = Guid.NewGuid(),
                 Name = "Test",
@@ -131,9 +147,13 @@ namespace TestBusinessLogic
                 Email = "test@test.com",
                 Password = "password"
             };
+            admin.UserRoles = new System.Collections.Generic.List<UserRole>
+            {
+                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+            };
 
-            string token1 = _tokenService.GenerateToken(admin);
-            string token2 = _tokenService.GenerateToken(admin);
+            string token1 = _tokenLogic.GenerateToken(admin);
+            string token2 = _tokenLogic.GenerateToken(admin);
 
             Assert.AreNotEqual(token1, token2);
         }
@@ -156,7 +176,7 @@ namespace TestBusinessLogic
             user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = adminRole.Id, Role = adminRole });
             user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = operatorRole.Id, Role = operatorRole });
 
-            string token = _tokenService.GenerateToken(user);
+            string token = _tokenLogic.GenerateToken(user);
 
             Assert.IsNotNull(token);
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -183,7 +203,7 @@ namespace TestBusinessLogic
             Role visitorRole = new Role { Id = 3, Name = "Visitor" };
             user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = visitorRole.Id, Role = visitorRole });
 
-            string token = _tokenService.GenerateToken(user);
+            string token = _tokenLogic.GenerateToken(user);
 
             Assert.IsNotNull(token);
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -195,7 +215,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void GenerateToken_ShouldUseClassNameFallback_ForUserWithoutRoles()
+        public void GenerateToken_ShouldNotIncludeRoleClaim_ForUserWithoutRoles()
         {
             User user = new User
             {
@@ -206,15 +226,14 @@ namespace TestBusinessLogic
                 Password = "hashedPassword"
             };
 
-            string token = _tokenService.GenerateToken(user);
+            string token = _tokenLogic.GenerateToken(user);
 
             Assert.IsNotNull(token);
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
 
             var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
-            Assert.IsNotNull(roleClaim);
-            Assert.AreEqual("User", roleClaim.Value);
+            Assert.IsNull(roleClaim);
         }
     }
 }

@@ -10,19 +10,19 @@ namespace BusinessLogic
     public class UserLogic : IUserLogic
     {
         private readonly IUserRepository _userRepository;
-        private readonly IPasswordService _passwordService;
+        private readonly IPasswordLogic _passwordLogic;
         private readonly IAttractionRepository _attractionRepository;
         private readonly ITicketLogic _ticketLogic;
         private readonly IRoleRepository _roleRepository;
         private readonly IEventRepository _eventRepository;
         private readonly IActiveStrategy _activeStrategy;
 
-        public UserLogic(IUserRepository userRepository, IPasswordService passwordService,
+        public UserLogic(IUserRepository userRepository, IPasswordLogic passwordLogic,
             IAttractionRepository attractionRepository, ITicketLogic ticketLogic, IRoleRepository roleRepository,
             IEventRepository eventRepository, IActiveStrategy activeStrategy)
         {
             _userRepository = userRepository;
-            _passwordService = passwordService;
+            _passwordLogic = passwordLogic;
             _attractionRepository = attractionRepository;
             _ticketLogic = ticketLogic;
             _roleRepository = roleRepository;
@@ -48,7 +48,7 @@ namespace BusinessLogic
                 return null;
             }
 
-            string hashedPassword = _passwordService.HashPassword(password);
+            string hashedPassword = _passwordLogic.HashPassword(password);
 
             User visitor = new User
             {
@@ -82,7 +82,7 @@ namespace BusinessLogic
                 return null;
             }
 
-            string hashedPassword = _passwordService.HashPassword(password);
+            string hashedPassword = _passwordLogic.HashPassword(password);
 
             User user = new User
             {

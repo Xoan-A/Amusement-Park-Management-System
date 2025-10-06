@@ -22,7 +22,7 @@ public class EventControllerTest
     private WebApplicationFactory<Program> _factory = null!;
     private HttpClient _client = null!;
     private HttpClient _adminClient = null!;
-    private Mock<IEventService> _mockEventService = null!;
+    private Mock<IEventLogic> _mockEventService = null!;
 
     [TestInitialize]
     public void Setup()
@@ -30,7 +30,7 @@ public class EventControllerTest
         _connection = new SqliteConnection("DataSource=:memory:");
         _connection.Open();
 
-        _mockEventService = new Mock<IEventService>();
+        _mockEventService = new Mock<IEventLogic>();
 
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
@@ -62,14 +62,18 @@ public class EventControllerTest
             Audience = "ParqueTematico",
             ExpirationHours = 1
         });
-        var tokenService = new BusinessLogic.TokenService(jwtSettings);
+        var tokenService = new BusinessLogic.TokenLogic(jwtSettings);
 
-        var adminUser = new Domain.Administrator
+        User adminUser = new User
         {
             Id = Guid.NewGuid(),
             Name = "Admin",
             LastName = "User",
             Email = "admin@example.com"
+        };
+        adminUser.UserRoles = new List<UserRole>
+        {
+            new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
         };
         string adminToken = tokenService.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();

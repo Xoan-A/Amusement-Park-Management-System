@@ -13,13 +13,13 @@ namespace Api.Controllers
     {
         private readonly IAuthLogic _authLogic;
         private readonly IUserLogic _userLogic;
-        private readonly ITokenService _tokenService;
+        private readonly ITokenLogic _tokenLogic;
 
-        public AuthController(IAuthLogic authLogic, IUserLogic userLogic, ITokenService tokenService)
+        public AuthController(IAuthLogic authLogic, IUserLogic userLogic, ITokenLogic tokenLogic)
         {
             _authLogic = authLogic;
             _userLogic = userLogic;
-            _tokenService = tokenService;
+            _tokenLogic = tokenLogic;
         }
 
         [HttpPost("login")]
@@ -32,7 +32,7 @@ namespace Api.Controllers
                 throw new UnauthorizedException("Invalid email or password");
             }
 
-            var token = _tokenService.GenerateToken(user);
+            var token = _tokenLogic.GenerateToken(user);
             var roles = user.UserRoles?.Select(ur => ur.Role.Name).ToArray() ?? new string[0];
 
             var response = new LoginResponse

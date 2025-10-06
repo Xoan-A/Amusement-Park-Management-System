@@ -14,15 +14,15 @@ public static class ServiceFactory
     public static void AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IDateTimeLogic>(provider => DateTimeLogic.Instance);
-        services.AddSingleton<IPasswordService, PasswordService>();
-        services.AddSingleton<ITokenService, TokenService>();
+        services.AddSingleton<IPasswordLogic, PasswordLogic>();
+        services.AddSingleton<ITokenLogic, TokenLogic>();
         services.AddSingleton<IActiveStrategy, ActiveStrategy>();
         services.AddScoped<IAuthLogic, AuthLogic>();
         services.AddScoped<IUserLogic, UserLogic>();
         services.AddScoped<ITicketLogic, TicketLogic>();
-        services.AddScoped<IAttractionService, AttractionService>();
-        services.AddScoped<IAttractionServiceEntity, AttractionService>();
-        services.AddScoped<IEventService, EventService>();
+        services.AddScoped<IAttractionLogic, AttractionLogic>();
+        services.AddScoped<IAttractionLogicEntity, AttractionLogic>();
+        services.AddScoped<IEventLogic, EventLogic>();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>(options =>

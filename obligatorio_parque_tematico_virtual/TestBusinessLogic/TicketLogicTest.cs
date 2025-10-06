@@ -35,7 +35,7 @@ namespace TestBusinessLogic
             DateTime currentDate = new DateTime(2025, 1, 1, 10, 0, 0);
             DateTime visitDate = new DateTime(2025, 1, 15, 0, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = visitorId,
                 Name = "John",
@@ -89,7 +89,7 @@ namespace TestBusinessLogic
             DateTime currentDate = new DateTime(2025, 1, 15, 10, 0, 0);
             DateTime pastVisitDate = new DateTime(2025, 1, 10, 0, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = visitorId,
                 Name = "John",
@@ -114,7 +114,7 @@ namespace TestBusinessLogic
             DateTime visitDate = new DateTime(2025, 1, 20, 0, 0, 0);
             int eventId = 5;
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = visitorId,
                 Name = "Jane",

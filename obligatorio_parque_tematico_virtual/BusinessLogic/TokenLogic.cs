@@ -12,11 +12,11 @@ using Models;
 
 namespace BusinessLogic
 {
-    public class TokenService : ITokenService
+    public class TokenLogic : ITokenLogic
     {
         private readonly JwtSettings _jwtSettings;
 
-        public TokenService(IOptions<JwtSettings> jwtSettings)
+        public TokenLogic(IOptions<JwtSettings> jwtSettings)
         {
             _jwtSettings = jwtSettings.Value;
         }
@@ -41,12 +41,6 @@ namespace BusinessLogic
                 {
                     claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
                 }
-            }
-            else
-            {
-                // Fallback to class name for backward compatibility (legacy Administrator/Operator/Visitor classes)
-                string role = user.GetType().Name;
-                claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
             SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));

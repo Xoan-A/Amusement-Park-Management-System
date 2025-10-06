@@ -2,7 +2,7 @@ using Domain;
 
 namespace IBusinessLogic
 {
-    public interface ITokenService
+    public interface ITokenLogic
     {
         string GenerateToken(User user);
     }

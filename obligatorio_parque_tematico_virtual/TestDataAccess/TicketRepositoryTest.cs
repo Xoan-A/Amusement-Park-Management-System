@@ -32,7 +32,7 @@ namespace TestDataAccess
 
             // Create a visitor for ticket tests
             _visitorId = Guid.NewGuid();
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = _visitorId,
                 Name = "Test",

@@ -2,7 +2,7 @@
 
 namespace IBusinessLogic;
 
-public interface IAttractionServiceEntity
+public interface IAttractionLogicEntity
 {
     Task<Attraction> GetAttractionEntityById(Guid expectedAttractionId);
 }

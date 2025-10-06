@@ -24,11 +24,6 @@ namespace DataAccess.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Ignore old inheritance-based classes (backward compatibility during migration)
-            modelBuilder.Ignore<Administrator>();
-            modelBuilder.Ignore<Operator>();
-            modelBuilder.Ignore<Visitor>();
-
             // User configuration
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)

@@ -1,6 +1,6 @@
 namespace IBusinessLogic
 {
-    public interface IPasswordService
+    public interface IPasswordLogic
     {
         string HashPassword(string password);
         bool VerifyPassword(string password, string hashedPassword);
