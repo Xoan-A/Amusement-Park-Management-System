@@ -239,6 +239,34 @@ namespace TestDataAccess
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
         }
+        
+        [TestMethod]
+        public async Task GetTopTen_ShouldReturnFewerThanTenUsers_WhenLessThanTenExist()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
 
+            for (int i = 1; i <= 5; i++)
+            {
+                Visitor visitor = new Visitor
+                {
+                    Name = $"User{i}",
+                    LastName = "Test",
+                    Email = $"user{i}@test.com",
+                    Password = "password",
+                    BirthDate = new DateTime(1990, 1, 1),
+                    Score = i * 20
+                };
+                _context.Users.Add(visitor);
+            }
+            _context.SaveChanges();
+
+            var result = await _userRepository.GetTopTen();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(5, result.Count);
+            Assert.AreEqual(100, result[0].Score);
+            Assert.AreEqual(20, result[4].Score);
+        }
     }
 }
