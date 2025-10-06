@@ -60,6 +60,40 @@ namespace DataAccess.Context
                 new Role { Id = 3, Name = Role.VISITOR }
             );
 
+            // Seed Admin and Operator Users
+            // Password hashes for "admin123" and "operator123" (using BCrypt WorkFactor 11)
+            var adminId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            var operatorId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = adminId,
+                    Name = "Admin",
+                    LastName = "User",
+                    Email = "admin@test.com",
+                    Password = "$2a$11$8K1p/a0dL3LHqJKvB5UFFe1CVJ0L4tGvAC2w6UO0m9l.KGJQhKGHi", // admin123
+                    BirthDate = new DateTime(1980, 1, 1),
+                    MembershipLevel = MembershipLevel.VIP
+                },
+                new User
+                {
+                    Id = operatorId,
+                    Name = "Operator",
+                    LastName = "User",
+                    Email = "operator@test.com",
+                    Password = "$2a$11$X2y.8K1u0/W.M9nGJU5LneF5JbYjQ2vYMz8R8qLq9.pU2wXTQZrjK", // operator123
+                    BirthDate = new DateTime(1985, 1, 1),
+                    MembershipLevel = MembershipLevel.Standard
+                }
+            );
+
+            // Seed UserRole associations
+            modelBuilder.Entity<UserRole>().HasData(
+                new UserRole { UserId = adminId, RoleId = 1 },
+                new UserRole { UserId = operatorId, RoleId = 2 }
+            );
+
             // Attraction configuration
             modelBuilder.Entity<Attraction>()
                 .HasIndex(a => a.Name)

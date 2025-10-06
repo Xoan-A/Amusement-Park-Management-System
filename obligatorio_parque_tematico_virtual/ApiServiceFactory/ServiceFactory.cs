@@ -5,12 +5,13 @@ using DataAccess.Context;
 using DataAccess.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace ApiServiceFactory;
 
 public static class ServiceFactory
 {
-    public static void AddServices(this IServiceCollection services)
+    public static void AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IDateTimeLogic>(provider => DateTimeLogic.Instance);
         services.AddSingleton<IPasswordService, PasswordService>();
@@ -23,8 +24,9 @@ public static class ServiceFactory
         services.AddScoped<IAttractionServiceEntity, AttractionService>();
         services.AddScoped<IEventService, EventService>();
 
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>(options =>
-            options.UseInMemoryDatabase("TestDb"));
+            options.UseSqlServer(connectionString));
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
