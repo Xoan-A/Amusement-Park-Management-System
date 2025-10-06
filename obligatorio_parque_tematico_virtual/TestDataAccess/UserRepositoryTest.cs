@@ -194,5 +194,38 @@ namespace TestDataAccess
             Assert.AreEqual(1, result.UserRoles.Count);
             Assert.AreEqual(Role.VISITOR, result.UserRoles.First().Role.Name);
         }
+
+        [TestMethod]
+        public async Task GetTopTen_ShouldReturnTopTenUsersOrderedByScore()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            for (int i = 1; i <= 15; i++)
+            {
+                User visitor = new User
+                {
+                    Name = $"User{i}",
+                    LastName = "Test",
+                    Email = $"user{i}@test.com",
+                    Password = "password",
+                    BirthDate = new DateTime(1990, 1, 1),
+                    Score = i * 10
+                };
+                _context.Users.Add(visitor);
+            }
+            _context.SaveChanges();
+
+            var result = await _userRepository.GetTopTen();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(10, result.Count);
+            Assert.AreEqual(150, result[0].Score);
+            Assert.AreEqual(60, result[9].Score);
+            for (int i = 0; i < result.Count - 1; i++)
+            {
+                Assert.IsTrue(result[i].Score >= result[i + 1].Score);
+            }
+        }
     }
 }
