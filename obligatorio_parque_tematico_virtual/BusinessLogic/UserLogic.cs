@@ -3,6 +3,7 @@ using System.Linq;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
+using Models.Out;
 
 namespace BusinessLogic
 {
@@ -163,6 +164,13 @@ namespace BusinessLogic
 
             if (attraction.CurrentCapacity > 0)
                 attraction.CurrentCapacity--;
+        }
+
+        public async Task<TopTenResponse> GetTopTenUsers()
+        {
+            TopTenResponse result = new TopTenResponse();
+            result.TopTenUsers = await _userRepository.GetTopTen();
+            return result;
         }
     }
 }

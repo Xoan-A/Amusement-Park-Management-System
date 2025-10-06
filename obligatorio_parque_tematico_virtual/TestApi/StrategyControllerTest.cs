@@ -25,6 +25,7 @@ namespace ApiTests
         private HttpClient _client = null!;
         private HttpClient _adminClient = null!;
         private Mock<IActiveStrategy> _mockActiveStrategy = null!;
+        private Mock<IUserLogic> _mockUserLogic = null!;
 
         [TestInitialize]
         public void Setup()
@@ -33,6 +34,7 @@ namespace ApiTests
             _connection.Open();
 
             _mockActiveStrategy = new Mock<IActiveStrategy>();
+            _mockUserLogic = new Mock<IUserLogic>();
 
             _factory = new WebApplicationFactory<Program>()
                 .WithWebHostBuilder(builder =>
@@ -47,6 +49,7 @@ namespace ApiTests
                             options.UseSqlite(_connection));
 
                         services.AddSingleton(_mockActiveStrategy.Object);
+                        services.AddSingleton(_mockUserLogic.Object);
                     });
                 });
 
@@ -345,6 +348,188 @@ namespace ApiTests
 
             Assert.IsNotNull(strategyResponse);
             Assert.AreEqual("Combo", strategyResponse.Name);
+        }
+
+        [TestMethod]
+        public async Task GetTopTen_ShouldReturnTopTenUsersOrderedByScore()
+        {
+            var topTenResponse = new TopTenResponse
+            {
+                TopTenUsers = new List<User>
+                {
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User1", LastName = "Test", Email = "user1@test.com", Score = 100
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User2", LastName = "Test", Email = "user2@test.com", Score = 90
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User3", LastName = "Test", Email = "user3@test.com", Score = 80
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User4", LastName = "Test", Email = "user4@test.com", Score = 70
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User5", LastName = "Test", Email = "user5@test.com", Score = 60
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User6", LastName = "Test", Email = "user6@test.com", Score = 50
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User7", LastName = "Test", Email = "user7@test.com", Score = 40
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User8", LastName = "Test", Email = "user8@test.com", Score = 30
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User9", LastName = "Test", Email = "user9@test.com", Score = 20
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User10", LastName = "Test", Email = "user10@test.com", Score = 10
+                    }
+                }
+            };
+
+            _mockUserLogic.Setup(x => x.GetTopTenUsers()).ReturnsAsync(topTenResponse);
+
+            var response = await _adminClient.GetAsync("/api/strategy/topTen");
+
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<TopTenResponse>(
+                responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(10, result.TopTenUsers.Count);
+            Assert.AreEqual(100, result.TopTenUsers[0].Score);
+            Assert.AreEqual(10, result.TopTenUsers[9].Score);
+            _mockUserLogic.Verify(x => x.GetTopTenUsers(), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetTopTen_WithoutAuth_ShouldReturnUnauthorized()
+        {
+            var response = await _client.GetAsync("/api/strategy/topTen");
+
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task GetTopTen_WithNoUsers_ShouldReturnEmptyList()
+        {
+            var topTenResponse = new TopTenResponse
+            {
+                TopTenUsers = new List<User>()
+            };
+
+            _mockUserLogic.Setup(x => x.GetTopTenUsers()).ReturnsAsync(topTenResponse);
+
+            var response = await _adminClient.GetAsync("/api/strategy/topTen");
+
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<TopTenResponse>(
+                responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(0, result.TopTenUsers.Count);
+        }
+
+        [TestMethod]
+        public async Task GetTopTen_WithFewerThanTenUsers_ShouldReturnAllUsers()
+        {
+            var topTenResponse = new TopTenResponse
+            {
+                TopTenUsers = new List<User>
+                {
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User1", LastName = "Test", Email = "user1@test.com", Score = 50
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User2", LastName = "Test", Email = "user2@test.com", Score = 40
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User3", LastName = "Test", Email = "user3@test.com", Score = 30
+                    }
+                }
+            };
+
+            _mockUserLogic.Setup(x => x.GetTopTenUsers()).ReturnsAsync(topTenResponse);
+
+            var response = await _adminClient.GetAsync("/api/strategy/topTen");
+
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<TopTenResponse>(
+                responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(3, result.TopTenUsers.Count);
+            Assert.AreEqual(50, result.TopTenUsers[0].Score);
+            Assert.AreEqual(30, result.TopTenUsers[2].Score);
+        }
+
+        [TestMethod]
+        public async Task GetTopTen_ShouldReturnUsersInDescendingOrderByScore()
+        {
+            var topTenResponse = new TopTenResponse
+            {
+                TopTenUsers = new List<User>
+                {
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User1", LastName = "Test", Email = "user1@test.com", Score = 100
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User2", LastName = "Test", Email = "user2@test.com", Score = 90
+                    },
+                    new User
+                    {
+                        Id = Guid.NewGuid(), Name = "User3", LastName = "Test", Email = "user3@test.com", Score = 80
+                    }
+                }
+            };
+
+            _mockUserLogic.Setup(x => x.GetTopTenUsers()).ReturnsAsync(topTenResponse);
+
+            var response = await _adminClient.GetAsync("/api/strategy/topTen");
+
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<TopTenResponse>(
+                responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            for (int i = 0; i < result.TopTenUsers.Count - 1; i++)
+            {
+                Assert.IsTrue(result.TopTenUsers[i].Score >= result.TopTenUsers[i + 1].Score);
+            }
         }
     }
 }

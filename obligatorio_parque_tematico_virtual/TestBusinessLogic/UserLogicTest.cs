@@ -5,6 +5,7 @@ using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using BusinessLogic;
+using Models.Out;
 
 namespace TestBusinessLogic
 {
@@ -887,7 +888,8 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).ReturnsAsync(attraction1);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).ReturnsAsync(attraction2);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, It.IsAny<DateTime>(), null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, It.IsAny<DateTime>(), null))
+                .ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(It.IsAny<Guid>(), It.IsAny<DateTime>()))
                 .ReturnsAsync((Event)null);
             _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<StrategyRequest>()))
@@ -936,6 +938,116 @@ namespace TestBusinessLogic
             await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
 
             Assert.AreEqual(5, visitor.Score);
+        }
+
+        [TestMethod]
+        public async Task GetTopTenUsers_ShouldReturnTopTenUsersOrderedByScore()
+        {
+            List<User> expectedUsers = new List<User>
+            {
+                new User { Id = Guid.NewGuid(), Name = "User1", Score = 100 },
+                new User { Id = Guid.NewGuid(), Name = "User2", Score = 90 },
+                new User { Id = Guid.NewGuid(), Name = "User3", Score = 80 },
+                new User { Id = Guid.NewGuid(), Name = "User4", Score = 70 },
+                new User { Id = Guid.NewGuid(), Name = "User5", Score = 60 },
+                new User { Id = Guid.NewGuid(), Name = "User6", Score = 50 },
+                new User { Id = Guid.NewGuid(), Name = "User7", Score = 40 },
+                new User { Id = Guid.NewGuid(), Name = "User8", Score = 30 },
+                new User { Id = Guid.NewGuid(), Name = "User9", Score = 20 },
+                new User { Id = Guid.NewGuid(), Name = "User10", Score = 10 }
+            };
+
+            _mockUserRepository.Setup(r => r.GetTopTen()).ReturnsAsync(expectedUsers);
+
+            TopTenResponse result = await _userLogic.GetTopTenUsers();
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(10, result.TopTenUsers.Count);
+            Assert.AreEqual(100, result.TopTenUsers[0].Score);
+            Assert.AreEqual(10, result.TopTenUsers[9].Score);
+            _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetTopTenUsers_ShouldReturnEmptyList_WhenNoUsersExist()
+        {
+            List<User> emptyList = new List<User>();
+
+            _mockUserRepository.Setup(r => r.GetTopTen()).ReturnsAsync(emptyList);
+
+            TopTenResponse result = await _userLogic.GetTopTenUsers();
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(0, result.TopTenUsers.Count);
+            _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetTopTenUsers_ShouldReturnFewerThanTenUsers_WhenLessThanTenExist()
+        {
+            List<User> expectedUsers = new List<User>
+            {
+                new User { Id = Guid.NewGuid(), Name = "User1", Score = 50 },
+                new User { Id = Guid.NewGuid(), Name = "User2", Score = 40 },
+                new User { Id = Guid.NewGuid(), Name = "User3", Score = 30 }
+            };
+
+            _mockUserRepository.Setup(r => r.GetTopTen()).ReturnsAsync(expectedUsers);
+
+            TopTenResponse result = await _userLogic.GetTopTenUsers();
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(3, result.TopTenUsers.Count);
+            Assert.AreEqual(50, result.TopTenUsers[0].Score);
+            Assert.AreEqual(30, result.TopTenUsers[2].Score);
+            _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetTopTenUsers_ShouldCallRepositoryGetTopTenOnce()
+        {
+            List<User> expectedUsers = new List<User>
+            {
+                new User { Id = Guid.NewGuid(), Name = "User1", Score = 100 }
+            };
+
+            _mockUserRepository.Setup(r => r.GetTopTen()).ReturnsAsync(expectedUsers);
+
+            await _userLogic.GetTopTenUsers();
+
+            _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetTopTenUsers_ShouldReturnOnlyTenUsers_WhenMoreThanTenExist()
+        {
+            List<User> expectedUsers = new List<User>
+            {
+                new User { Id = Guid.NewGuid(), Name = "User1", Score = 110 },
+                new User { Id = Guid.NewGuid(), Name = "User2", Score = 100 },
+                new User { Id = Guid.NewGuid(), Name = "User3", Score = 90 },
+                new User { Id = Guid.NewGuid(), Name = "User4", Score = 80 },
+                new User { Id = Guid.NewGuid(), Name = "User5", Score = 70 },
+                new User { Id = Guid.NewGuid(), Name = "User6", Score = 60 },
+                new User { Id = Guid.NewGuid(), Name = "User7", Score = 50 },
+                new User { Id = Guid.NewGuid(), Name = "User8", Score = 40 },
+                new User { Id = Guid.NewGuid(), Name = "User9", Score = 30 },
+                new User { Id = Guid.NewGuid(), Name = "User10", Score = 20 }
+            };
+
+            _mockUserRepository.Setup(r => r.GetTopTen()).ReturnsAsync(expectedUsers);
+
+            TopTenResponse result = await _userLogic.GetTopTenUsers();
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(10, result.TopTenUsers.Count);
+            Assert.AreEqual(110, result.TopTenUsers[0].Score);
+            Assert.AreEqual(20, result.TopTenUsers[9].Score);
+            _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
         }
     }
 }

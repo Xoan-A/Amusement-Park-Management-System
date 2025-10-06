@@ -215,5 +215,142 @@ namespace TestDataAccess
             Assert.AreEqual(1, result.UserRoles.Count);
             Assert.AreEqual(Role.VISITOR, result.UserRoles.First().Role.Name);
         }
+
+        [TestMethod]
+        public async Task GetTopTen_ShouldReturnTopTenUsersOrderedByScore()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            for (int i = 1; i <= 15; i++)
+            {
+                User visitor = new User
+                {
+                    Name = $"User{i}",
+                    LastName = "Test",
+                    Email = $"user{i}@test.com",
+                    Password = "password",
+                    BirthDate = new DateTime(1990, 1, 1),
+                    Score = i * 10
+                };
+                _context.Users.Add(visitor);
+            }
+
+            _context.SaveChanges();
+
+            var result = await _userRepository.GetTopTen();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(10, result.Count);
+            Assert.AreEqual(150, result[0].Score);
+            Assert.AreEqual(60, result[9].Score);
+            for (int i = 0; i < result.Count - 1; i++)
+            {
+                Assert.IsTrue(result[i].Score >= result[i + 1].Score);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetTopTen_ShouldReturnEmptyList_WhenNoUsersExist()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            var result = await _userRepository.GetTopTen();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public async Task GetTopTen_ShouldReturnFewerThanTenUsers_WhenLessThanTenExist()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            for (int i = 1; i <= 5; i++)
+            {
+                User visitor = new User
+                {
+                    Name = $"User{i}",
+                    LastName = "Test",
+                    Email = $"user{i}@test.com",
+                    Password = "password",
+                    BirthDate = new DateTime(1990, 1, 1),
+                    Score = i * 20
+                };
+                _context.Users.Add(visitor);
+            }
+
+            _context.SaveChanges();
+
+            var result = await _userRepository.GetTopTen();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(5, result.Count);
+            Assert.AreEqual(100, result[0].Score);
+            Assert.AreEqual(20, result[4].Score);
+        }
+
+        [TestMethod]
+        public async Task GetTopTen_ShouldReturnExactlyTenUsers_WhenExactlyTenExist()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            for (int i = 1; i <= 10; i++)
+            {
+                User visitor = new User
+                {
+                    Name = $"User{i}",
+                    LastName = "Test",
+                    Email = $"user{i}@test.com",
+                    Password = "password",
+                    BirthDate = new DateTime(1990, 1, 1),
+                    Score = i * 5
+                };
+                _context.Users.Add(visitor);
+            }
+
+            _context.SaveChanges();
+
+            var result = await _userRepository.GetTopTen();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(10, result.Count);
+            Assert.AreEqual(50, result[0].Score);
+            Assert.AreEqual(5, result[9].Score);
+        }
+
+        [TestMethod]
+        public async Task GetTopTen_ShouldReturnUsersWithSameScore_InCorrectOrder()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            for (int i = 1; i <= 12; i++)
+            {
+                User visitor = new User
+                {
+                    Name = $"User{i}",
+                    LastName = "Test",
+                    Email = $"user{i}@test.com",
+                    Password = "password",
+                    BirthDate = new DateTime(1990, 1, 1),
+                    Score = i <= 6 ? 100 : 50
+                };
+                _context.Users.Add(visitor);
+            }
+
+            _context.SaveChanges();
+
+            var result = await _userRepository.GetTopTen();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(10, result.Count);
+            Assert.AreEqual(100, result[0].Score);
+            Assert.AreEqual(100, result[5].Score);
+            Assert.AreEqual(50, result[6].Score);
+        }
     }
 }

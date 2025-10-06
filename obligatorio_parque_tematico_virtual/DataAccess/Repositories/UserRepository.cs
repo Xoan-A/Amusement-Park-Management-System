@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using DataAccess.Context;
 using Domain;
@@ -52,6 +53,14 @@ namespace DataAccess.Repositories
         public bool IsEmailUnique(string email)
         {
             return !_context.Users.Any(u => u.Email == email);
+        }
+
+        public Task<List<User>> GetTopTen()
+        {
+            return _context.Users
+                .OrderByDescending(u => u.Score)
+                .Take(10)
+                .ToListAsync();
         }
     }
 }
