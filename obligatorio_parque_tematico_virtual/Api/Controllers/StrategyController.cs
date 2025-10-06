@@ -21,9 +21,9 @@ public class StrategyController : ControllerBase
 
     [HttpGet]
     [Authorize(Roles = "Administrator")]
-    public IActionResult GetStrategy()
+    public IActionResult GetStrategy([FromBody] GetStrategyRequest getStrategyRequest)
     {
-        IContreteStrategy strategy = _activeStrategy.GetStrategy();
+        IContreteStrategy strategy = _activeStrategy.GetStrategy(getStrategyRequest.CurrentDate);
 
         StrategyResponse response = new StrategyResponse
         {
