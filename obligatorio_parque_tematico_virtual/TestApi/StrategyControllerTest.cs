@@ -384,5 +384,14 @@ namespace ApiTests
             Assert.AreEqual(10, result.TopTenUsers[9].Score);
             _mockUserLogic.Verify(x => x.GetTopTenUsers(), Times.Once);
         }
+        
+        [TestMethod]
+        public async Task GetTopTen_WithoutAuth_ShouldReturnUnauthorized()
+        {
+            var response = await _client.GetAsync("/api/strategy/topTen");
+
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
     }
 }
