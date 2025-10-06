@@ -17,9 +17,12 @@ public class AttractionRepositoryTest
     public void Setup()
     {
         DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseSqlite("DataSource=:memory:")
             .Options;
         _context = new AppDbContext(options);
+        _context.Database.OpenConnection();
+        _context.Database.EnsureDeleted();
+        _context.Database.EnsureCreated();
         _attractionRepository = new AttractionRepository(_context);
 
         attraction = new Attraction();
@@ -35,6 +38,7 @@ public class AttractionRepositoryTest
     [TestCleanup]
     public void Cleanup()
     {
+        _context.Database.CloseConnection();
         _context.Dispose();
     }
 

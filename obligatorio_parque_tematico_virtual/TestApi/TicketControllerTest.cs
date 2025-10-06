@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -15,6 +16,9 @@ using Models.In;
 using Models.Out;
 using IBusinessLogic;
 using BusinessLogic;
+using Microsoft.EntityFrameworkCore;
+using DataAccess.Context;
+using Microsoft.Data.Sqlite;
 
 namespace TestApi
 {
@@ -23,18 +27,43 @@ namespace TestApi
     {
         private WebApplicationFactory<Program> _factory;
         private HttpClient _client;
+        private SqliteConnection _connection;
 
         [TestInitialize]
         public void TestInitialize()
         {
+            // Create shared in-memory connection
+            _connection = new SqliteConnection("DataSource=:memory:");
+            _connection.Open();
+
             _factory = new WebApplicationFactory<Program>()
                 .WithWebHostBuilder(builder =>
                 {
                     builder.ConfigureServices(services =>
                     {
+                        // Remove SQL Server DbContext
+                        ServiceDescriptor descriptor = services.SingleOrDefault(
+                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                        if (descriptor != null)
+                        {
+                            services.Remove(descriptor);
+                        }
+
+                        // Add SQLite DbContext with shared connection
+                        services.AddDbContext<AppDbContext>(options =>
+                            options.UseSqlite(_connection));
+
                         services.AddSingleton<IDateTimeLogic>(provider => DateTimeLogic.Instance);
                     });
                 });
+
+            // Initialize database schema
+            using (IServiceScope scope = _factory.Services.CreateScope())
+            {
+                AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                context.Database.EnsureCreated();
+            }
+
             _client = _factory.CreateClient();
         }
 
@@ -43,6 +72,8 @@ namespace TestApi
         {
             _client.Dispose();
             _factory.Dispose();
+            _connection.Close();
+            _connection.Dispose();
         }
 
         private async Task<HttpClient> CreateAuthenticatedClient(string email, string password)
