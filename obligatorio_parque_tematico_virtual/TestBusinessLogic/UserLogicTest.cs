@@ -888,7 +888,8 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).ReturnsAsync(attraction1);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).ReturnsAsync(attraction2);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, It.IsAny<DateTime>(), null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, It.IsAny<DateTime>(), null))
+                .ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(It.IsAny<Guid>(), It.IsAny<DateTime>()))
                 .ReturnsAsync((Event)null);
             _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<StrategyRequest>()))
@@ -967,7 +968,7 @@ namespace TestBusinessLogic
             Assert.AreEqual(10, result.TopTenUsers[9].Score);
             _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
         }
-        
+
         [TestMethod]
         public async Task GetTopTenUsers_ShouldReturnEmptyList_WhenNoUsersExist()
         {
@@ -982,7 +983,7 @@ namespace TestBusinessLogic
             Assert.AreEqual(0, result.TopTenUsers.Count);
             _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
         }
-        
+
         [TestMethod]
         public async Task GetTopTenUsers_ShouldReturnFewerThanTenUsers_WhenLessThanTenExist()
         {
@@ -1004,7 +1005,7 @@ namespace TestBusinessLogic
             Assert.AreEqual(30, result.TopTenUsers[2].Score);
             _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
         }
-        
+
         [TestMethod]
         public async Task GetTopTenUsers_ShouldCallRepositoryGetTopTenOnce()
         {
