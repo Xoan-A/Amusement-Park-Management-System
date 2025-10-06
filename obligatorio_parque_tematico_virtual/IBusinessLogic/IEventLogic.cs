@@ -3,7 +3,7 @@ using Models.In;
 
 namespace IBusinessLogic;
 
-public interface IEventService
+public interface IEventLogic
 {
     Task<EventResponse> GetEventById(Guid expectedEventId);
     Task<List<EventResponse>> GetAllEvents();

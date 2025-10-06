@@ -6,20 +6,20 @@ using Models.In;
 
 namespace BusinessLogic;
 
-public class EventService : IEventService
+public class EventLogic : IEventLogic
 {
     private IEventRepository _eventRepository;
-    private IAttractionServiceEntity _attractionService;
+    private IAttractionLogicEntity _attractionLogic;
     private const int MinCapacityLimit = 1;
     private const int MaxCapacityLimit = 10000;
     private const int MinHour = 0;
     private const int MaxHour = 23;
     private const int MinCost = 1;
 
-    public EventService(IEventRepository eventRepository, IAttractionServiceEntity attractionService)
+    public EventLogic(IEventRepository eventRepository, IAttractionLogicEntity attractionLogic)
     {
         _eventRepository = eventRepository;
-        _attractionService = attractionService;
+        _attractionLogic = attractionLogic;
     }
 
     public async Task<EventResponse> GetEventById(Guid expectedEventId)
@@ -102,7 +102,7 @@ public class EventService : IEventService
         {
             foreach (var attractionId in newEvent.AttractionIds)
             {
-                Attraction attraction = await _attractionService.GetAttractionEntityById(attractionId);
+                Attraction attraction = await _attractionLogic.GetAttractionEntityById(attractionId);
                 eventEntity.AddAttraction(attraction);
             }
         }

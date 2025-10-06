@@ -70,7 +70,7 @@ namespace TestDomain
         public void TestTicketWithVisitorRelationship()
         {
             Guid visitorGuid = Guid.NewGuid();
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = visitorGuid,
                 Name = "John",

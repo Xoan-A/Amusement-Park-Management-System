@@ -9,18 +9,18 @@ namespace Api.Controllers;
 [Route("api/incidents/{id}")]
 public class IncidentController : ControllerBase
 {
-    private readonly IAttractionService _attractionService;
+    private readonly IAttractionLogic _attractionLogic;
 
-    public IncidentController(IAttractionService attractionService)
+    public IncidentController(IAttractionLogic attractionLogic)
     {
-        _attractionService = attractionService;
+        _attractionLogic = attractionLogic;
     }
 
     [HttpGet]
     [Authorize(Roles = "Operator")]
     public async Task<IActionResult> GetAttractionIncidents(Guid id)
     {
-        var incidents = await _attractionService.GetAttractionIncidents(id);
+        var incidents = await _attractionLogic.GetAttractionIncidents(id);
         return Ok(incidents);
     }
 
@@ -28,7 +28,7 @@ public class IncidentController : ControllerBase
     [Authorize(Roles = "Operator")]
     public async Task<IActionResult> AddIncident(Guid id, [FromBody] IncidentRequest request)
     {
-        await _attractionService.AddIncident(id, request.Incident);
+        await _attractionLogic.AddIncident(id, request.Incident);
         return Ok(new { Message = "Incident reported successfully" });
     }
 
@@ -36,7 +36,7 @@ public class IncidentController : ControllerBase
     [Authorize(Roles = "Operator")]
     public async Task<IActionResult> RemoveIncident(Guid id, [FromBody] IncidentRequest request)
     {
-        await _attractionService.RemoveIncident(id, request.Incident);
+        await _attractionLogic.RemoveIncident(id, request.Incident);
         return Ok(new { Message = "Incident resolved successfully" });
     }
 }

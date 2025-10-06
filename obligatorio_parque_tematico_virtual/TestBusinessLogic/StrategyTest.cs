@@ -89,7 +89,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ActiveStrategy_BasicCalculation_RollerCoaster_ShouldReturn2()
         {
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.RollerCoaster };
 
             var request = new StrategyRequest
@@ -106,7 +106,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ActiveStrategy_BasicCalculation_Simulator_ShouldReturn2()
         {
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.Simulator };
 
             var request = new StrategyRequest
@@ -123,7 +123,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ActiveStrategy_BasicCalculation_Performance_ShouldReturn3()
         {
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.Performance };
 
             var request = new StrategyRequest
@@ -140,7 +140,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ActiveStrategy_BasicCalculation_InteractiveZone_ShouldReturn4()
         {
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.InteractiveZone };
 
             var request = new StrategyRequest
@@ -158,7 +158,7 @@ namespace TestBusinessLogic
         public void PerAttraction_CalculateScore_ShouldReturnBasicCalculation()
         {
             var strategy = new PerAttraction();
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.Performance };
 
             var request = new StrategyRequest
@@ -184,7 +184,7 @@ namespace TestBusinessLogic
         public void PerEvent_CalculateScore_NotSpecialEvent_ShouldReturnBaseScore()
         {
             var strategy = new PerEvent();
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.Performance };
 
             var request = new StrategyRequest
@@ -203,7 +203,7 @@ namespace TestBusinessLogic
         public void PerEvent_CalculateScore_SpecialEvent_ShouldReturnDoubleScore()
         {
             var strategy = new PerEvent();
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.Performance };
 
             var request = new StrategyRequest
@@ -230,7 +230,7 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_FirstVisit_ShouldReturnBaseScore()
         {
             var strategy = new Combo(30);
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.Performance };
 
             DateTime firstVisit = new DateTime(2025, 10, 5, 10, 0, 0);
@@ -252,7 +252,7 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_SameAttraction_ShouldReturnBaseScore()
         {
             var strategy = new Combo(30);
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction1 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Performance };
 
             DateTime firstVisit = new DateTime(2025, 10, 5, 10, 0, 0);
@@ -277,7 +277,7 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_DifferentAttractionWithinTime_ShouldReturnDoubleScore()
         {
             var strategy = new Combo(30);
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction1 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.RollerCoaster };
             var attraction2 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Performance };
 
@@ -303,7 +303,7 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_DifferentAttractionOutsideTime_ShouldReturnBaseScore()
         {
             var strategy = new Combo(30);
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction1 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.RollerCoaster };
             var attraction2 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Performance };
 
@@ -329,7 +329,7 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_MultipleVisits_ShouldCheckMostRecent()
         {
             var strategy = new Combo(30);
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction1 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.RollerCoaster };
             var attraction2 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Simulator };
             var attraction3 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Performance };
@@ -533,7 +533,7 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_ShouldThrowWhenAttractionIsNull()
         {
             var strategy = new Combo(30);
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
 
             var request = new StrategyRequest
             {
@@ -549,7 +549,7 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_ShouldThrowWhenEnterDateIsNull()
         {
             var strategy = new Combo(30);
-            var user = new Visitor { Name = "Test" };
+            var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.Performance };
 
             var request = new StrategyRequest

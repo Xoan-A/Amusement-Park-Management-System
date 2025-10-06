@@ -10,18 +10,18 @@ namespace Api.Controllers;
 [Route("api/events")]
 public class EventController : ControllerBase
 {
-    private readonly IEventService _eventService;
+    private readonly IEventLogic _eventLogic;
 
-    public EventController(IEventService eventService)
+    public EventController(IEventLogic eventLogic)
     {
-        _eventService = eventService;
+        _eventLogic = eventLogic;
     }
 
     [HttpGet]
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetEvents()
     {
-        List<EventResponse> events = await _eventService.GetAllEvents();
+        List<EventResponse> events = await _eventLogic.GetAllEvents();
 
         return Ok(events);
     }
@@ -30,7 +30,7 @@ public class EventController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetEventById(Guid id)
     {
-        EventResponse eventResponse = await _eventService.GetEventById(id);
+        EventResponse eventResponse = await _eventLogic.GetEventById(id);
         return Ok(eventResponse);
     }
 
@@ -38,7 +38,7 @@ public class EventController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> CreateEvent([FromBody] EventRequest newEvent)
     {
-        Guid newId = await _eventService.CreateEvent(newEvent);
+        Guid newId = await _eventLogic.CreateEvent(newEvent);
 
         CreateEventResponse response = new CreateEventResponse
         {
@@ -53,7 +53,7 @@ public class EventController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> DeleteEventById(Guid id)
     {
-        await _eventService.DeleteEvent(id);
+        await _eventLogic.DeleteEvent(id);
         return NoContent();
     }
 }

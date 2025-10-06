@@ -12,14 +12,14 @@ namespace TestBusinessLogic
     public class AuthLogicTest
     {
         private Mock<IUserRepository> _mockUserRepository;
-        private Mock<IPasswordService> _mockPasswordService;
+        private Mock<IPasswordLogic> _mockPasswordService;
         private IAuthLogic _authLogic;
 
         [TestInitialize]
         public void Setup()
         {
             _mockUserRepository = new Mock<IUserRepository>();
-            _mockPasswordService = new Mock<IPasswordService>();
+            _mockPasswordService = new Mock<IPasswordLogic>();
             _authLogic = new AuthLogic(_mockUserRepository.Object, _mockPasswordService.Object);
         }
 
@@ -30,13 +30,17 @@ namespace TestBusinessLogic
             string password = "password123";
             string hashedPassword = "hashedPassword123";
 
-            Administrator admin = new Administrator
+            User admin = new User
             {
                 Id = Guid.NewGuid(),
                 Name = "Admin",
                 LastName = "User",
                 Email = email,
                 Password = hashedPassword
+            };
+            admin.UserRoles = new System.Collections.Generic.List<UserRole>
+            {
+                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
             };
 
             _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(admin);
@@ -72,13 +76,17 @@ namespace TestBusinessLogic
             string password = "wrongPassword";
             string hashedPassword = "hashedPassword123";
 
-            Administrator admin = new Administrator
+            User admin = new User
             {
                 Id = Guid.NewGuid(),
                 Name = "Admin",
                 LastName = "User",
                 Email = email,
                 Password = hashedPassword
+            };
+            admin.UserRoles = new System.Collections.Generic.List<UserRole>
+            {
+                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
             };
 
             _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(admin);
@@ -98,7 +106,7 @@ namespace TestBusinessLogic
             string password = "password123";
             string hashedPassword = "hashedPassword123";
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = Guid.NewGuid(),
                 Name = "Visitor",

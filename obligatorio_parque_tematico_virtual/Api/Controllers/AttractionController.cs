@@ -10,12 +10,12 @@ namespace Api.Controllers;
 [Route("api/attractions")]
 public class AttractionController : ControllerBase
 {
-    private readonly IAttractionService _attractionService;
+    private readonly IAttractionLogic _attractionLogic;
     private readonly IUserLogic _userService;
 
-    public AttractionController(IAttractionService attractionService, IUserLogic userService)
+    public AttractionController(IAttractionLogic attractionLogic, IUserLogic userService)
     {
-        _attractionService = attractionService;
+        _attractionLogic = attractionLogic;
         _userService = userService;
     }
 
@@ -23,7 +23,7 @@ public class AttractionController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetAttractions()
     {
-        var attractions = await _attractionService.GetAllAttractions();
+        var attractions = await _attractionLogic.GetAllAttractions();
         var response = new AllAttractionsResponse();
 
         foreach (var attraction in attractions)
@@ -48,7 +48,7 @@ public class AttractionController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetAttractionById(Guid id)
     {
-        AttractionResponse attraction = await _attractionService.GetAttractionById(id);
+        AttractionResponse attraction = await _attractionLogic.GetAttractionById(id);
         return Ok(attraction);
     }
 
@@ -56,7 +56,7 @@ public class AttractionController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> CreateAttraction([FromBody] AttractionRequest newAttraction)
     {
-        Guid newId = await _attractionService.CreateAttraction(newAttraction);
+        Guid newId = await _attractionLogic.CreateAttraction(newAttraction);
 
         CreateAttractionResponse response = new CreateAttractionResponse
         {
@@ -70,7 +70,7 @@ public class AttractionController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> UpdateAttraction(Guid id, [FromBody] AttractionRequest updatedAttraction)
     {
-        await _attractionService.UpdateAttraction(id, updatedAttraction);
+        await _attractionLogic.UpdateAttraction(id, updatedAttraction);
         MessageResponse response = new MessageResponse
         {
             Message = "Attraction updated successfully"
@@ -82,7 +82,7 @@ public class AttractionController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> DeleteAttraction(Guid id)
     {
-        await _attractionService.DeleteAttraction(id);
+        await _attractionLogic.DeleteAttraction(id);
         return NoContent();
     }
 
@@ -116,7 +116,7 @@ public class AttractionController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetCapacity(Guid id)
     {
-        CapacityResponse capacity = await _attractionService.GetCapacity(id);
+        CapacityResponse capacity = await _attractionLogic.GetCapacity(id);
         return Ok(capacity);
     }
 }

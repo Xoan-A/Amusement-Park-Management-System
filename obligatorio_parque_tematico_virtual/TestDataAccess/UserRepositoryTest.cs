@@ -39,12 +39,17 @@ namespace TestDataAccess
         [TestMethod]
         public void Create_ShouldAddUserToDatabase()
         {
-            Administrator admin = new Administrator
+            User admin = new User
             {
                 Name = "Admin",
                 LastName = "User",
                 Email = "newadmin@test.com",
                 Password = "hashedPassword"
+            };
+            Role adminRole = _context.Roles.First(r => r.Name == Role.ADMINISTRATOR);
+            admin.UserRoles = new System.Collections.Generic.List<UserRole>
+            {
+                new UserRole { RoleId = adminRole.Id }
             };
 
             User result = _userRepository.Create(admin);
@@ -57,13 +62,19 @@ namespace TestDataAccess
         [TestMethod]
         public void GetByEmail_ShouldReturnUser_WhenUserExists()
         {
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Name = "Test",
                 LastName = "User",
                 Email = "test@test.com",
                 Password = "password",
-                BirthDate = new DateTime(1990, 1, 1)
+                BirthDate = new DateTime(1990, 1, 1),
+                MembershipLevel = MembershipLevel.Standard
+            };
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+            visitor.UserRoles = new System.Collections.Generic.List<UserRole>
+            {
+                new UserRole { RoleId = visitorRole.Id }
             };
             _context.Users.Add(visitor);
             _context.SaveChanges();
@@ -72,7 +83,7 @@ namespace TestDataAccess
 
             Assert.IsNotNull(result);
             Assert.AreEqual("test@test.com", result.Email);
-            Assert.IsInstanceOfType(result, typeof(Visitor));
+            Assert.IsInstanceOfType(result, typeof(User));
         }
 
         [TestMethod]
@@ -86,12 +97,17 @@ namespace TestDataAccess
         [TestMethod]
         public void GetById_ShouldReturnUser_WhenUserExists()
         {
-            Operator op = new Operator
+            User op = new User
             {
                 Name = "Operator",
                 LastName = "User",
                 Email = "newoperator@test.com",
                 Password = "password"
+            };
+            Role operatorRole = _context.Roles.First(r => r.Name == Role.OPERATOR);
+            op.UserRoles = new System.Collections.Generic.List<UserRole>
+            {
+                new UserRole { RoleId = operatorRole.Id }
             };
             _context.Users.Add(op);
             _context.SaveChanges();
@@ -100,7 +116,7 @@ namespace TestDataAccess
 
             Assert.IsNotNull(result);
             Assert.AreEqual(op.Id, result.Id);
-            Assert.IsInstanceOfType(result, typeof(Operator));
+            Assert.IsInstanceOfType(result, typeof(User));
         }
 
         [TestMethod]
@@ -116,12 +132,17 @@ namespace TestDataAccess
         [TestMethod]
         public void IsEmailUnique_ShouldReturnFalse_WhenEmailExists()
         {
-            Administrator admin = new Administrator
+            User admin = new User
             {
                 Name = "Admin",
                 LastName = "User",
                 Email = "existing@test.com",
                 Password = "password"
+            };
+            Role adminRole = _context.Roles.First(r => r.Name == Role.ADMINISTRATOR);
+            admin.UserRoles = new System.Collections.Generic.List<UserRole>
+            {
+                new UserRole { RoleId = adminRole.Id }
             };
             _context.Users.Add(admin);
             _context.SaveChanges();

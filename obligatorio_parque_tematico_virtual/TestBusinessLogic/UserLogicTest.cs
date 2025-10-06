@@ -12,7 +12,7 @@ namespace TestBusinessLogic
     public class UserLogicTest
     {
         private Mock<IUserRepository> _mockUserRepository;
-        private Mock<IPasswordService> _mockPasswordService;
+        private Mock<IPasswordLogic> _mockPasswordService;
         private Mock<IAttractionRepository> _mockAttractionRepository;
         private Mock<ITicketLogic> _mockTicketLogic;
         private Mock<IRoleRepository> _mockRoleRepository;
@@ -24,7 +24,7 @@ namespace TestBusinessLogic
         public void Setup()
         {
             _mockUserRepository = new Mock<IUserRepository>();
-            _mockPasswordService = new Mock<IPasswordService>();
+            _mockPasswordService = new Mock<IPasswordLogic>();
             _mockAttractionRepository = new Mock<IAttractionRepository>();
             _mockTicketLogic = new Mock<ITicketLogic>();
             _mockRoleRepository = new Mock<IRoleRepository>();
@@ -230,7 +230,7 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -270,7 +270,7 @@ namespace TestBusinessLogic
             DateTime enterDate1 = new DateTime(2025, 10, 1, 10, 0, 0);
             DateTime enterDate2 = new DateTime(2025, 10, 1, 14, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -333,7 +333,7 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -356,7 +356,7 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -391,7 +391,7 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -423,7 +423,7 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -468,7 +468,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -509,7 +509,7 @@ namespace TestBusinessLogic
             Guid attractionId = Guid.NewGuid();
             DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -541,7 +541,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 5
             };
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -577,7 +577,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -613,7 +613,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 9
             };
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -638,7 +638,7 @@ namespace TestBusinessLogic
             Guid attractionId = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -675,7 +675,7 @@ namespace TestBusinessLogic
             int eventId = 5;
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -712,7 +712,7 @@ namespace TestBusinessLogic
             int eventId = 10;
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "Jane",
@@ -763,7 +763,7 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -806,7 +806,7 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -858,7 +858,7 @@ namespace TestBusinessLogic
             DateTime enterDate1 = new DateTime(2025, 10, 1, 10, 0, 0);
             DateTime enterDate2 = new DateTime(2025, 10, 1, 11, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",
@@ -908,7 +908,7 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Id = userId,
                 Name = "John",

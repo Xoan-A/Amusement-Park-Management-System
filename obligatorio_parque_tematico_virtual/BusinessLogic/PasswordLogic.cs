@@ -3,7 +3,7 @@ using IBusinessLogic;
 
 namespace BusinessLogic
 {
-    public class PasswordService : IPasswordService
+    public class PasswordLogic : IPasswordLogic
     {
         public string HashPassword(string password)
         {

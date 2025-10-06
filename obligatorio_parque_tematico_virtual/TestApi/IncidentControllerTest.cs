@@ -18,7 +18,7 @@ public class IncidentControllerTest
 {
     private WebApplicationFactory<Program> _factory = null!;
     private HttpClient _operatorClient = null!;
-    private Mock<IAttractionService> _mockService = null!;
+    private Mock<IAttractionLogic> _mockService = null!;
     private Guid _attractionId;
     private SqliteConnection _connection = null!;
 
@@ -28,7 +28,7 @@ public class IncidentControllerTest
         _connection = new SqliteConnection("DataSource=:memory:");
         _connection.Open();
 
-        _mockService = new Mock<IAttractionService>();
+        _mockService = new Mock<IAttractionLogic>();
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
@@ -57,15 +57,19 @@ public class IncidentControllerTest
             Audience = "ParqueTematico",
             ExpirationHours = 1
         });
-        TokenService tokenService = new TokenService(jwtSettings);
-        Operator operatorUser = new Operator
+        TokenLogic tokenLogic = new TokenLogic(jwtSettings);
+        User operatorUser = new User
         {
             Id = Guid.NewGuid(),
             Name = "Operator",
             LastName = "User",
             Email = "operator@example.com"
         };
-        string operatorToken = tokenService.GenerateToken(operatorUser);
+        operatorUser.UserRoles = new List<UserRole>
+        {
+            new UserRole { Role = new Role { Name = Role.OPERATOR } }
+        };
+        string operatorToken = tokenLogic.GenerateToken(operatorUser);
         _operatorClient = _factory.CreateClient();
         _operatorClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", operatorToken);

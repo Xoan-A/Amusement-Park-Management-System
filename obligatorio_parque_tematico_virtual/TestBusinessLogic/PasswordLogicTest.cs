@@ -5,14 +5,14 @@ using BusinessLogic;
 namespace TestBusinessLogic
 {
     [TestClass]
-    public class PasswordServiceTest
+    public class PasswordLogicTest
     {
-        private IPasswordService _passwordService;
+        private IPasswordLogic _passwordLogic;
 
         [TestInitialize]
         public void Setup()
         {
-            _passwordService = new PasswordService();
+            _passwordLogic = new PasswordLogic();
         }
 
         [TestMethod]
@@ -20,7 +20,7 @@ namespace TestBusinessLogic
         {
             string plainPassword = "myPassword123";
 
-            string hashedPassword = _passwordService.HashPassword(plainPassword);
+            string hashedPassword = _passwordLogic.HashPassword(plainPassword);
 
             Assert.IsNotNull(hashedPassword);
             Assert.AreNotEqual(plainPassword, hashedPassword);
@@ -32,8 +32,8 @@ namespace TestBusinessLogic
         {
             string plainPassword = "samePassword";
 
-            string hash1 = _passwordService.HashPassword(plainPassword);
-            string hash2 = _passwordService.HashPassword(plainPassword);
+            string hash1 = _passwordLogic.HashPassword(plainPassword);
+            string hash2 = _passwordLogic.HashPassword(plainPassword);
 
             Assert.AreNotEqual(hash1, hash2);
         }
@@ -42,9 +42,9 @@ namespace TestBusinessLogic
         public void VerifyPassword_ShouldReturnTrue_WhenPasswordMatches()
         {
             string plainPassword = "correctPassword";
-            string hashedPassword = _passwordService.HashPassword(plainPassword);
+            string hashedPassword = _passwordLogic.HashPassword(plainPassword);
 
-            bool result = _passwordService.VerifyPassword(plainPassword, hashedPassword);
+            bool result = _passwordLogic.VerifyPassword(plainPassword, hashedPassword);
 
             Assert.IsTrue(result);
         }
@@ -54,9 +54,9 @@ namespace TestBusinessLogic
         {
             string plainPassword = "correctPassword";
             string wrongPassword = "wrongPassword";
-            string hashedPassword = _passwordService.HashPassword(plainPassword);
+            string hashedPassword = _passwordLogic.HashPassword(plainPassword);
 
-            bool result = _passwordService.VerifyPassword(wrongPassword, hashedPassword);
+            bool result = _passwordLogic.VerifyPassword(wrongPassword, hashedPassword);
 
             Assert.IsFalse(result);
         }
@@ -67,7 +67,7 @@ namespace TestBusinessLogic
             string plainPassword = "password";
             string emptyHash = "";
 
-            bool result = _passwordService.VerifyPassword(plainPassword, emptyHash);
+            bool result = _passwordLogic.VerifyPassword(plainPassword, emptyHash);
 
             Assert.IsFalse(result);
         }
@@ -77,8 +77,8 @@ namespace TestBusinessLogic
         {
             string complexPassword = "P@ssw0rd!#$%&*()";
 
-            string hashedPassword = _passwordService.HashPassword(complexPassword);
-            bool isValid = _passwordService.VerifyPassword(complexPassword, hashedPassword);
+            string hashedPassword = _passwordLogic.HashPassword(complexPassword);
+            bool isValid = _passwordLogic.VerifyPassword(complexPassword, hashedPassword);
 
             Assert.IsNotNull(hashedPassword);
             Assert.IsTrue(isValid);

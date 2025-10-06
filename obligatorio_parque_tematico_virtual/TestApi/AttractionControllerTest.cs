@@ -21,14 +21,14 @@ public class AttractionControllerTest
     private HttpClient _client = null!;
     private HttpClient _adminClient = null!;
     private HttpClient _operatorClient = null!;
-    private Mock<IAttractionService> _mockAttractionService = null!;
+    private Mock<IAttractionLogic> _mockAttractionService = null!;
     private Mock<IUserLogic> _mockUserLogic = null!;
     private SqliteConnection _connection = null!;
 
     [TestInitialize]
     public void Setup()
     {
-        _mockAttractionService = new Mock<IAttractionService>();
+        _mockAttractionService = new Mock<IAttractionLogic>();
         _mockUserLogic = new Mock<IUserLogic>();
 
         // Create shared in-memory connection
@@ -72,26 +72,34 @@ public class AttractionControllerTest
             Audience = "ParqueTematico",
             ExpirationHours = 1
         });
-        var tokenService = new BusinessLogic.TokenService(jwtSettings);
+        var tokenService = new BusinessLogic.TokenLogic(jwtSettings);
 
-        Administrator adminUser = new Administrator
+        User adminUser = new User
         {
             Id = Guid.NewGuid(),
             Name = "Admin",
             LastName = "User",
             Email = "admin@example.com"
         };
+        adminUser.UserRoles = new List<UserRole>
+        {
+            new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+        };
         string adminToken = tokenService.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();
         _adminClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
 
-        Operator operatorUser = new Operator
+        User operatorUser = new User
         {
             Id = Guid.NewGuid(),
             Name = "Operator",
             LastName = "User",
             Email = "operator@example.com"
+        };
+        operatorUser.UserRoles = new List<UserRole>
+        {
+            new UserRole { Role = new Role { Name = Role.OPERATOR } }
         };
         string operatorToken = tokenService.GenerateToken(operatorUser);
         _operatorClient = _factory.CreateClient();
