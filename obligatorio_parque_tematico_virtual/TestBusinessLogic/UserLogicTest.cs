@@ -1004,5 +1004,21 @@ namespace TestBusinessLogic
             Assert.AreEqual(30, result.TopTenUsers[2].Score);
             _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
         }
+        
+        [TestMethod]
+        public async Task GetTopTenUsers_ShouldCallRepositoryGetTopTenOnce()
+        {
+            List<User> expectedUsers = new List<User>
+            {
+                new User { Id = Guid.NewGuid(), Name = "User1", Score = 100 }
+            };
+
+            _mockUserRepository.Setup(r => r.GetTopTen()).ReturnsAsync(expectedUsers);
+
+            await _userLogic.GetTopTenUsers();
+
+            _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
+        }
+
     }
 }
