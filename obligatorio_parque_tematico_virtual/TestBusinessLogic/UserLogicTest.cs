@@ -967,5 +967,21 @@ namespace TestBusinessLogic
             Assert.AreEqual(10, result.TopTenUsers[9].Score);
             _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
         }
+        
+        [TestMethod]
+        public async Task GetTopTenUsers_ShouldReturnEmptyList_WhenNoUsersExist()
+        {
+            List<User> emptyList = new List<User>();
+
+            _mockUserRepository.Setup(r => r.GetTopTen()).ReturnsAsync(emptyList);
+
+            TopTenResponse result = await _userLogic.GetTopTenUsers();
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(0, result.TopTenUsers.Count);
+            _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
+        }
+
     }
 }
