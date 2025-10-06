@@ -982,6 +982,27 @@ namespace TestBusinessLogic
             Assert.AreEqual(0, result.TopTenUsers.Count);
             _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
         }
+        
+        [TestMethod]
+        public async Task GetTopTenUsers_ShouldReturnFewerThanTenUsers_WhenLessThanTenExist()
+        {
+            List<User> expectedUsers = new List<User>
+            {
+                new User { Id = Guid.NewGuid(), Name = "User1", Score = 50 },
+                new User { Id = Guid.NewGuid(), Name = "User2", Score = 40 },
+                new User { Id = Guid.NewGuid(), Name = "User3", Score = 30 }
+            };
 
+            _mockUserRepository.Setup(r => r.GetTopTen()).ReturnsAsync(expectedUsers);
+
+            TopTenResponse result = await _userLogic.GetTopTenUsers();
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(3, result.TopTenUsers.Count);
+            Assert.AreEqual(50, result.TopTenUsers[0].Score);
+            Assert.AreEqual(30, result.TopTenUsers[2].Score);
+            _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
+        }
     }
 }
