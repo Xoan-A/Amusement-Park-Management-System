@@ -1020,5 +1020,33 @@ namespace TestBusinessLogic
             _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
         }
 
+        [TestMethod]
+        public async Task GetTopTenUsers_ShouldReturnOnlyTenUsers_WhenMoreThanTenExist()
+        {
+            List<User> expectedUsers = new List<User>
+            {
+                new User { Id = Guid.NewGuid(), Name = "User1", Score = 110 },
+                new User { Id = Guid.NewGuid(), Name = "User2", Score = 100 },
+                new User { Id = Guid.NewGuid(), Name = "User3", Score = 90 },
+                new User { Id = Guid.NewGuid(), Name = "User4", Score = 80 },
+                new User { Id = Guid.NewGuid(), Name = "User5", Score = 70 },
+                new User { Id = Guid.NewGuid(), Name = "User6", Score = 60 },
+                new User { Id = Guid.NewGuid(), Name = "User7", Score = 50 },
+                new User { Id = Guid.NewGuid(), Name = "User8", Score = 40 },
+                new User { Id = Guid.NewGuid(), Name = "User9", Score = 30 },
+                new User { Id = Guid.NewGuid(), Name = "User10", Score = 20 }
+            };
+
+            _mockUserRepository.Setup(r => r.GetTopTen()).ReturnsAsync(expectedUsers);
+
+            TopTenResponse result = await _userLogic.GetTopTenUsers();
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            Assert.AreEqual(10, result.TopTenUsers.Count);
+            Assert.AreEqual(110, result.TopTenUsers[0].Score);
+            Assert.AreEqual(20, result.TopTenUsers[9].Score);
+            _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
+        }
     }
 }
