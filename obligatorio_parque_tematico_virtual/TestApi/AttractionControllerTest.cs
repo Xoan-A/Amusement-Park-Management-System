@@ -8,6 +8,9 @@ using Domain;
 using IBusinessLogic;
 using Models.In;
 using Models.Out;
+using Microsoft.EntityFrameworkCore;
+using DataAccess.Context;
+using Microsoft.Data.Sqlite;
 
 namespace ApiTests;
 
@@ -20,6 +23,7 @@ public class AttractionControllerTest
     private HttpClient _operatorClient = null!;
     private Mock<IAttractionService> _mockAttractionService = null!;
     private Mock<IUserLogic> _mockUserLogic = null!;
+    private SqliteConnection _connection = null!;
 
     [TestInitialize]
     public void Setup()
@@ -27,14 +31,37 @@ public class AttractionControllerTest
         _mockAttractionService = new Mock<IAttractionService>();
         _mockUserLogic = new Mock<IUserLogic>();
 
+        // Create shared in-memory connection
+        _connection = new SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
             {
+                // Remove SQL Server DbContext
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                if (descriptor != null)
+                {
+                    services.Remove(descriptor);
+                }
+
+                // Add SQLite DbContext with shared connection
+                services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlite(_connection));
+
                 services.AddSingleton(_mockAttractionService.Object);
                 services.AddSingleton(_mockUserLogic.Object);
             });
         });
+
+        // Initialize database schema
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            context.Database.EnsureCreated();
+        }
 
         _client = _factory.CreateClient();
 
@@ -79,6 +106,8 @@ public class AttractionControllerTest
         _adminClient?.Dispose();
         _operatorClient?.Dispose();
         _factory?.Dispose();
+        _connection?.Close();
+        _connection?.Dispose();
     }
 
     [TestMethod]

@@ -7,6 +7,9 @@ using IBusinessLogic;
 using Domain;
 using System.Net;
 using BusinessLogic;
+using Microsoft.EntityFrameworkCore;
+using DataAccess.Context;
+using Microsoft.Data.Sqlite;
 
 namespace ApiTests;
 
@@ -17,15 +20,35 @@ public class IncidentControllerTest
     private HttpClient _operatorClient = null!;
     private Mock<IAttractionService> _mockService = null!;
     private Guid _attractionId;
+    private SqliteConnection _connection = null!;
 
     [TestInitialize]
     public void Setup()
     {
+        _connection = new SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
         _mockService = new Mock<IAttractionService>();
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
-            builder.ConfigureServices(services => { services.AddSingleton(_mockService.Object); });
+            builder.ConfigureServices(services =>
+            {
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                if (descriptor != null) services.Remove(descriptor);
+
+                services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlite(_connection));
+
+                services.AddSingleton(_mockService.Object);
+            });
         });
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            context.Database.EnsureCreated();
+        }
 
         var jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
         {
@@ -54,6 +77,8 @@ public class IncidentControllerTest
     {
         _operatorClient?.Dispose();
         _factory?.Dispose();
+        _connection?.Close();
+        _connection?.Dispose();
     }
 
     [TestMethod]

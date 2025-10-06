@@ -4,6 +4,7 @@ using System.Text;
 using ApiServiceFactory;
 using Api.Filters;
 using Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
-builder.Services.AddServices();
+builder.Services.AddServices(builder.Configuration);
 
 // Configuración de autenticación JWT
 builder.Services.AddAuthentication(options =>
@@ -45,11 +46,20 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Initialize database and seed data
+// Initialize database and run migrations
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<DataAccess.Context.AppDbContext>();
-    context.Database.EnsureCreated();
+
+    // Use EnsureCreated for SQLite, Migrate for SQL Server
+    if (context.Database.IsSqlite())
+    {
+        context.Database.EnsureCreated();
+    }
+    else
+    {
+        context.Database.Migrate();
+    }
 }
 
 // Configure the HTTP request pipeline.

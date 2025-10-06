@@ -15,10 +15,12 @@ public class RoleRepositoryTest
     public void Setup()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseSqlite("DataSource=:memory:")
             .Options;
 
         _context = new AppDbContext(options);
+        _context.Database.OpenConnection();
+        _context.Database.EnsureDeleted();
         _context.Database.EnsureCreated();
         _repository = new RoleRepository(_context);
     }
@@ -26,7 +28,7 @@ public class RoleRepositoryTest
     [TestCleanup]
     public void Cleanup()
     {
-        _context.Database.EnsureDeleted();
+        _context.Database.CloseConnection();
         _context.Dispose();
     }
 

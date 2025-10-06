@@ -19,15 +19,20 @@ namespace TestDataAccess
         public void Setup()
         {
             DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .UseSqlite("DataSource=:memory:")
                 .Options;
             _context = new AppDbContext(options);
+            _context.Database.OpenConnection();
+            _context.Database.EnsureDeleted();
+            _context.Database.EnsureCreated();
+
             _userRepository = new UserRepository(_context);
         }
 
         [TestCleanup]
         public void Cleanup()
         {
+            _context.Database.CloseConnection();
             _context.Dispose();
         }
 
@@ -38,15 +43,15 @@ namespace TestDataAccess
             {
                 Name = "Admin",
                 LastName = "User",
-                Email = "admin@test.com",
+                Email = "newadmin@test.com",
                 Password = "hashedPassword"
             };
 
             User result = _userRepository.Create(admin);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual("admin@test.com", result.Email);
-            Assert.AreEqual(1, _context.Users.Count());
+            Assert.AreEqual("newadmin@test.com", result.Email);
+            Assert.AreEqual(3, _context.Users.Count()); // 2 from seed + 1 new
         }
 
         [TestMethod]
@@ -85,7 +90,7 @@ namespace TestDataAccess
             {
                 Name = "Operator",
                 LastName = "User",
-                Email = "operator@test.com",
+                Email = "newoperator@test.com",
                 Password = "password"
             };
             _context.Users.Add(op);

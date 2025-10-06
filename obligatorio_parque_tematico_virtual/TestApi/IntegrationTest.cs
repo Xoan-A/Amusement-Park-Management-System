@@ -9,6 +9,10 @@ using Models.In;
 using Models.Out;
 using IBusinessLogic;
 using BusinessLogic;
+using Microsoft.EntityFrameworkCore;
+using DataAccess.Context;
+using System;
+using Microsoft.Data.Sqlite;
 
 namespace ApiTests
 {
@@ -17,19 +21,42 @@ namespace ApiTests
     {
         private WebApplicationFactory<Program> _factory;
         private HttpClient _client;
+        private SqliteConnection _connection;
 
         [TestInitialize]
         public void Setup()
         {
+            // Create shared in-memory connection
+            _connection = new SqliteConnection("DataSource=:memory:");
+            _connection.Open();
+
             _factory = new WebApplicationFactory<Program>()
                 .WithWebHostBuilder(builder =>
                 {
                     builder.ConfigureServices(services =>
                     {
-                        // Override with simpler registration for tests
+                        // Remove SQL Server DbContext
+                        ServiceDescriptor descriptor = services.SingleOrDefault(
+                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                        if (descriptor != null)
+                        {
+                            services.Remove(descriptor);
+                        }
+
+                        // Add SQLite DbContext with shared connection
+                        services.AddDbContext<AppDbContext>(options =>
+                            options.UseSqlite(_connection));
+
                         services.AddSingleton<IDateTimeLogic>(provider => DateTimeLogic.Instance);
                     });
                 });
+
+            // Initialize database schema
+            using (IServiceScope scope = _factory.Services.CreateScope())
+            {
+                AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                context.Database.EnsureCreated();
+            }
 
             _client = _factory.CreateClient();
         }
@@ -39,6 +66,8 @@ namespace ApiTests
         {
             _client?.Dispose();
             _factory?.Dispose();
+            _connection.Close();
+            _connection.Dispose();
         }
 
         [TestMethod]

@@ -11,12 +11,16 @@ using Models.In;
 using Models.Out;
 using BusinessLogic;
 using Domain;
+using Microsoft.EntityFrameworkCore;
+using DataAccess.Context;
+using Microsoft.Data.Sqlite;
 
 namespace ApiTests
 {
     [TestClass]
     public class StrategyControllerTest
     {
+        private SqliteConnection _connection = null!;
         private WebApplicationFactory<Program> _factory = null!;
         private HttpClient _client = null!;
         private HttpClient _adminClient = null!;
@@ -25,13 +29,32 @@ namespace ApiTests
         [TestInitialize]
         public void Setup()
         {
+            _connection = new SqliteConnection("DataSource=:memory:");
+            _connection.Open();
+
             _mockActiveStrategy = new Mock<IActiveStrategy>();
 
             _factory = new WebApplicationFactory<Program>()
                 .WithWebHostBuilder(builder =>
                 {
-                    builder.ConfigureServices(services => { services.AddSingleton(_mockActiveStrategy.Object); });
+                    builder.ConfigureServices(services =>
+                    {
+                        var descriptor = services.SingleOrDefault(
+                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                        if (descriptor != null) services.Remove(descriptor);
+
+                        services.AddDbContext<AppDbContext>(options =>
+                            options.UseSqlite(_connection));
+
+                        services.AddSingleton(_mockActiveStrategy.Object);
+                    });
                 });
+
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                context.Database.EnsureCreated();
+            }
 
             _client = _factory.CreateClient();
 
@@ -64,6 +87,8 @@ namespace ApiTests
             _client?.Dispose();
             _adminClient?.Dispose();
             _factory?.Dispose();
+            _connection?.Close();
+            _connection?.Dispose();
         }
 
         [TestMethod]
