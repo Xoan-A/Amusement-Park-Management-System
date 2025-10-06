@@ -298,5 +298,35 @@ namespace TestDataAccess
             Assert.AreEqual(5, result[9].Score);
         }
 
+        [TestMethod]
+        public async Task GetTopTen_ShouldReturnUsersWithSameScore_InCorrectOrder()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            for (int i = 1; i <= 12; i++)
+            {
+                Visitor visitor = new Visitor
+                {
+                    Name = $"User{i}",
+                    LastName = "Test",
+                    Email = $"user{i}@test.com",
+                    Password = "password",
+                    BirthDate = new DateTime(1990, 1, 1),
+                    Score = i <= 6 ? 100 : 50
+                };
+                _context.Users.Add(visitor);
+            }
+            _context.SaveChanges();
+
+            var result = await _userRepository.GetTopTen();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(10, result.Count);
+            Assert.AreEqual(100, result[0].Score);
+            Assert.AreEqual(100, result[5].Score);
+            Assert.AreEqual(50, result[6].Score);
+        }
+
     }
 }
