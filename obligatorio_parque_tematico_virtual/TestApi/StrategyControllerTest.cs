@@ -447,5 +447,37 @@ namespace ApiTests
             Assert.AreEqual(50, result.TopTenUsers[0].Score);
             Assert.AreEqual(30, result.TopTenUsers[2].Score);
         }
+        
+        [TestMethod]
+        public async Task GetTopTen_ShouldReturnUsersInDescendingOrderByScore()
+        {
+            var topTenResponse = new TopTenResponse
+            {
+                TopTenUsers = new List<User>
+                {
+                    new User { Id = Guid.NewGuid(), Name = "User1", LastName = "Test", Email = "user1@test.com", Score = 100 },
+                    new User { Id = Guid.NewGuid(), Name = "User2", LastName = "Test", Email = "user2@test.com", Score = 90 },
+                    new User { Id = Guid.NewGuid(), Name = "User3", LastName = "Test", Email = "user3@test.com", Score = 80 }
+                }
+            };
+
+            _mockUserLogic.Setup(x => x.GetTopTenUsers()).ReturnsAsync(topTenResponse);
+
+            var response = await _adminClient.GetAsync("/api/strategy/topTen");
+
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<TopTenResponse>(
+                responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.TopTenUsers);
+            for (int i = 0; i < result.TopTenUsers.Count - 1; i++)
+            {
+                Assert.IsTrue(result.TopTenUsers[i].Score >= result.TopTenUsers[i + 1].Score);
+            }
+        }
     }
 }
