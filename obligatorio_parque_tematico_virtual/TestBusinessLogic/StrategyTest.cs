@@ -372,6 +372,148 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
+        public void ActiveStrategy_GetStrategy_OnSameDayAsUpdate_ShouldReturnPreviousStrategy()
+        {
+            var activeStrategy = new ActiveStrategy();
+            var updateDate = new DateTime(2024, 1, 15, 9, 0, 0);
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "PerAttraction",
+                CurrentDate = new DateTime(2024, 1, 14, 10, 0, 0)
+            });
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "PerEvent",
+                CurrentDate = updateDate
+            });
+
+            var queryDate = new DateTime(2024, 1, 15, 15, 0, 0);
+            IContreteStrategy result = activeStrategy.GetStrategy(queryDate);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("PerAttraction", result.Name);
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_GetStrategy_OnDayAfterUpdate_ShouldReturnNewStrategy()
+        {
+            var activeStrategy = new ActiveStrategy();
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "PerAttraction",
+                CurrentDate = new DateTime(2024, 1, 14, 10, 0, 0)
+            });
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "PerEvent",
+                CurrentDate = new DateTime(2024, 1, 15, 9, 0, 0)
+            });
+
+            var queryDate = new DateTime(2024, 1, 16, 10, 0, 0);
+            IContreteStrategy result = activeStrategy.GetStrategy(queryDate);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("PerEvent", result.Name);
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_GetStrategy_FirstStrategySet_ShouldReturnStrategyImmediately()
+        {
+            var activeStrategy = new ActiveStrategy();
+            var setDate = new DateTime(2024, 1, 15, 9, 0, 0);
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "PerAttraction",
+                CurrentDate = setDate
+            });
+
+            var queryDate = new DateTime(2024, 1, 15, 15, 0, 0);
+            IContreteStrategy result = activeStrategy.GetStrategy(queryDate);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("PerAttraction", result.Name);
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_GetStrategy_UpdatedAtMidnight_ShouldUsePreviousStrategySameDay()
+        {
+            var activeStrategy = new ActiveStrategy();
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "PerAttraction",
+                CurrentDate = new DateTime(2024, 1, 14, 10, 0, 0)
+            });
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "Combo",
+                N = 30,
+                CurrentDate = new DateTime(2024, 1, 15, 0, 0, 0)
+            });
+
+            var queryDate = new DateTime(2024, 1, 15, 23, 59, 59);
+            IContreteStrategy result = activeStrategy.GetStrategy(queryDate);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("PerAttraction", result.Name);
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_GetStrategy_SettingMultipleDifferentStrategies_ShouldReturnCorrectStrategy()
+        {
+            var activeStrategy = new ActiveStrategy();
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "PerAttraction",
+                CurrentDate = new DateTime(2024, 1, 14, 9, 0, 0)
+            });
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "PerEvent",
+                CurrentDate = new DateTime(2024, 1, 14, 10, 0, 0)
+            });
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "Combo",
+                N = 30,
+                CurrentDate = new DateTime(2024, 1, 14, 15, 0, 0)
+            });
+
+            var queryDay1 = new DateTime(2024, 1, 14, 18, 0, 0);
+            IContreteStrategy resultDay1 = activeStrategy.GetStrategy(queryDay1);
+
+            Assert.IsNotNull(resultDay1);
+            Assert.AreEqual("PerAttraction", resultDay1.Name);
+
+            activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "PerEvent",
+                CurrentDate = new DateTime(2024, 1, 15, 9, 0, 0)
+            });
+
+            var queryDay2 = new DateTime(2024, 1, 15, 14, 0, 0);
+            IContreteStrategy resultDay2 = activeStrategy.GetStrategy(queryDay2);
+
+            Assert.IsNotNull(resultDay2);
+            Assert.AreEqual("Combo", resultDay2.Name);
+
+            var queryDay3 = new DateTime(2024, 1, 16, 10, 0, 0);
+            IContreteStrategy resultDay3 = activeStrategy.GetStrategy(queryDay3);
+
+            Assert.IsNotNull(resultDay3);
+            Assert.AreEqual("PerEvent", resultDay3.Name);
+        }
+
+        [TestMethod]
         public void Combo_CalculateScore_ShouldThrowWhenUserIsNull()
         {
             var strategy = new Combo(30);
