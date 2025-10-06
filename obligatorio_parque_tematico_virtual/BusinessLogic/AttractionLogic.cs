@@ -6,7 +6,7 @@ using Models.Out;
 
 namespace BusinessLogic;
 
-public class AttractionService : IAttractionService, IAttractionServiceEntity
+public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
 {
     private readonly IAttractionRepository _attractionRepository;
     private readonly int _nameMaxLength = 100;
@@ -18,7 +18,7 @@ public class AttractionService : IAttractionService, IAttractionServiceEntity
     private readonly int _minCurrentCapacity = 0;
     private readonly int _noIncidents = 0;
 
-    public AttractionService(IAttractionRepository attractionRepository)
+    public AttractionLogic(IAttractionRepository attractionRepository)
     {
         _attractionRepository = attractionRepository;
     }

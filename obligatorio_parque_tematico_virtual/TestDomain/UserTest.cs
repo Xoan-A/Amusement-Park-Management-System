@@ -296,7 +296,7 @@ namespace TestDomain
         [TestMethod]
         public void User_Score_ShouldBeZeroByDefault()
         {
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Name = "John",
                 LastName = "Doe"
@@ -308,7 +308,7 @@ namespace TestDomain
         [TestMethod]
         public void User_Score_ShouldBeSettable()
         {
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Name = "John",
                 LastName = "Doe",
@@ -321,7 +321,7 @@ namespace TestDomain
         [TestMethod]
         public void User_Score_CanBeIncremented()
         {
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Name = "John",
                 LastName = "Doe",
@@ -336,7 +336,7 @@ namespace TestDomain
         [TestMethod]
         public void User_Score_CanBeSetToNegative()
         {
-            Visitor visitor = new Visitor
+            User visitor = new User
             {
                 Name = "John",
                 LastName = "Doe",

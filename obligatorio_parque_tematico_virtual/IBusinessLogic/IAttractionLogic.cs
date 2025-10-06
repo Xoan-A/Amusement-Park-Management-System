@@ -4,7 +4,7 @@ using Models.Out;
 
 namespace IBusinessLogic;
 
-public interface IAttractionService
+public interface IAttractionLogic
 {
     Task<AttractionResponse> GetAttractionById(Guid id);
     Task<List<AttractionResponse>> GetAllAttractions();

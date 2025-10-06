@@ -7,7 +7,7 @@ namespace Domain
         public Guid Id { get; set; }
         public DateTime Date { get; set; }
         public Guid VisitorId { get; set; }
-        public Visitor Visitor { get; set; }
+        public User Visitor { get; set; }
         public List<Report> Reports { get; set; }
 
         public VisitorReport(DateTime date, Report report)

@@ -9,11 +9,11 @@ using Models.Out;
 namespace TestBusinessLogic;
 
 [TestClass]
-public class EventServiceTest
+public class EventLogicTest
 {
     private Mock<IEventRepository> _mockEventRepository;
-    private IEventService _eventService;
-    private Mock<IAttractionServiceEntity> _mockAttractionService;
+    private IEventLogic _eventLogic;
+    private Mock<IAttractionLogicEntity> _mockAttractionService;
     private Event baseEvent;
     private EventRequest baseEventRequest;
 
@@ -21,8 +21,8 @@ public class EventServiceTest
     public void Setup()
     {
         _mockEventRepository = new Mock<IEventRepository>();
-        _mockAttractionService = new Mock<IAttractionServiceEntity>();
-        _eventService = new EventService(_mockEventRepository.Object, _mockAttractionService.Object);
+        _mockAttractionService = new Mock<IAttractionLogicEntity>();
+        _eventLogic = new EventLogic(_mockEventRepository.Object, _mockAttractionService.Object);
         baseEvent = new Event
         {
             Name = "Base Event",
@@ -48,7 +48,7 @@ public class EventServiceTest
     public async Task GetEventById_ShouldReturnEvent_WhenIdIsValid()
     {
         _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
-        EventResponse result = await _eventService.GetEventById(baseEvent.Id);
+        EventResponse result = await _eventLogic.GetEventById(baseEvent.Id);
         Assert.IsNotNull(result);
         Assert.AreEqual(baseEvent.Name, result.Name);
         _mockEventRepository.Verify(r => r.GetById(baseEvent.Id), Times.Once);
@@ -69,7 +69,7 @@ public class EventServiceTest
         };
         baseEvent.AddAttraction(attraction1);
         _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
-        EventResponse result = await _eventService.GetEventById(baseEvent.Id);
+        EventResponse result = await _eventLogic.GetEventById(baseEvent.Id);
 
         Assert.AreEqual(baseEvent.Name, result.Name);
         Assert.AreEqual(1, result.Attractions.Count);
@@ -82,7 +82,7 @@ public class EventServiceTest
         Guid eventId = Guid.NewGuid();
         _mockEventRepository.Setup(r => r.GetById(eventId)).ReturnsAsync((Event)null);
 
-        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () => await _eventService.GetEventById(eventId));
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () => await _eventLogic.GetEventById(eventId));
     }
 
     [TestMethod]
@@ -102,7 +102,7 @@ public class EventServiceTest
         List<Event> expectedEvents = new List<Event> { baseEvent, event2 };
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(expectedEvents);
 
-        List<EventResponse> result = await _eventService.GetAllEvents();
+        List<EventResponse> result = await _eventLogic.GetAllEvents();
 
         Assert.AreEqual(2, result.Count);
         Assert.AreEqual(baseEvent.Name, result[0].Name);
@@ -129,7 +129,7 @@ public class EventServiceTest
         List<Event> eventsList = new List<Event> { baseEvent };
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(eventsList);
 
-        var result = await _eventService.GetAllEvents();
+        var result = await _eventLogic.GetAllEvents();
 
         Assert.AreEqual(1, result.Count);
         EventResponse returnedEvent = result[0];
@@ -145,7 +145,7 @@ public class EventServiceTest
         _mockEventRepository.Setup(r => r.Create(It.IsAny<Event>())).Callback<Event>(e => e.Id = baseEvent.Id)
             .Returns(Task.CompletedTask);
 
-        Guid resultId = await _eventService.CreateEvent(baseEventRequest);
+        Guid resultId = await _eventLogic.CreateEvent(baseEventRequest);
 
         Assert.AreEqual(baseEvent.Id, resultId);
     }
@@ -169,7 +169,7 @@ public class EventServiceTest
             })
             .Returns(Task.CompletedTask);
 
-        await _eventService.CreateEvent(baseEventRequest);
+        await _eventLogic.CreateEvent(baseEventRequest);
     }
 
     [TestMethod]
@@ -178,7 +178,7 @@ public class EventServiceTest
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event> { baseEvent });
 
         await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-            await _eventService.CreateEvent(baseEventRequest));
+            await _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
@@ -187,7 +187,7 @@ public class EventServiceTest
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
         baseEventRequest.Name = String.Empty;
         await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-            await _eventService.CreateEvent(baseEventRequest));
+            await _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
@@ -196,7 +196,7 @@ public class EventServiceTest
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
         baseEventRequest.Date = DateTime.Now.AddDays(-1);
         await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-            await _eventService.CreateEvent(baseEventRequest));
+            await _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
@@ -205,7 +205,7 @@ public class EventServiceTest
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
         baseEventRequest.Hour = -1;
         await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-            await _eventService.CreateEvent(baseEventRequest));
+            await _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
@@ -214,10 +214,10 @@ public class EventServiceTest
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
         baseEventRequest.MaxCapacity = -1;
         await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-            await _eventService.CreateEvent(baseEventRequest));
+            await _eventLogic.CreateEvent(baseEventRequest));
         baseEventRequest.MaxCapacity = 10001;
         await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-            await _eventService.CreateEvent(baseEventRequest));
+            await _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
@@ -226,7 +226,7 @@ public class EventServiceTest
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
         baseEventRequest.Cost = -1;
         await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-            await _eventService.CreateEvent(baseEventRequest));
+            await _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
@@ -235,7 +235,7 @@ public class EventServiceTest
         _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
         _mockEventRepository.Setup(r => r.Delete(baseEvent)).Returns(Task.CompletedTask);
 
-        await _eventService.DeleteEvent(baseEvent.Id);
+        await _eventLogic.DeleteEvent(baseEvent.Id);
 
         _mockEventRepository.Verify(r => r.GetById(baseEvent.Id), Times.Once);
         _mockEventRepository.Verify(r => r.Delete(baseEvent), Times.Once);
@@ -246,6 +246,6 @@ public class EventServiceTest
     {
         Guid eventId = Guid.NewGuid();
         _mockEventRepository.Setup(r => r.GetById(eventId)).ReturnsAsync((Event)null);
-        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () => await _eventService.DeleteEvent(eventId));
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () => await _eventLogic.DeleteEvent(eventId));
     }
 }

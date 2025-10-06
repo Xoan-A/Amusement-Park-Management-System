@@ -66,16 +66,20 @@ namespace ApiTests
                 ExpirationHours = 1
             });
 
-            TokenService tokenService = new TokenService(jwtSettings);
+            TokenLogic tokenLogic = new TokenLogic(jwtSettings);
 
-            Administrator adminUser = new Administrator
+            User adminUser = new User
             {
                 Id = Guid.NewGuid(),
                 Name = "Admin",
                 LastName = "User",
                 Email = "admin@example.com"
             };
-            string adminToken = tokenService.GenerateToken(adminUser);
+            adminUser.UserRoles = new List<UserRole>
+            {
+                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+            };
+            string adminToken = tokenLogic.GenerateToken(adminUser);
             _adminClient = _factory.CreateClient();
             _adminClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);

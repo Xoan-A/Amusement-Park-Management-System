@@ -7,12 +7,12 @@ namespace BusinessLogic
     public class AuthLogic : IAuthLogic
     {
         private readonly IUserRepository _userRepository;
-        private readonly IPasswordService _passwordService;
+        private readonly IPasswordLogic _passwordLogic;
 
-        public AuthLogic(IUserRepository userRepository, IPasswordService passwordService)
+        public AuthLogic(IUserRepository userRepository, IPasswordLogic passwordLogic)
         {
             _userRepository = userRepository;
-            _passwordService = passwordService;
+            _passwordLogic = passwordLogic;
         }
 
         public User Login(string email, string password)
@@ -28,7 +28,7 @@ namespace BusinessLogic
                 return null;
             }
 
-            bool isPasswordValid = _passwordService.VerifyPassword(password, user.Password);
+            bool isPasswordValid = _passwordLogic.VerifyPassword(password, user.Password);
             if (!isPasswordValid)
             {
                 return null;
