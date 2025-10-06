@@ -9,4 +9,5 @@ public interface IEventRepository
     Task<List<Event>> GetAll();
     Task Update(Event eventEntity);
     Task Delete(Event eventEntity);
+    Task<Event?> GetEventByAttractionAndDate(Guid attractionId, DateTime date);
 }

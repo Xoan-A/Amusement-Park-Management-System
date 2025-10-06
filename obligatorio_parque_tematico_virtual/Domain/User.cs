@@ -15,6 +15,7 @@ namespace Domain
         public DateTime? BirthDate { get; set; }
         public MembershipLevel? MembershipLevel { get; set; }
         public ICollection<UserRole> UserRoles { get; set; }
+        public int Score { get; set; }
 
         public User()
         {

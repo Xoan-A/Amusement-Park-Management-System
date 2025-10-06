@@ -16,6 +16,8 @@ namespace TestBusinessLogic
         private Mock<IAttractionRepository> _mockAttractionRepository;
         private Mock<ITicketLogic> _mockTicketLogic;
         private Mock<IRoleRepository> _mockRoleRepository;
+        private Mock<IEventRepository> _mockEventRepository;
+        private Mock<IActiveStrategy> _mockActiveStrategy;
         private IUserLogic _userLogic;
 
         [TestInitialize]
@@ -26,8 +28,11 @@ namespace TestBusinessLogic
             _mockAttractionRepository = new Mock<IAttractionRepository>();
             _mockTicketLogic = new Mock<ITicketLogic>();
             _mockRoleRepository = new Mock<IRoleRepository>();
+            _mockEventRepository = new Mock<IEventRepository>();
+            _mockActiveStrategy = new Mock<IActiveStrategy>();
             _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
-                _mockAttractionRepository.Object, _mockTicketLogic.Object, _mockRoleRepository.Object);
+                _mockAttractionRepository.Object, _mockTicketLogic.Object, _mockRoleRepository.Object,
+                _mockEventRepository.Object, _mockActiveStrategy.Object);
         }
 
         [TestMethod]
@@ -748,6 +753,189 @@ namespace TestBusinessLogic
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(false);
 
             await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, eventId);
+        }
+
+        [TestMethod]
+        public async Task RegisterEntry_ShouldAddScoreToUser_WhenNoEvent()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Score = 0
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
+                .ReturnsAsync((Event)null);
+            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<StrategyRequest>()))
+                .Returns(5);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
+
+            Assert.AreEqual(5, visitor.Score);
+            _mockActiveStrategy.Verify(s => s.CalculateScore(It.Is<StrategyRequest>(
+                req => req.User == visitor &&
+                       req.Attraction == attraction &&
+                       req.IsSepcialEvent == false &&
+                       req.EnterDate == enterDate)), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task RegisterEntry_ShouldAddScoreToUser_WhenEventExists()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Score = 10
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Performance",
+                Type = AttractionType.Performance,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
+            };
+
+            Event specialEvent = new Event
+            {
+                Id = Guid.NewGuid(),
+                Name = "Special Event",
+                Date = enterDate
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
+                .ReturnsAsync(specialEvent);
+            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<StrategyRequest>()))
+                .Returns(6);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
+
+            Assert.AreEqual(16, visitor.Score);
+            _mockActiveStrategy.Verify(s => s.CalculateScore(It.Is<StrategyRequest>(
+                req => req.User == visitor &&
+                       req.Attraction == attraction &&
+                       req.IsSepcialEvent == true &&
+                       req.EnterDate == enterDate)), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task RegisterEntry_ShouldAccumulateScore_OverMultipleEntries()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId1 = Guid.NewGuid();
+            Guid attractionId2 = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+            DateTime enterDate1 = new DateTime(2025, 10, 1, 10, 0, 0);
+            DateTime enterDate2 = new DateTime(2025, 10, 1, 11, 0, 0);
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Score = 0
+            };
+
+            Attraction attraction1 = new Attraction
+            {
+                Id = attractionId1,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
+            };
+
+            Attraction attraction2 = new Attraction
+            {
+                Id = attractionId2,
+                Name = "Simulator",
+                Type = AttractionType.Simulator,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).ReturnsAsync(attraction1);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).ReturnsAsync(attraction2);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, It.IsAny<DateTime>(), null)).ReturnsAsync(true);
+            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(It.IsAny<Guid>(), It.IsAny<DateTime>()))
+                .ReturnsAsync((Event)null);
+            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<StrategyRequest>()))
+                .Returns(3);
+
+            await _userLogic.RegisterEntry(userId, attractionId1, enterDate1, qrCode, null, null);
+            await _userLogic.RegisterEntry(userId, attractionId2, enterDate2, qrCode, null, null);
+
+            Assert.AreEqual(6, visitor.Score);
+            _mockActiveStrategy.Verify(s => s.CalculateScore(It.IsAny<StrategyRequest>()), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public async Task RegisterEntry_ShouldAddZeroScore_WhenStrategyReturnsZero()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+
+            Visitor visitor = new Visitor
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Score = 5
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
+                .ReturnsAsync((Event)null);
+            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<StrategyRequest>()))
+                .Returns(0);
+
+            await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
+
+            Assert.AreEqual(5, visitor.Score);
         }
     }
 }

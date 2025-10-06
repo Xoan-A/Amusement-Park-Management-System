@@ -13,15 +13,20 @@ namespace BusinessLogic
         private readonly IAttractionRepository _attractionRepository;
         private readonly ITicketLogic _ticketLogic;
         private readonly IRoleRepository _roleRepository;
+        private readonly IEventRepository _eventRepository;
+        private readonly IActiveStrategy _activeStrategy;
 
         public UserLogic(IUserRepository userRepository, IPasswordService passwordService,
-            IAttractionRepository attractionRepository, ITicketLogic ticketLogic, IRoleRepository roleRepository)
+            IAttractionRepository attractionRepository, ITicketLogic ticketLogic, IRoleRepository roleRepository,
+            IEventRepository eventRepository, IActiveStrategy activeStrategy)
         {
             _userRepository = userRepository;
             _passwordService = passwordService;
             _attractionRepository = attractionRepository;
             _ticketLogic = ticketLogic;
             _roleRepository = roleRepository;
+            _eventRepository = eventRepository;
+            _activeStrategy = activeStrategy;
         }
 
         public User RegisterVisitor(string name, string lastName, string email, string password, DateTime birthDate)
@@ -126,6 +131,22 @@ namespace BusinessLogic
             }
             else
                 throw new ArgumentException("Attraction is at full capacity.");
+
+            Event even = await _eventRepository.GetEventByAttractionAndDate(attractionId, enterDate.Date);
+
+            bool isEvent = even != null;
+
+            var strategyRequest = new StrategyRequest
+            {
+                User = user,
+                Attraction = attraction,
+                IsSepcialEvent = isEvent,
+                EnterDate = enterDate,
+            };
+
+            int score = _activeStrategy.CalculateScore(strategyRequest);
+
+            user.Score += score;
         }
 
         public async Task RegisterExit(Guid userId, Guid attractionId, DateTime exitDate)

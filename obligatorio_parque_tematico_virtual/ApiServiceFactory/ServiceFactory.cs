@@ -15,6 +15,7 @@ public static class ServiceFactory
         services.AddSingleton<IDateTimeLogic>(provider => DateTimeLogic.Instance);
         services.AddSingleton<IPasswordService, PasswordService>();
         services.AddSingleton<ITokenService, TokenService>();
+        services.AddSingleton<IActiveStrategy, ActiveStrategy>();
         services.AddScoped<IAuthLogic, AuthLogic>();
         services.AddScoped<IUserLogic, UserLogic>();
         services.AddScoped<ITicketLogic, TicketLogic>();
