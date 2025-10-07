@@ -8,7 +8,6 @@ namespace BusinessLogic;
 public class ActiveStrategy : IActiveStrategy
 {
     private IContreteStrategy Strategy;
-    private IContreteStrategy PreviousStrategy;
     public DateTime LastUpdated { get; set; }
 
 
@@ -22,38 +21,15 @@ public class ActiveStrategy : IActiveStrategy
                 setStrategyRequest.N ?? throw new ArgumentException("N is required for Combo strategy")),
             _ => throw new ArgumentException($"Invalid strategy name: {setStrategyRequest.StrategyName}")
         };
-
-        if (Strategy != null && setStrategyRequest.CurrentDate.Date != LastUpdated.Date)
-        {
-            PreviousStrategy = Strategy;
-            Strategy = strategy;
-            LastUpdated = setStrategyRequest.CurrentDate;
-        }
-        else if (Strategy != null && setStrategyRequest.CurrentDate.Date == LastUpdated.Date)
-        {
-            if (PreviousStrategy == null)
-            {
-                PreviousStrategy = Strategy;
-            }
-
-            Strategy = strategy;
-        }
-        else
-        {
-            Strategy = strategy;
-            LastUpdated = setStrategyRequest.CurrentDate;
-        }
+        
+        Strategy = strategy;
+        LastUpdated = setStrategyRequest.CurrentDate;
     }
 
     public IContreteStrategy GetStrategy(DateTime currentDate)
     {
         if (Strategy == null)
             throw new InvalidOperationException("Strategy not set");
-
-        if (PreviousStrategy != null && currentDate.Date == LastUpdated.Date)
-        {
-            return PreviousStrategy;
-        }
 
         return Strategy;
     }
