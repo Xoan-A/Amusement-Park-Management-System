@@ -12,7 +12,7 @@ public class DateTimeRepository : IDateTimeRepository
     {
         _context = context;
     }
-    
+
     public DateTime? GetConfiguredDateTime()
     {
         DateTimeConfiguration currentDate = _context.DateTimeConfigurations.FirstOrDefault();
