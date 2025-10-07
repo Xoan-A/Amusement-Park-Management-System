@@ -2,6 +2,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using IBusinessLogic;
 using BusinessLogic;
+using Moq;
+using IDataAccess;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TestBusinessLogic
 {
@@ -9,12 +12,20 @@ namespace TestBusinessLogic
     public class DateTimeLogicTest
     {
         private IDateTimeLogic _dateTimeLogic;
+        private Mock<IUserRepository> _mockUserRepository;
+        private IServiceProvider _serviceProvider;
 
         [TestInitialize]
         public void Setup()
         {
-            _dateTimeLogic = DateTimeLogic.Instance;
             DateTimeLogic.ResetInstance();
+            _mockUserRepository = new Mock<IUserRepository>();
+
+            var services = new ServiceCollection();
+            services.AddScoped<IUserRepository>(sp => _mockUserRepository.Object);
+            _serviceProvider = services.BuildServiceProvider();
+
+            _dateTimeLogic = DateTimeLogic.GetInstance(_serviceProvider);
         }
 
         [TestMethod]
@@ -65,8 +76,8 @@ namespace TestBusinessLogic
         [TestMethod]
         public void DateTimeLogic_ShouldBeSingleton()
         {
-            IDateTimeLogic instance1 = DateTimeLogic.Instance;
-            IDateTimeLogic instance2 = DateTimeLogic.Instance;
+            IDateTimeLogic instance1 = DateTimeLogic.GetInstance(_serviceProvider);
+            IDateTimeLogic instance2 = DateTimeLogic.GetInstance(_serviceProvider);
 
             Assert.AreSame(instance1, instance2);
         }
@@ -76,8 +87,8 @@ namespace TestBusinessLogic
         {
             DateTime configuredTime = new DateTime(2025, 5, 5, 5, 5, 0);
 
-            DateTimeLogic.Instance.SetDateTime(configuredTime);
-            IDateTimeLogic newInstance = DateTimeLogic.Instance;
+            DateTimeLogic.GetInstance(_serviceProvider).SetDateTime(configuredTime);
+            IDateTimeLogic newInstance = DateTimeLogic.GetInstance(_serviceProvider);
 
             Assert.AreEqual(configuredTime, newInstance.GetCurrentDateTime());
         }
