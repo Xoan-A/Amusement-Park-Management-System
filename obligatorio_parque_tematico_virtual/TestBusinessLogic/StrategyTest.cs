@@ -370,7 +370,7 @@ namespace TestBusinessLogic
 
             Assert.AreEqual(45, strategy.N);
         }
-        
+
         [TestMethod]
         public void ActiveStrategy_GetStrategy_FirstStrategySet_ShouldReturnStrategyImmediately()
         {
@@ -389,7 +389,7 @@ namespace TestBusinessLogic
             Assert.IsNotNull(result);
             Assert.AreEqual("PerAttraction", result.Name);
         }
-        
+
         [TestMethod]
         public void ActiveStrategy_GetStrategy_ShouldReturnSameStrategyRegardlessOfDate()
         {

@@ -62,7 +62,7 @@ namespace DataAccess.Repositories
                 .Take(10)
                 .ToListAsync();
         }
-        
+
         public async Task ResetScores()
         {
             var users = await _context.Users.ToListAsync();
@@ -70,6 +70,7 @@ namespace DataAccess.Repositories
             {
                 user.Score = 0;
             }
+
             await _context.SaveChangesAsync();
         }
     }

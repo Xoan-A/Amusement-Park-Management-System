@@ -21,7 +21,7 @@ public class ActiveStrategy : IActiveStrategy
                 setStrategyRequest.N ?? throw new ArgumentException("N is required for Combo strategy")),
             _ => throw new ArgumentException($"Invalid strategy name: {setStrategyRequest.StrategyName}")
         };
-        
+
         Strategy = strategy;
         LastUpdated = setStrategyRequest.CurrentDate;
     }
