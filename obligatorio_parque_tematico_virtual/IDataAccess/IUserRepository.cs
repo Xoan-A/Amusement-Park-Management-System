@@ -13,5 +13,6 @@ namespace IDataAccess
         bool IsEmailUnique(string email);
         Task<List<User>> GetTopTen();
         Task ResetScores();
+        Task Update(User user);
     }
 }

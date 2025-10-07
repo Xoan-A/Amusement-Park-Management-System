@@ -32,6 +32,7 @@ public static class ServiceFactory
         services.AddScoped<ITicketRepository, TicketRepository>();
         services.AddScoped<IAttractionRepository, AttractionRepository>();
         services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IDateTimeRepository, DateTimeRepository>();
         services.AddScoped<IDateTimeLogic, DateTimeLogic>();
     }

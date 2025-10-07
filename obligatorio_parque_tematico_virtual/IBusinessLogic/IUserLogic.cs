@@ -13,5 +13,6 @@ namespace IBusinessLogic
         Task RegisterEntry(Guid userId, Guid attractionId, DateTime enterDate, Guid? qr, Guid? nfc, int? eventId);
         Task RegisterExit(Guid userId, Guid attractionId, DateTime exitDate);
         Task<TopTenResponse> GetTopTenUsers();
+        Task AddRoleToUser(Guid userId, string role);
     }
 }
