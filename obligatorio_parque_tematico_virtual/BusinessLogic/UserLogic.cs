@@ -63,7 +63,8 @@ namespace BusinessLogic
             Role visitorRole = _roleRepository.GetByName(Role.VISITOR);
             if (visitorRole != null)
             {
-                visitor.UserRoles.Add(new UserRole { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
+                visitor.UserRoles.Add(new UserRole
+                    { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
             }
 
             return _userRepository.Create(visitor);
@@ -129,6 +130,7 @@ namespace BusinessLogic
             {
                 user.RegisterEntry(attraction, enterDate);
                 attraction.CurrentCapacity++;
+                await _attractionRepository.Update(attraction);
             }
             else
                 throw new ArgumentException("Attraction is at full capacity.");
@@ -148,6 +150,7 @@ namespace BusinessLogic
             int score = _activeStrategy.CalculateScore(strategyRequest);
 
             user.Score += score;
+            _userRepository.Update(user);
         }
 
         public async Task RegisterExit(Guid userId, Guid attractionId, DateTime exitDate)
@@ -163,7 +166,10 @@ namespace BusinessLogic
             user.RegisterExit(attraction, exitDate);
 
             if (attraction.CurrentCapacity > 0)
+            {
                 attraction.CurrentCapacity--;
+                await _attractionRepository.Update(attraction);
+            }
         }
 
         public async Task<TopTenResponse> GetTopTenUsers()
@@ -171,6 +177,30 @@ namespace BusinessLogic
             TopTenResponse result = new TopTenResponse();
             result.TopTenUsers = await _userRepository.GetTopTen();
             return result;
+        }
+
+        public async Task AddRoleToUser(Guid userId, string roleName)
+        {
+            User user = _userRepository.GetByIdWithRoles(userId);
+            if (user == null)
+            {
+                throw new ArgumentException("User not found.");
+            }
+
+            Role role = _roleRepository.GetByName(roleName);
+            if (role == null)
+            {
+                throw new ArgumentException("Role not found.");
+            }
+
+            if (user.UserRoles.Any(ur => ur.Role == role))
+            {
+                throw new ArgumentException("User already has that role.");
+            }
+
+            user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = role.Id, Role = role });
+
+            await _userRepository.Update(user);
         }
     }
 }

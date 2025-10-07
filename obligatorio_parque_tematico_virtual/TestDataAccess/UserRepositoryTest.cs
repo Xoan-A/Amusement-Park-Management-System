@@ -498,5 +498,56 @@ namespace TestDataAccess
             Assert.AreEqual(scores.Length, users.Count);
             Assert.IsTrue(users.All(u => u.Score == 0));
         }
+
+        [TestMethod]
+        public async Task Update_ShouldUpdateUserInDatabase()
+        {
+            User user = new User
+            {
+                Name = "Original",
+                LastName = "Name",
+                Email = "original@test.com",
+                Password = "password",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 50
+            };
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            user.Name = "Updated";
+            user.LastName = "NewName";
+            user.Score = 100;
+
+            await _userRepository.Update(user);
+
+            var updatedUser = _context.Users.FirstOrDefault(u => u.Email == "original@test.com");
+            Assert.AreEqual("Updated", updatedUser.Name);
+            Assert.AreEqual("NewName", updatedUser.LastName);
+            Assert.AreEqual(100, updatedUser.Score);
+        }
+
+        [TestMethod]
+        public async Task Update_ShouldUpdateUserRoles()
+        {
+            User user = new User
+            {
+                Name = "TestUser",
+                LastName = "Test",
+                Email = "testuser@test.com",
+                Password = "password"
+            };
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+            UserRole userRole = new UserRole { UserId = user.Id, RoleId = visitorRole.Id };
+            user.UserRoles.Add(userRole);
+
+            await _userRepository.Update(user);
+
+            var updatedUser = _userRepository.GetByIdWithRoles(user.Id);
+            Assert.AreEqual(1, updatedUser.UserRoles.Count);
+            Assert.AreEqual(Role.VISITOR, updatedUser.UserRoles.First().Role.Name);
+        }
     }
 }

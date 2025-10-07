@@ -192,4 +192,139 @@ public class UserLogicRoleTest
         Assert.AreEqual(1, result.UserRoles.Count);
         Assert.AreEqual(Role.VISITOR, result.UserRoles.First().Role.Name);
     }
+
+    [TestMethod]
+    public async Task AddRoleToUser_ShouldAddRoleSuccessfully()
+    {
+        Guid userId = Guid.NewGuid();
+        string roleName = Role.OPERATOR;
+
+        User user = new User
+        {
+            Id = userId,
+            Name = "John",
+            LastName = "Doe",
+            Email = "john@test.com",
+            UserRoles = new List<UserRole>()
+        };
+
+        Role operatorRole = new Role { Id = 2, Name = Role.OPERATOR };
+
+        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
+        _mockRoleRepository.Setup(r => r.GetByName(roleName)).Returns(operatorRole);
+        _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+
+        await _userLogic.AddRoleToUser(userId, roleName);
+
+        Assert.AreEqual(1, user.UserRoles.Count);
+        Assert.AreEqual(operatorRole, user.UserRoles.First().Role);
+        _mockUserRepository.Verify(r => r.Update(user), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task AddRoleToUser_ShouldThrowException_WhenUserNotFound()
+    {
+        Guid userId = Guid.NewGuid();
+        string roleName = Role.OPERATOR;
+
+        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns((User)null);
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _userLogic.AddRoleToUser(userId, roleName),
+            "User not found."
+        );
+
+        _mockUserRepository.Verify(r => r.Update(It.IsAny<User>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task AddRoleToUser_ShouldThrowException_WhenRoleNotFound()
+    {
+        Guid userId = Guid.NewGuid();
+        string roleName = "InvalidRole";
+
+        User user = new User
+        {
+            Id = userId,
+            Name = "John",
+            LastName = "Doe",
+            Email = "john@test.com",
+            UserRoles = new List<UserRole>()
+        };
+
+        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
+        _mockRoleRepository.Setup(r => r.GetByName(roleName)).Returns((Role)null);
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _userLogic.AddRoleToUser(userId, roleName),
+            "Role not found."
+        );
+
+        _mockUserRepository.Verify(r => r.Update(It.IsAny<User>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task AddRoleToUser_ShouldThrowException_WhenUserAlreadyHasRole()
+    {
+        Guid userId = Guid.NewGuid();
+        string roleName = Role.VISITOR;
+
+        Role visitorRole = new Role { Id = 3, Name = Role.VISITOR };
+
+        User user = new User
+        {
+            Id = userId,
+            Name = "John",
+            LastName = "Doe",
+            Email = "john@test.com",
+            UserRoles = new List<UserRole>
+            {
+                new UserRole { UserId = userId, RoleId = visitorRole.Id, Role = visitorRole }
+            }
+        };
+
+        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
+        _mockRoleRepository.Setup(r => r.GetByName(roleName)).Returns(visitorRole);
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _userLogic.AddRoleToUser(userId, roleName),
+            "User already has that role."
+        );
+
+        Assert.AreEqual(1, user.UserRoles.Count);
+        _mockUserRepository.Verify(r => r.Update(It.IsAny<User>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task AddRoleToUser_ShouldAddSecondRole_WhenUserHasDifferentRole()
+    {
+        Guid userId = Guid.NewGuid();
+        string newRoleName = Role.ADMINISTRATOR;
+
+        Role visitorRole = new Role { Id = 3, Name = Role.VISITOR };
+        Role adminRole = new Role { Id = 1, Name = Role.ADMINISTRATOR };
+
+        User user = new User
+        {
+            Id = userId,
+            Name = "John",
+            LastName = "Doe",
+            Email = "john@test.com",
+            UserRoles = new List<UserRole>
+            {
+                new UserRole { UserId = userId, RoleId = visitorRole.Id, Role = visitorRole }
+            }
+        };
+
+        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
+        _mockRoleRepository.Setup(r => r.GetByName(newRoleName)).Returns(adminRole);
+        _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+
+        await _userLogic.AddRoleToUser(userId, newRoleName);
+
+        Assert.AreEqual(2, user.UserRoles.Count);
+        Assert.IsTrue(user.UserRoles.Any(ur => ur.Role == visitorRole));
+        Assert.IsTrue(user.UserRoles.Any(ur => ur.Role == adminRole));
+        _mockUserRepository.Verify(r => r.Update(user), Times.Once);
+    }
 }

@@ -73,5 +73,11 @@ namespace DataAccess.Repositories
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task Update(User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
     }
 }
