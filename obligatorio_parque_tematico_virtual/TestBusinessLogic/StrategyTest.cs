@@ -2,54 +2,67 @@ using Domain;
 using BusinessLogic;
 using IBusinessLogic.Strategy;
 using Models.In;
+using Moq;
+using IDataAccess;
 
 namespace TestBusinessLogic
 {
     [TestClass]
     public class StrategyTest
     {
+        private Mock<IStrategyRepository> CreateMockRepository()
+        {
+            var mock = new Mock<IStrategyRepository>();
+            StrategyConfiguration? storedConfig = null;
+
+            mock.Setup(x => x.Get()).Returns(() => storedConfig);
+            mock.Setup(x => x.Update(It.IsAny<StrategyConfiguration>()))
+                .Callback<StrategyConfiguration>(config => storedConfig = config);
+
+            return mock;
+        }
         [TestMethod]
         public void ActiveStrategy_SetStrategy_ShouldSetStrategy()
         {
-            var activeStrategy = new ActiveStrategy();
-            var perAttractionStrategy = new PerAttraction();
+            var mockRepo = CreateMockRepository();
+            var activeStrategy = new ActiveStrategy(mockRepo.Object);
 
-            var currentDate = new DateTime(2024, 1, 15, 10, 0, 0);
             activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "PerAttraction",
-                CurrentDate = currentDate
             });
 
-            IContreteStrategy result = activeStrategy.GetStrategy(currentDate);
+            IContreteStrategy result = activeStrategy.GetStrategy();
 
             Assert.IsNotNull(result);
             Assert.AreEqual("PerAttraction", result.Name);
         }
 
         [TestMethod]
-        public void ActiveStrategy_GetStrategy_ShouldThrowWhenNoStrategySet()
+        public void ActiveStrategy_GetStrategy_ShouldReturnDefaultWhenNoStrategySet()
         {
-            var activeStrategy = new ActiveStrategy();
-            var currentDate = new DateTime(2024, 1, 15, 10, 0, 0);
+            var mockRepo = CreateMockRepository();
+            var activeStrategy = new ActiveStrategy(mockRepo.Object);
 
-            Assert.ThrowsException<InvalidOperationException>(() => activeStrategy.GetStrategy(currentDate));
+            IContreteStrategy result = activeStrategy.GetStrategy();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("PerAttraction", result.Name);
         }
 
         [TestMethod]
         public void ActiveStrategy_SetStrategy_WithCombo_ShouldSetComboWithN()
         {
-            var activeStrategy = new ActiveStrategy();
-            var currentDate = new DateTime(2024, 1, 15, 10, 0, 0);
+            var mockRepo = CreateMockRepository();
+            var activeStrategy = new ActiveStrategy(mockRepo.Object);
 
             activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "Combo",
                 N = 30,
-                CurrentDate = currentDate
             });
 
-            IContreteStrategy result = activeStrategy.GetStrategy(currentDate);
+            IContreteStrategy result = activeStrategy.GetStrategy();
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Combo", result.Name);
@@ -60,29 +73,27 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ActiveStrategy_SetStrategy_WithCombo_ShouldThrowWhenNIsNull()
         {
-            var activeStrategy = new ActiveStrategy();
-            var currentDate = new DateTime(2024, 1, 15, 10, 0, 0);
+            var mockRepo = CreateMockRepository();
+            var activeStrategy = new ActiveStrategy(mockRepo.Object);
 
             Assert.ThrowsException<ArgumentException>(() =>
                 activeStrategy.SetStrategy(new SetStrategyRequest
                 {
                     StrategyName = "Combo",
                     N = null,
-                    CurrentDate = currentDate
                 }));
         }
 
         [TestMethod]
         public void ActiveStrategy_SetStrategy_ShouldThrowForInvalidStrategyName()
         {
-            var activeStrategy = new ActiveStrategy();
-            var currentDate = new DateTime(2024, 1, 15, 10, 0, 0);
+            var mockRepo = CreateMockRepository();
+            var activeStrategy = new ActiveStrategy(mockRepo.Object);
 
             Assert.ThrowsException<ArgumentException>(() =>
                 activeStrategy.SetStrategy(new SetStrategyRequest
                 {
                     StrategyName = "InvalidStrategy",
-                    CurrentDate = currentDate
                 }));
         }
 
@@ -374,17 +385,15 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ActiveStrategy_GetStrategy_FirstStrategySet_ShouldReturnStrategyImmediately()
         {
-            var activeStrategy = new ActiveStrategy();
-            var setDate = new DateTime(2024, 1, 15, 9, 0, 0);
+            var mockRepo = CreateMockRepository();
+            var activeStrategy = new ActiveStrategy(mockRepo.Object);
 
             activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "PerAttraction",
-                CurrentDate = setDate
             });
 
-            var queryDate = new DateTime(2024, 1, 15, 15, 0, 0);
-            IContreteStrategy result = activeStrategy.GetStrategy(queryDate);
+            IContreteStrategy result = activeStrategy.GetStrategy();
 
             Assert.IsNotNull(result);
             Assert.AreEqual("PerAttraction", result.Name);
@@ -393,22 +402,17 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ActiveStrategy_GetStrategy_ShouldReturnSameStrategyRegardlessOfDate()
         {
-            var activeStrategy = new ActiveStrategy();
-            var setDate = new DateTime(2024, 1, 15, 9, 0, 0);
+            var mockRepo = CreateMockRepository();
+            var activeStrategy = new ActiveStrategy(mockRepo.Object);
 
             activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "PerAttraction",
-                CurrentDate = setDate
             });
 
-            var queryDate1 = new DateTime(2024, 1, 15, 10, 0, 0);
-            var queryDate2 = new DateTime(2024, 1, 16, 10, 0, 0);
-            var queryDate3 = new DateTime(2024, 2, 1, 10, 0, 0);
-
-            IContreteStrategy result1 = activeStrategy.GetStrategy(queryDate1);
-            IContreteStrategy result2 = activeStrategy.GetStrategy(queryDate2);
-            IContreteStrategy result3 = activeStrategy.GetStrategy(queryDate3);
+            IContreteStrategy result1 = activeStrategy.GetStrategy();
+            IContreteStrategy result2 = activeStrategy.GetStrategy();
+            IContreteStrategy result3 = activeStrategy.GetStrategy();
 
             Assert.AreEqual("PerAttraction", result1.Name);
             Assert.AreEqual("PerAttraction", result2.Name);
@@ -416,51 +420,22 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void ActiveStrategy_GetStrategy_AfterMultipleSetsSameDay_ShouldReturnLatestStrategy()
+        public void ActiveStrategy_GetStrategy_AfterMultipleSets_ShouldReturnLatestStrategy()
         {
-            var activeStrategy = new ActiveStrategy();
-            var setDate = new DateTime(2024, 1, 15, 9, 0, 0);
+            var mockRepo = CreateMockRepository();
+            var activeStrategy = new ActiveStrategy(mockRepo.Object);
 
             activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "PerAttraction",
-                CurrentDate = setDate
             });
 
-            var setDate2 = new DateTime(2024, 1, 15, 12, 0, 0);
             activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "PerEvent",
-                CurrentDate = setDate2
             });
 
-            var queryDate = new DateTime(2024, 1, 15, 15, 0, 0);
-            IContreteStrategy result = activeStrategy.GetStrategy(queryDate);
-
-            Assert.AreEqual("PerEvent", result.Name);
-        }
-
-        [TestMethod]
-        public void ActiveStrategy_GetStrategy_AfterMultipleSetsDifferentDays_ShouldReturnLatestStrategy()
-        {
-            var activeStrategy = new ActiveStrategy();
-            var setDate1 = new DateTime(2024, 1, 15, 9, 0, 0);
-
-            activeStrategy.SetStrategy(new SetStrategyRequest
-            {
-                StrategyName = "PerAttraction",
-                CurrentDate = setDate1
-            });
-
-            var setDate2 = new DateTime(2024, 1, 16, 9, 0, 0);
-            activeStrategy.SetStrategy(new SetStrategyRequest
-            {
-                StrategyName = "PerEvent",
-                CurrentDate = setDate2
-            });
-
-            var queryDate = new DateTime(2024, 1, 17, 10, 0, 0);
-            IContreteStrategy result = activeStrategy.GetStrategy(queryDate);
+            IContreteStrategy result = activeStrategy.GetStrategy();
 
             Assert.AreEqual("PerEvent", result.Name);
         }
@@ -468,18 +443,16 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ActiveStrategy_GetStrategy_AfterSettingCombo_ShouldReturnComboWithCorrectN()
         {
-            var activeStrategy = new ActiveStrategy();
-            var setDate = new DateTime(2024, 1, 15, 9, 0, 0);
+            var mockRepo = CreateMockRepository();
+            var activeStrategy = new ActiveStrategy(mockRepo.Object);
 
             activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "Combo",
                 N = 45,
-                CurrentDate = setDate
             });
 
-            var queryDate = new DateTime(2024, 1, 15, 15, 0, 0);
-            IContreteStrategy result = activeStrategy.GetStrategy(queryDate);
+            IContreteStrategy result = activeStrategy.GetStrategy();
 
             Assert.AreEqual("Combo", result.Name);
             Assert.IsInstanceOfType(result, typeof(Combo));
@@ -487,46 +460,23 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void ActiveStrategy_GetStrategy_MultipleCallsSameDate_ShouldReturnSameStrategy()
-        {
-            var activeStrategy = new ActiveStrategy();
-            var setDate = new DateTime(2024, 1, 15, 9, 0, 0);
-
-            activeStrategy.SetStrategy(new SetStrategyRequest
-            {
-                StrategyName = "PerAttraction",
-                CurrentDate = setDate
-            });
-
-            var queryDate = new DateTime(2024, 1, 15, 15, 0, 0);
-            IContreteStrategy result1 = activeStrategy.GetStrategy(queryDate);
-            IContreteStrategy result2 = activeStrategy.GetStrategy(queryDate);
-
-            Assert.AreSame(result1, result2);
-        }
-
-        [TestMethod]
         public void ActiveStrategy_GetStrategy_AfterChangingFromComboToPerAttraction_ShouldReturnPerAttraction()
         {
-            var activeStrategy = new ActiveStrategy();
-            var setDate1 = new DateTime(2024, 1, 15, 9, 0, 0);
+            var mockRepo = CreateMockRepository();
+            var activeStrategy = new ActiveStrategy(mockRepo.Object);
 
             activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "Combo",
                 N = 30,
-                CurrentDate = setDate1
             });
 
-            var setDate2 = new DateTime(2024, 1, 16, 9, 0, 0);
             activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "PerAttraction",
-                CurrentDate = setDate2
             });
 
-            var queryDate = new DateTime(2024, 1, 16, 15, 0, 0);
-            IContreteStrategy result = activeStrategy.GetStrategy(queryDate);
+            IContreteStrategy result = activeStrategy.GetStrategy();
 
             Assert.AreEqual("PerAttraction", result.Name);
             Assert.IsNotInstanceOfType(result, typeof(Combo));

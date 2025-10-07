@@ -13,10 +13,10 @@ public static class ServiceFactory
 {
     public static void AddServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<IDateTimeLogic>(provider => DateTimeLogic.GetInstance(provider));
         services.AddSingleton<IPasswordLogic, PasswordLogic>();
         services.AddSingleton<ITokenLogic, TokenLogic>();
-        services.AddSingleton<IActiveStrategy, ActiveStrategy>();
+        services.AddScoped<IStrategyRepository, StrategyRepository>();
+        services.AddScoped<IActiveStrategy, ActiveStrategy>();
         services.AddScoped<IAuthLogic, AuthLogic>();
         services.AddScoped<IUserLogic, UserLogic>();
         services.AddScoped<ITicketLogic, TicketLogic>();
@@ -33,5 +33,7 @@ public static class ServiceFactory
         services.AddScoped<IAttractionRepository, AttractionRepository>();
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<IDateTimeRepository, DateTimeRepository>();
+        services.AddScoped<IDateTimeLogic, DateTimeLogic>();
     }
 }

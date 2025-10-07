@@ -4,7 +4,6 @@ using IBusinessLogic;
 using BusinessLogic;
 using Moq;
 using IDataAccess;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace TestBusinessLogic
 {
@@ -12,25 +11,20 @@ namespace TestBusinessLogic
     public class DateTimeLogicTest
     {
         private IDateTimeLogic _dateTimeLogic;
-        private Mock<IUserRepository> _mockUserRepository;
-        private IServiceProvider _serviceProvider;
+        private Mock<IDateTimeRepository> _mockDateTimeRepository;
 
         [TestInitialize]
         public void Setup()
         {
-            DateTimeLogic.ResetInstance();
-            _mockUserRepository = new Mock<IUserRepository>();
-
-            var services = new ServiceCollection();
-            services.AddScoped<IUserRepository>(sp => _mockUserRepository.Object);
-            _serviceProvider = services.BuildServiceProvider();
-
-            _dateTimeLogic = DateTimeLogic.GetInstance(_serviceProvider);
+            _mockDateTimeRepository = new Mock<IDateTimeRepository>();
+            _dateTimeLogic = new DateTimeLogic(_mockDateTimeRepository.Object);
         }
 
         [TestMethod]
         public void GetCurrentDateTime_ShouldReturnSystemTime_WhenNotConfigured()
         {
+            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).Returns((DateTime?)null);
+
             DateTime before = DateTime.Now;
             DateTime result = _dateTimeLogic.GetCurrentDateTime();
             DateTime after = DateTime.Now;
@@ -39,58 +33,35 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void SetDateTime_ShouldSetConfiguredTime()
+        public void GetCurrentDateTime_ShouldReturnConfiguredTime_WhenConfigured()
+        {
+            DateTime configuredTime = new DateTime(2025, 9, 2, 14, 45, 0);
+            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).Returns(configuredTime);
+
+            DateTime result = _dateTimeLogic.GetCurrentDateTime();
+
+            Assert.AreEqual(configuredTime, result);
+        }
+
+        [TestMethod]
+        public void SetDateTime_ShouldCallRepository()
         {
             DateTime configuredTime = new DateTime(2025, 9, 2, 14, 45, 0);
 
             _dateTimeLogic.SetDateTime(configuredTime);
-            DateTime result = _dateTimeLogic.GetCurrentDateTime();
 
-            Assert.AreEqual(configuredTime, result);
+            _mockDateTimeRepository.Verify(r => r.SetConfiguredDateTime(configuredTime), Times.Once);
         }
 
         [TestMethod]
-        public void GetCurrentDateTime_ShouldReturnConfiguredTime_AfterSetting()
-        {
-            DateTime configuredTime = new DateTime(2025, 10, 15, 10, 30, 0);
-
-            _dateTimeLogic.SetDateTime(configuredTime);
-            System.Threading.Thread.Sleep(100);
-            DateTime result = _dateTimeLogic.GetCurrentDateTime();
-
-            Assert.AreEqual(configuredTime, result);
-        }
-
-        [TestMethod]
-        public void SetDateTime_WithStringFormat_ShouldParseCorrectly()
+        public void SetDateTime_WithStringFormat_ShouldParseAndCallRepository()
         {
             string dateTimeString = "2025-09-02T14:45";
             DateTime expectedTime = new DateTime(2025, 9, 2, 14, 45, 0);
 
             _dateTimeLogic.SetDateTime(dateTimeString);
-            DateTime result = _dateTimeLogic.GetCurrentDateTime();
 
-            Assert.AreEqual(expectedTime, result);
-        }
-
-        [TestMethod]
-        public void DateTimeLogic_ShouldBeSingleton()
-        {
-            IDateTimeLogic instance1 = DateTimeLogic.GetInstance(_serviceProvider);
-            IDateTimeLogic instance2 = DateTimeLogic.GetInstance(_serviceProvider);
-
-            Assert.AreSame(instance1, instance2);
-        }
-
-        [TestMethod]
-        public void SetDateTime_ShouldPersistAcrossInstances()
-        {
-            DateTime configuredTime = new DateTime(2025, 5, 5, 5, 5, 0);
-
-            DateTimeLogic.GetInstance(_serviceProvider).SetDateTime(configuredTime);
-            IDateTimeLogic newInstance = DateTimeLogic.GetInstance(_serviceProvider);
-
-            Assert.AreEqual(configuredTime, newInstance.GetCurrentDateTime());
+            _mockDateTimeRepository.Verify(r => r.SetConfiguredDateTime(expectedTime), Times.Once);
         }
     }
 }

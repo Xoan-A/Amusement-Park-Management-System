@@ -7,6 +7,6 @@ namespace IBusinessLogic;
 public interface IActiveStrategy
 {
     void SetStrategy(SetStrategyRequest setStrategyRequest);
-    IContreteStrategy GetStrategy(DateTime currentDate);
+    IContreteStrategy GetStrategy();
     int CalculateScore(StrategyRequest strategyRequest);
 }

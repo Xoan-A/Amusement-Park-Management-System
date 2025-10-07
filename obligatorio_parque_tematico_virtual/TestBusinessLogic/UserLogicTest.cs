@@ -795,8 +795,7 @@ namespace TestBusinessLogic
             _mockActiveStrategy.Verify(s => s.CalculateScore(It.Is<StrategyRequest>(
                 req => req.User == visitor &&
                        req.Attraction == attraction &&
-                       req.IsSepcialEvent == false &&
-                       req.EnterDate == enterDate)), Times.Once);
+                       req.IsSepcialEvent == false)), Times.Once);
         }
 
         [TestMethod]
@@ -845,8 +844,7 @@ namespace TestBusinessLogic
             _mockActiveStrategy.Verify(s => s.CalculateScore(It.Is<StrategyRequest>(
                 req => req.User == visitor &&
                        req.Attraction == attraction &&
-                       req.IsSepcialEvent == true &&
-                       req.EnterDate == enterDate)), Times.Once);
+                       req.IsSepcialEvent == true)), Times.Once);
         }
 
         [TestMethod]

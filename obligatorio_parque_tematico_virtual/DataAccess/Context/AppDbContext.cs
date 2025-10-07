@@ -13,6 +13,8 @@ namespace DataAccess.Context
         public virtual DbSet<Ticket> Tickets { get; set; }
         public virtual DbSet<VisitorReport> VisitorReports { get; set; }
         public virtual DbSet<Report> Reports { get; set; }
+        public virtual DbSet<StrategyConfiguration> StrategyConfigurations { get; set; }
+        public virtual DbSet<DateTimeConfiguration> DateTimeConfigurations { get; set; }
 
         public AppDbContext()
         {
@@ -140,6 +142,16 @@ namespace DataAccess.Context
                 .WithMany()
                 .HasForeignKey(r => r.AttractionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // StrategyConfiguration - seed default strategy
+            modelBuilder.Entity<StrategyConfiguration>().HasData(
+                new StrategyConfiguration
+                {
+                    Id = 1,
+                    StrategyName = "PerAttraction",
+                    N = null,
+                }
+            );
 
             base.OnModelCreating(modelBuilder);
         }
