@@ -12,5 +12,6 @@ namespace IDataAccess
         User GetByEmailWithRoles(string email);
         bool IsEmailUnique(string email);
         Task<List<User>> GetTopTen();
+        Task ResetScores();
     }
 }
