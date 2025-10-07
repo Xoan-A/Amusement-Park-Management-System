@@ -352,5 +352,151 @@ namespace TestDataAccess
             Assert.AreEqual(100, result[5].Score);
             Assert.AreEqual(50, result[6].Score);
         }
+
+        [TestMethod]
+        public async Task ResetScores_ShouldSetAllUserScoresToZero()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            for (int i = 1; i <= 5; i++)
+            {
+                User visitor = new User
+                {
+                    Name = $"User{i}",
+                    LastName = "Test",
+                    Email = $"user{i}@test.com",
+                    Password = "password",
+                    BirthDate = new DateTime(1990, 1, 1),
+                    Score = i * 20
+                };
+                _context.Users.Add(visitor);
+            }
+
+            _context.SaveChanges();
+
+            await _userRepository.ResetScores();
+
+            var users = _context.Users.ToList();
+            Assert.AreEqual(5, users.Count);
+            foreach (var user in users)
+            {
+                Assert.AreEqual(0, user.Score);
+            }
+        }
+
+        [TestMethod]
+        public async Task ResetScores_ShouldWorkWhenNoUsersExist()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            await _userRepository.ResetScores();
+
+            var users = _context.Users.ToList();
+            Assert.AreEqual(0, users.Count);
+        }
+
+        [TestMethod]
+        public async Task ResetScores_ShouldPersistChangesToDatabase()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            var user1 = new User
+            {
+                Name = "User1",
+                LastName = "Test",
+                Email = "user1@test.com",
+                Password = "password",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 100
+            };
+            var user2 = new User
+            {
+                Name = "User2",
+                LastName = "Test",
+                Email = "user2@test.com",
+                Password = "password",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 200
+            };
+            _context.Users.Add(user1);
+            _context.Users.Add(user2);
+            _context.SaveChanges();
+
+            await _userRepository.ResetScores();
+
+            var retrievedUser1 = _context.Users.FirstOrDefault(u => u.Email == "user1@test.com");
+            var retrievedUser2 = _context.Users.FirstOrDefault(u => u.Email == "user2@test.com");
+
+            Assert.IsNotNull(retrievedUser1);
+            Assert.IsNotNull(retrievedUser2);
+            Assert.AreEqual(0, retrievedUser1.Score);
+            Assert.AreEqual(0, retrievedUser2.Score);
+        }
+
+        [TestMethod]
+        public async Task ResetScores_ShouldNotAffectOtherUserProperties()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            var user = new User
+            {
+                Name = "TestUser",
+                LastName = "LastName",
+                Email = "test@test.com",
+                Password = "password",
+                BirthDate = new DateTime(1990, 5, 15),
+                Score = 500,
+                MembershipLevel = MembershipLevel.Premium
+            };
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            await _userRepository.ResetScores();
+
+            var retrievedUser = _context.Users.FirstOrDefault(u => u.Email == "test@test.com");
+
+            Assert.IsNotNull(retrievedUser);
+            Assert.AreEqual(0, retrievedUser.Score);
+            Assert.AreEqual("TestUser", retrievedUser.Name);
+            Assert.AreEqual("LastName", retrievedUser.LastName);
+            Assert.AreEqual("test@test.com", retrievedUser.Email);
+            Assert.AreEqual("password", retrievedUser.Password);
+            Assert.AreEqual(new DateTime(1990, 5, 15), retrievedUser.BirthDate);
+            Assert.AreEqual(MembershipLevel.Premium, retrievedUser.MembershipLevel);
+        }
+
+        [TestMethod]
+        public async Task ResetScores_ShouldResetMultipleUsersWithDifferentScores()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            var scores = new[] { 10, 0, 500, 1000, 75 };
+            for (int i = 0; i < scores.Length; i++)
+            {
+                User visitor = new User
+                {
+                    Name = $"User{i}",
+                    LastName = "Test",
+                    Email = $"user{i}@test.com",
+                    Password = "password",
+                    BirthDate = new DateTime(1990, 1, 1),
+                    Score = scores[i]
+                };
+                _context.Users.Add(visitor);
+            }
+
+            _context.SaveChanges();
+
+            await _userRepository.ResetScores();
+
+            var users = _context.Users.ToList();
+            Assert.AreEqual(scores.Length, users.Count);
+            Assert.IsTrue(users.All(u => u.Score == 0));
+        }
     }
 }
