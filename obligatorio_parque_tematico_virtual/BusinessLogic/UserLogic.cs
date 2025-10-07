@@ -142,7 +142,6 @@ namespace BusinessLogic
                 User = user,
                 Attraction = attraction,
                 IsSepcialEvent = isEvent,
-                EnterDate = enterDate,
             };
 
             int score = _activeStrategy.CalculateScore(strategyRequest);
