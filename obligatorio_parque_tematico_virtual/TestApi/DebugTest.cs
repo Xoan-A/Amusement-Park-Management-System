@@ -8,6 +8,7 @@ using BusinessLogic;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using Microsoft.Data.Sqlite;
+using IDataAccess;
 
 namespace TestApi
 {
@@ -17,6 +18,9 @@ namespace TestApi
         [TestMethod]
         public async Task TestTicketsEndpointExists()
         {
+            // Reset singleton instance
+            DateTimeLogic.ResetInstance();
+
             // Create shared in-memory connection
             var connection = new SqliteConnection("DataSource=:memory:");
             connection.Open();
@@ -34,11 +38,19 @@ namespace TestApi
                             services.Remove(descriptor);
                         }
 
+                        // Remove existing IDateTimeLogic registration
+                        var dateTimeDescriptor = services.SingleOrDefault(
+                            d => d.ServiceType == typeof(IDateTimeLogic));
+                        if (dateTimeDescriptor != null)
+                        {
+                            services.Remove(dateTimeDescriptor);
+                        }
+
                         // Add SQLite DbContext with shared connection
                         services.AddDbContext<AppDbContext>(options =>
                             options.UseSqlite(connection));
 
-                        services.AddSingleton<IDateTimeLogic>(provider => DateTimeLogic.Instance);
+                        services.AddSingleton<IDateTimeLogic>(provider => DateTimeLogic.GetInstance(provider));
                     });
                 });
 

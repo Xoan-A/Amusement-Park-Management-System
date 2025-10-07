@@ -13,7 +13,7 @@ public static class ServiceFactory
 {
     public static void AddServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<IDateTimeLogic>(provider => DateTimeLogic.Instance);
+        services.AddSingleton<IDateTimeLogic>(provider => DateTimeLogic.GetInstance(provider));
         services.AddSingleton<IPasswordLogic, PasswordLogic>();
         services.AddSingleton<ITokenLogic, TokenLogic>();
         services.AddSingleton<IActiveStrategy, ActiveStrategy>();

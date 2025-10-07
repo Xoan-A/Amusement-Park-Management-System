@@ -1,5 +1,7 @@
 using System;
 using IBusinessLogic;
+using IDataAccess;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BusinessLogic
 {
@@ -8,25 +10,26 @@ namespace BusinessLogic
         private static DateTimeLogic _instance;
         private static readonly object _lock = new object();
         private DateTime? _configuredDateTime;
+        private readonly IServiceProvider _serviceProvider;
 
-        private DateTimeLogic() { }
-
-        public static DateTimeLogic Instance
+        private DateTimeLogic(IServiceProvider serviceProvider)
         {
-            get
+            _serviceProvider = serviceProvider;
+        }
+
+        public static DateTimeLogic GetInstance(IServiceProvider serviceProvider)
+        {
+            if (_instance == null)
             {
-                if (_instance == null)
+                lock (_lock)
                 {
-                    lock (_lock)
+                    if (_instance == null)
                     {
-                        if (_instance == null)
-                        {
-                            _instance = new DateTimeLogic();
-                        }
+                        _instance = new DateTimeLogic(serviceProvider);
                     }
                 }
-                return _instance;
             }
+            return _instance;
         }
 
         public static void ResetInstance()
@@ -44,12 +47,30 @@ namespace BusinessLogic
 
         public void SetDateTime(DateTime dateTime)
         {
+            if (_configuredDateTime != null && _configuredDateTime.Value.Date < dateTime.Date)
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+                    userRepository.ResetScores().Wait();
+                }
+            }
+
             _configuredDateTime = dateTime;
         }
 
         public void SetDateTime(string dateTimeString)
         {
-            _configuredDateTime = DateTime.Parse(dateTimeString);
+            var dateTime = DateTime.Parse(dateTimeString);
+            if (_configuredDateTime != null && _configuredDateTime.Value.Date < dateTime.Date)
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+                    userRepository.ResetScores().Wait();
+                }
+            }
+            _configuredDateTime = dateTime;
         }
     }
 }
