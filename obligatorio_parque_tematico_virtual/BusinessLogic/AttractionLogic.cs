@@ -9,6 +9,8 @@ namespace BusinessLogic;
 public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
 {
     private readonly IAttractionRepository _attractionRepository;
+    private readonly IReportRepository _reportRepository;
+
     private readonly int _nameMaxLength = 100;
     private readonly int _maxDescriptionLength = 500;
     private readonly int _maxMinAge = 25;
@@ -18,9 +20,10 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
     private readonly int _minCurrentCapacity = 0;
     private readonly int _noIncidents = 0;
 
-    public AttractionLogic(IAttractionRepository attractionRepository)
+    public AttractionLogic(IAttractionRepository attractionRepository, IReportRepository reportRepository)
     {
         _attractionRepository = attractionRepository;
+        _reportRepository = reportRepository;
     }
 
     public async Task<AttractionResponse> GetAttractionById(Guid id)
@@ -154,6 +157,31 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
 
         attraction.RemoveIncident(incidence);
         await _attractionRepository.Update(attraction);
+    }
+
+    public async Task<AttractionsVisitResponse> GetAllAttractionsVisits(AttractionsVisitRequest request)
+    {
+        DateTime startDate = request.StartDate;
+        DateTime endDate = request.EndDate;
+
+        if (startDate > endDate)
+        {
+            throw new ArgumentException("La fecha de inicio no puede ser posterior a la fecha de fin.");
+        }
+
+        List<Report> reports = await _reportRepository.GetAllReports();
+        List<Report> filteredReports = reports.Where(r => r.EnterDate >= startDate && r.EnterDate <= endDate).ToList();
+
+        AttractionsVisitResponse attractionsVisits = new AttractionsVisitResponse();
+        var groupedReports = filteredReports.GroupBy(r => r.AttractionId);
+        foreach (var group in groupedReports)
+        {
+            Attraction attraction = group.First().Attraction;
+            int visitCount = group.Count();
+            attractionsVisits.AttractionsVisits.Add((attraction, visitCount));
+        }
+
+        return attractionsVisits;
     }
 
     private async Task ValidateAttractionRequest(AttractionRequest request, bool checkCurrentCapacity = false)

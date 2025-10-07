@@ -12,6 +12,7 @@ namespace TestBusinessLogic;
 public class AttractionLogicTest
 {
     private Mock<IAttractionRepository> _mockAttractionRepository;
+    private Mock<IReportRepository> _mockReportRepository;
     private IAttractionLogic _attractionLogic;
     private IAttractionLogicEntity _attractionLogicEntity;
 
@@ -19,8 +20,9 @@ public class AttractionLogicTest
     public void Setup()
     {
         _mockAttractionRepository = new Mock<IAttractionRepository>();
-        _attractionLogic = new AttractionLogic(_mockAttractionRepository.Object);
-        _attractionLogicEntity = new AttractionLogic(_mockAttractionRepository.Object);
+        _mockReportRepository = new Mock<IReportRepository>();
+        _attractionLogic = new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object);
+        _attractionLogicEntity = new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object);
     }
 
     [TestMethod]
@@ -501,5 +503,127 @@ public class AttractionLogicTest
         Assert.AreEqual(50, result.Capacity);
         Assert.AreEqual(20, result.CurrentCapacity);
         _mockAttractionRepository.Verify(r => r.GetById(attractionId), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task GetAllAttractionsVisits_ShouldReturnAttractionsWithVisitCounts_WhenReportsExist()
+    {
+        DateTime startDate = new DateTime(2025, 10, 1);
+        DateTime endDate = new DateTime(2025, 10, 7);
+
+        AttractionsVisitRequest request = new AttractionsVisitRequest
+        {
+            StartDate = startDate,
+            EndDate = endDate
+        };
+
+        Guid attraction1Id = Guid.NewGuid();
+        Guid attraction2Id = Guid.NewGuid();
+
+        Attraction attraction1 = new Attraction
+        {
+            Id = attraction1Id,
+            Name = "Montaña Rusa",
+            Description = "Una atracción emocionante",
+            Type = AttractionType.RollerCoaster,
+            MinAge = 12,
+            MaxCapacity = 50,
+            CurrentCapacity = 0
+        };
+
+        Attraction attraction2 = new Attraction
+        {
+            Id = attraction2Id,
+            Name = "Simulador",
+            Description = "Experiencia virtual",
+            Type = AttractionType.Simulator,
+            MinAge = 8,
+            MaxCapacity = 30,
+            CurrentCapacity = 0
+        };
+
+        List<Report> reports = new List<Report>
+        {
+            new Report
+            {
+                Id = Guid.NewGuid(),
+                AttractionId = attraction1Id,
+                Attraction = attraction1,
+                EnterDate = new DateTime(2025, 10, 2),
+                ExitDate = new DateTime(2025, 10, 2, 1, 0, 0),
+                VisitorReportId = Guid.NewGuid()
+            },
+            new Report
+            {
+                Id = Guid.NewGuid(),
+                AttractionId = attraction1Id,
+                Attraction = attraction1,
+                EnterDate = new DateTime(2025, 10, 3),
+                ExitDate = new DateTime(2025, 10, 3, 1, 0, 0),
+                VisitorReportId = Guid.NewGuid()
+            },
+            new Report
+            {
+                Id = Guid.NewGuid(),
+                AttractionId = attraction1Id,
+                Attraction = attraction1,
+                EnterDate = new DateTime(2025, 10, 4),
+                ExitDate = new DateTime(2025, 10, 4, 1, 0, 0),
+                VisitorReportId = Guid.NewGuid()
+            },
+            new Report
+            {
+                Id = Guid.NewGuid(),
+                AttractionId = attraction2Id,
+                Attraction = attraction2,
+                EnterDate = new DateTime(2025, 10, 3),
+                ExitDate = new DateTime(2025, 10, 3, 1, 0, 0),
+                VisitorReportId = Guid.NewGuid()
+            },
+            new Report
+            {
+                Id = Guid.NewGuid(),
+                AttractionId = attraction2Id,
+                Attraction = attraction2,
+                EnterDate = new DateTime(2025, 10, 5),
+                ExitDate = new DateTime(2025, 10, 5, 1, 0, 0),
+                VisitorReportId = Guid.NewGuid()
+            }
+        };
+
+        _mockReportRepository.Setup(r => r.GetAllReports()).ReturnsAsync(reports);
+
+        AttractionsVisitResponse result = await _attractionLogic.GetAllAttractionsVisits(request);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(2, result.AttractionsVisits.Count);
+
+        var attraction1Result = result.AttractionsVisits.FirstOrDefault(r => r.Item1.Id == attraction1Id);
+        Assert.IsNotNull(attraction1Result.Item1);
+        Assert.AreEqual("Montaña Rusa", attraction1Result.Item1.Name);
+        Assert.AreEqual(3, attraction1Result.Item2);
+
+        var attraction2Result = result.AttractionsVisits.FirstOrDefault(r => r.Item1.Id == attraction2Id);
+        Assert.IsNotNull(attraction2Result.Item1);
+        Assert.AreEqual("Simulador", attraction2Result.Item1.Name);
+        Assert.AreEqual(2, attraction2Result.Item2);
+
+        _mockReportRepository.Verify(r => r.GetAllReports(), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task GetAllAttractionsVisits_ShouldThrowException_WhenStartDateIsAfterEndDate()
+    {
+        DateTime startDate = new DateTime(2025, 10, 7);
+        DateTime endDate = new DateTime(2025, 10, 1);
+
+        AttractionsVisitRequest request = new AttractionsVisitRequest
+        {
+            StartDate = startDate,
+            EndDate = endDate
+        };
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionLogic.GetAllAttractionsVisits(request));
     }
 }
