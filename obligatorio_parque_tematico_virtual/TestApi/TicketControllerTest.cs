@@ -20,6 +20,7 @@ using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using IDataAccess;
 using Microsoft.Data.Sqlite;
+using DataAccess.Repositories;
 
 namespace TestApi
 {
@@ -33,9 +34,6 @@ namespace TestApi
         [TestInitialize]
         public void TestInitialize()
         {
-            // Reset singleton instance before each test
-            DateTimeLogic.ResetInstance();
-
             // Create shared in-memory connection
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
@@ -61,11 +59,20 @@ namespace TestApi
                             services.Remove(dateTimeDescriptor);
                         }
 
+                        // Remove existing IDateTimeRepository registration
+                        var dateTimeRepoDescriptor = services.SingleOrDefault(
+                            d => d.ServiceType == typeof(IDateTimeRepository));
+                        if (dateTimeRepoDescriptor != null)
+                        {
+                            services.Remove(dateTimeRepoDescriptor);
+                        }
+
                         // Add SQLite DbContext with shared connection
                         services.AddDbContext<AppDbContext>(options =>
                             options.UseSqlite(_connection));
 
-                        services.AddSingleton<IDateTimeLogic>(provider => DateTimeLogic.GetInstance(provider));
+                        services.AddScoped<IDateTimeRepository, DateTimeRepository>();
+                        services.AddScoped<IDateTimeLogic, DateTimeLogic>();
                     });
                 });
 
