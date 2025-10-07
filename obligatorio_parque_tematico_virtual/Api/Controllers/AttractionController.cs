@@ -90,7 +90,8 @@ public class AttractionController : ControllerBase
     [Authorize(Roles = "Operator")]
     public async Task<IActionResult> RegisterEntry(Guid id, [FromBody] RegisterEntryRequest registerEntryRequest)
     {
-        await _userService.RegisterEntry(registerEntryRequest.UserId, id, registerEntryRequest.EnterDate, registerEntryRequest.Qr, registerEntryRequest.NFC, registerEntryRequest.EventId);
+        await _userService.RegisterEntry(registerEntryRequest.UserId, id, registerEntryRequest.EnterDate,
+            registerEntryRequest.Qr, registerEntryRequest.NFC, registerEntryRequest.EventId);
 
         MessageResponse response = new MessageResponse
         {
@@ -118,5 +119,18 @@ public class AttractionController : ControllerBase
     {
         CapacityResponse capacity = await _attractionLogic.GetCapacity(id);
         return Ok(capacity);
+    }
+
+    [HttpGet("visits")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> GetAttractionVisits([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+    {
+        AttractionsVisitRequest request = new AttractionsVisitRequest
+        {
+            StartDate = startDate,
+            EndDate = endDate
+        };
+        AttractionsVisitResponse visits = await _attractionLogic.GetAllAttractionsVisits(request);
+        return Ok(visits);
     }
 }

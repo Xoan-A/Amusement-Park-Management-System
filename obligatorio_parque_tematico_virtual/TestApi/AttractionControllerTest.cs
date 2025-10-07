@@ -358,7 +358,9 @@ public class AttractionControllerTest
         Guid userId = Guid.NewGuid();
         DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, It.IsAny<Guid?>(), It.IsAny<Guid?>(), It.IsAny<int?>()))
+        _mockUserLogic.Setup(s =>
+                s.RegisterEntry(userId, attractionId, enterDate, It.IsAny<Guid?>(), It.IsAny<Guid?>(),
+                    It.IsAny<int?>()))
             .Returns(Task.CompletedTask);
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
@@ -380,7 +382,9 @@ public class AttractionControllerTest
 
         Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, It.IsAny<Guid?>(), It.IsAny<Guid?>(), It.IsAny<int?>()), Times.Once);
+        _mockUserLogic.Verify(
+            s => s.RegisterEntry(userId, attractionId, enterDate, It.IsAny<Guid?>(), It.IsAny<Guid?>(),
+                It.IsAny<int?>()), Times.Once);
     }
 
     [TestMethod]
@@ -400,7 +404,9 @@ public class AttractionControllerTest
         var response = await _client.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
-        _mockUserLogic.Verify(s => s.RegisterEntry(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<Guid?>(), It.IsAny<Guid?>(), It.IsAny<int?>()), Times.Never);
+        _mockUserLogic.Verify(
+            s => s.RegisterEntry(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<Guid?>(),
+                It.IsAny<Guid?>(), It.IsAny<int?>()), Times.Never);
     }
 
     [TestMethod]
@@ -615,7 +621,8 @@ public class AttractionControllerTest
         var response = await _client.PutAsync($"/api/attractions/registerExit/{attractionId}", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
-        _mockUserLogic.Verify(s => s.RegisterExit(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>()), Times.Never);
+        _mockUserLogic.Verify(s => s.RegisterExit(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>()),
+            Times.Never);
     }
 
     [TestMethod]
@@ -653,5 +660,73 @@ public class AttractionControllerTest
         var response = await _client.GetAsync($"/api/attractions/capacity/{attractionId}");
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.GetCapacity(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task GetAttractionVisits_AsAdmin_ReturnsVisitsSuccessfully()
+    {
+        DateTime startDate = new DateTime(2025, 10, 1);
+        DateTime endDate = new DateTime(2025, 10, 7);
+
+        Guid attraction1Id = Guid.NewGuid();
+        Guid attraction2Id = Guid.NewGuid();
+
+        Attraction attraction1 = new Attraction
+        {
+            Id = attraction1Id,
+            Name = "Montaña Rusa",
+            Description = "Una atracción emocionante",
+            Type = AttractionType.RollerCoaster,
+            MinAge = 12,
+            MaxCapacity = 50,
+            CurrentCapacity = 0
+        };
+
+        Attraction attraction2 = new Attraction
+        {
+            Id = attraction2Id,
+            Name = "Simulador",
+            Description = "Experiencia virtual",
+            Type = AttractionType.Simulator,
+            MinAge = 8,
+            MaxCapacity = 30,
+            CurrentCapacity = 0
+        };
+
+        AttractionsVisitResponse expectedResponse = new AttractionsVisitResponse();
+        expectedResponse.AttractionsVisits.Add((attraction1, 3));
+        expectedResponse.AttractionsVisits.Add((attraction2, 2));
+
+        _mockAttractionService.Setup(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitRequest>()))
+            .ReturnsAsync(expectedResponse);
+
+        var response =
+            await _adminClient.GetAsync(
+                $"/api/attractions/visits?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
+
+        response.EnsureSuccessStatusCode();
+        var responseContent = await response.Content.ReadAsStringAsync();
+        AttractionsVisitResponse? visitResponse = JsonSerializer.Deserialize<AttractionsVisitResponse>(responseContent,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+        Assert.AreEqual(2, visitResponse.AttractionsVisits.Count);
+        _mockAttractionService.Verify(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitRequest>()), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task GetAttractionVisits_AsNonAdmin_ReturnsUnauthorized()
+    {
+        DateTime startDate = new DateTime(2025, 10, 1);
+        DateTime endDate = new DateTime(2025, 10, 7);
+
+        var response =
+            await _operatorClient.GetAsync(
+                $"/api/attractions/visits?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
+
+        Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
+        _mockAttractionService.Verify(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitRequest>()), Times.Never);
     }
 }
