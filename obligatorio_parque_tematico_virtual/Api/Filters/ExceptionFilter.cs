@@ -10,28 +10,28 @@ public class ExceptionFilter : IExceptionFilter
     {
         if (context.Exception is UnauthorizedException)
         {
-            context.Result = new ObjectResult(new { Message = context.Exception.Message })
+            context.Result = new ObjectResult(new { Message = "Required privileges not met" })
             {
                 StatusCode = 401
             };
         }
         else if (context.Exception is ForbiddenException)
         {
-            context.Result = new ObjectResult(new { Message = context.Exception.Message })
+            context.Result = new ObjectResult(new { Message = "An authorization is mandatory for this request" })
             {
                 StatusCode = 403
             };
         }
         else if (context.Exception is KeyNotFoundException)
         {
-            context.Result = new ObjectResult(new { Message = context.Exception.Message })
+            context.Result = new ObjectResult(new { Message = "Key not found in server" })
             {
                 StatusCode = 404
             };
         }
         else if (context.Exception is ArgumentException)
         {
-            context.Result = new ObjectResult(new { Message = context.Exception.Message })
+            context.Result = new ObjectResult(new { Message = "Incorrect request data" })
             {
                 StatusCode = 400
             };
@@ -45,7 +45,7 @@ public class ExceptionFilter : IExceptionFilter
         }
         else
         {
-            context.Result = new ObjectResult(new { Message = "An unexpected error occurred" })
+            context.Result = new ObjectResult(new { Message = "Internal server error" })
             {
                 StatusCode = 500
             };

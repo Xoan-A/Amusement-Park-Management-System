@@ -113,7 +113,7 @@ public class IncidentControllerTest
         _mockService.Setup(s => s.AddIncident(_attractionId, "Incidente")).Returns(Task.CompletedTask);
         var incidentRequest = new { incident = "Incidente" };
         var content = new StringContent(JsonSerializer.Serialize(incidentRequest), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PostAsync($"/api/incidents/{_attractionId}", content);
+        var response = await _operatorClient.PutAsync($"/api/incidents/{_attractionId}", content);
         response.EnsureSuccessStatusCode();
         string respContent = await response.Content.ReadAsStringAsync();
         Assert.IsTrue(respContent.Contains("Incident reported successfully"));
@@ -125,7 +125,7 @@ public class IncidentControllerTest
         _mockService.Setup(s => s.AddIncident(_attractionId, "Incidente")).ThrowsAsync(new KeyNotFoundException());
         var incidentRequest = new { incident = "Incidente" };
         var content = new StringContent(JsonSerializer.Serialize(incidentRequest), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PostAsync($"/api/incidents/{_attractionId}", content);
+        var response = await _operatorClient.PutAsync($"/api/incidents/{_attractionId}", content);
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 
@@ -133,25 +133,16 @@ public class IncidentControllerTest
     public async Task RemoveIncident_ValidRequest_RemovesIncident()
     {
         _mockService.Setup(s => s.RemoveIncident(_attractionId, "Incidente")).Returns(Task.CompletedTask);
-        var incidentRequest = new { incident = "Incidente" };
-        var content = new StringContent(JsonSerializer.Serialize(incidentRequest), Encoding.UTF8, "application/json");
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/incidents/{_attractionId}")
-        { Content = content };
-        var response = await _operatorClient.SendAsync(request);
+        var response = await _operatorClient.DeleteAsync($"/api/incidents/{_attractionId}?incident=Incidente");
         response.EnsureSuccessStatusCode();
-        string respContent = await response.Content.ReadAsStringAsync();
-        Assert.IsTrue(respContent.Contains("Incident resolved successfully"));
+        Assert.IsTrue(response.StatusCode == HttpStatusCode.NoContent);
     }
 
     [TestMethod]
     public async Task RemoveIncident_AttractionNotFound_ReturnsNotFound()
     {
         _mockService.Setup(s => s.RemoveIncident(_attractionId, "Incidente")).ThrowsAsync(new KeyNotFoundException());
-        var incidentRequest = new { incident = "Incidente" };
-        var content = new StringContent(JsonSerializer.Serialize(incidentRequest), Encoding.UTF8, "application/json");
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/incidents/{_attractionId}")
-        { Content = content };
-        var response = await _operatorClient.SendAsync(request);
+        var response = await _operatorClient.DeleteAsync($"/api/incidents/{_attractionId}?incident=Incidente");
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

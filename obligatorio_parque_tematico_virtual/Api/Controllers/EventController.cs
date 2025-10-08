@@ -18,7 +18,7 @@ public class EventController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Administrator")]
+    [Authorize]
     public async Task<IActionResult> GetEvents()
     {
         List<EventResponse> events = await _eventLogic.GetAllEvents();
@@ -27,7 +27,7 @@ public class EventController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(Roles = "Administrator")]
+    [Authorize]
     public async Task<IActionResult> GetEventById(Guid id)
     {
         EventResponse eventResponse = await _eventLogic.GetEventById(id);

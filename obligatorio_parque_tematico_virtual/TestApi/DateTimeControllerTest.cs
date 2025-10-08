@@ -101,7 +101,7 @@ namespace ApiTests
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PostAsync("/api/datetime", content);
+            var response = await _client.PutAsync("/api/datetime", content);
 
             response.EnsureSuccessStatusCode();
             _mockDateTimeLogic.Verify(x => x.SetDateTime(expectedDateTime), Times.Once);

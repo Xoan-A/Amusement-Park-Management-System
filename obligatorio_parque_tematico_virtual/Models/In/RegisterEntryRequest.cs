@@ -13,6 +13,6 @@ namespace Models.In
         public Guid UserId { get; set; }
         public Guid? Qr { get; set; }
         public Guid? NFC { get; set; }
-        public int? EventId { get; set; }
+        public Guid? EventId { get; set; }
     }
 }

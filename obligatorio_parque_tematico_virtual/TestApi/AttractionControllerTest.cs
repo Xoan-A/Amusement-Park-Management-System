@@ -360,7 +360,7 @@ public class AttractionControllerTest
 
         _mockUserLogic.Setup(s =>
                 s.RegisterEntry(userId, attractionId, enterDate, It.IsAny<Guid?>(), It.IsAny<Guid?>(),
-                    It.IsAny<int?>()))
+                    It.IsAny<Guid?>()))
             .Returns(Task.CompletedTask);
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
@@ -370,7 +370,7 @@ public class AttractionControllerTest
         };
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+        var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -384,7 +384,7 @@ public class AttractionControllerTest
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
         _mockUserLogic.Verify(
             s => s.RegisterEntry(userId, attractionId, enterDate, It.IsAny<Guid?>(), It.IsAny<Guid?>(),
-                It.IsAny<int?>()), Times.Once);
+                It.IsAny<Guid?>()), Times.Once);
     }
 
     [TestMethod]
@@ -401,12 +401,12 @@ public class AttractionControllerTest
         };
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _client.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+        var response = await _client.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockUserLogic.Verify(
             s => s.RegisterEntry(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<Guid?>(),
-                It.IsAny<Guid?>(), It.IsAny<int?>()), Times.Never);
+                It.IsAny<Guid?>(), It.IsAny<Guid?>()), Times.Never);
     }
 
     [TestMethod]
@@ -428,7 +428,7 @@ public class AttractionControllerTest
         };
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+        var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -461,7 +461,7 @@ public class AttractionControllerTest
         };
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+        var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -482,7 +482,7 @@ public class AttractionControllerTest
         Guid attractionId = Guid.NewGuid();
         Guid userId = Guid.NewGuid();
         Guid qrCode = Guid.NewGuid();
-        int eventId = 5;
+        Guid eventId = Guid.NewGuid();
         DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
         _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, eventId))
@@ -497,7 +497,7 @@ public class AttractionControllerTest
         };
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+        var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -517,7 +517,7 @@ public class AttractionControllerTest
     {
         Guid attractionId = Guid.NewGuid();
         Guid userId = Guid.NewGuid();
-        int eventId = 10;
+        Guid eventId = Guid.NewGuid();
         DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
         _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, null, userId, eventId))
@@ -532,7 +532,7 @@ public class AttractionControllerTest
         };
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+        var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -566,7 +566,7 @@ public class AttractionControllerTest
         };
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PostAsync($"/api/attractions/registerEntry/{attractionId}", content);
+        var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
         _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null), Times.Once);
@@ -589,7 +589,7 @@ public class AttractionControllerTest
         };
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PutAsync($"/api/attractions/registerExit/{attractionId}", content);
+        var response = await _operatorClient.PutAsync($"/api/attractions/exit/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -618,7 +618,7 @@ public class AttractionControllerTest
         };
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _client.PutAsync($"/api/attractions/registerExit/{attractionId}", content);
+        var response = await _client.PutAsync($"/api/attractions/exit/{attractionId}", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockUserLogic.Verify(s => s.RegisterExit(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>()),
@@ -697,7 +697,7 @@ public class AttractionControllerTest
         expectedResponse.AttractionsVisits.Add((attraction1, 3));
         expectedResponse.AttractionsVisits.Add((attraction2, 2));
 
-        _mockAttractionService.Setup(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitRequest>()))
+        _mockAttractionService.Setup(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitsRequest>()))
             .ReturnsAsync(expectedResponse);
 
         var response =
@@ -713,7 +713,7 @@ public class AttractionControllerTest
             });
 
         Assert.AreEqual(2, visitResponse.AttractionsVisits.Count);
-        _mockAttractionService.Verify(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitRequest>()), Times.Once);
+        _mockAttractionService.Verify(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitsRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -727,6 +727,6 @@ public class AttractionControllerTest
                 $"/api/attractions/visits?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
 
         Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
-        _mockAttractionService.Verify(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitRequest>()), Times.Never);
+        _mockAttractionService.Verify(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitsRequest>()), Times.Never);
     }
 }

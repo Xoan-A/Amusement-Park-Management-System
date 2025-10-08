@@ -20,7 +20,7 @@ public class AttractionController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Administrator")]
+    [Authorize]
     public async Task<IActionResult> GetAttractions()
     {
         var attractions = await _attractionLogic.GetAllAttractions();
@@ -45,7 +45,7 @@ public class AttractionController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(Roles = "Administrator")]
+    [Authorize]
     public async Task<IActionResult> GetAttractionById(Guid id)
     {
         AttractionResponse attraction = await _attractionLogic.GetAttractionById(id);
@@ -86,7 +86,7 @@ public class AttractionController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("registerEntry/{id}")]
+    [HttpPut("entry/{id}")]
     [Authorize(Roles = "Operator")]
     public async Task<IActionResult> RegisterEntry(Guid id, [FromBody] RegisterEntryRequest registerEntryRequest)
     {
@@ -100,7 +100,7 @@ public class AttractionController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPut("registerExit/{id}")]
+    [HttpPut("exit/{id}")]
     [Authorize(Roles = "Operator")]
     public async Task<IActionResult> RegisterExit(Guid id, [FromBody] RegisterExitRequest registerExitRequest)
     {
@@ -123,9 +123,9 @@ public class AttractionController : ControllerBase
 
     [HttpGet("visits")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetAttractionVisits([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+    public async Task<IActionResult> GetAttractionsVisits([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
     {
-        AttractionsVisitRequest request = new AttractionsVisitRequest
+        AttractionsVisitsRequest request = new AttractionsVisitsRequest
         {
             StartDate = startDate,
             EndDate = endDate

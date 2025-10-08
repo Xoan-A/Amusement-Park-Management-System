@@ -109,7 +109,7 @@ namespace BusinessLogic
         }
 
         public async Task RegisterEntry(Guid userId, Guid attractionId, DateTime enterDate, Guid? qr, Guid? nfc,
-            int? eventId)
+            Guid? eventId)
         {
             if (qr == null && nfc == null)
                 throw new ArgumentException("QR code or NFC must be provided.");

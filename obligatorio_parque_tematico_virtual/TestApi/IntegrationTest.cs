@@ -154,7 +154,7 @@ namespace ApiTests
             var json = JsonSerializer.Serialize(setRequest);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var postResponse = await _client.PostAsync("/api/datetime", content);
+            var postResponse = await _client.PutAsync("/api/datetime", content);
             Assert.AreEqual(System.Net.HttpStatusCode.OK, postResponse.StatusCode);
         }
     }

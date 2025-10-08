@@ -69,7 +69,7 @@ namespace DataAccess.Context
                     Name = "Admin",
                     LastName = "User",
                     Email = "admin@test.com",
-                    Password = "$2a$11$8K1p/a0dL3LHqJKvB5UFFe1CVJ0L4tGvAC2w6UO0m9l.KGJQhKGHi", // admin123
+                    Password = "$2a$11$TgMvdaYlj5ZLE7ybPvoFi.jqSqp6S39yr3JXz34wo/ReZThKeHuYq", // admin123
                     BirthDate = new DateTime(1980, 1, 1),
                     MembershipLevel = MembershipLevel.VIP
                 },
@@ -79,7 +79,7 @@ namespace DataAccess.Context
                     Name = "Operator",
                     LastName = "User",
                     Email = "operator@test.com",
-                    Password = "$2a$11$X2y.8K1u0/W.M9nGJU5LneF5JbYjQ2vYMz8R8qLq9.pU2wXTQZrjK", // operator123
+                    Password = "$2a$11$QHVhQ21m/dB3cntgTO2aqu3SNiQn6d7nUnRE3lPE4LPEoFJGRSEJu", // operator123
                     BirthDate = new DateTime(1985, 1, 1),
                     MembershipLevel = MembershipLevel.Standard
                 }

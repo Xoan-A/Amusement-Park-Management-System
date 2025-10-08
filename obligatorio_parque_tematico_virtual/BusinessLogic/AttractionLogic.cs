@@ -84,17 +84,13 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
     {
         await ValidateAttractionRequest(existingAttraction, true);
         Attraction attraction = await _attractionRepository.GetById(id);
-        Attraction updatedAttraction = new Attraction()
-        {
-            Id = id,
-            Name = existingAttraction.Name,
-            Description = existingAttraction.Description,
-            Type = Enum.Parse<AttractionType>(existingAttraction.Type),
-            MinAge = existingAttraction.MinAge,
-            MaxCapacity = existingAttraction.MaxCapacity,
-            CurrentCapacity = existingAttraction.CurrentCapacity ?? attraction.CurrentCapacity,
-        };
-        await _attractionRepository.Update(updatedAttraction);
+        attraction.Name = existingAttraction.Name;
+        attraction.Description = existingAttraction.Description;
+        attraction.Type = Enum.Parse<AttractionType>(existingAttraction.Type);
+        attraction.MinAge = existingAttraction.MinAge;
+        attraction.MaxCapacity = existingAttraction.MaxCapacity;
+        attraction.CurrentCapacity = existingAttraction.CurrentCapacity ?? attraction.CurrentCapacity;
+        await _attractionRepository.Update(attraction);
     }
 
     public async Task DeleteAttraction(Guid id)
@@ -159,7 +155,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         await _attractionRepository.Update(attraction);
     }
 
-    public async Task<AttractionsVisitResponse> GetAllAttractionsVisits(AttractionsVisitRequest request)
+    public async Task<AttractionsVisitResponse> GetAllAttractionsVisits(AttractionsVisitsRequest request)
     {
         DateTime startDate = request.StartDate;
         DateTime endDate = request.EndDate;

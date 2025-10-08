@@ -511,7 +511,7 @@ public class AttractionLogicTest
         DateTime startDate = new DateTime(2025, 10, 1);
         DateTime endDate = new DateTime(2025, 10, 7);
 
-        AttractionsVisitRequest request = new AttractionsVisitRequest
+        AttractionsVisitsRequest request = new AttractionsVisitsRequest
         {
             StartDate = startDate,
             EndDate = endDate
@@ -617,7 +617,7 @@ public class AttractionLogicTest
         DateTime startDate = new DateTime(2025, 10, 7);
         DateTime endDate = new DateTime(2025, 10, 1);
 
-        AttractionsVisitRequest request = new AttractionsVisitRequest
+        AttractionsVisitsRequest request = new AttractionsVisitsRequest
         {
             StartDate = startDate,
             EndDate = endDate

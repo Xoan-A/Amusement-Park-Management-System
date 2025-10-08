@@ -101,7 +101,6 @@ namespace ApiTests
             Guid userId = Guid.NewGuid();
             AddRolesRequest request = new AddRolesRequest
             {
-                UserId = userId,
                 Role = Role.OPERATOR
             };
 
@@ -111,7 +110,7 @@ namespace ApiTests
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PostAsync($"/api/users/{userId}/roles", content);
+            var response = await _adminClient.PutAsync($"/api/users/{userId}/roles", content);
 
             response.EnsureSuccessStatusCode();
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -134,14 +133,13 @@ namespace ApiTests
             Guid userId = Guid.NewGuid();
             AddRolesRequest request = new AddRolesRequest
             {
-                UserId = userId,
                 Role = Role.OPERATOR
             };
 
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PostAsync($"/api/users/{userId}/roles", content);
+            var response = await _client.PutAsync($"/api/users/{userId}/roles", content);
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
             _mockUserLogic.Verify(u => u.AddRoleToUser(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);

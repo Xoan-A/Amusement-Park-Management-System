@@ -8,6 +8,6 @@ namespace Models.In
         public Guid VisitorId { get; set; }
         public DateTime VisitDate { get; set; }
         public TicketType TicketType { get; set; }
-        public int? EventId { get; set; }
+        public Guid? EventId { get; set; }
     }
 }
