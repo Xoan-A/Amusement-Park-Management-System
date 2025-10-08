@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -9,8 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataAccess.Migrations
 {
     /// <inheritdoc />
-    [ExcludeFromCodeCoverage]
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,6 +29,19 @@ namespace DataAccess.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Attractions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DateTimeConfigurations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CurrentDateTime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DateTimeConfigurations", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -64,6 +75,20 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StrategyConfigurations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StrategyName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    N = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StrategyConfigurations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -74,8 +99,7 @@ namespace DataAccess.Migrations
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     MembershipLevel = table.Column<int>(type: "int", nullable: true),
-                    Score = table.Column<int>(type: "int", nullable: false),
-                    Discriminator = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false)
+                    Score = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -110,14 +134,13 @@ namespace DataAccess.Migrations
                 name: "Tickets",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     VisitorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PurchaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     VisitDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
                     QRCode = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EventId = table.Column<int>(type: "int", nullable: true)
+                    EventId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -211,12 +234,17 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "StrategyConfigurations",
+                columns: new[] { "Id", "N", "StrategyName" },
+                values: new object[] { 1, null, "PerAttraction" });
+
+            migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "BirthDate", "Discriminator", "Email", "LastName", "MembershipLevel", "Name", "Password", "Score" },
+                columns: new[] { "Id", "BirthDate", "Email", "LastName", "MembershipLevel", "Name", "Password", "Score" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), new DateTime(1980, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "User", "admin@test.com", "User", 2, "Admin", "$2a$11$8K1p/a0dL3LHqJKvB5UFFe1CVJ0L4tGvAC2w6UO0m9l.KGJQhKGHi", 0 },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), new DateTime(1985, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "User", "operator@test.com", "User", 0, "Operator", "$2a$11$X2y.8K1u0/W.M9nGJU5LneF5JbYjQ2vYMz8R8qLq9.pU2wXTQZrjK", 0 }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), new DateTime(1980, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "admin@test.com", "User", 2, "Admin", "$2a$11$TgMvdaYlj5ZLE7ybPvoFi.jqSqp6S39yr3JXz34wo/ReZThKeHuYq", 0 },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), new DateTime(1985, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "operator@test.com", "User", 0, "Operator", "$2a$11$QHVhQ21m/dB3cntgTO2aqu3SNiQn6d7nUnRE3lPE4LPEoFJGRSEJu", 0 }
                 });
 
             migrationBuilder.InsertData(
@@ -293,10 +321,16 @@ namespace DataAccess.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "DateTimeConfigurations");
+
+            migrationBuilder.DropTable(
                 name: "EventAttraction");
 
             migrationBuilder.DropTable(
                 name: "Reports");
+
+            migrationBuilder.DropTable(
+                name: "StrategyConfigurations");
 
             migrationBuilder.DropTable(
                 name: "Tickets");

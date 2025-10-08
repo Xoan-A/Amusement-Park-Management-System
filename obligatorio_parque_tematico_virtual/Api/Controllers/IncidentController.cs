@@ -24,7 +24,7 @@ public class IncidentController : ControllerBase
         return Ok(incidents);
     }
 
-    [HttpPost]
+    [HttpPut]
     [Authorize(Roles = "Operator")]
     public async Task<IActionResult> AddIncident(Guid id, [FromBody] IncidentRequest request)
     {
@@ -34,9 +34,9 @@ public class IncidentController : ControllerBase
 
     [HttpDelete]
     [Authorize(Roles = "Operator")]
-    public async Task<IActionResult> RemoveIncident(Guid id, [FromBody] IncidentRequest request)
+    public async Task<IActionResult> RemoveIncident(Guid id, [FromQuery] IncidentRequest request)
     {
         await _attractionLogic.RemoveIncident(id, request.Incident);
-        return Ok(new { Message = "Incident resolved successfully" });
+        return NoContent();
     }
 }

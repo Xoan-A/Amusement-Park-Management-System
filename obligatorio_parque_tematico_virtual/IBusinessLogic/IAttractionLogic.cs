@@ -15,5 +15,5 @@ public interface IAttractionLogic
     Task RemoveIncident(Guid id, string incident);
     Task<List<string>> GetAttractionIncidents(Guid id);
     Task<CapacityResponse> GetCapacity(Guid id);
-    Task<AttractionsVisitResponse> GetAllAttractionsVisits(AttractionsVisitRequest request);
+    Task<AttractionsVisitResponse> GetAllAttractionsVisits(AttractionsVisitsRequest request);
 }

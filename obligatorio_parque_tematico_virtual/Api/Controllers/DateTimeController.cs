@@ -6,7 +6,7 @@ using Models.Out;
 namespace Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/datetime")]
     public class DateTimeController : ControllerBase
     {
         private readonly IDateTimeLogic _dateTimeLogic;
@@ -29,7 +29,7 @@ namespace Api.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPut]
         public IActionResult SetDateTime([FromBody] SetDateTimeRequest request)
         {
             var dateTime = DateTime.Parse(request.DateTime);

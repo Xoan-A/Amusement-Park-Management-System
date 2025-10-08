@@ -38,7 +38,7 @@ public class ExceptionFilterTest
 
         Assert.AreEqual((int)HttpStatusCode.InternalServerError, concreteResponse.StatusCode);
         Assert.AreEqual("500", concreteResponse.StatusCode.ToString());
-        Assert.AreEqual("An unexpected error occurred", GetMessage(concreteResponse.Value));
+        Assert.AreEqual("Internal server error", GetMessage(concreteResponse.Value));
     }
 
     [TestMethod]
@@ -58,25 +58,25 @@ public class ExceptionFilterTest
     [TestMethod]
     public void OnException_WhenExceptionIsKeyNotFound_ShouldResponseNotFound()
     {
-        _context.Exception = new KeyNotFoundException("No se encontró la atracción");
+        _context.Exception = new KeyNotFoundException("Attraction not found");
         _attribute.OnException(_context);
 
         var response = _context.Result as ObjectResult;
         Assert.AreEqual((int)HttpStatusCode.NotFound, response.StatusCode);
         Assert.AreEqual("404", response.StatusCode.ToString());
-        Assert.AreEqual("No se encontró la atracción", GetMessage(response.Value));
+        Assert.AreEqual("Key not found in server", GetMessage(response.Value));
     }
 
     [TestMethod]
     public void OnException_WhenExceptionIsArgument_ShouldResponseBadRequest()
     {
-        _context.Exception = new ArgumentException("Datos inválidos");
+        _context.Exception = new ArgumentException("Invalid data");
         _attribute.OnException(_context);
 
         var response = _context.Result as ObjectResult;
         Assert.AreEqual((int)HttpStatusCode.BadRequest, response.StatusCode);
         Assert.AreEqual("400", response.StatusCode.ToString());
-        Assert.AreEqual("Datos inválidos", GetMessage(response.Value));
+        Assert.AreEqual("Incorrect request data", GetMessage(response.Value));
     }
 
     [TestMethod]
@@ -88,7 +88,7 @@ public class ExceptionFilterTest
         var response = _context.Result as ObjectResult;
         Assert.AreEqual((int)HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.AreEqual("401", response.StatusCode.ToString());
-        Assert.AreEqual("Unauthorized access", GetMessage(response.Value));
+        Assert.AreEqual("Required privileges not met", GetMessage(response.Value));
     }
 
     [TestMethod]
@@ -100,7 +100,7 @@ public class ExceptionFilterTest
         var response = _context.Result as ObjectResult;
         Assert.AreEqual((int)HttpStatusCode.Forbidden, response.StatusCode);
         Assert.AreEqual("403", response.StatusCode.ToString());
-        Assert.AreEqual("Forbidden access", GetMessage(response.Value));
+        Assert.AreEqual("An authorization is mandatory for this request", GetMessage(response.Value));
     }
 
     private string GetMessage(object value) =>

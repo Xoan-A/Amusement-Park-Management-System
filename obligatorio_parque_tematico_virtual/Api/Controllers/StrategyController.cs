@@ -36,7 +36,7 @@ public class StrategyController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPut("set")]
+    [HttpPut]
     [Authorize(Roles = "Administrator")]
     public IActionResult SetStrategy([FromBody] SetStrategyRequest setStrategyRequest)
     {
@@ -44,7 +44,7 @@ public class StrategyController : ControllerBase
 
         MessageResponse response = new MessageResponse
         {
-            Message = "Strategy setted successfully"
+            Message = "Strategy set successfully"
         };
 
         return Ok(response);

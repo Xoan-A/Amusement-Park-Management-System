@@ -155,7 +155,7 @@ namespace ApiTests
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PutAsync("/api/strategy/set", content);
+            var response = await _adminClient.PutAsync("/api/strategy", content);
 
             response.EnsureSuccessStatusCode();
 
@@ -165,7 +165,7 @@ namespace ApiTests
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(messageResponse);
-            Assert.AreEqual("Strategy setted successfully", messageResponse.Message);
+            Assert.AreEqual("Strategy set successfully", messageResponse.Message);
 
             _mockActiveStrategy.Verify(x => x.SetStrategy(It.Is<SetStrategyRequest>(
                 r => r.StrategyName == "PerAttraction")), Times.Once);
@@ -184,7 +184,7 @@ namespace ApiTests
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PutAsync("/api/strategy/set", content);
+            var response = await _adminClient.PutAsync("/api/strategy", content);
 
             response.EnsureSuccessStatusCode();
 
@@ -194,7 +194,7 @@ namespace ApiTests
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(messageResponse);
-            Assert.AreEqual("Strategy setted successfully", messageResponse.Message);
+            Assert.AreEqual("Strategy set successfully", messageResponse.Message);
 
             _mockActiveStrategy.Verify(x => x.SetStrategy(It.Is<SetStrategyRequest>(
                 r => r.StrategyName == "PerEvent")), Times.Once);
@@ -214,7 +214,7 @@ namespace ApiTests
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PutAsync("/api/strategy/set", content);
+            var response = await _adminClient.PutAsync("/api/strategy", content);
 
             response.EnsureSuccessStatusCode();
 
@@ -224,7 +224,7 @@ namespace ApiTests
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(messageResponse);
-            Assert.AreEqual("Strategy setted successfully", messageResponse.Message);
+            Assert.AreEqual("Strategy set successfully", messageResponse.Message);
 
             _mockActiveStrategy.Verify(x => x.SetStrategy(It.Is<SetStrategyRequest>(
                 r => r.StrategyName == "Combo" && r.N == 30)), Times.Once);
@@ -245,7 +245,7 @@ namespace ApiTests
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PutAsync("/api/strategy/set", content);
+            var response = await _adminClient.PutAsync("/api/strategy", content);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
@@ -264,7 +264,7 @@ namespace ApiTests
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PutAsync("/api/strategy/set", content);
+            var response = await _adminClient.PutAsync("/api/strategy", content);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
@@ -275,7 +275,7 @@ namespace ApiTests
             var json = "null";
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PutAsync("/api/strategy/set", content);
+            var response = await _adminClient.PutAsync("/api/strategy", content);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
@@ -291,7 +291,7 @@ namespace ApiTests
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PutAsync("/api/strategy/set", content);
+            var response = await _client.PutAsync("/api/strategy", content);
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
@@ -314,7 +314,7 @@ namespace ApiTests
             var json = JsonSerializer.Serialize(setRequest);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var setResponse = await _adminClient.PutAsync("/api/strategy/set", content);
+            var setResponse = await _adminClient.PutAsync("/api/strategy", content);
             setResponse.EnsureSuccessStatusCode();
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy");

@@ -154,7 +154,7 @@ namespace TestApi
 
             HttpResponseMessage purchaseResponse = await authenticatedClient.PostAsync("/api/tickets", purchaseContent);
 
-            Assert.AreEqual(HttpStatusCode.OK, purchaseResponse.StatusCode);
+            Assert.AreEqual(HttpStatusCode.Created, purchaseResponse.StatusCode);
 
             String purchaseResponseBody = await purchaseResponse.Content.ReadAsStringAsync();
             TicketResponse ticketResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -305,7 +305,6 @@ namespace TestApi
         [TestMethod]
         public async Task TestGetTicketById_NotFound()
         {
-            // Register and login a user for authentication
             await _client.PostAsync("/api/auth/register", new StringContent(
                 JsonSerializer.Serialize(new RegisterVisitorRequest
                 {
@@ -320,7 +319,7 @@ namespace TestApi
             ));
             HttpClient authenticatedClient = await CreateAuthenticatedClient("authuser2@test.com", "password123");
 
-            HttpResponseMessage response = await authenticatedClient.GetAsync("/api/tickets/99999");
+            HttpResponseMessage response = await authenticatedClient.GetAsync($"/api/tickets/{Guid.NewGuid()}");
 
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
         }
@@ -371,7 +370,7 @@ namespace TestApi
                 VisitorId = registerResult.Id,
                 VisitDate = DateTime.Now.AddDays(14),
                 TicketType = TicketType.EventSpecial,
-                EventId = 5
+                EventId = Guid.NewGuid()
             };
 
             HttpContent purchaseContent2 = new StringContent(

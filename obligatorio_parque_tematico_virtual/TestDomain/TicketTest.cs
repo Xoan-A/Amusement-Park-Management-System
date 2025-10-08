@@ -14,10 +14,11 @@ namespace TestDomain
             DateTime visitDate = new DateTime(2025, 1, 15, 0, 0, 0);
             Guid qrCode = Guid.NewGuid();
             Guid visitorId = Guid.NewGuid();
+            Guid ticketId = Guid.NewGuid();
 
             Ticket ticket = new Ticket
             {
-                Id = 1,
+                Id = ticketId,
                 VisitorId = visitorId,
                 PurchaseDate = purchaseDate,
                 VisitDate = visitDate,
@@ -25,7 +26,7 @@ namespace TestDomain
                 QRCode = qrCode
             };
 
-            Assert.AreEqual(1, ticket.Id);
+            Assert.AreEqual(ticketId, ticket.Id);
             Assert.AreEqual(visitorId, ticket.VisitorId);
             Assert.AreEqual(purchaseDate, ticket.PurchaseDate);
             Assert.AreEqual(visitDate, ticket.VisitDate);
@@ -38,21 +39,23 @@ namespace TestDomain
         public void TestTicketWithEventId()
         {
             Guid visitorId = Guid.NewGuid();
+            Guid ticketId = Guid.NewGuid();
+            Guid eventId = Guid.NewGuid();
             Ticket ticket = new Ticket
             {
-                Id = 2,
+                Id = ticketId,
                 VisitorId = visitorId,
                 PurchaseDate = DateTime.Now,
                 VisitDate = DateTime.Now.AddDays(5),
                 Type = TicketType.EventSpecial,
                 QRCode = Guid.NewGuid(),
-                EventId = 10
+                EventId = eventId
             };
 
-            Assert.AreEqual(2, ticket.Id);
+            Assert.AreEqual(ticketId, ticket.Id);
             Assert.AreEqual(visitorId, ticket.VisitorId);
             Assert.AreEqual(TicketType.EventSpecial, ticket.Type);
-            Assert.AreEqual(10, ticket.EventId);
+            Assert.AreEqual(eventId, ticket.EventId);
         }
 
         [TestMethod]
@@ -70,6 +73,7 @@ namespace TestDomain
         public void TestTicketWithVisitorRelationship()
         {
             Guid visitorGuid = Guid.NewGuid();
+            Guid ticketId = Guid.NewGuid();
             User visitor = new User
             {
                 Id = visitorGuid,
@@ -83,7 +87,7 @@ namespace TestDomain
 
             Ticket ticket = new Ticket
             {
-                Id = 3,
+                Id = ticketId,
                 VisitorId = visitor.Id,
                 PurchaseDate = DateTime.Now,
                 VisitDate = DateTime.Now.AddDays(7),

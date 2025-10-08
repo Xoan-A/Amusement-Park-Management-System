@@ -12,17 +12,20 @@ namespace BusinessLogic
         private readonly ITicketRepository _ticketRepository;
         private readonly IUserRepository _userRepository;
         private readonly IDateTimeLogic _dateTimeLogic;
+        private readonly IEventRepository _eventRepository;
+        private readonly int _eventDurationHours = 4;
 
         public TicketLogic(ITicketRepository ticketRepository, IUserRepository userRepository,
-            IDateTimeLogic dateTimeLogic)
+            IDateTimeLogic dateTimeLogic, IEventRepository eventRepository)
         {
             _ticketRepository = ticketRepository;
             _userRepository = userRepository;
             _dateTimeLogic = dateTimeLogic;
+            _eventRepository = eventRepository;
         }
 
         public async Task<Ticket> PurchaseTicketAsync(Guid visitorId, DateTime visitDate, TicketType ticketType,
-            int? eventId)
+            Guid? eventId)
         {
             User visitor = _userRepository.GetById(visitorId);
             if (visitor == null)
@@ -49,7 +52,7 @@ namespace BusinessLogic
             return await _ticketRepository.AddAsync(newTicket);
         }
 
-        public async Task<Ticket> GetTicketByIdAsync(int id)
+        public async Task<Ticket> GetTicketByIdAsync(Guid id)
         {
             return await _ticketRepository.GetByIdAsync(id);
         }
@@ -64,7 +67,7 @@ namespace BusinessLogic
             return await _ticketRepository.GetByQRCodeAsync(qrCode);
         }
 
-        public async Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, int? eventId)
+        public async Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, Guid? eventId)
         {
             bool isValid = false;
 
@@ -82,6 +85,14 @@ namespace BusinessLogic
                 IEnumerable<Ticket> tickets = await GetVisitorTicketsAsync(nfc!.Value);
                 ticket = tickets.FirstOrDefault(t => t.VisitDate.Date == enterDate.Date && t.EventId == eventId);
                 isValid = ticket != null;
+            }
+
+            if (isValid && ticket is { EventId: not null })
+            {
+                Event ticketEvent = await _eventRepository.GetById(ticket.EventId.Value);
+                if (ticketEvent.Date.Date != enterDate.Date || ticketEvent.Date.Hour > enterDate.Hour ||
+                    ticketEvent.Date.Hour + _eventDurationHours < enterDate.Hour)
+                    isValid = false;
             }
 
             return isValid;

@@ -673,7 +673,7 @@ namespace TestBusinessLogic
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
             Guid qrCode = Guid.NewGuid();
-            int eventId = 5;
+            Guid eventId = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
             User visitor = new User
@@ -710,7 +710,7 @@ namespace TestBusinessLogic
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
             Guid qrCode = Guid.NewGuid();
-            int eventId = 10;
+            Guid eventId = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
             User visitor = new User
@@ -748,7 +748,7 @@ namespace TestBusinessLogic
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
             Guid qrCode = Guid.NewGuid();
-            int eventId = 5;
+            Guid eventId = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(false);

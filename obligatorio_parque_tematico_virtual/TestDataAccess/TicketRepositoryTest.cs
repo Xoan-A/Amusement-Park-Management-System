@@ -69,7 +69,7 @@ namespace TestDataAccess
             Ticket addedTicket = await _ticketRepository.AddAsync(ticket);
 
             Assert.IsNotNull(addedTicket);
-            Assert.AreNotEqual(0, addedTicket.Id);
+            Assert.AreNotEqual(Guid.Empty, addedTicket.Id);
             Assert.AreEqual(_visitorId, addedTicket.VisitorId);
             Assert.AreEqual(TicketType.General, addedTicket.Type);
         }
@@ -77,6 +77,7 @@ namespace TestDataAccess
         [TestMethod]
         public async Task TestGetByIdAsync()
         {
+            Guid eventId = Guid.NewGuid();
             Ticket ticket = new Ticket
             {
                 VisitorId = _visitorId,
@@ -84,7 +85,7 @@ namespace TestDataAccess
                 VisitDate = DateTime.Now.AddDays(7),
                 Type = TicketType.EventSpecial,
                 QRCode = Guid.NewGuid(),
-                EventId = 5
+                EventId = eventId
             };
 
             Ticket addedTicket = await _ticketRepository.AddAsync(ticket);
@@ -94,12 +95,13 @@ namespace TestDataAccess
             Assert.AreEqual(addedTicket.Id, retrievedTicket.Id);
             Assert.AreEqual(_visitorId, retrievedTicket.VisitorId);
             Assert.AreEqual(TicketType.EventSpecial, retrievedTicket.Type);
-            Assert.AreEqual(5, retrievedTicket.EventId);
+            Assert.AreEqual(eventId, retrievedTicket.EventId);
         }
 
         [TestMethod]
         public async Task TestGetByVisitorIdAsync()
         {
+            Guid eventId = Guid.NewGuid();
             Ticket ticket1 = new Ticket
             {
                 VisitorId = _visitorId,
@@ -116,7 +118,7 @@ namespace TestDataAccess
                 VisitDate = DateTime.Now.AddDays(14),
                 Type = TicketType.EventSpecial,
                 QRCode = Guid.NewGuid(),
-                EventId = 10
+                EventId = eventId
             };
 
             await _ticketRepository.AddAsync(ticket1);
@@ -195,7 +197,7 @@ namespace TestDataAccess
         [TestMethod]
         public async Task TestGetByIdAsync_ReturnsNullForNonExistentId()
         {
-            Ticket ticket = await _ticketRepository.GetByIdAsync(999);
+            Ticket ticket = await _ticketRepository.GetByIdAsync(Guid.NewGuid());
             Assert.IsNull(ticket);
         }
 

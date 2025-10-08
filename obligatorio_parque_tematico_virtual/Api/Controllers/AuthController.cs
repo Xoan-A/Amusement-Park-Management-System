@@ -8,7 +8,7 @@ using Domain.Exceptions;
 namespace Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthLogic _authLogic;

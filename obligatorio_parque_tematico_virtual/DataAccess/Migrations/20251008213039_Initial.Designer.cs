@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251006014531_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251008213039_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -61,6 +61,22 @@ namespace DataAccess.Migrations
                         .IsUnique();
 
                     b.ToTable("Attractions");
+                });
+
+            modelBuilder.Entity("Domain.DateTimeConfiguration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CurrentDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DateTimeConfigurations");
                 });
 
             modelBuilder.Entity("Domain.Event", b =>
@@ -175,7 +191,7 @@ namespace DataAccess.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Domain.Ticket", b =>
+            modelBuilder.Entity("Domain.StrategyConfiguration", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -183,8 +199,33 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("EventId")
+                    b.Property<int?>("N")
                         .HasColumnType("int");
+
+                    b.Property<string>("StrategyName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StrategyConfigurations");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            StrategyName = "PerAttraction"
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Ticket", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("EventId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("datetime2");
@@ -220,11 +261,6 @@ namespace DataAccess.Migrations
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -254,10 +290,6 @@ namespace DataAccess.Migrations
 
                     b.ToTable("Users");
 
-                    b.HasDiscriminator().HasValue("User");
-
-                    b.UseTphMappingStrategy();
-
                     b.HasData(
                         new
                         {
@@ -267,7 +299,7 @@ namespace DataAccess.Migrations
                             LastName = "User",
                             MembershipLevel = 2,
                             Name = "Admin",
-                            Password = "$2a$11$8K1p/a0dL3LHqJKvB5UFFe1CVJ0L4tGvAC2w6UO0m9l.KGJQhKGHi",
+                            Password = "$2a$11$TgMvdaYlj5ZLE7ybPvoFi.jqSqp6S39yr3JXz34wo/ReZThKeHuYq",
                             Score = 0
                         },
                         new
@@ -278,7 +310,7 @@ namespace DataAccess.Migrations
                             LastName = "User",
                             MembershipLevel = 0,
                             Name = "Operator",
-                            Password = "$2a$11$X2y.8K1u0/W.M9nGJU5LneF5JbYjQ2vYMz8R8qLq9.pU2wXTQZrjK",
+                            Password = "$2a$11$QHVhQ21m/dB3cntgTO2aqu3SNiQn6d7nUnRE3lPE4LPEoFJGRSEJu",
                             Score = 0
                         });
                 });
@@ -327,13 +359,6 @@ namespace DataAccess.Migrations
                     b.HasIndex("VisitorId");
 
                     b.ToTable("VisitorReports");
-                });
-
-            modelBuilder.Entity("Domain.Visitor", b =>
-                {
-                    b.HasBaseType("Domain.User");
-
-                    b.HasDiscriminator().HasValue("Visitor");
                 });
 
             modelBuilder.Entity("Domain.EventAttraction", b =>
@@ -406,7 +431,7 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Domain.VisitorReport", b =>
                 {
-                    b.HasOne("Domain.Visitor", "Visitor")
+                    b.HasOne("Domain.User", "Visitor")
                         .WithMany("VisitorReports")
                         .HasForeignKey("VisitorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -423,16 +448,13 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("Domain.User", b =>
                 {
                     b.Navigation("UserRoles");
+
+                    b.Navigation("VisitorReports");
                 });
 
             modelBuilder.Entity("Domain.VisitorReport", b =>
                 {
                     b.Navigation("Reports");
-                });
-
-            modelBuilder.Entity("Domain.Visitor", b =>
-                {
-                    b.Navigation("VisitorReports");
                 });
 #pragma warning restore 612, 618
         }

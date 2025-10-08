@@ -13,7 +13,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("api/tickets")]
-    [Authorize]
+    
     public class TicketController : ControllerBase
     {
         private readonly ITicketLogic _ticketLogic;
@@ -24,6 +24,7 @@ namespace Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Visitor")]
         public async Task<IActionResult> PurchaseTicket([FromBody] PurchaseTicketRequest request)
         {
             Ticket ticket = await _ticketLogic.PurchaseTicketAsync(request.VisitorId, request.VisitDate, request.TicketType, request.EventId);
@@ -44,11 +45,12 @@ namespace Api.Controllers
                 EventId = ticket.EventId
             };
 
-            return Ok(response);
+            return CreatedAtAction(nameof(GetTicketById), new { id = ticket.Id }, response);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetTicketById(int id)
+        [Authorize(Roles = "Visitor, Operator, Administrator")]
+        public async Task<IActionResult> GetTicketById(Guid id)
         {
             Ticket ticket = await _ticketLogic.GetTicketByIdAsync(id);
 
@@ -72,6 +74,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("visitor/{visitorId}")]
+        [Authorize(Roles = "Visitor, Operator, Administrator")]
         public async Task<IActionResult> GetVisitorTickets(Guid visitorId)
         {
             IEnumerable<Ticket> tickets = await _ticketLogic.GetVisitorTicketsAsync(visitorId);

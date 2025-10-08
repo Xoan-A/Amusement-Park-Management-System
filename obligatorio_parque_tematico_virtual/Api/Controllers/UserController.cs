@@ -17,7 +17,7 @@ public class UserController : ControllerBase
         _userLogic = userLogic;
     }
 
-    [HttpPost("{userId}/roles")]
+    [HttpPut("{userId}/roles")]
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> AddRoleToUser(Guid userId, [FromBody] AddRolesRequest request)
     {
