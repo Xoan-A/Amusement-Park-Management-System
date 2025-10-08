@@ -13,7 +13,6 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("api/tickets")]
-    
     public class TicketController : ControllerBase
     {
         private readonly ITicketLogic _ticketLogic;
@@ -27,7 +26,8 @@ namespace Api.Controllers
         [Authorize(Roles = "Visitor")]
         public async Task<IActionResult> PurchaseTicket([FromBody] PurchaseTicketRequest request)
         {
-            Ticket ticket = await _ticketLogic.PurchaseTicketAsync(request.VisitorId, request.VisitDate, request.TicketType, request.EventId);
+            Ticket ticket = await _ticketLogic.PurchaseTicketAsync(request.VisitorId, request.VisitDate,
+                request.TicketType, request.EventId);
 
             if (ticket == null)
             {
