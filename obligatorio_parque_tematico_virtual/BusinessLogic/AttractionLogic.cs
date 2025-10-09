@@ -174,7 +174,18 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         {
             Attraction attraction = group.First().Attraction;
             int visitCount = group.Count();
-            attractionsVisits.AttractionsVisits.Add((attraction, visitCount));
+            AttractionResponse attractionRes = new AttractionResponse()
+            {
+                Id = attraction.Id,
+                Name = attraction.Name,
+                Description = attraction.Description,
+                Type = attraction.Type.ToString(),
+                MinAge = attraction.MinAge,
+                MaxCapacity = attraction.MaxCapacity,
+                CurrentCapacity = attraction.CurrentCapacity,
+                IsActive = attraction.IsActive
+            };
+            attractionsVisits.AttractionsVisits.Add((attractionRes, visitCount));
         }
 
         return attractionsVisits;

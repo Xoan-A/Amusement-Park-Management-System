@@ -788,16 +788,16 @@ namespace TestBusinessLogic
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
                 .ReturnsAsync((Event)null);
-            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<StrategyRequest>()))
-                .Returns(5);
+            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
+                .ReturnsAsync(5);
 
             await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
 
             Assert.AreEqual(5, visitor.Score);
-            _mockActiveStrategy.Verify(s => s.CalculateScore(It.Is<StrategyRequest>(
-                req => req.User == visitor &&
-                       req.Attraction == attraction &&
-                       req.IsSepcialEvent == false)), Times.Once);
+            _mockActiveStrategy.Verify(s => s.CalculateScore(
+                visitor,
+                attraction,
+                It.Is<StrategyRequest>(req => req.IsSepcialEvent == false)), Times.Once);
         }
 
         [TestMethod]
@@ -837,16 +837,16 @@ namespace TestBusinessLogic
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
                 .ReturnsAsync(specialEvent);
-            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<StrategyRequest>()))
-                .Returns(6);
+            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
+                .ReturnsAsync(6);
 
             await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
 
             Assert.AreEqual(16, visitor.Score);
-            _mockActiveStrategy.Verify(s => s.CalculateScore(It.Is<StrategyRequest>(
-                req => req.User == visitor &&
-                       req.Attraction == attraction &&
-                       req.IsSepcialEvent == true)), Times.Once);
+            _mockActiveStrategy.Verify(s => s.CalculateScore(
+                visitor,
+                attraction,
+                It.Is<StrategyRequest>(req => req.IsSepcialEvent == true)), Times.Once);
         }
 
         [TestMethod]
@@ -892,14 +892,14 @@ namespace TestBusinessLogic
                 .ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(It.IsAny<Guid>(), It.IsAny<DateTime>()))
                 .ReturnsAsync((Event)null);
-            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<StrategyRequest>()))
-                .Returns(3);
+            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
+                .ReturnsAsync(3);
 
             await _userLogic.RegisterEntry(userId, attractionId1, enterDate1, qrCode, null, null);
             await _userLogic.RegisterEntry(userId, attractionId2, enterDate2, qrCode, null, null);
 
             Assert.AreEqual(6, visitor.Score);
-            _mockActiveStrategy.Verify(s => s.CalculateScore(It.IsAny<StrategyRequest>()), Times.Exactly(2));
+            _mockActiveStrategy.Verify(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -932,8 +932,8 @@ namespace TestBusinessLogic
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
                 .ReturnsAsync((Event)null);
-            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<StrategyRequest>()))
-                .Returns(0);
+            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
+                .ReturnsAsync(0);
 
             await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
 

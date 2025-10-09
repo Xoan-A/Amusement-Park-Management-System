@@ -13,20 +13,17 @@ public class Combo : IContreteStrategy
         N = n;
     }
 
-    public int CalculateScore(StrategyRequest strategyRequest)
+    public async Task<int> CalculateScore(User visitor, Attraction attraction, StrategyRequest strategyRequest)
     {
-        User visitor = strategyRequest.User;
-        Attraction attraction = strategyRequest.Attraction;
-        DateTime? enterDate = strategyRequest.EnterDate;
 
-        if (visitor == null || attraction == null || enterDate == null)
+        if (visitor == null || attraction == null || strategyRequest.EnterDate == null)
             throw new ArgumentException("Visitor, Attraction and EnterDate must be provided");
 
-        int baseScore = ActiveStrategy.BasicCalculation(strategyRequest);
+        int baseScore = await ActiveStrategy.BasicCalculation(visitor, attraction);
 
         List<Report> previousReports = visitor.VisitorReports
             .SelectMany(vr => vr.Reports)
-            .Where(r => r.EnterDate < enterDate.Value)
+            .Where(r => r.EnterDate < strategyRequest.EnterDate.Value)
             .OrderByDescending(r => r.EnterDate)
             .ToList();
 
@@ -35,7 +32,7 @@ public class Combo : IContreteStrategy
 
         Report previousReport = previousReports.First();
 
-        TimeSpan timeDifference = enterDate.Value - previousReport.EnterDate;
+        TimeSpan timeDifference = strategyRequest.EnterDate.Value - previousReport.EnterDate;
         bool isDifferentAttraction = attraction.Id != previousReport.Attraction.Id;
         bool isWithinTimeWindow = timeDifference.TotalMinutes <= N && timeDifference.TotalMinutes >= 0;
 
