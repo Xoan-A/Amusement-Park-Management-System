@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -32,9 +30,14 @@ namespace BusinessLogic
             _activeStrategy = activeStrategy;
         }
 
-        public async Task<User> RegisterVisitor(string name, string lastName, string email, string password,
-            DateTime birthDate)
+        public async Task<User> RegisterVisitor(RegisterVisitorRequest request)
         {
+            string name = request.Name;
+            string lastName = request.LastName;
+            string email = request.Email;
+            string password = request.Password;
+            DateTime birthDate = request.BirthDate;
+
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
@@ -155,9 +158,14 @@ namespace BusinessLogic
             };
         }
 
-        public async Task RegisterEntry(Guid userId, Guid attractionId, DateTime enterDate, Guid? qr, Guid? nfc,
-            Guid? eventId)
+        public async Task RegisterEntry(Guid attractionId, RegisterEntryRequest request)
         {
+            Guid? qr = request.Qr;
+            Guid? nfc = request.NFC;
+            DateTime enterDate = request.EnterDate;
+            Guid userId = request.UserId;
+            Guid? eventId = request.EventId;
+
             if (qr == null && nfc == null)
                 throw new ArgumentException("QR code or NFC must be provided.");
 
@@ -193,14 +201,17 @@ namespace BusinessLogic
                 IsSepcialEvent = isEvent,
             };
 
-            int score = await _activeStrategy.CalculateScore(user, attraction, strategyRequest);
+            int score = _activeStrategy.CalculateScore(user, attraction, strategyRequest);
 
             user.Score += score;
             await _userRepository.Update(user);
         }
 
-        public async Task RegisterExit(Guid userId, Guid attractionId, DateTime exitDate)
+        public async Task RegisterExit(Guid attractionId, RegisterExitRequest request)
         {
+            Guid userId = request.userId;
+            DateTime exitDate = request.exitDate;
+
             User user = await _userRepository.GetById(userId);
             if (user == null)
                 throw new ArgumentException("User not found.");

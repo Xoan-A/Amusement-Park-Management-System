@@ -26,17 +26,14 @@ namespace DataAccess.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // User configuration
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
-            // Role configuration
             modelBuilder.Entity<Role>()
                 .HasIndex(r => r.Name)
                 .IsUnique();
 
-            // UserRole configuration (many-to-many)
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
 
@@ -50,15 +47,12 @@ namespace DataAccess.Context
                 .WithMany()
                 .HasForeignKey(ur => ur.RoleId);
 
-            // Seed Roles
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = Role.ADMINISTRATOR },
                 new Role { Id = 2, Name = Role.OPERATOR },
                 new Role { Id = 3, Name = Role.VISITOR }
             );
 
-            // Seed Admin and Operator Users
-            // Password hashes for "admin123" and "operator123" (using BCrypt WorkFactor 11)
             var adminId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var operatorId = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
@@ -85,18 +79,15 @@ namespace DataAccess.Context
                 }
             );
 
-            // Seed UserRole associations
             modelBuilder.Entity<UserRole>().HasData(
                 new UserRole { UserId = adminId, RoleId = 1 },
                 new UserRole { UserId = operatorId, RoleId = 2 }
             );
 
-            // Attraction configuration
             modelBuilder.Entity<Attraction>()
                 .HasIndex(a => a.Name)
                 .IsUnique();
 
-            // Event configuration
             modelBuilder.Entity<Event>()
                 .HasIndex(e => e.Name)
                 .IsUnique();
@@ -114,7 +105,6 @@ namespace DataAccess.Context
                 .WithMany()
                 .HasForeignKey(ea => ea.AttractionId);
 
-            // Ticket configuration
             modelBuilder.Entity<Ticket>()
                 .HasIndex(t => t.QRCode)
                 .IsUnique();
@@ -143,7 +133,6 @@ namespace DataAccess.Context
                 .HasForeignKey(r => r.AttractionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // StrategyConfiguration - seed default strategy
             modelBuilder.Entity<StrategyConfiguration>().HasData(
                 new StrategyConfiguration
                 {

@@ -1,6 +1,7 @@
 using DataAccess.Context;
 using Domain;
 using IDataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories;
 
@@ -13,14 +14,14 @@ public class StrategyRepository : IStrategyRepository
         _context = context;
     }
 
-    public StrategyConfiguration? Get()
+    public async Task<StrategyConfiguration?> Get()
     {
-        return _context.StrategyConfigurations.FirstOrDefault(s => s.Id == 1);
+        return await _context.StrategyConfigurations.FirstOrDefaultAsync(s => s.Id == 1);
     }
 
-    public void Update(StrategyConfiguration strategyConfiguration)
+    public async Task Update(StrategyConfiguration strategyConfiguration)
     {
-        var existing = _context.StrategyConfigurations.FirstOrDefault(s => s.Id == 1);
+        var existing = await _context.StrategyConfigurations.FirstOrDefaultAsync(s => s.Id == 1);
 
         if (existing != null)
         {
@@ -30,9 +31,9 @@ public class StrategyRepository : IStrategyRepository
         else
         {
             strategyConfiguration.Id = 1;
-            _context.StrategyConfigurations.Add(strategyConfiguration);
+            await _context.StrategyConfigurations.AddAsync(strategyConfiguration);
         }
 
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 }

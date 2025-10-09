@@ -1,6 +1,7 @@
 using DataAccess.Context;
 using Domain;
 using IDataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories;
 
@@ -13,18 +14,18 @@ public class DateTimeRepository : IDateTimeRepository
         _context = context;
     }
 
-    public DateTime? GetConfiguredDateTime()
+    public async Task<DateTime?> GetConfiguredDateTime()
     {
-        DateTimeConfiguration currentDate = _context.DateTimeConfigurations.FirstOrDefault();
+        DateTimeConfiguration currentDate = await _context.DateTimeConfigurations.FirstOrDefaultAsync();
         return currentDate?.CurrentDateTime;
     }
 
-    public void SetConfiguredDateTime(DateTime dateTime)
+    public async Task SetConfiguredDateTime(DateTime dateTime)
     {
-        DateTimeConfiguration existingConfig = _context.DateTimeConfigurations.FirstOrDefault();
+        DateTimeConfiguration existingConfig = await _context.DateTimeConfigurations.FirstOrDefaultAsync();
         if (existingConfig == null)
         {
-            _context.DateTimeConfigurations.Add(new DateTimeConfiguration(dateTime));
+            await _context.DateTimeConfigurations.AddAsync(new DateTimeConfiguration(dateTime));
         }
         else
         {
@@ -32,6 +33,6 @@ public class DateTimeRepository : IDateTimeRepository
             _context.DateTimeConfigurations.Update(existingConfig);
         }
 
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 }

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
@@ -26,8 +22,7 @@ namespace Api.Controllers
         [Authorize(Roles = "Visitor")]
         public async Task<IActionResult> PurchaseTicket([FromBody] PurchaseTicketRequest request)
         {
-            Ticket ticket = await _ticketLogic.PurchaseTicketAsync(request.VisitorId, request.VisitDate,
-                request.TicketType, request.EventId);
+            Ticket ticket = await _ticketLogic.PurchaseTicketAsync(request);
 
             if (ticket == null)
             {
@@ -40,7 +35,7 @@ namespace Api.Controllers
                 VisitorId = ticket.VisitorId,
                 PurchaseDate = ticket.PurchaseDate,
                 VisitDate = ticket.VisitDate,
-                Type = ticket.Type,
+                Type = (int)ticket.Type,
                 QRCode = ticket.QRCode,
                 EventId = ticket.EventId
             };
@@ -65,7 +60,7 @@ namespace Api.Controllers
                 VisitorId = ticket.VisitorId,
                 PurchaseDate = ticket.PurchaseDate,
                 VisitDate = ticket.VisitDate,
-                Type = ticket.Type,
+                Type = (int)ticket.Type,
                 QRCode = ticket.QRCode,
                 EventId = ticket.EventId
             };
@@ -85,7 +80,7 @@ namespace Api.Controllers
                 VisitorId = ticket.VisitorId,
                 PurchaseDate = ticket.PurchaseDate,
                 VisitDate = ticket.VisitDate,
-                Type = ticket.Type,
+                Type = (int)ticket.Type,
                 QRCode = ticket.QRCode,
                 EventId = ticket.EventId
             }).ToList();

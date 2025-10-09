@@ -3,7 +3,7 @@ using Domain;
 
 namespace BusinessLogic;
 
-public class Combo : IContreteStrategy
+public class Combo : IConcreteStrategy
 {
     public string Name => "Combo";
     public int N { get; set; }
@@ -13,13 +13,13 @@ public class Combo : IContreteStrategy
         N = n;
     }
 
-    public async Task<int> CalculateScore(User visitor, Attraction attraction, StrategyRequest strategyRequest)
+    public int CalculateScore(User visitor, Attraction attraction, StrategyRequest strategyRequest)
     {
 
         if (visitor == null || attraction == null || strategyRequest.EnterDate == null)
             throw new ArgumentException("Visitor, Attraction and EnterDate must be provided");
 
-        int baseScore = await ActiveStrategy.BasicCalculation(visitor, attraction);
+        int baseScore = ActiveStrategy.BasicCalculation(visitor, attraction);
 
         List<Report> previousReports = visitor.VisitorReports
             .SelectMany(vr => vr.Reports)

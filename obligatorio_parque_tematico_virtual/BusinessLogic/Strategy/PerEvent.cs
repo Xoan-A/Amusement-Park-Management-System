@@ -3,13 +3,13 @@ using IBusinessLogic.Strategy;
 
 namespace BusinessLogic;
 
-public class PerEvent : IContreteStrategy
+public class PerEvent : IConcreteStrategy
 {
     public string Name => "PerEvent";
 
-    public async Task<int> CalculateScore(User visitor, Attraction attraction, StrategyRequest strategyRequest)
+    public int CalculateScore(User visitor, Attraction attraction, StrategyRequest strategyRequest)
     {
-        int score = await ActiveStrategy.BasicCalculation(visitor, attraction);
+        int score = ActiveStrategy.BasicCalculation(visitor, attraction);
 
         if (strategyRequest.IsSepcialEvent)
             score *= 2;

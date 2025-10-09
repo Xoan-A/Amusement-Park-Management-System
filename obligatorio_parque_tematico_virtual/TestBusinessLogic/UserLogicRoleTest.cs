@@ -1,7 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System;
-using System.Linq;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -54,7 +51,16 @@ public class UserLogicRoleTest
         _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns(visitorRole);
         _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
 
-        User result = await _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+        RegisterVisitorRequest request = new RegisterVisitorRequest
+        {
+            Name = name,
+            LastName = lastName,
+            Email = email,
+            Password = password,
+            BirthDate = birthDate
+        };
+
+        User result = await _userLogic.RegisterVisitor(request);
 
         Assert.IsNotNull(result);
         _mockRoleRepository.Verify(r => r.GetByName(Role.VISITOR), Times.Once);

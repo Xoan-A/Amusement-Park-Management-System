@@ -1,13 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Domain;
+using Models.In;
 
 namespace IBusinessLogic
 {
     public interface ITicketLogic
     {
-        Task<Ticket> PurchaseTicketAsync(Guid visitorId, DateTime visitDate, TicketType ticketType, Guid? eventId);
+        Task<Ticket> PurchaseTicketAsync(PurchaseTicketRequest request);
         Task<Ticket> GetTicketByIdAsync(Guid id);
         Task<IEnumerable<Ticket>> GetVisitorTicketsAsync(Guid visitorId);
         Task<Ticket> GetTicketByQRCodeAsync(Guid qrCode);

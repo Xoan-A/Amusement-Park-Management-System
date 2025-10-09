@@ -1,7 +1,5 @@
-using System;
 using IBusinessLogic;
 using IDataAccess;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BusinessLogic
 {
@@ -14,20 +12,20 @@ namespace BusinessLogic
             _dateTimeRepository = dateTimeRepository;
         }
 
-        public DateTime GetCurrentDateTime()
+        public async Task<DateTime> GetCurrentDateTime()
         {
-            return _dateTimeRepository.GetConfiguredDateTime() ?? DateTime.Now;
+            return await _dateTimeRepository.GetConfiguredDateTime() ?? DateTime.Now;
         }
 
-        public void SetDateTime(DateTime dateTime)
+        public async Task SetDateTime(DateTime dateTime)
         {
-            _dateTimeRepository.SetConfiguredDateTime(dateTime);
+            await _dateTimeRepository.SetConfiguredDateTime(dateTime);
         }
 
-        public void SetDateTime(string dateTimeString)
+        public async Task SetDateTime(string dateTimeString)
         {
             var dateTime = DateTime.Parse(dateTimeString);
-            _dateTimeRepository.SetConfiguredDateTime(dateTime);
+            await _dateTimeRepository.SetConfiguredDateTime(dateTime);
         }
     }
 }

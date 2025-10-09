@@ -2,14 +2,13 @@ using Domain;
 using IBusinessLogic;
 using IBusinessLogic.Strategy;
 using IDataAccess;
-using Microsoft.Extensions.DependencyInjection;
 using Models.In;
 
 namespace BusinessLogic;
 
 public class ActiveStrategy : IActiveStrategy
 {
-    private IContreteStrategy Strategy;
+    private IConcreteStrategy Strategy;
     private readonly IStrategyRepository _strategyRepository;
 
     public ActiveStrategy(IStrategyRepository strategyRepository)
@@ -18,9 +17,9 @@ public class ActiveStrategy : IActiveStrategy
         LoadStrategyFromDatabase();
     }
 
-    private void LoadStrategyFromDatabase()
+    private async Task LoadStrategyFromDatabase()
     {
-        var config = _strategyRepository.Get();
+        var config = await _strategyRepository.Get();
         if (config != null)
         {
             Strategy = config.StrategyName switch
@@ -37,9 +36,9 @@ public class ActiveStrategy : IActiveStrategy
         }
     }
 
-    public void SetStrategy(SetStrategyRequest setStrategyRequest)
+    public async Task SetStrategy(SetStrategyRequest setStrategyRequest)
     {
-        IContreteStrategy strategy = setStrategyRequest.StrategyName switch
+        IConcreteStrategy strategy = setStrategyRequest.StrategyName switch
         {
             "PerAttraction" => new PerAttraction(),
             "PerEvent" => new PerEvent(),
@@ -56,19 +55,19 @@ public class ActiveStrategy : IActiveStrategy
             StrategyName = setStrategyRequest.StrategyName,
             N = setStrategyRequest.N,
         };
-        _strategyRepository.Update(config);
+        await _strategyRepository.Update(config);
     }
 
-    public IContreteStrategy GetStrategy()
+    public async Task<IConcreteStrategy> GetStrategy()
     {
-        LoadStrategyFromDatabase();
+        await LoadStrategyFromDatabase();
         if (Strategy == null)
             throw new InvalidOperationException("Strategy not set");
 
         return Strategy;
     }
 
-    public static async Task<int> BasicCalculation(User visitor, Attraction attraction)
+    public static int BasicCalculation(User visitor, Attraction attraction)
     {
         if (visitor == null || attraction == null)
             throw new ArgumentException("Visitor and Attraction cannot be null");
@@ -93,9 +92,9 @@ public class ActiveStrategy : IActiveStrategy
         return score;
     }
 
-    public async Task<int> CalculateScore(User user, Attraction attraction, StrategyRequest strategyRequest)
+    public int CalculateScore(User user, Attraction attraction, StrategyRequest strategyRequest)
     {
-        int score = await Strategy.CalculateScore(user, attraction, strategyRequest);
+        int score = Strategy.CalculateScore(user, attraction, strategyRequest);
         return score;
     }
 }

@@ -1,7 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 using Domain;
 using DataAccess.Context;
 using DataAccess.Repositories;
@@ -37,21 +34,21 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetConfiguredDateTime_ShouldReturnNull_WhenNoConfigurationExists()
+        public async Task GetConfiguredDateTime_ShouldReturnNull_WhenNoConfigurationExists()
         {
-            DateTime? result = _dateTimeRepository.GetConfiguredDateTime();
+            DateTime? result = await _dateTimeRepository.GetConfiguredDateTime();
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void GetConfiguredDateTime_ShouldReturnConfiguredDateTime_WhenConfigurationExists()
+        public async Task GetConfiguredDateTime_ShouldReturnConfiguredDateTime_WhenConfigurationExists()
         {
             DateTime configuredTime = new DateTime(2025, 9, 2, 14, 45, 0);
             _context.DateTimeConfigurations.Add(new DateTimeConfiguration(configuredTime));
             _context.SaveChanges();
 
-            DateTime? result = _dateTimeRepository.GetConfiguredDateTime();
+            DateTime? result = await _dateTimeRepository.GetConfiguredDateTime();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(configuredTime, result.Value);

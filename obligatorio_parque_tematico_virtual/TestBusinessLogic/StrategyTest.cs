@@ -13,57 +13,59 @@ namespace TestBusinessLogic
         private Mock<IStrategyRepository> _mockRepo;
         private StrategyConfiguration? _storedConfig;
 
-        private void SetupMocks()
+        [TestInitialize]
+        public void SetupMocks()
         {
             _storedConfig = null;
             _mockRepo = new Mock<IStrategyRepository>();
 
-            _mockRepo.Setup(x => x.Get()).Returns(() => _storedConfig);
+            _mockRepo.Setup(x => x.Get()).ReturnsAsync(() => _storedConfig);
             _mockRepo.Setup(x => x.Update(It.IsAny<StrategyConfiguration>()))
-                .Callback<StrategyConfiguration>(config => _storedConfig = config);
+                .Callback<StrategyConfiguration>(config => _storedConfig = config)
+                .Returns(Task.CompletedTask);
         }
+
         [TestMethod]
-        public void ActiveStrategy_SetStrategy_ShouldSetStrategy()
+        public async Task ActiveStrategy_SetStrategy_ShouldSetStrategy()
         {
-            SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            activeStrategy.SetStrategy(new SetStrategyRequest
+            await activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "PerAttraction",
             });
 
-            IContreteStrategy result = activeStrategy.GetStrategy();
+            IConcreteStrategy result = await activeStrategy.GetStrategy();
 
             Assert.IsNotNull(result);
             Assert.AreEqual("PerAttraction", result.Name);
         }
 
         [TestMethod]
-        public void ActiveStrategy_GetStrategy_ShouldReturnDefaultWhenNoStrategySet()
+        public async Task ActiveStrategy_GetStrategy_ShouldReturnDefaultWhenNoStrategySet()
         {
             SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            IContreteStrategy result = activeStrategy.GetStrategy();
+            IConcreteStrategy result = await activeStrategy.GetStrategy();
 
             Assert.IsNotNull(result);
             Assert.AreEqual("PerAttraction", result.Name);
         }
 
         [TestMethod]
-        public void ActiveStrategy_SetStrategy_WithCombo_ShouldSetComboWithN()
+        public async Task ActiveStrategy_SetStrategy_WithCombo_ShouldSetComboWithN()
         {
             SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            activeStrategy.SetStrategy(new SetStrategyRequest
+            await activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "Combo",
                 N = 30,
             });
 
-            IContreteStrategy result = activeStrategy.GetStrategy();
+            IConcreteStrategy result = await activeStrategy.GetStrategy();
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Combo", result.Name);
@@ -72,13 +74,13 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void ActiveStrategy_SetStrategy_WithCombo_ShouldThrowWhenNIsNull()
+        public async Task ActiveStrategy_SetStrategy_WithCombo_ShouldThrowWhenNIsNull()
         {
             SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            Assert.ThrowsException<ArgumentException>(() =>
-                activeStrategy.SetStrategy(new SetStrategyRequest
+            await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+                await activeStrategy.SetStrategy(new SetStrategyRequest
                 {
                     StrategyName = "Combo",
                     N = null,
@@ -86,64 +88,63 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void ActiveStrategy_SetStrategy_ShouldThrowForInvalidStrategyName()
+        public async Task ActiveStrategy_SetStrategy_ShouldThrowForInvalidStrategyName()
         {
-            SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            Assert.ThrowsException<ArgumentException>(() =>
-                activeStrategy.SetStrategy(new SetStrategyRequest
+            await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+                await activeStrategy.SetStrategy(new SetStrategyRequest
                 {
                     StrategyName = "InvalidStrategy",
                 }));
         }
 
         [TestMethod]
-        public async Task ActiveStrategy_BasicCalculation_RollerCoaster_ShouldReturn2()
+        public void ActiveStrategy_BasicCalculation_RollerCoaster_ShouldReturn2()
         {
             var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.RollerCoaster };
 
-            int score = await ActiveStrategy.BasicCalculation(user, attraction);
+            int score = ActiveStrategy.BasicCalculation(user, attraction);
 
             Assert.AreEqual(2, score);
         }
 
         [TestMethod]
-        public async Task ActiveStrategy_BasicCalculation_Simulator_ShouldReturn2()
+        public void ActiveStrategy_BasicCalculation_Simulator_ShouldReturn2()
         {
             var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.Simulator };
 
-            int score = await ActiveStrategy.BasicCalculation(user, attraction);
+            int score = ActiveStrategy.BasicCalculation(user, attraction);
 
             Assert.AreEqual(2, score);
         }
 
         [TestMethod]
-        public async Task ActiveStrategy_BasicCalculation_Performance_ShouldReturn3()
+        public void ActiveStrategy_BasicCalculation_Performance_ShouldReturn3()
         {
             var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.Performance };
 
-            int score = await ActiveStrategy.BasicCalculation(user, attraction);
+            int score = ActiveStrategy.BasicCalculation(user, attraction);
 
             Assert.AreEqual(3, score);
         }
 
         [TestMethod]
-        public async Task ActiveStrategy_BasicCalculation_InteractiveZone_ShouldReturn4()
+        public void ActiveStrategy_BasicCalculation_InteractiveZone_ShouldReturn4()
         {
             var user = new User { Name = "Test" };
             var attraction = new Attraction { Type = AttractionType.InteractiveZone };
 
-            int score = await ActiveStrategy.BasicCalculation(user, attraction);
+            int score = ActiveStrategy.BasicCalculation(user, attraction);
 
             Assert.AreEqual(4, score);
         }
 
         [TestMethod]
-        public async Task PerAttraction_CalculateScore_ShouldReturnBasicCalculation()
+        public void PerAttraction_CalculateScore_ShouldReturnBasicCalculation()
         {
             var strategy = new PerAttraction();
             var user = new User { Name = "Test" };
@@ -151,7 +152,7 @@ namespace TestBusinessLogic
 
             var request = new StrategyRequest();
 
-            int score = await strategy.CalculateScore(user, attraction, request);
+            int score = strategy.CalculateScore(user, attraction, request);
 
             Assert.AreEqual(3, score);
         }
@@ -165,7 +166,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public async Task PerEvent_CalculateScore_NotSpecialEvent_ShouldReturnBaseScore()
+        public void PerEvent_CalculateScore_NotSpecialEvent_ShouldReturnBaseScore()
         {
             var strategy = new PerEvent();
             var user = new User { Name = "Test" };
@@ -176,13 +177,13 @@ namespace TestBusinessLogic
                 IsSepcialEvent = false
             };
 
-            int score = await strategy.CalculateScore(user, attraction, request);
+            int score = strategy.CalculateScore(user, attraction, request);
 
             Assert.AreEqual(3, score);
         }
 
         [TestMethod]
-        public async Task PerEvent_CalculateScore_SpecialEvent_ShouldReturnDoubleScore()
+        public void PerEvent_CalculateScore_SpecialEvent_ShouldReturnDoubleScore()
         {
             var strategy = new PerEvent();
             var user = new User { Name = "Test" };
@@ -193,7 +194,7 @@ namespace TestBusinessLogic
                 IsSepcialEvent = true
             };
 
-            int score = await strategy.CalculateScore(user, attraction, request);
+            int score = strategy.CalculateScore(user, attraction, request);
 
             Assert.AreEqual(6, score);
         }
@@ -207,7 +208,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public async Task Combo_CalculateScore_FirstVisit_ShouldReturnBaseScore()
+        public void Combo_CalculateScore_FirstVisit_ShouldReturnBaseScore()
         {
             SetupMocks();
             var strategy = new Combo(30);
@@ -222,13 +223,13 @@ namespace TestBusinessLogic
                 EnterDate = firstVisit
             };
 
-            int score = await strategy.CalculateScore(user, attraction, request);
+            int score = strategy.CalculateScore(user, attraction, request);
 
             Assert.AreEqual(3, score);
         }
 
         [TestMethod]
-        public async Task Combo_CalculateScore_SameAttraction_ShouldReturnBaseScore()
+        public void Combo_CalculateScore_SameAttraction_ShouldReturnBaseScore()
         {
             SetupMocks();
             var strategy = new Combo(30);
@@ -246,13 +247,13 @@ namespace TestBusinessLogic
                 EnterDate = secondVisit
             };
 
-            int score = await strategy.CalculateScore(user, attraction1, request);
+            int score = strategy.CalculateScore(user, attraction1, request);
 
             Assert.AreEqual(3, score);
         }
 
         [TestMethod]
-        public async Task Combo_CalculateScore_DifferentAttractionWithinTime_ShouldReturnDoubleScore()
+        public void Combo_CalculateScore_DifferentAttractionWithinTime_ShouldReturnDoubleScore()
         {
             SetupMocks();
             var strategy = new Combo(30);
@@ -271,13 +272,13 @@ namespace TestBusinessLogic
                 EnterDate = secondVisit
             };
 
-            int score = await strategy.CalculateScore(user, attraction2, request);
+            int score = strategy.CalculateScore(user, attraction2, request);
 
             Assert.AreEqual(6, score);
         }
 
         [TestMethod]
-        public async Task Combo_CalculateScore_DifferentAttractionOutsideTime_ShouldReturnBaseScore()
+        public void Combo_CalculateScore_DifferentAttractionOutsideTime_ShouldReturnBaseScore()
         {
             SetupMocks();
             var strategy = new Combo(30);
@@ -296,13 +297,13 @@ namespace TestBusinessLogic
                 EnterDate = secondVisit
             };
 
-            int score = await strategy.CalculateScore(user, attraction2, request);
+            int score = strategy.CalculateScore(user, attraction2, request);
 
             Assert.AreEqual(3, score);
         }
 
         [TestMethod]
-        public async Task Combo_CalculateScore_MultipleVisits_ShouldCheckMostRecent()
+        public void Combo_CalculateScore_MultipleVisits_ShouldCheckMostRecent()
         {
             SetupMocks();
             var strategy = new Combo(30);
@@ -325,7 +326,7 @@ namespace TestBusinessLogic
                 EnterDate = thirdVisit
             };
 
-            int score = await strategy.CalculateScore(user, attraction3, request);
+            int score = strategy.CalculateScore(user, attraction3, request);
 
             Assert.AreEqual(6, score);
         }
@@ -349,36 +350,36 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void ActiveStrategy_GetStrategy_FirstStrategySet_ShouldReturnStrategyImmediately()
+        public async Task ActiveStrategy_GetStrategy_FirstStrategySet_ShouldReturnStrategyImmediately()
         {
             SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            activeStrategy.SetStrategy(new SetStrategyRequest
+            await activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "PerAttraction",
             });
 
-            IContreteStrategy result = activeStrategy.GetStrategy();
+            IConcreteStrategy result = await activeStrategy.GetStrategy();
 
             Assert.IsNotNull(result);
             Assert.AreEqual("PerAttraction", result.Name);
         }
 
         [TestMethod]
-        public void ActiveStrategy_GetStrategy_ShouldReturnSameStrategyRegardlessOfDate()
+        public async Task ActiveStrategy_GetStrategy_ShouldReturnSameStrategyRegardlessOfDate()
         {
             SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            activeStrategy.SetStrategy(new SetStrategyRequest
+            await activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "PerAttraction",
             });
 
-            IContreteStrategy result1 = activeStrategy.GetStrategy();
-            IContreteStrategy result2 = activeStrategy.GetStrategy();
-            IContreteStrategy result3 = activeStrategy.GetStrategy();
+            IConcreteStrategy result1 = await activeStrategy.GetStrategy();
+            IConcreteStrategy result2 = await activeStrategy.GetStrategy();
+            IConcreteStrategy result3 = await activeStrategy.GetStrategy();
 
             Assert.AreEqual("PerAttraction", result1.Name);
             Assert.AreEqual("PerAttraction", result2.Name);
@@ -386,39 +387,39 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void ActiveStrategy_GetStrategy_AfterMultipleSets_ShouldReturnLatestStrategy()
+        public async Task ActiveStrategy_GetStrategy_AfterMultipleSets_ShouldReturnLatestStrategy()
         {
             SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            activeStrategy.SetStrategy(new SetStrategyRequest
+            await activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "PerAttraction",
             });
 
-            activeStrategy.SetStrategy(new SetStrategyRequest
+            await activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "PerEvent",
             });
 
-            IContreteStrategy result = activeStrategy.GetStrategy();
+            IConcreteStrategy result = await activeStrategy.GetStrategy();
 
             Assert.AreEqual("PerEvent", result.Name);
         }
 
         [TestMethod]
-        public void ActiveStrategy_GetStrategy_AfterSettingCombo_ShouldReturnComboWithCorrectN()
+        public async Task ActiveStrategy_GetStrategy_AfterSettingCombo_ShouldReturnComboWithCorrectN()
         {
             SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            activeStrategy.SetStrategy(new SetStrategyRequest
+            await activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "Combo",
                 N = 45,
             });
 
-            IContreteStrategy result = activeStrategy.GetStrategy();
+            IConcreteStrategy result = await activeStrategy.GetStrategy();
 
             Assert.AreEqual("Combo", result.Name);
             Assert.IsInstanceOfType(result, typeof(Combo));
@@ -426,32 +427,30 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void ActiveStrategy_GetStrategy_AfterChangingFromComboToPerAttraction_ShouldReturnPerAttraction()
+        public async Task ActiveStrategy_GetStrategy_AfterChangingFromComboToPerAttraction_ShouldReturnPerAttraction()
         {
-            SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            activeStrategy.SetStrategy(new SetStrategyRequest
+            await activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "Combo",
                 N = 30,
             });
 
-            activeStrategy.SetStrategy(new SetStrategyRequest
+            await activeStrategy.SetStrategy(new SetStrategyRequest
             {
                 StrategyName = "PerAttraction",
             });
 
-            IContreteStrategy result = activeStrategy.GetStrategy();
+            IConcreteStrategy result = await activeStrategy.GetStrategy();
 
             Assert.AreEqual("PerAttraction", result.Name);
             Assert.IsNotInstanceOfType(result, typeof(Combo));
         }
 
         [TestMethod]
-        public async Task Combo_CalculateScore_ShouldThrowWhenUserIsNull()
+        public void Combo_CalculateScore_ShouldThrowWhenUserIsNull()
         {
-            SetupMocks();
             var strategy = new Combo(30);
             var attraction = new Attraction { Type = AttractionType.Performance };
 
@@ -460,11 +459,11 @@ namespace TestBusinessLogic
                 EnterDate = new DateTime(2025, 10, 5, 10, 0, 0)
             };
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await strategy.CalculateScore(null!, attraction, request));
+            Assert.ThrowsException<ArgumentException>(() => strategy.CalculateScore(null!, attraction, request));
         }
 
         [TestMethod]
-        public async Task Combo_CalculateScore_ShouldThrowWhenAttractionIsNull()
+        public void Combo_CalculateScore_ShouldThrowWhenAttractionIsNull()
         {
             SetupMocks();
             var strategy = new Combo(30);
@@ -475,11 +474,11 @@ namespace TestBusinessLogic
                 EnterDate = new DateTime(2025, 10, 5, 10, 0, 0)
             };
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await strategy.CalculateScore(user, null!, request));
+            Assert.ThrowsException<ArgumentException>(() => strategy.CalculateScore(user, null!, request));
         }
 
         [TestMethod]
-        public async Task Combo_CalculateScore_ShouldThrowWhenEnterDateIsNull()
+        public void Combo_CalculateScore_ShouldThrowWhenEnterDateIsNull()
         {
             SetupMocks();
             var strategy = new Combo(30);
@@ -491,7 +490,7 @@ namespace TestBusinessLogic
                 EnterDate = null
             };
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await strategy.CalculateScore(user, attraction, request));
+            Assert.ThrowsException<ArgumentException>(() => strategy.CalculateScore(user, attraction, request));
         }
     }
 }

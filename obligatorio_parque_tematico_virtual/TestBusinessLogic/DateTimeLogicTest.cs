@@ -1,5 +1,3 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using IBusinessLogic;
 using BusinessLogic;
 using Moq;
@@ -21,24 +19,24 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void GetCurrentDateTime_ShouldReturnSystemTime_WhenNotConfigured()
+        public async Task GetCurrentDateTime_ShouldReturnSystemTime_WhenNotConfigured()
         {
-            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).Returns((DateTime?)null);
+            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync((DateTime?)null);
 
             DateTime before = DateTime.Now;
-            DateTime result = _dateTimeLogic.GetCurrentDateTime();
+            DateTime result = await _dateTimeLogic.GetCurrentDateTime();
             DateTime after = DateTime.Now;
 
             Assert.IsTrue(result >= before && result <= after);
         }
 
         [TestMethod]
-        public void GetCurrentDateTime_ShouldReturnConfiguredTime_WhenConfigured()
+        public async Task GetCurrentDateTime_ShouldReturnConfiguredTime_WhenConfigured()
         {
             DateTime configuredTime = new DateTime(2025, 9, 2, 14, 45, 0);
-            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).Returns(configuredTime);
+            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync(configuredTime);
 
-            DateTime result = _dateTimeLogic.GetCurrentDateTime();
+            DateTime result = await _dateTimeLogic.GetCurrentDateTime();
 
             Assert.AreEqual(configuredTime, result);
         }

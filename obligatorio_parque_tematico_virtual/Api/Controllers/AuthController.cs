@@ -1,10 +1,8 @@
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
 using Models.In;
 using Models.Out;
 using Domain.Exceptions;
-using Domain;
 
 namespace Api.Controllers
 {
@@ -51,8 +49,7 @@ namespace Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterVisitorRequest request)
         {
-            var visitor = await _userLogic.RegisterVisitor(request.Name, request.LastName, request.Email,
-                request.Password, request.BirthDate);
+            var visitor = await _userLogic.RegisterVisitor(request);
 
             if (visitor == null)
             {

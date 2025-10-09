@@ -1,6 +1,5 @@
 ﻿using System.Runtime.InteropServices.JavaScript;
 using Domain;
-
 namespace TestDomain;
 
 [TestClass]

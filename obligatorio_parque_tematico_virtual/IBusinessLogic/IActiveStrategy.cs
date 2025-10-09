@@ -7,7 +7,7 @@ namespace IBusinessLogic;
 
 public interface IActiveStrategy
 {
-    void SetStrategy(SetStrategyRequest setStrategyRequest);
-    IContreteStrategy GetStrategy();
-    Task<int> CalculateScore(User user, Attraction attraction, StrategyRequest strategyRequest);
+    Task SetStrategy(SetStrategyRequest setStrategyRequest);
+    Task<IConcreteStrategy> GetStrategy();
+    int CalculateScore(User user, Attraction attraction, StrategyRequest strategyRequest);
 }

@@ -1,17 +1,12 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Models.In;
-using Models.Out;
 using IBusinessLogic;
 using BusinessLogic;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
-using System;
 using Microsoft.Data.Sqlite;
 using IDataAccess;
 using DataAccess.Repositories;
@@ -28,7 +23,6 @@ namespace ApiTests
         [TestInitialize]
         public void Setup()
         {
-            // Create shared in-memory connection
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 
@@ -37,7 +31,6 @@ namespace ApiTests
                 {
                     builder.ConfigureServices(services =>
                     {
-                        // Remove SQL Server DbContext
                         ServiceDescriptor descriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
                         if (descriptor != null)
@@ -45,7 +38,6 @@ namespace ApiTests
                             services.Remove(descriptor);
                         }
 
-                        // Remove existing IDateTimeLogic registration
                         ServiceDescriptor dateTimeDescriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(IDateTimeLogic));
                         if (dateTimeDescriptor != null)
@@ -53,7 +45,6 @@ namespace ApiTests
                             services.Remove(dateTimeDescriptor);
                         }
 
-                        // Remove existing IDateTimeRepository registration
                         ServiceDescriptor dateTimeRepoDescriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(IDateTimeRepository));
                         if (dateTimeRepoDescriptor != null)
@@ -61,7 +52,6 @@ namespace ApiTests
                             services.Remove(dateTimeRepoDescriptor);
                         }
 
-                        // Add SQLite DbContext with shared connection
                         services.AddDbContext<AppDbContext>(options =>
                             options.UseSqlite(_connection));
 
@@ -70,7 +60,6 @@ namespace ApiTests
                     });
                 });
 
-            // Initialize database schema
             using (IServiceScope scope = _factory.Services.CreateScope())
             {
                 AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -92,7 +81,6 @@ namespace ApiTests
         [TestMethod]
         public async Task LoginEndpoint_RequiresNoAuthentication()
         {
-            // First register a user
             var registerRequest = new RegisterVisitorRequest
             {
                 Name = "Test",
@@ -105,7 +93,6 @@ namespace ApiTests
             var registerContent = new StringContent(registerJson, Encoding.UTF8, "application/json");
             await _client.PostAsync("/api/auth/register", registerContent);
 
-            // Now login with the registered user
             var request = new LoginRequest
             {
                 Email = "testlogin@test.com",

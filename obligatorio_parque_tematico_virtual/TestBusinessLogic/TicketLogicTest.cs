@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using BusinessLogic;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Models.In;
 using Moq;
 
 namespace TestBusinessLogic
@@ -58,11 +54,18 @@ namespace TestBusinessLogic
                 QRCode = Guid.NewGuid()
             };
 
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(currentDate);
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
             _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
             _mockTicketRepository.Setup(t => t.AddAsync(It.IsAny<Ticket>())).ReturnsAsync(expectedTicket);
 
-            Ticket result = await _ticketLogic.PurchaseTicketAsync(visitorId, visitDate, TicketType.General, null);
+            PurchaseTicketRequest request = new PurchaseTicketRequest
+            {
+                VisitorId = visitorId,
+                VisitDate = visitDate,
+                TicketType = (int)TicketType.General
+            };
+
+            Ticket result = await _ticketLogic.PurchaseTicketAsync(request);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(visitorId, result.VisitorId);
@@ -80,7 +83,14 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync((User)null);
 
-            Ticket result = await _ticketLogic.PurchaseTicketAsync(visitorId, visitDate, TicketType.General, null);
+            PurchaseTicketRequest request = new PurchaseTicketRequest
+            {
+                VisitorId = visitorId,
+                VisitDate = visitDate,
+                TicketType = (int)TicketType.General
+            };
+
+            Ticket result = await _ticketLogic.PurchaseTicketAsync(request);
 
             Assert.IsNull(result);
             _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
@@ -101,10 +111,17 @@ namespace TestBusinessLogic
                 Email = "john@test.com"
             };
 
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(currentDate);
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
             _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
 
-            Ticket result = await _ticketLogic.PurchaseTicketAsync(visitorId, pastVisitDate, TicketType.General, null);
+            PurchaseTicketRequest request = new PurchaseTicketRequest
+            {
+                VisitorId = visitorId,
+                VisitDate = pastVisitDate,
+                TicketType = (int)TicketType.General
+            };
+
+            Ticket result = await _ticketLogic.PurchaseTicketAsync(request);
 
             Assert.IsNull(result);
             _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
@@ -137,12 +154,20 @@ namespace TestBusinessLogic
                 EventId = eventId
             };
 
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(currentDate);
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
             _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
             _mockTicketRepository.Setup(t => t.AddAsync(It.IsAny<Ticket>())).ReturnsAsync(expectedTicket);
 
+            PurchaseTicketRequest request = new PurchaseTicketRequest
+            {
+                VisitorId = visitorId,
+                VisitDate = visitDate,
+                TicketType = (int)TicketType.EventSpecial,
+                EventId = eventId
+            };
+
             Ticket result =
-                await _ticketLogic.PurchaseTicketAsync(visitorId, visitDate, TicketType.EventSpecial, eventId);
+                await _ticketLogic.PurchaseTicketAsync(request);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TicketType.EventSpecial, result.Type);

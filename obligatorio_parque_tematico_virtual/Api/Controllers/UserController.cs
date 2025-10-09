@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Models.In;
 using Models.Out;
 using System.IdentityModel.Tokens.Jwt;
-using Domain.Exceptions;
 
 namespace Api.Controllers;
 

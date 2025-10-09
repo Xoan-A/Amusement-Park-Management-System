@@ -90,8 +90,7 @@ public class AttractionController : ControllerBase
     [Authorize(Roles = "Operator")]
     public async Task<IActionResult> RegisterEntry(Guid id, [FromBody] RegisterEntryRequest registerEntryRequest)
     {
-        await _userService.RegisterEntry(registerEntryRequest.UserId, id, registerEntryRequest.EnterDate,
-            registerEntryRequest.Qr, registerEntryRequest.NFC, registerEntryRequest.EventId);
+        await _userService.RegisterEntry(id, registerEntryRequest);
 
         MessageResponse response = new MessageResponse
         {
@@ -104,7 +103,7 @@ public class AttractionController : ControllerBase
     [Authorize(Roles = "Operator")]
     public async Task<IActionResult> RegisterExit(Guid id, [FromBody] RegisterExitRequest registerExitRequest)
     {
-        await _userService.RegisterExit(registerExitRequest.userId, id, registerExitRequest.exitDate);
+        await _userService.RegisterExit(id, registerExitRequest);
 
         MessageResponse response = new MessageResponse
         {

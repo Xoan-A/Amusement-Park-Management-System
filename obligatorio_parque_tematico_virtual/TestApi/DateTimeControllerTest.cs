@@ -1,12 +1,8 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using BusinessLogic;
 using IBusinessLogic;
 using Models.In;
 using Models.Out;
@@ -76,7 +72,7 @@ namespace ApiTests
             };
 
             _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime())
-                             .Returns(expectedDateTime);
+                             .ReturnsAsync(expectedDateTime);
 
             var response = await _client.GetAsync("/api/datetime");
 

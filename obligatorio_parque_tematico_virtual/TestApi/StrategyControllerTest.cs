@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Net;
 using System.Text;
@@ -101,11 +100,11 @@ namespace ApiTests
         [TestMethod]
         public async Task GetStrategy_ShouldReturnCurrentStrategy()
         {
-            var mockStrategy = new Mock<IContreteStrategy>();
+            var mockStrategy = new Mock<IConcreteStrategy>();
             mockStrategy.Setup(s => s.Name).Returns("PerAttraction");
 
             _mockActiveStrategy.Setup(x => x.GetStrategy())
-                .Returns(mockStrategy.Object);
+                .ReturnsAsync(mockStrategy.Object);
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy");
             var response = await _adminClient.SendAsync(requestMessage);
@@ -305,11 +304,11 @@ namespace ApiTests
                 N = 45
             };
 
-            var mockStrategy = new Mock<IContreteStrategy>();
+            var mockStrategy = new Mock<IConcreteStrategy>();
             mockStrategy.Setup(s => s.Name).Returns("Combo");
 
             _mockActiveStrategy.Setup(x => x.SetStrategy(It.IsAny<SetStrategyRequest>()));
-            _mockActiveStrategy.Setup(x => x.GetStrategy()).Returns(mockStrategy.Object);
+            _mockActiveStrategy.Setup(x => x.GetStrategy()).ReturnsAsync(mockStrategy.Object);
 
             var json = JsonSerializer.Serialize(setRequest);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
