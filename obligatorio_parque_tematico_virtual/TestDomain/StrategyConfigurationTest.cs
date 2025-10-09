@@ -8,7 +8,7 @@ public class StrategyConfigurationTest
     [TestMethod]
     public void StrategyConfiguration_ShouldHaveRequiredProperties()
     {
-        var config = new StrategyConfiguration();
+        StrategyConfiguration config = new StrategyConfiguration();
 
         config.Id = 1;
         config.StrategyName = "PerAttraction";
@@ -22,7 +22,7 @@ public class StrategyConfigurationTest
     [TestMethod]
     public void StrategyConfiguration_ShouldSetStrategyNameToEmptyStringByDefault()
     {
-        var config = new StrategyConfiguration();
+        StrategyConfiguration config = new StrategyConfiguration();
 
         Assert.AreEqual(string.Empty, config.StrategyName);
     }
@@ -30,7 +30,7 @@ public class StrategyConfigurationTest
     [TestMethod]
     public void StrategyConfiguration_ShouldAllowPerAttractionStrategy()
     {
-        var config = new StrategyConfiguration
+        StrategyConfiguration config = new StrategyConfiguration
         {
             Id = 1,
             StrategyName = "PerAttraction",
@@ -44,7 +44,7 @@ public class StrategyConfigurationTest
     [TestMethod]
     public void StrategyConfiguration_ShouldAllowPerEventStrategy()
     {
-        var config = new StrategyConfiguration
+        StrategyConfiguration config = new StrategyConfiguration
         {
             Id = 1,
             StrategyName = "PerEvent",
@@ -58,7 +58,7 @@ public class StrategyConfigurationTest
     [TestMethod]
     public void StrategyConfiguration_ShouldAllowComboStrategyWithN()
     {
-        var config = new StrategyConfiguration
+        StrategyConfiguration config = new StrategyConfiguration
         {
             Id = 1,
             StrategyName = "Combo",
@@ -72,7 +72,7 @@ public class StrategyConfigurationTest
     [TestMethod]
     public void StrategyConfiguration_ShouldAllowUpdatingStrategyName()
     {
-        var config = new StrategyConfiguration
+        StrategyConfiguration config = new StrategyConfiguration
         {
             Id = 1,
             StrategyName = "PerAttraction",
@@ -86,7 +86,7 @@ public class StrategyConfigurationTest
     [TestMethod]
     public void StrategyConfiguration_ShouldAllowUpdatingNValue()
     {
-        var config = new StrategyConfiguration
+        StrategyConfiguration config = new StrategyConfiguration
         {
             Id = 1,
             StrategyName = "Combo",
@@ -101,7 +101,7 @@ public class StrategyConfigurationTest
     [TestMethod]
     public void StrategyConfiguration_ShouldAllowSettingNToNull()
     {
-        var config = new StrategyConfiguration
+        StrategyConfiguration config = new StrategyConfiguration
         {
             Id = 1,
             StrategyName = "Combo",

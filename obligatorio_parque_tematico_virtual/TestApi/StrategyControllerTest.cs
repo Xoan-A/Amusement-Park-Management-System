@@ -40,7 +40,7 @@ namespace ApiTests
                 {
                     builder.ConfigureServices(services =>
                     {
-                        var descriptor = services.SingleOrDefault(
+                        ServiceDescriptor? descriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
                         if (descriptor != null) services.Remove(descriptor);
 
@@ -52,15 +52,15 @@ namespace ApiTests
                     });
                 });
 
-            using (var scope = _factory.Services.CreateScope())
+            using (IServiceScope scope = _factory.Services.CreateScope())
             {
-                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 context.Database.EnsureCreated();
             }
 
             _client = _factory.CreateClient();
 
-            var jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
             {
                 SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
                 Issuer = "ParqueTematico",
@@ -100,19 +100,19 @@ namespace ApiTests
         [TestMethod]
         public async Task GetStrategy_ShouldReturnCurrentStrategy()
         {
-            var mockStrategy = new Mock<IConcreteStrategy>();
+            Mock<IConcreteStrategy> mockStrategy = new Mock<IConcreteStrategy>();
             mockStrategy.Setup(s => s.Name).Returns("PerAttraction");
 
             _mockActiveStrategy.Setup(x => x.GetStrategy())
                 .ReturnsAsync(mockStrategy.Object);
 
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy");
-            var response = await _adminClient.SendAsync(requestMessage);
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy");
+            HttpResponseMessage response = await _adminClient.SendAsync(requestMessage);
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var strategyResponse = JsonSerializer.Deserialize<StrategyResponse>(
+            string responseContent = await response.Content.ReadAsStringAsync();
+            StrategyResponse? strategyResponse = JsonSerializer.Deserialize<StrategyResponse>(
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -126,8 +126,8 @@ namespace ApiTests
             _mockActiveStrategy.Setup(x => x.GetStrategy())
                 .Throws(new InvalidOperationException("Strategy not set"));
 
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy");
-            var response = await _adminClient.SendAsync(requestMessage);
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy");
+            HttpResponseMessage response = await _adminClient.SendAsync(requestMessage);
 
             Assert.AreEqual(HttpStatusCode.InternalServerError, response.StatusCode);
         }
@@ -135,8 +135,8 @@ namespace ApiTests
         [TestMethod]
         public async Task GetStrategy_WithoutAuth_ShouldReturnUnauthorized()
         {
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy");
-            var response = await _client.SendAsync(requestMessage);
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy");
+            HttpResponseMessage response = await _client.SendAsync(requestMessage);
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
@@ -144,22 +144,22 @@ namespace ApiTests
         [TestMethod]
         public async Task SetStrategy_WithPerAttraction_ShouldReturnSuccess()
         {
-            var request = new SetStrategyRequest
+            SetStrategyRequest request = new SetStrategyRequest
             {
                 StrategyName = "PerAttraction"
             };
 
             _mockActiveStrategy.Setup(x => x.SetStrategy(It.IsAny<SetStrategyRequest>()));
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PutAsync("/api/strategy", content);
+            HttpResponseMessage response = await _adminClient.PutAsync("/api/strategy", content);
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var messageResponse = JsonSerializer.Deserialize<MessageResponse>(
+            string responseContent = await response.Content.ReadAsStringAsync();
+            MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -173,22 +173,22 @@ namespace ApiTests
         [TestMethod]
         public async Task SetStrategy_WithPerEvent_ShouldReturnSuccess()
         {
-            var request = new SetStrategyRequest
+            SetStrategyRequest request = new SetStrategyRequest
             {
                 StrategyName = "PerEvent"
             };
 
             _mockActiveStrategy.Setup(x => x.SetStrategy(It.IsAny<SetStrategyRequest>()));
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PutAsync("/api/strategy", content);
+            HttpResponseMessage response = await _adminClient.PutAsync("/api/strategy", content);
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var messageResponse = JsonSerializer.Deserialize<MessageResponse>(
+            string responseContent = await response.Content.ReadAsStringAsync();
+            MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -202,7 +202,7 @@ namespace ApiTests
         [TestMethod]
         public async Task SetStrategy_WithCombo_ShouldReturnSuccess()
         {
-            var request = new SetStrategyRequest
+            SetStrategyRequest request = new SetStrategyRequest
             {
                 StrategyName = "Combo",
                 N = 30
@@ -210,15 +210,15 @@ namespace ApiTests
 
             _mockActiveStrategy.Setup(x => x.SetStrategy(It.IsAny<SetStrategyRequest>()));
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PutAsync("/api/strategy", content);
+            HttpResponseMessage response = await _adminClient.PutAsync("/api/strategy", content);
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var messageResponse = JsonSerializer.Deserialize<MessageResponse>(
+            string responseContent = await response.Content.ReadAsStringAsync();
+            MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -232,7 +232,7 @@ namespace ApiTests
         [TestMethod]
         public async Task SetStrategy_WithComboWithoutN_ShouldReturnBadRequest()
         {
-            var request = new SetStrategyRequest
+            SetStrategyRequest request = new SetStrategyRequest
             {
                 StrategyName = "Combo",
                 N = null
@@ -241,10 +241,10 @@ namespace ApiTests
             _mockActiveStrategy.Setup(x => x.SetStrategy(It.IsAny<SetStrategyRequest>()))
                 .Throws(new ArgumentException("N is required for Combo strategy"));
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PutAsync("/api/strategy", content);
+            HttpResponseMessage response = await _adminClient.PutAsync("/api/strategy", content);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
@@ -252,7 +252,7 @@ namespace ApiTests
         [TestMethod]
         public async Task SetStrategy_WithInvalidStrategyName_ShouldReturnBadRequest()
         {
-            var request = new SetStrategyRequest
+            SetStrategyRequest request = new SetStrategyRequest
             {
                 StrategyName = "InvalidStrategy"
             };
@@ -260,10 +260,10 @@ namespace ApiTests
             _mockActiveStrategy.Setup(x => x.SetStrategy(It.IsAny<SetStrategyRequest>()))
                 .Throws(new ArgumentException("Invalid strategy name: InvalidStrategy"));
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PutAsync("/api/strategy", content);
+            HttpResponseMessage response = await _adminClient.PutAsync("/api/strategy", content);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
@@ -271,10 +271,10 @@ namespace ApiTests
         [TestMethod]
         public async Task SetStrategy_WithNullRequest_ShouldReturnBadRequest()
         {
-            var json = "null";
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = "null";
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _adminClient.PutAsync("/api/strategy", content);
+            HttpResponseMessage response = await _adminClient.PutAsync("/api/strategy", content);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
@@ -282,15 +282,15 @@ namespace ApiTests
         [TestMethod]
         public async Task SetStrategy_WithoutAuth_ShouldReturnUnauthorized()
         {
-            var request = new SetStrategyRequest
+            SetStrategyRequest request = new SetStrategyRequest
             {
                 StrategyName = "PerAttraction"
             };
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PutAsync("/api/strategy", content);
+            HttpResponseMessage response = await _client.PutAsync("/api/strategy", content);
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
@@ -298,30 +298,30 @@ namespace ApiTests
         [TestMethod]
         public async Task GetStrategy_AfterSettingStrategy_ShouldReturnNewStrategy()
         {
-            var setRequest = new SetStrategyRequest
+            SetStrategyRequest setRequest = new SetStrategyRequest
             {
                 StrategyName = "Combo",
                 N = 45
             };
 
-            var mockStrategy = new Mock<IConcreteStrategy>();
+            Mock<IConcreteStrategy> mockStrategy = new Mock<IConcreteStrategy>();
             mockStrategy.Setup(s => s.Name).Returns("Combo");
 
             _mockActiveStrategy.Setup(x => x.SetStrategy(It.IsAny<SetStrategyRequest>()));
             _mockActiveStrategy.Setup(x => x.GetStrategy()).ReturnsAsync(mockStrategy.Object);
 
-            var json = JsonSerializer.Serialize(setRequest);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(setRequest);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var setResponse = await _adminClient.PutAsync("/api/strategy", content);
+            HttpResponseMessage setResponse = await _adminClient.PutAsync("/api/strategy", content);
             setResponse.EnsureSuccessStatusCode();
 
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy");
-            var getResponse = await _adminClient.SendAsync(requestMessage);
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy");
+            HttpResponseMessage getResponse = await _adminClient.SendAsync(requestMessage);
             getResponse.EnsureSuccessStatusCode();
 
-            var responseContent = await getResponse.Content.ReadAsStringAsync();
-            var strategyResponse = JsonSerializer.Deserialize<StrategyResponse>(
+            string responseContent = await getResponse.Content.ReadAsStringAsync();
+            StrategyResponse? strategyResponse = JsonSerializer.Deserialize<StrategyResponse>(
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -332,7 +332,7 @@ namespace ApiTests
         [TestMethod]
         public async Task GetTopTen_ShouldReturnTopTenUsersOrderedByScore()
         {
-            var topTenResponse = new TopTenResponse
+            TopTenResponse topTenResponse = new TopTenResponse
             {
                 TopTenUsers = new List<UserResponse>
                 {
@@ -381,12 +381,12 @@ namespace ApiTests
 
             _mockUserLogic.Setup(x => x.GetTopTenUsers()).ReturnsAsync(topTenResponse);
 
-            var response = await _adminClient.GetAsync("/api/strategy/topTen");
+            HttpResponseMessage response = await _adminClient.GetAsync("/api/strategy/topTen");
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<TopTenResponse>(
+            string responseContent = await response.Content.ReadAsStringAsync();
+            TopTenResponse? result = JsonSerializer.Deserialize<TopTenResponse>(
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -401,7 +401,7 @@ namespace ApiTests
         [TestMethod]
         public async Task GetTopTen_WithoutAuth_ShouldReturnUnauthorized()
         {
-            var response = await _client.GetAsync("/api/strategy/topTen");
+            HttpResponseMessage response = await _client.GetAsync("/api/strategy/topTen");
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
@@ -409,19 +409,19 @@ namespace ApiTests
         [TestMethod]
         public async Task GetTopTen_WithNoUsers_ShouldReturnEmptyList()
         {
-            var topTenResponse = new TopTenResponse
+            TopTenResponse topTenResponse = new TopTenResponse
             {
                 TopTenUsers = new List<UserResponse>()
             };
 
             _mockUserLogic.Setup(x => x.GetTopTenUsers()).ReturnsAsync(topTenResponse);
 
-            var response = await _adminClient.GetAsync("/api/strategy/topTen");
+            HttpResponseMessage response = await _adminClient.GetAsync("/api/strategy/topTen");
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<TopTenResponse>(
+            string responseContent = await response.Content.ReadAsStringAsync();
+            TopTenResponse? result = JsonSerializer.Deserialize<TopTenResponse>(
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -433,7 +433,7 @@ namespace ApiTests
         [TestMethod]
         public async Task GetTopTen_WithFewerThanTenUsers_ShouldReturnAllUsers()
         {
-            var topTenResponse = new TopTenResponse
+            TopTenResponse topTenResponse = new TopTenResponse
             {
                 TopTenUsers = new List<UserResponse>
                 {
@@ -454,12 +454,12 @@ namespace ApiTests
 
             _mockUserLogic.Setup(x => x.GetTopTenUsers()).ReturnsAsync(topTenResponse);
 
-            var response = await _adminClient.GetAsync("/api/strategy/topTen");
+            HttpResponseMessage response = await _adminClient.GetAsync("/api/strategy/topTen");
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<TopTenResponse>(
+            string responseContent = await response.Content.ReadAsStringAsync();
+            TopTenResponse? result = JsonSerializer.Deserialize<TopTenResponse>(
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -473,7 +473,7 @@ namespace ApiTests
         [TestMethod]
         public async Task GetTopTen_ShouldReturnUsersInDescendingOrderByScore()
         {
-            var topTenResponse = new TopTenResponse
+            TopTenResponse topTenResponse = new TopTenResponse
             {
                 TopTenUsers = new List<UserResponse>
                 {
@@ -494,12 +494,12 @@ namespace ApiTests
 
             _mockUserLogic.Setup(x => x.GetTopTenUsers()).ReturnsAsync(topTenResponse);
 
-            var response = await _adminClient.GetAsync("/api/strategy/topTen");
+            HttpResponseMessage response = await _adminClient.GetAsync("/api/strategy/topTen");
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<TopTenResponse>(
+            string responseContent = await response.Content.ReadAsStringAsync();
+            TopTenResponse? result = JsonSerializer.Deserialize<TopTenResponse>(
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 

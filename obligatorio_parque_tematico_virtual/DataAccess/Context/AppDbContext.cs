@@ -53,8 +53,8 @@ namespace DataAccess.Context
                 new Role { Id = 3, Name = Role.VISITOR }
             );
 
-            var adminId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-            var operatorId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            Guid adminId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            Guid operatorId = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
             modelBuilder.Entity<User>().HasData(
                 new User

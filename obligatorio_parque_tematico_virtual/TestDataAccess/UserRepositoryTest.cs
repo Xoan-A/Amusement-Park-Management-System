@@ -235,7 +235,7 @@ namespace TestDataAccess
 
             _context.SaveChanges();
 
-            var result = await _userRepository.GetTopTen();
+            List<User> result = await _userRepository.GetTopTen();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
@@ -253,7 +253,7 @@ namespace TestDataAccess
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
-            var result = await _userRepository.GetTopTen();
+            List<User> result = await _userRepository.GetTopTen();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
@@ -281,7 +281,7 @@ namespace TestDataAccess
 
             _context.SaveChanges();
 
-            var result = await _userRepository.GetTopTen();
+            List<User> result = await _userRepository.GetTopTen();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(5, result.Count);
@@ -311,7 +311,7 @@ namespace TestDataAccess
 
             _context.SaveChanges();
 
-            var result = await _userRepository.GetTopTen();
+            List<User> result = await _userRepository.GetTopTen();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
@@ -341,7 +341,7 @@ namespace TestDataAccess
 
             _context.SaveChanges();
 
-            var result = await _userRepository.GetTopTen();
+            List<User> result = await _userRepository.GetTopTen();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
@@ -374,9 +374,9 @@ namespace TestDataAccess
 
             await _userRepository.ResetScores();
 
-            var users = _context.Users.ToList();
+            List<User> users = _context.Users.ToList();
             Assert.AreEqual(5, users.Count);
-            foreach (var user in users)
+            foreach (User user in users)
             {
                 Assert.AreEqual(0, user.Score);
             }
@@ -390,7 +390,7 @@ namespace TestDataAccess
 
             await _userRepository.ResetScores();
 
-            var users = _context.Users.ToList();
+            List<User> users = _context.Users.ToList();
             Assert.AreEqual(0, users.Count);
         }
 
@@ -400,7 +400,7 @@ namespace TestDataAccess
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
-            var user1 = new User
+            User user1 = new User
             {
                 Name = "User1",
                 LastName = "Test",
@@ -409,7 +409,7 @@ namespace TestDataAccess
                 BirthDate = new DateTime(1990, 1, 1),
                 Score = 100
             };
-            var user2 = new User
+            User user2 = new User
             {
                 Name = "User2",
                 LastName = "Test",
@@ -424,8 +424,8 @@ namespace TestDataAccess
 
             await _userRepository.ResetScores();
 
-            var retrievedUser1 = _context.Users.FirstOrDefault(u => u.Email == "user1@test.com");
-            var retrievedUser2 = _context.Users.FirstOrDefault(u => u.Email == "user2@test.com");
+            User? retrievedUser1 = _context.Users.FirstOrDefault(u => u.Email == "user1@test.com");
+            User? retrievedUser2 = _context.Users.FirstOrDefault(u => u.Email == "user2@test.com");
 
             Assert.IsNotNull(retrievedUser1);
             Assert.IsNotNull(retrievedUser2);
@@ -439,7 +439,7 @@ namespace TestDataAccess
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
-            var user = new User
+            User user = new User
             {
                 Name = "TestUser",
                 LastName = "LastName",
@@ -454,7 +454,7 @@ namespace TestDataAccess
 
             await _userRepository.ResetScores();
 
-            var retrievedUser = _context.Users.FirstOrDefault(u => u.Email == "test@test.com");
+            User? retrievedUser = _context.Users.FirstOrDefault(u => u.Email == "test@test.com");
 
             Assert.IsNotNull(retrievedUser);
             Assert.AreEqual(0, retrievedUser.Score);
@@ -472,7 +472,7 @@ namespace TestDataAccess
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
-            var scores = new[] { 10, 0, 500, 1000, 75 };
+            int[] scores = new[] { 10, 0, 500, 1000, 75 };
             for (int i = 0; i < scores.Length; i++)
             {
                 User visitor = new User
@@ -491,7 +491,7 @@ namespace TestDataAccess
 
             await _userRepository.ResetScores();
 
-            var users = _context.Users.ToList();
+            List<User> users = _context.Users.ToList();
             Assert.AreEqual(scores.Length, users.Count);
             Assert.IsTrue(users.All(u => u.Score == 0));
         }
@@ -517,7 +517,7 @@ namespace TestDataAccess
 
             await _userRepository.Update(user);
 
-            var updatedUser = _context.Users.FirstOrDefault(u => u.Email == "original@test.com");
+            User? updatedUser = _context.Users.FirstOrDefault(u => u.Email == "original@test.com");
             Assert.AreEqual("Updated", updatedUser.Name);
             Assert.AreEqual("NewName", updatedUser.LastName);
             Assert.AreEqual(100, updatedUser.Score);
@@ -542,7 +542,7 @@ namespace TestDataAccess
 
             await _userRepository.Update(user);
 
-            var updatedUser = await _userRepository.GetByIdWithRoles(user.Id);
+            User? updatedUser = await _userRepository.GetByIdWithRoles(user.Id);
             Assert.AreEqual(1, updatedUser.UserRoles.Count);
             Assert.AreEqual(Role.VISITOR, updatedUser.UserRoles.First().Role.Name);
         }
@@ -576,15 +576,15 @@ namespace TestDataAccess
             _context.SaveChanges();
 
             // Act: Load user (now tracked), call RegisterEntry, then Update
-            var trackedUser = await _userRepository.GetById(user.Id);
+            User? trackedUser = await _userRepository.GetById(user.Id);
             trackedUser.RegisterEntry(attraction, DateTime.Now);
             trackedUser.Score = 10;
 
             await _userRepository.Update(trackedUser);
 
             // Assert: Verify Report and VisitorReport were inserted
-            var reports = _context.Reports.ToList();
-            var visitorReports = _context.VisitorReports.ToList();
+            List<Report> reports = _context.Reports.ToList();
+            List<VisitorReport> visitorReports = _context.VisitorReports.ToList();
 
             Assert.AreEqual(1, reports.Count, "Report should be inserted");
             Assert.AreEqual(1, visitorReports.Count, "VisitorReport should be inserted");
@@ -621,7 +621,7 @@ namespace TestDataAccess
             _context.SaveChanges();
 
             // Act: Load user, register entries on two different dates
-            var trackedUser = await _userRepository.GetById(user.Id);
+            User? trackedUser = await _userRepository.GetById(user.Id);
             DateTime date1 = new DateTime(2025, 10, 1, 10, 0, 0);
             DateTime date2 = new DateTime(2025, 10, 2, 14, 0, 0);
 
@@ -632,8 +632,8 @@ namespace TestDataAccess
             await _userRepository.Update(trackedUser);
 
             // Assert: Verify both VisitorReports and Reports were inserted
-            var reports = _context.Reports.ToList();
-            var visitorReports = _context.VisitorReports.ToList();
+            List<Report> reports = _context.Reports.ToList();
+            List<VisitorReport> visitorReports = _context.VisitorReports.ToList();
 
             Assert.AreEqual(2, reports.Count, "Two Reports should be inserted");
             Assert.AreEqual(2, visitorReports.Count, "Two VisitorReports should be inserted");

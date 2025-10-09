@@ -33,7 +33,7 @@ namespace BusinessLogic
 
             if (user.UserRoles != null && user.UserRoles.Any())
             {
-                foreach (var userRole in user.UserRoles)
+                foreach (UserRole userRole in user.UserRoles)
                 {
                     claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
                 }

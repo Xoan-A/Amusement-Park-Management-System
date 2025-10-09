@@ -8,7 +8,7 @@ public class ForbiddenExceptionTest
     [TestMethod]
     public void Constructor_WithNoArgs_SetsDefaultMessage()
     {
-        var exception = new ForbiddenException();
+        ForbiddenException exception = new ForbiddenException();
 
         Assert.AreEqual("Forbidden access", exception.Message);
     }
@@ -17,7 +17,7 @@ public class ForbiddenExceptionTest
     public void Constructor_WithCustomMessage_SetsCustomMessage()
     {
         string customMessage = "Custom forbidden message";
-        var exception = new ForbiddenException(customMessage);
+        ForbiddenException exception = new ForbiddenException(customMessage);
 
         Assert.AreEqual(customMessage, exception.Message);
     }

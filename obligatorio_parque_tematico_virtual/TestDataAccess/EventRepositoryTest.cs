@@ -82,7 +82,7 @@ public class EventRepositoryTest
         await _context.Events.AddAsync(eventEntity);
         await _context.SaveChangesAsync();
 
-        var events = await _eventRepository.GetAll();
+        List<Event> events = await _eventRepository.GetAll();
 
         Assert.IsNotNull(events);
         Assert.IsTrue(events.Any());

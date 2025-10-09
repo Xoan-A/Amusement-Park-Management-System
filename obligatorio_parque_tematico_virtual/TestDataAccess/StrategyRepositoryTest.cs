@@ -25,7 +25,7 @@ public class StrategyRepositoryTest
         _context.Database.EnsureCreated();
         _strategyRepository = new StrategyRepository(_context);
 
-        var seededConfig = _context.StrategyConfigurations.FirstOrDefault(s => s.Id == 1);
+        StrategyConfiguration? seededConfig = _context.StrategyConfigurations.FirstOrDefault(s => s.Id == 1);
         if (seededConfig != null)
         {
             _context.StrategyConfigurations.Remove(seededConfig);

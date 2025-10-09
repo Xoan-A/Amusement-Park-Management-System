@@ -30,7 +30,7 @@ public class EventLogic : IEventLogic
             throw new KeyNotFoundException($"No se encontró el evento con id {expectedEventId}");
         }
 
-        var eventResponse = new EventResponse
+        EventResponse eventResponse = new EventResponse
         {
             Id = eventEntity.Id,
             Name = eventEntity.Name,
@@ -58,8 +58,8 @@ public class EventLogic : IEventLogic
 
     public async Task<List<EventResponse>> GetAllEvents()
     {
-        var events = await _eventRepository.GetAll();
-        var eventResponses = events.Select(eventEntity => new EventResponse
+        List<Event> events = await _eventRepository.GetAll();
+        List<EventResponse> eventResponses = events.Select(eventEntity => new EventResponse
         {
             Id = eventEntity.Id,
             Name = eventEntity.Name,
@@ -100,7 +100,7 @@ public class EventLogic : IEventLogic
         };
         if (newEvent.AttractionIds != null)
         {
-            foreach (var attractionId in newEvent.AttractionIds)
+            foreach (Guid attractionId in newEvent.AttractionIds)
             {
                 Attraction attraction = await _attractionLogic.GetAttractionEntityById(attractionId);
                 eventEntity.AddAttraction(attraction);
@@ -141,7 +141,7 @@ public class EventLogic : IEventLogic
 
     private async Task<bool> IsEventNameUnique(string name)
     {
-        var events = await _eventRepository.GetAll() ?? new List<Event>();
+        List<Event> events = await _eventRepository.GetAll() ?? new List<Event>();
         return !events.Any(e => e.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 }

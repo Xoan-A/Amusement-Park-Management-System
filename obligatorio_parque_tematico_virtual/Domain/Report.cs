@@ -12,14 +12,12 @@ public class Report
 
     public Report(DateTime enterDate, Attraction attraction)
     {
-        Id = Guid.NewGuid();
         EnterDate = enterDate;
         Attraction = attraction;
     }
 
     public Report()
     {
-        Id = Guid.NewGuid();
     }
 
     public void SetExitTime(DateTime date)

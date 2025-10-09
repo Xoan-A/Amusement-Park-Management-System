@@ -169,8 +169,8 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         List<Report> filteredReports = reports.Where(r => r.EnterDate >= startDate && r.EnterDate <= endDate).ToList();
 
         AttractionsVisitResponse attractionsVisits = new AttractionsVisitResponse();
-        var groupedReports = filteredReports.GroupBy(r => r.AttractionId);
-        foreach (var group in groupedReports)
+        System.Collections.Generic.IEnumerable<System.Linq.IGrouping<Guid, Report>> groupedReports = filteredReports.GroupBy(r => r.AttractionId);
+        foreach (System.Linq.IGrouping<Guid, Report> group in groupedReports)
         {
             Attraction attraction = group.First().Attraction;
             int visitCount = group.Count();

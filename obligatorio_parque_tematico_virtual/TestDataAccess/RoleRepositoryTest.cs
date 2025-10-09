@@ -14,7 +14,7 @@ public class RoleRepositoryTest
     [TestInitialize]
     public void Setup()
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
+        DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite("DataSource=:memory:")
             .Options;
 

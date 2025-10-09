@@ -33,7 +33,7 @@ public class IncidentControllerTest
         {
             builder.ConfigureServices(services =>
             {
-                var descriptor = services.SingleOrDefault(
+                ServiceDescriptor? descriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
                 if (descriptor != null) services.Remove(descriptor);
 
@@ -44,13 +44,13 @@ public class IncidentControllerTest
             });
         });
 
-        using (var scope = _factory.Services.CreateScope())
+        using (IServiceScope scope = _factory.Services.CreateScope())
         {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Database.EnsureCreated();
         }
 
-        var jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+        Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
         {
             SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
             Issuer = "ParqueTematico",
@@ -88,12 +88,12 @@ public class IncidentControllerTest
     [TestMethod]
     public async Task GetAttractionIncidents_ValidRequest_ReturnsIncidents()
     {
-        var incidents = new List<string> { "Incidente1" };
+        List<string> incidents = new List<string> { "Incidente1" };
         _mockService.Setup(s => s.GetAttractionIncidents(_attractionId)).ReturnsAsync(incidents);
-        var response = await _operatorClient.GetAsync($"/api/incidents/{_attractionId}");
+        HttpResponseMessage response = await _operatorClient.GetAsync($"/api/incidents/{_attractionId}");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
-        List<string> result = JsonSerializer.Deserialize<List<string>>(content,
+        List<string>? result = JsonSerializer.Deserialize<List<string>>(content,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         Assert.AreEqual(1, result.Count);
         Assert.AreEqual("Incidente1", result[0]);
@@ -103,7 +103,7 @@ public class IncidentControllerTest
     public async Task GetAttractionIncidents_AttractionNotFound_ReturnsNotFound()
     {
         _mockService.Setup(s => s.GetAttractionIncidents(_attractionId)).ThrowsAsync(new KeyNotFoundException());
-        var response = await _operatorClient.GetAsync($"/api/incidents/{_attractionId}");
+        HttpResponseMessage response = await _operatorClient.GetAsync($"/api/incidents/{_attractionId}");
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 
@@ -111,9 +111,9 @@ public class IncidentControllerTest
     public async Task AddIncident_ValidRequest_AddsIncident()
     {
         _mockService.Setup(s => s.AddIncident(_attractionId, "Incidente")).Returns(Task.CompletedTask);
-        var incidentRequest = new { incident = "Incidente" };
-        var content = new StringContent(JsonSerializer.Serialize(incidentRequest), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PutAsync($"/api/incidents/{_attractionId}", content);
+        object incidentRequest = new { incident = "Incidente" };
+        StringContent content = new StringContent(JsonSerializer.Serialize(incidentRequest), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _operatorClient.PutAsync($"/api/incidents/{_attractionId}", content);
         response.EnsureSuccessStatusCode();
         string respContent = await response.Content.ReadAsStringAsync();
         Assert.IsTrue(respContent.Contains("Incident reported successfully"));
@@ -123,9 +123,9 @@ public class IncidentControllerTest
     public async Task AddIncident_AttractionNotFound_ReturnsNotFound()
     {
         _mockService.Setup(s => s.AddIncident(_attractionId, "Incidente")).ThrowsAsync(new KeyNotFoundException());
-        var incidentRequest = new { incident = "Incidente" };
-        var content = new StringContent(JsonSerializer.Serialize(incidentRequest), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PutAsync($"/api/incidents/{_attractionId}", content);
+        object incidentRequest = new { incident = "Incidente" };
+        StringContent content = new StringContent(JsonSerializer.Serialize(incidentRequest), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _operatorClient.PutAsync($"/api/incidents/{_attractionId}", content);
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 
@@ -133,7 +133,7 @@ public class IncidentControllerTest
     public async Task RemoveIncident_ValidRequest_RemovesIncident()
     {
         _mockService.Setup(s => s.RemoveIncident(_attractionId, "Incidente")).Returns(Task.CompletedTask);
-        var response = await _operatorClient.DeleteAsync($"/api/incidents/{_attractionId}?incident=Incidente");
+        HttpResponseMessage response = await _operatorClient.DeleteAsync($"/api/incidents/{_attractionId}?incident=Incidente");
         response.EnsureSuccessStatusCode();
         Assert.IsTrue(response.StatusCode == HttpStatusCode.NoContent);
     }
@@ -142,7 +142,7 @@ public class IncidentControllerTest
     public async Task RemoveIncident_AttractionNotFound_ReturnsNotFound()
     {
         _mockService.Setup(s => s.RemoveIncident(_attractionId, "Incidente")).ThrowsAsync(new KeyNotFoundException());
-        var response = await _operatorClient.DeleteAsync($"/api/incidents/{_attractionId}?incident=Incidente");
+        HttpResponseMessage response = await _operatorClient.DeleteAsync($"/api/incidents/{_attractionId}?incident=Incidente");
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

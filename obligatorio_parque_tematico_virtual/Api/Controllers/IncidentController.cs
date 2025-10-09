@@ -20,7 +20,7 @@ public class IncidentController : ControllerBase
     [Authorize(Roles = "Operator")]
     public async Task<IActionResult> GetAttractionIncidents(Guid id)
     {
-        var incidents = await _attractionLogic.GetAttractionIncidents(id);
+        List<string> incidents = await _attractionLogic.GetAttractionIncidents(id);
         return Ok(incidents);
     }
 

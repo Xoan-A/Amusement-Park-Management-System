@@ -17,9 +17,9 @@ public class ActiveStrategy : IActiveStrategy
         LoadStrategyFromDatabase();
     }
 
-    private async Task LoadStrategyFromDatabase()
+    private void LoadStrategyFromDatabase()
     {
-        var config = await _strategyRepository.Get();
+        StrategyConfiguration? config = _strategyRepository.Get().GetAwaiter().GetResult();
         if (config != null)
         {
             Strategy = config.StrategyName switch
@@ -49,7 +49,7 @@ public class ActiveStrategy : IActiveStrategy
 
         Strategy = strategy;
 
-        var config = new StrategyConfiguration
+        StrategyConfiguration config = new StrategyConfiguration
         {
             Id = 1,
             StrategyName = setStrategyRequest.StrategyName,
@@ -58,13 +58,13 @@ public class ActiveStrategy : IActiveStrategy
         await _strategyRepository.Update(config);
     }
 
-    public async Task<IConcreteStrategy> GetStrategy()
+    public Task<IConcreteStrategy> GetStrategy()
     {
-        await LoadStrategyFromDatabase();
+        LoadStrategyFromDatabase();
         if (Strategy == null)
             throw new InvalidOperationException("Strategy not set");
 
-        return Strategy;
+        return Task.FromResult(Strategy);
     }
 
     public static int BasicCalculation(User visitor, Attraction attraction)

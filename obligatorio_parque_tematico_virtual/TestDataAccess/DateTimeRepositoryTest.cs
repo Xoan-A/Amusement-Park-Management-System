@@ -61,7 +61,7 @@ namespace TestDataAccess
 
             _dateTimeRepository.SetConfiguredDateTime(configuredTime);
 
-            var configuration = _context.DateTimeConfigurations.FirstOrDefault();
+            DateTimeConfiguration? configuration = _context.DateTimeConfigurations.FirstOrDefault();
             Assert.IsNotNull(configuration);
             Assert.AreEqual(configuredTime, configuration.CurrentDateTime);
             Assert.AreEqual(1, _context.DateTimeConfigurations.Count());
@@ -77,7 +77,7 @@ namespace TestDataAccess
             DateTime updatedTime = new DateTime(2025, 10, 15, 10, 30, 0);
             _dateTimeRepository.SetConfiguredDateTime(updatedTime);
 
-            var configuration = _context.DateTimeConfigurations.FirstOrDefault();
+            DateTimeConfiguration? configuration = _context.DateTimeConfigurations.FirstOrDefault();
             Assert.IsNotNull(configuration);
             Assert.AreEqual(updatedTime, configuration.CurrentDateTime);
             Assert.AreEqual(1, _context.DateTimeConfigurations.Count());
@@ -95,7 +95,7 @@ namespace TestDataAccess
             _dateTimeRepository.SetConfiguredDateTime(time3);
 
             Assert.AreEqual(1, _context.DateTimeConfigurations.Count());
-            var configuration = _context.DateTimeConfigurations.FirstOrDefault();
+            DateTimeConfiguration? configuration = _context.DateTimeConfigurations.FirstOrDefault();
             Assert.IsNotNull(configuration);
             Assert.AreEqual(time3, configuration.CurrentDateTime);
         }
@@ -107,7 +107,7 @@ namespace TestDataAccess
 
             _dateTimeRepository.SetConfiguredDateTime(configuredTime);
 
-            var retrievedConfiguration = _context.DateTimeConfigurations.FirstOrDefault();
+            DateTimeConfiguration? retrievedConfiguration = _context.DateTimeConfigurations.FirstOrDefault();
             Assert.IsNotNull(retrievedConfiguration);
             Assert.AreEqual(configuredTime, retrievedConfiguration.CurrentDateTime);
         }

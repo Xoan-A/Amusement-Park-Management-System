@@ -14,7 +14,7 @@ namespace TestBusinessLogic
         [TestInitialize]
         public void Setup()
         {
-            var jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
             {
                 SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
                 Issuer = "ParqueTematico",
@@ -179,7 +179,7 @@ namespace TestBusinessLogic
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
 
-            var roleClaims = jwtToken.Claims.Where(c => c.Type == ClaimTypes.Role).ToList();
+            List<Claim> roleClaims = jwtToken.Claims.Where(c => c.Type == ClaimTypes.Role).ToList();
             Assert.AreEqual(2, roleClaims.Count);
             Assert.IsTrue(roleClaims.Any(c => c.Value == "Administrator"));
             Assert.IsTrue(roleClaims.Any(c => c.Value == "Operator"));
@@ -206,7 +206,7 @@ namespace TestBusinessLogic
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
 
-            var roleClaims = jwtToken.Claims.Where(c => c.Type == ClaimTypes.Role).ToList();
+            List<Claim> roleClaims = jwtToken.Claims.Where(c => c.Type == ClaimTypes.Role).ToList();
             Assert.AreEqual(1, roleClaims.Count);
             Assert.AreEqual("Visitor", roleClaims[0].Value);
         }
@@ -229,7 +229,7 @@ namespace TestBusinessLogic
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
 
-            var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+            Claim? roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
             Assert.IsNull(roleClaim);
         }
     }

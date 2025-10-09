@@ -24,7 +24,7 @@ namespace Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var user = await _authLogic.Login(request.Email, request.Password);
+            Domain.User user = await _authLogic.Login(request.Email, request.Password);
 
             if (user == null)
             {
@@ -32,10 +32,10 @@ namespace Api.Controllers
             }
 
 
-            var token = _tokenLogic.GenerateToken(user);
-            var roles = user.UserRoles?.Select(ur => ur.Role.Name).ToArray() ?? new string[0];
+            string token = _tokenLogic.GenerateToken(user);
+            string[] roles = user.UserRoles?.Select(ur => ur.Role.Name).ToArray() ?? new string[0];
 
-            var response = new LoginResponse
+            LoginResponse response = new LoginResponse
             {
                 Token = token,
                 Email = user.Email,
@@ -49,14 +49,14 @@ namespace Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterVisitorRequest request)
         {
-            var visitor = await _userLogic.RegisterVisitor(request);
+            Domain.User visitor = await _userLogic.RegisterVisitor(request);
 
             if (visitor == null)
             {
                 return BadRequest(new { Message = "Registration failed" });
             }
 
-            var response = new RegisterResponse
+            RegisterResponse response = new RegisterResponse
             {
                 Id = visitor.Id,
                 Email = visitor.Email,

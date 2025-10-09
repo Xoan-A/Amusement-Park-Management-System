@@ -37,7 +37,7 @@ public class AttractionControllerTest
         {
             builder.ConfigureServices(services =>
             {
-                var descriptor = services.SingleOrDefault(
+                ServiceDescriptor? descriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
                 if (descriptor != null)
                 {
@@ -52,22 +52,22 @@ public class AttractionControllerTest
             });
         });
 
-        using (var scope = _factory.Services.CreateScope())
+        using (IServiceScope scope = _factory.Services.CreateScope())
         {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Database.EnsureCreated();
         }
 
         _client = _factory.CreateClient();
 
-        var jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+        Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
         {
             SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
             Issuer = "ParqueTematico",
             Audience = "ParqueTematico",
             ExpirationHours = 1
         });
-        var tokenService = new BusinessLogic.TokenLogic(jwtSettings);
+        BusinessLogic.TokenLogic tokenService = new BusinessLogic.TokenLogic(jwtSettings);
 
         User adminUser = new User
         {
@@ -151,7 +151,7 @@ public class AttractionControllerTest
                 }
             });
 
-        var response = await _adminClient.GetAsync("/api/attractions");
+        HttpResponseMessage response = await _adminClient.GetAsync("/api/attractions");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
         AllAttractionsResponse attractionsResponse = JsonSerializer.Deserialize<AllAttractionsResponse>(content,
@@ -189,7 +189,7 @@ public class AttractionControllerTest
 
         _mockAttractionService.Setup(s => s.GetAttractionById(id)).ReturnsAsync(expectedAttraction);
 
-        var response = await _adminClient.GetAsync($"/api/attractions/{id}");
+        HttpResponseMessage response = await _adminClient.GetAsync($"/api/attractions/{id}");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
         AttractionResponse attractionResponse = JsonSerializer.Deserialize<AttractionResponse>(content,
@@ -224,8 +224,8 @@ public class AttractionControllerTest
 
         _mockAttractionService.Setup(s => s.CreateAttraction(It.IsAny<AttractionRequest>())).ReturnsAsync(expectedId);
 
-        var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
-        var response = await _adminClient.PostAsync("/api/attractions", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _adminClient.PostAsync("/api/attractions", content);
 
         response.EnsureSuccessStatusCode();
         string responseContent = await response.Content.ReadAsStringAsync();
@@ -256,8 +256,8 @@ public class AttractionControllerTest
 
         _mockAttractionService.Setup(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>()))
             .Returns(Task.CompletedTask);
-        var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
-        var response = await _adminClient.PutAsync($"/api/attractions/{id}", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _adminClient.PutAsync($"/api/attractions/{id}", content);
 
         response.EnsureSuccessStatusCode();
         string responseContent = await response.Content.ReadAsStringAsync();
@@ -277,7 +277,7 @@ public class AttractionControllerTest
     {
         Guid id = Guid.NewGuid();
         _mockAttractionService.Setup(s => s.DeleteAttraction(id)).Returns(Task.CompletedTask);
-        var response = await _adminClient.DeleteAsync($"/api/attractions/{id}");
+        HttpResponseMessage response = await _adminClient.DeleteAsync($"/api/attractions/{id}");
         response.EnsureSuccessStatusCode();
         Assert.AreEqual(System.Net.HttpStatusCode.NoContent, response.StatusCode);
         _mockAttractionService.Verify(s => s.DeleteAttraction(id), Times.Once);
@@ -295,8 +295,8 @@ public class AttractionControllerTest
             MaxCapacity = 100,
         };
 
-        var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
-        var response = await _client.PostAsync("/api/attractions", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _client.PostAsync("/api/attractions", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.CreateAttraction(It.IsAny<AttractionRequest>()), Times.Never);
@@ -305,7 +305,7 @@ public class AttractionControllerTest
     [TestMethod]
     public async Task GetAttractions_InvalidAuthentication_ReturnsUnauthorized()
     {
-        var response = await _client.GetAsync("/api/attractions");
+        HttpResponseMessage response = await _client.GetAsync("/api/attractions");
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.GetAllAttractions(), Times.Never);
     }
@@ -314,7 +314,7 @@ public class AttractionControllerTest
     public async Task GetAttractionById_InvalidAuthentication_ReturnsUnauthorized()
     {
         Guid id = Guid.NewGuid();
-        var response = await _client.GetAsync($"/api/attractions/{id}");
+        HttpResponseMessage response = await _client.GetAsync($"/api/attractions/{id}");
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.GetAttractionById(id), Times.Never);
     }
@@ -331,8 +331,8 @@ public class AttractionControllerTest
             MinAge = 10,
             MaxCapacity = 100,
         };
-        var content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
-        var response = await _client.PutAsync($"/api/attractions/{id}", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(newAttraction), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _client.PutAsync($"/api/attractions/{id}", content);
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>()), Times.Never);
     }
@@ -341,7 +341,7 @@ public class AttractionControllerTest
     public async Task DeleteAttraction_InvalidAuthentication_ReturnsUnauthorized()
     {
         Guid id = Guid.NewGuid();
-        var response = await _client.DeleteAsync($"/api/attractions/{id}");
+        HttpResponseMessage response = await _client.DeleteAsync($"/api/attractions/{id}");
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.DeleteAttraction(id), Times.Never);
     }
@@ -364,11 +364,11 @@ public class AttractionControllerTest
                 s.RegisterEntry(userId, requestBody))
             .Returns(Task.CompletedTask);
 
-        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
-        var responseContent = await response.Content.ReadAsStringAsync();
+        string responseContent = await response.Content.ReadAsStringAsync();
         MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
             new JsonSerializerOptions
             {
@@ -393,8 +393,8 @@ public class AttractionControllerTest
             UserId = userId
         };
 
-        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _client.PutAsync($"/api/attractions/entry/{attractionId}", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _client.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockUserLogic.Verify(
@@ -419,11 +419,11 @@ public class AttractionControllerTest
         _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
             .Returns(Task.CompletedTask);
 
-        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
-        var responseContent = await response.Content.ReadAsStringAsync();
+        string responseContent = await response.Content.ReadAsStringAsync();
         MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
             new JsonSerializerOptions
             {
@@ -452,11 +452,11 @@ public class AttractionControllerTest
         _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
             .Returns(Task.CompletedTask);
 
-        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
-        var responseContent = await response.Content.ReadAsStringAsync();
+        string responseContent = await response.Content.ReadAsStringAsync();
         MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
             new JsonSerializerOptions
             {
@@ -488,11 +488,11 @@ public class AttractionControllerTest
         _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
             .Returns(Task.CompletedTask);
 
-        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
-        var responseContent = await response.Content.ReadAsStringAsync();
+        string responseContent = await response.Content.ReadAsStringAsync();
         MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
             new JsonSerializerOptions
             {
@@ -523,11 +523,11 @@ public class AttractionControllerTest
         _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
             .Returns(Task.CompletedTask);
 
-        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
-        var responseContent = await response.Content.ReadAsStringAsync();
+        string responseContent = await response.Content.ReadAsStringAsync();
         MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
             new JsonSerializerOptions
             {
@@ -557,8 +557,8 @@ public class AttractionControllerTest
         _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()))
             .ThrowsAsync(new ArgumentException("User does not have a valid ticket."));
 
-        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
@@ -581,11 +581,11 @@ public class AttractionControllerTest
         _mockUserLogic.Setup(s => s.RegisterExit(attractionId, requestBody))
             .Returns(Task.CompletedTask);
 
-        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _operatorClient.PutAsync($"/api/attractions/exit/{attractionId}", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _operatorClient.PutAsync($"/api/attractions/exit/{attractionId}", content);
 
         response.EnsureSuccessStatusCode();
-        var responseContent = await response.Content.ReadAsStringAsync();
+        string responseContent = await response.Content.ReadAsStringAsync();
         MessageResponse? messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
             new JsonSerializerOptions
             {
@@ -610,8 +610,8 @@ public class AttractionControllerTest
             userId = userId
         };
 
-        var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await _client.PutAsync($"/api/attractions/exit/{attractionId}", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _client.PutAsync($"/api/attractions/exit/{attractionId}", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockUserLogic.Verify(s => s.RegisterExit(It.IsAny<Guid>(), It.IsAny<RegisterExitRequest>()),
@@ -631,10 +631,10 @@ public class AttractionControllerTest
 
         _mockAttractionService.Setup(s => s.GetCapacity(attractionId)).ReturnsAsync(expectedCapacity);
 
-        var response = await _adminClient.GetAsync($"/api/attractions/capacity/{attractionId}");
+        HttpResponseMessage response = await _adminClient.GetAsync($"/api/attractions/capacity/{attractionId}");
         response.EnsureSuccessStatusCode();
-        var content = await response.Content.ReadAsStringAsync();
-        var capacityResponse = JsonSerializer.Deserialize<CapacityResponse>(content, new JsonSerializerOptions
+        string content = await response.Content.ReadAsStringAsync();
+        CapacityResponse? capacityResponse = JsonSerializer.Deserialize<CapacityResponse>(content, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
@@ -650,7 +650,7 @@ public class AttractionControllerTest
     public async Task GetCapacity_InvalidAuthentication_ReturnsUnauthorized()
     {
         Guid attractionId = Guid.NewGuid();
-        var response = await _client.GetAsync($"/api/attractions/capacity/{attractionId}");
+        HttpResponseMessage response = await _client.GetAsync($"/api/attractions/capacity/{attractionId}");
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockAttractionService.Verify(s => s.GetCapacity(It.IsAny<Guid>()), Times.Never);
     }
@@ -716,12 +716,12 @@ public class AttractionControllerTest
         _mockAttractionService.Setup(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitsRequest>()))
             .ReturnsAsync(expectedResponse);
 
-        var response =
+        HttpResponseMessage response =
             await _adminClient.GetAsync(
                 $"/api/attractions/visits?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
 
         response.EnsureSuccessStatusCode();
-        var responseContent = await response.Content.ReadAsStringAsync();
+        string responseContent = await response.Content.ReadAsStringAsync();
         AttractionsVisitResponse? visitResponse = JsonSerializer.Deserialize<AttractionsVisitResponse>(responseContent,
             new JsonSerializerOptions
             {
@@ -738,7 +738,7 @@ public class AttractionControllerTest
         DateTime startDate = new DateTime(2025, 10, 1);
         DateTime endDate = new DateTime(2025, 10, 7);
 
-        var response =
+        HttpResponseMessage response =
             await _operatorClient.GetAsync(
                 $"/api/attractions/visits?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
 

@@ -23,10 +23,10 @@ public class AttractionController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetAttractions()
     {
-        var attractions = await _attractionLogic.GetAllAttractions();
-        var response = new AllAttractionsResponse();
+        List<AttractionResponse> attractions = await _attractionLogic.GetAllAttractions();
+        AllAttractionsResponse response = new AllAttractionsResponse();
 
-        foreach (var attraction in attractions)
+        foreach (AttractionResponse attraction in attractions)
         {
             response.Attractions.Add(new AttractionResponse()
             {
