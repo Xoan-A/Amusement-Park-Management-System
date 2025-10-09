@@ -1042,7 +1042,6 @@ namespace TestBusinessLogic
 
             TopTenResponse result = await _userLogic.GetTopTenUsers();
 
-            Assert.IsNotNull(result);
             Assert.IsNotNull(result.TopTenUsers);
             Assert.AreEqual(10, result.TopTenUsers.Count);
             Assert.AreEqual(110, result.TopTenUsers[0].Score);
@@ -1053,9 +1052,9 @@ namespace TestBusinessLogic
         [TestMethod]
         public async Task ModifyUser_ShouldUpdateAndReturnResponse_WhenDataIsValid()
         {
-            var userId = Guid.NewGuid();
-            var actorSub = userId.ToString();
-            var originalUser = new User
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User
             {
                 Id = userId,
                 Name = "Old",
@@ -1071,7 +1070,7 @@ namespace TestBusinessLogic
                 Score = 10
             };
 
-            var request = new ModifyUserRequest
+            ModifyUserRequest request = new ModifyUserRequest
             {
                 Name = "New",
                 LastName = "Surname",
@@ -1104,9 +1103,9 @@ namespace TestBusinessLogic
         [TestMethod]
         public async Task ModifyUser_WhenEmailNotChanged_DoesNotCheckUniqueness()
         {
-            var userId = Guid.NewGuid();
-            var actorSub = userId.ToString();
-            var originalUser = new User
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User
             {
                 Id = userId,
                 Name = "Old",
@@ -1116,7 +1115,7 @@ namespace TestBusinessLogic
                 BirthDate = new DateTime(1990, 1, 1)
             };
 
-            var request = new ModifyUserRequest
+            ModifyUserRequest request = new ModifyUserRequest
             {
                 Name = "New",
                 LastName = "Surname",
@@ -1139,7 +1138,7 @@ namespace TestBusinessLogic
         public async Task ModifyUser_WhenActorSubIsNull_ThrowsUnauthorized()
         {
             var userId = Guid.NewGuid();
-            var request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
 
             await _userLogic.ModifyUser(userId, null, request);
         }
@@ -1148,9 +1147,9 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(ForbiddenException))]
         public async Task ModifyUser_WhenActorIsDifferentUser_ThrowsForbidden()
         {
-            var userId = Guid.NewGuid();
-            var actorSub = Guid.NewGuid().ToString();
-            var request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            Guid userId = Guid.NewGuid();
+            string actorSub = Guid.NewGuid().ToString();
+            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
 
             await _userLogic.ModifyUser(userId, actorSub, request);
         }
@@ -1159,9 +1158,9 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(KeyNotFoundException))]
         public async Task ModifyUser_WhenUserNotFound_ThrowsNotFound()
         {
-            var userId = Guid.NewGuid();
-            var actorSub = userId.ToString();
-            var request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync((User)null);
 
@@ -1172,11 +1171,11 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(ArgumentException))]
         public async Task ModifyUser_WhenEmailNotUnique_ThrowsArgument()
         {
-            var userId = Guid.NewGuid();
-            var actorSub = userId.ToString();
-            var originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
-            var request = new ModifyUserRequest
-                { Name = "A", LastName = "B", Email = "new@example.com", Password = "p" };
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            ModifyUserRequest request = new ModifyUserRequest
+            { Name = "A", LastName = "B", Email = "new@example.com", Password = "p" };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
             _mockUserRepository.Setup(r => r.IsEmailUnique("new@example.com")).ReturnsAsync(false);
@@ -1188,11 +1187,11 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(ArgumentException))]
         public async Task ModifyUser_WhenNameEmpty_ThrowsArgument()
         {
-            var userId = Guid.NewGuid();
-            var actorSub = userId.ToString();
-            var originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
-            var request = new ModifyUserRequest
-                { Name = "", LastName = "B", Email = "new@example.com", Password = "p" };
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            ModifyUserRequest request = new ModifyUserRequest
+            { Name = "", LastName = "B", Email = "new@example.com", Password = "p" };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1203,11 +1202,11 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(ArgumentException))]
         public async Task ModifyUser_WhenLastNameEmpty_ThrowsArgument()
         {
-            var userId = Guid.NewGuid();
-            var actorSub = userId.ToString();
-            var originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
-            var request = new ModifyUserRequest
-                { Name = "A", LastName = "", Email = "new@example.com", Password = "p" };
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            ModifyUserRequest request = new ModifyUserRequest
+            { Name = "A", LastName = "", Email = "new@example.com", Password = "p" };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1218,10 +1217,10 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(ArgumentException))]
         public async Task ModifyUser_WhenEmailEmpty_ThrowsArgument()
         {
-            var userId = Guid.NewGuid();
-            var actorSub = userId.ToString();
-            var originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
-            var request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "", Password = "p" };
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "", Password = "p" };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1232,10 +1231,10 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(ArgumentException))]
         public async Task ModifyUser_WhenPasswordEmpty_ThrowsArgument()
         {
-            var userId = Guid.NewGuid();
-            var actorSub = userId.ToString();
-            var originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
-            var request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "x@y.com", Password = "" };
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "x@y.com", Password = "" };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1246,11 +1245,11 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(ArgumentException))]
         public async Task ModifyUser_WhenBirthDateInFuture_ThrowsArgument()
         {
-            var userId = Guid.NewGuid();
-            var actorSub = userId.ToString();
-            var originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
-            var request = new ModifyUserRequest
-                { Name = "A", LastName = "B", Email = "x@y.com", Password = "p", BirthDate = DateTime.Now.AddDays(1) };
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            ModifyUserRequest request = new ModifyUserRequest
+            { Name = "A", LastName = "B", Email = "x@y.com", Password = "p", BirthDate = DateTime.Now.AddDays(1) };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
