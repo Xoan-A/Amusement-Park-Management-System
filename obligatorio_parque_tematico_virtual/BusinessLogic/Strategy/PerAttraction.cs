@@ -6,8 +6,9 @@ namespace BusinessLogic;
 public class PerAttraction : IContreteStrategy
 {
     public string Name => "PerAttraction";
-    public int CalculateScore(StrategyRequest strategyRequest)
+    
+    public async Task<int> CalculateScore(User visitor, Attraction attraction, StrategyRequest strategyRequest)
     {
-        return ActiveStrategy.BasicCalculation(strategyRequest);
+        return await ActiveStrategy.BasicCalculation(visitor, attraction);
     }
 }

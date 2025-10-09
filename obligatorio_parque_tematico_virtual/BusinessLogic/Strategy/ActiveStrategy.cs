@@ -68,11 +68,8 @@ public class ActiveStrategy : IActiveStrategy
         return Strategy;
     }
 
-    public static int BasicCalculation(StrategyRequest strategyRequest)
+    public static async Task<int> BasicCalculation(User visitor, Attraction attraction)
     {
-        User visitor = strategyRequest.User;
-        Attraction attraction = strategyRequest.Attraction;
-
         if (visitor == null || attraction == null)
             throw new ArgumentException("Visitor and Attraction cannot be null");
 
@@ -96,8 +93,9 @@ public class ActiveStrategy : IActiveStrategy
         return score;
     }
 
-    public int CalculateScore(StrategyRequest strategyRequest)
+    public async Task<int> CalculateScore(User user, Attraction attraction, StrategyRequest strategyRequest)
     {
-        return Strategy.CalculateScore(strategyRequest);
+        int score = await Strategy.CalculateScore(user, attraction, strategyRequest);
+        return score;
     }
 }

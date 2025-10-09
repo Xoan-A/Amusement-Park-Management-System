@@ -187,12 +187,12 @@ namespace BusinessLogic
 
             var strategyRequest = new StrategyRequest
             {
-                User = user,
-                Attraction = attraction,
+                UserId = user.Id,
+                AttractionId = attraction.Id,
                 IsSepcialEvent = isEvent,
             };
 
-            int score = _activeStrategy.CalculateScore(strategyRequest);
+            int score = await _activeStrategy.CalculateScore(user, attraction, strategyRequest);
 
             user.Score += score;
             await _userRepository.Update(user);
