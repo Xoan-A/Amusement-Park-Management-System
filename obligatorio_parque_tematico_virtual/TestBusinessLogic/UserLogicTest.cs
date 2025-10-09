@@ -6,6 +6,8 @@ using IBusinessLogic;
 using IDataAccess;
 using BusinessLogic;
 using Models.Out;
+using Domain.Exceptions;
+using Models.In;
 
 namespace TestBusinessLogic
 {
@@ -1040,12 +1042,218 @@ namespace TestBusinessLogic
 
             TopTenResponse result = await _userLogic.GetTopTenUsers();
 
-            Assert.IsNotNull(result);
             Assert.IsNotNull(result.TopTenUsers);
             Assert.AreEqual(10, result.TopTenUsers.Count);
             Assert.AreEqual(110, result.TopTenUsers[0].Score);
             Assert.AreEqual(20, result.TopTenUsers[9].Score);
             _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task ModifyUser_ShouldUpdateAndReturnResponse_WhenDataIsValid()
+        {
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User
+            {
+                Id = userId,
+                Name = "Old",
+                LastName = "Name",
+                Email = "old@example.com",
+                Password = "oldpass",
+                BirthDate = new DateTime(1990, 1, 1),
+                MembershipLevel = MembershipLevel.Standard,
+                UserRoles = new System.Collections.Generic.List<UserRole>
+                {
+                    new UserRole { Role = new Role { Name = Role.VISITOR } }
+                },
+                Score = 10
+            };
+
+            ModifyUserRequest request = new ModifyUserRequest
+            {
+                Name = "New",
+                LastName = "Surname",
+                Email = "new@example.com",
+                Password = "New#Pass1",
+                BirthDate = new DateTime(1992, 2, 2)
+            };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+            _mockUserRepository.Setup(r => r.IsEmailUnique("new@example.com")).ReturnsAsync(true);
+            _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+
+            UserResponse response = await _userLogic.ModifyUser(userId, actorSub, request);
+
+            Assert.AreEqual(userId, response.Id);
+            Assert.AreEqual(request.Email, response.Email);
+
+            _mockUserRepository.Verify(r => r.IsEmailUnique("new@example.com"), Times.Once);
+            _mockPasswordService.Verify(p => p.HashPassword("New#Pass1"), Times.Once);
+            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u =>
+                u.Name == request.Name &&
+                u.LastName == request.LastName &&
+                u.Email == request.Email &&
+                u.Password == "hashed" &&
+                u.BirthDate == request.BirthDate
+            )), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task ModifyUser_WhenEmailNotChanged_DoesNotCheckUniqueness()
+        {
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User
+            {
+                Id = userId,
+                Name = "Old",
+                LastName = "Name",
+                Email = "same@example.com",
+                Password = "oldpass",
+                BirthDate = new DateTime(1990, 1, 1)
+            };
+
+            ModifyUserRequest request = new ModifyUserRequest
+            {
+                Name = "New",
+                LastName = "Surname",
+                Email = "same@example.com",
+                Password = "New#Pass1"
+            };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+            _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
+
+            await _userLogic.ModifyUser(userId, actorSub, request);
+
+            _mockUserRepository.Verify(r => r.IsEmailUnique(It.IsAny<string>()), Times.Never);
+            _mockUserRepository.Verify(
+                r => r.Update(It.Is<User>(u => u.Email == "same@example.com" && u.Password == "hashed")), Times.Once);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(UnauthorizedException))]
+        public async Task ModifyUser_WhenActorSubIsNull_ThrowsUnauthorized()
+        {
+            var userId = Guid.NewGuid();
+            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+
+            await _userLogic.ModifyUser(userId, null, request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ForbiddenException))]
+        public async Task ModifyUser_WhenActorIsDifferentUser_ThrowsForbidden()
+        {
+            Guid userId = Guid.NewGuid();
+            string actorSub = Guid.NewGuid().ToString();
+            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+
+            await _userLogic.ModifyUser(userId, actorSub, request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(KeyNotFoundException))]
+        public async Task ModifyUser_WhenUserNotFound_ThrowsNotFound()
+        {
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync((User)null);
+
+            await _userLogic.ModifyUser(userId, actorSub, request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task ModifyUser_WhenEmailNotUnique_ThrowsArgument()
+        {
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            ModifyUserRequest request = new ModifyUserRequest
+            { Name = "A", LastName = "B", Email = "new@example.com", Password = "p" };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+            _mockUserRepository.Setup(r => r.IsEmailUnique("new@example.com")).ReturnsAsync(false);
+
+            await _userLogic.ModifyUser(userId, actorSub, request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task ModifyUser_WhenNameEmpty_ThrowsArgument()
+        {
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            ModifyUserRequest request = new ModifyUserRequest
+            { Name = "", LastName = "B", Email = "new@example.com", Password = "p" };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+
+            await _userLogic.ModifyUser(userId, actorSub, request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task ModifyUser_WhenLastNameEmpty_ThrowsArgument()
+        {
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            ModifyUserRequest request = new ModifyUserRequest
+            { Name = "A", LastName = "", Email = "new@example.com", Password = "p" };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+
+            await _userLogic.ModifyUser(userId, actorSub, request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task ModifyUser_WhenEmailEmpty_ThrowsArgument()
+        {
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "", Password = "p" };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+
+            await _userLogic.ModifyUser(userId, actorSub, request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task ModifyUser_WhenPasswordEmpty_ThrowsArgument()
+        {
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "x@y.com", Password = "" };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+
+            await _userLogic.ModifyUser(userId, actorSub, request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task ModifyUser_WhenBirthDateInFuture_ThrowsArgument()
+        {
+            Guid userId = Guid.NewGuid();
+            string actorSub = userId.ToString();
+            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            ModifyUserRequest request = new ModifyUserRequest
+            { Name = "A", LastName = "B", Email = "x@y.com", Password = "p", BirthDate = DateTime.Now.AddDays(1) };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+
+            await _userLogic.ModifyUser(userId, actorSub, request);
         }
     }
 }

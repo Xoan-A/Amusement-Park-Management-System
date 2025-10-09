@@ -3,6 +3,8 @@ using IBusinessLogic;
 using Microsoft.AspNetCore.Authorization;
 using Models.In;
 using Models.Out;
+using System.IdentityModel.Tokens.Jwt;
+using Domain.Exceptions;
 
 namespace Api.Controllers;
 
@@ -45,5 +47,14 @@ public class UserController : ControllerBase
         };
 
         return Ok(response);
+    }
+
+    [HttpPut("{userId}")]
+    [Authorize]
+    public async Task<IActionResult> ModifyUser(Guid userId, [FromBody] ModifyUserRequest request)
+    {
+        string actorSubClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        UserResponse updated = await _userLogic.ModifyUser(userId, actorSubClaim, request);
+        return Ok(updated);
     }
 }
