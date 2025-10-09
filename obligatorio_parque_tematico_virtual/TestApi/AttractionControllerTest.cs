@@ -705,7 +705,7 @@ public class AttractionControllerTest
             CurrentCapacity = attraction1.CurrentCapacity,
             IsActive = attraction1.IsActive
         };
-        
+
         AttractionResponse attractionRes2 = new AttractionResponse()
         {
             Id = attraction2.Id,
@@ -750,6 +750,7 @@ public class AttractionControllerTest
                 $"/api/attractions/visits?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
 
         Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
-        _mockAttractionService.Verify(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitsRequest>()), Times.Never);
+        _mockAttractionService.Verify(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitsRequest>()),
+            Times.Never);
     }
 }
