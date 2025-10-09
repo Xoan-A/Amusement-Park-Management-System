@@ -5,6 +5,7 @@ using IBusinessLogic;
 using IDataAccess;
 using Models.In;
 using Models.Out;
+using Domain.Exceptions;
 
 namespace BusinessLogic
 {
@@ -246,6 +247,69 @@ namespace BusinessLogic
             user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = role.Id, Role = role });
 
             await _userRepository.Update(user);
+        }
+
+        public async Task<UserResponse> ModifyUser(Guid userId, string? actorSubClaim, ModifyUserRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(actorSubClaim) || !Guid.TryParse(actorSubClaim, out var actorUserId))
+            {
+                throw new UnauthorizedException("Invalid token");
+            }
+
+            if (actorUserId != userId)
+            {
+                throw new ForbiddenException("You cannot modify another user");
+            }
+
+            User user = await _userRepository.GetByIdWithRoles(userId);
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Name))
+                throw new ArgumentException("Name cannot be empty");
+            user.Name = request.Name;
+
+            if (string.IsNullOrWhiteSpace(request.LastName))
+                throw new ArgumentException("Last name cannot be empty");
+            user.LastName = request.LastName;
+
+            if (string.IsNullOrWhiteSpace(request.Email))
+                throw new ArgumentException("Email cannot be empty");
+            if (!string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                bool unique = await _userRepository.IsEmailUnique(request.Email);
+                if (!unique)
+                    throw new ArgumentException("Email must be unique");
+                user.Email = request.Email;
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Password))
+                throw new ArgumentException("Password cannot be empty");
+            string hashedPassword = _passwordLogic.HashPassword(request.Password);
+            user.Password = hashedPassword;
+
+            if (request.BirthDate.HasValue)
+            {
+                if (request.BirthDate.Value >= DateTime.Now)
+                    throw new ArgumentException("Birth date must be in the past");
+                user.BirthDate = request.BirthDate.Value;
+            }
+
+            await _userRepository.Update(user);
+
+            return new UserResponse
+            {
+                Id = user.Id,
+                Name = user.Name,
+                LastName = user.LastName,
+                Email = user.Email,
+                BirthDate = user.BirthDate,
+                MembershipLevel = (int?)user.MembershipLevel,
+                UserRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                Score = user.Score
+            };
         }
     }
 }
