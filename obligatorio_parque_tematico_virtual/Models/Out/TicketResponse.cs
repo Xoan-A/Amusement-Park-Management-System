@@ -1,6 +1,3 @@
-using System;
-using Domain;
-
 namespace Models.Out
 {
     public class TicketResponse
@@ -9,7 +6,7 @@ namespace Models.Out
         public Guid VisitorId { get; set; }
         public DateTime PurchaseDate { get; set; }
         public DateTime VisitDate { get; set; }
-        public TicketType Type { get; set; }
+        public int Type { get; set; }
         public Guid QRCode { get; set; }
         public Guid? EventId { get; set; }
     }

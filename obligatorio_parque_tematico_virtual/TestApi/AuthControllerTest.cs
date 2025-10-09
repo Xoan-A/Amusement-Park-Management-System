@@ -128,7 +128,7 @@ namespace ApiTests
                 Message = "Registration successful"
             };
 
-            var user = new Domain.User
+            var user = new User
             {
                 Id = expectedResponse.Id,
                 Name = request.Name,
@@ -138,7 +138,7 @@ namespace ApiTests
                 BirthDate = request.BirthDate
             };
 
-            _mockUserLogic.Setup(x => x.RegisterVisitor(request.Name, request.LastName, request.Email, request.Password, request.BirthDate))
+            _mockUserLogic.Setup(x => x.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
                          .ReturnsAsync(user);
 
             var json = JsonSerializer.Serialize(request);
@@ -222,7 +222,7 @@ namespace ApiTests
                 BirthDate = new DateTime(1990, 1, 1)
             };
 
-            _mockUserLogic.Setup(x => x.RegisterVisitor(request.Name, request.LastName, request.Email, request.Password, request.BirthDate))
+            _mockUserLogic.Setup(x => x.RegisterVisitor(request))
                          .ReturnsAsync((User)null);
 
             var json = JsonSerializer.Serialize(request);

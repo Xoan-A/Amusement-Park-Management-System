@@ -130,7 +130,7 @@ namespace TestApi
             {
                 VisitorId = registerResult.Id,
                 VisitDate = DateTime.Now.AddDays(7),
-                TicketType = TicketType.General
+                TicketType = (int)TicketType.General
             };
 
             HttpContent purchaseContent = new StringContent(
@@ -148,7 +148,7 @@ namespace TestApi
 
             Assert.IsNotNull(ticketResult);
             Assert.AreEqual(registerResult.Id, ticketResult.VisitorId);
-            Assert.AreEqual(TicketType.General, ticketResult.Type);
+            Assert.AreEqual((int)TicketType.General, ticketResult.Type);
             Assert.AreNotEqual(Guid.Empty, ticketResult.QRCode);
         }
 
@@ -173,7 +173,7 @@ namespace TestApi
             {
                 VisitorId = Guid.NewGuid(),
                 VisitDate = DateTime.Now.AddDays(7),
-                TicketType = TicketType.General
+                TicketType = (int)TicketType.General
             };
 
             HttpContent content = new StringContent(
@@ -217,7 +217,7 @@ namespace TestApi
             {
                 VisitorId = registerResult.Id,
                 VisitDate = DateTime.Now.AddDays(-7),
-                TicketType = TicketType.General
+                TicketType = (int)TicketType.General
             };
 
             HttpContent purchaseContent = new StringContent(
@@ -261,7 +261,7 @@ namespace TestApi
             {
                 VisitorId = registerResult.Id,
                 VisitDate = DateTime.Now.AddDays(7),
-                TicketType = TicketType.General
+                TicketType = (int)TicketType.General
             };
 
             HttpContent purchaseContent = new StringContent(
@@ -340,7 +340,7 @@ namespace TestApi
             {
                 VisitorId = registerResult.Id,
                 VisitDate = DateTime.Now.AddDays(7),
-                TicketType = TicketType.General
+                TicketType = (int)TicketType.General
             };
 
             HttpContent purchaseContent1 = new StringContent(
@@ -355,7 +355,7 @@ namespace TestApi
             {
                 VisitorId = registerResult.Id,
                 VisitDate = DateTime.Now.AddDays(14),
-                TicketType = TicketType.EventSpecial,
+                TicketType = (int)TicketType.EventSpecial,
                 EventId = Guid.NewGuid()
             };
 
@@ -386,7 +386,7 @@ namespace TestApi
             {
                 VisitorId = Guid.NewGuid(),
                 VisitDate = DateTime.Now.AddDays(7),
-                TicketType = TicketType.General
+                TicketType = (int)TicketType.General
             };
 
             HttpContent content = new StringContent(

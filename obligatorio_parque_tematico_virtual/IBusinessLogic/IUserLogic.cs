@@ -6,10 +6,10 @@ namespace IBusinessLogic
 {
     public interface IUserLogic
     {
-        Task<User> RegisterVisitor(string name, string lastName, string email, string password, DateTime birthDate);
+        Task<User> RegisterVisitor(RegisterVisitorRequest registerVisitorRequest);
         Task<UserResponse> CreateUser(CreateUserRequest request);
-        Task RegisterEntry(Guid userId, Guid attractionId, DateTime enterDate, Guid? qr, Guid? nfc, Guid? eventId);
-        Task RegisterExit(Guid userId, Guid attractionId, DateTime exitDate);
+        Task RegisterEntry(Guid id, RegisterEntryRequest request);
+        Task RegisterExit(Guid id, RegisterExitRequest request);
         Task<TopTenResponse> GetTopTenUsers();
         Task AddRoleToUser(Guid userId, string role);
         Task<User> GetUserById(Guid userId);

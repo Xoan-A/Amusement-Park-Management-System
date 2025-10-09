@@ -352,17 +352,17 @@ public class AttractionControllerTest
         Guid attractionId = Guid.NewGuid();
         Guid userId = Guid.NewGuid();
         DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-        _mockUserLogic.Setup(s =>
-                s.RegisterEntry(userId, attractionId, enterDate, It.IsAny<Guid?>(), It.IsAny<Guid?>(),
-                    It.IsAny<Guid?>()))
-            .Returns(Task.CompletedTask);
+        
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
             EnterDate = enterDate,
             UserId = userId
         };
+        
+        _mockUserLogic.Setup(s =>
+                s.RegisterEntry(userId, requestBody))
+            .Returns(Task.CompletedTask);
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
         var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
@@ -375,11 +375,9 @@ public class AttractionControllerTest
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
         _mockUserLogic.Verify(
-            s => s.RegisterEntry(userId, attractionId, enterDate, It.IsAny<Guid?>(), It.IsAny<Guid?>(),
-                It.IsAny<Guid?>()), Times.Once);
+            s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -400,8 +398,7 @@ public class AttractionControllerTest
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockUserLogic.Verify(
-            s => s.RegisterEntry(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<Guid?>(),
-                It.IsAny<Guid?>(), It.IsAny<Guid?>()), Times.Never);
+            s => s.RegisterEntry(It.IsAny<Guid>(), It.IsAny<RegisterEntryRequest>()), Times.Never);
     }
 
     [TestMethod]
@@ -412,9 +409,6 @@ public class AttractionControllerTest
         Guid qrCode = Guid.NewGuid();
         DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null))
-            .Returns(Task.CompletedTask);
-
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
             EnterDate = enterDate,
@@ -422,6 +416,9 @@ public class AttractionControllerTest
             Qr = qrCode
         };
 
+        _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
+            .Returns(Task.CompletedTask);
+        
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
         var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
@@ -435,7 +432,7 @@ public class AttractionControllerTest
 
         Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null), Times.Once);
+        _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -445,15 +442,15 @@ public class AttractionControllerTest
         Guid userId = Guid.NewGuid();
         DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, null, userId, null))
-            .Returns(Task.CompletedTask);
-
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
             EnterDate = enterDate,
             UserId = userId,
             NFC = userId
         };
+        
+        _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
+            .Returns(Task.CompletedTask);
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
         var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
@@ -468,7 +465,7 @@ public class AttractionControllerTest
 
         Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, null, userId, null), Times.Once);
+        _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -480,9 +477,6 @@ public class AttractionControllerTest
         Guid eventId = Guid.NewGuid();
         DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, eventId))
-            .Returns(Task.CompletedTask);
-
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
             EnterDate = enterDate,
@@ -490,6 +484,9 @@ public class AttractionControllerTest
             Qr = qrCode,
             EventId = eventId
         };
+        
+        _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
+            .Returns(Task.CompletedTask);
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
         var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
@@ -504,7 +501,7 @@ public class AttractionControllerTest
 
         Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, eventId), Times.Once);
+        _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -515,9 +512,6 @@ public class AttractionControllerTest
         Guid eventId = Guid.NewGuid();
         DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, null, userId, eventId))
-            .Returns(Task.CompletedTask);
-
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
             EnterDate = enterDate,
@@ -525,6 +519,9 @@ public class AttractionControllerTest
             NFC = userId,
             EventId = eventId
         };
+        
+        _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
+            .Returns(Task.CompletedTask);
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
         var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
@@ -539,7 +536,7 @@ public class AttractionControllerTest
 
         Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, null, userId, eventId), Times.Once);
+        _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -550,21 +547,22 @@ public class AttractionControllerTest
         Guid qrCode = Guid.NewGuid();
         DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-        _mockUserLogic.Setup(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null))
-            .ThrowsAsync(new ArgumentException("User does not have a valid ticket."));
-
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
             EnterDate = enterDate,
             UserId = userId,
             Qr = qrCode
         };
-
+        
+        _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()))
+            .ThrowsAsync(new ArgumentException("User does not have a valid ticket."));
+        
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
         var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
+        _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
-        _mockUserLogic.Verify(s => s.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null), Times.Once);
+        
     }
 
     [TestMethod]
@@ -574,14 +572,16 @@ public class AttractionControllerTest
         Guid userId = Guid.NewGuid();
         DateTime exitDate = new DateTime(2025, 10, 1, 12, 0, 0);
 
-        _mockUserLogic.Setup(s => s.RegisterExit(userId, attractionId, exitDate))
-            .Returns(Task.CompletedTask);
+        
 
         RegisterExitRequest requestBody = new RegisterExitRequest
         {
             exitDate = exitDate,
             userId = userId
         };
+        
+        _mockUserLogic.Setup(s => s.RegisterExit(attractionId, requestBody))
+            .Returns(Task.CompletedTask);
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
         var response = await _operatorClient.PutAsync($"/api/attractions/exit/{attractionId}", content);
@@ -596,7 +596,7 @@ public class AttractionControllerTest
 
         Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Exit registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(s => s.RegisterExit(userId, attractionId, exitDate), Times.Once);
+        _mockUserLogic.Verify(s => s.RegisterExit(attractionId, It.IsAny<RegisterExitRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -616,7 +616,7 @@ public class AttractionControllerTest
         var response = await _client.PutAsync($"/api/attractions/exit/{attractionId}", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
-        _mockUserLogic.Verify(s => s.RegisterExit(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateTime>()),
+        _mockUserLogic.Verify(s => s.RegisterExit(It.IsAny<Guid>(), It.IsAny<RegisterExitRequest>()),
             Times.Never);
     }
 

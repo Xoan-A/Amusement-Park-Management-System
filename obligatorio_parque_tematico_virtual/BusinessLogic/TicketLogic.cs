@@ -1,6 +1,7 @@
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
+using Models.In;
 
 namespace BusinessLogic
 {
@@ -21,9 +22,13 @@ namespace BusinessLogic
             _eventRepository = eventRepository;
         }
 
-        public async Task<Ticket> PurchaseTicketAsync(Guid visitorId, DateTime visitDate, TicketType ticketType,
-            Guid? eventId)
+        public async Task<Ticket> PurchaseTicketAsync(PurchaseTicketRequest request)
         {
+            Guid visitorId = request.VisitorId;
+            DateTime visitDate = request.VisitDate;
+            TicketType ticketType = (TicketType)request.TicketType;;
+            Guid? eventId = request.EventId;
+            
             User visitor = await _userRepository.GetById(visitorId);
             if (visitor == null)
             {
