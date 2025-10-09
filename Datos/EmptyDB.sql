@@ -1,51 +1,22 @@
-/*
-================================================================================
-ADD ADMIN USER - MINIMAL SCRIPT
-================================================================================
+-- DELETE ALL DATA
 
-HOW TO EXECUTE IN DBEAVER:
-1. Open this file in DBeaver
-2. Connect to your ParqueTematicoDB database
-3. Select all (Ctrl+A / Cmd+A)
-4. Execute (Ctrl+Enter / Cmd+Enter or press F5)
+DELETE FROM Reports;
+DELETE FROM VisitorReports;
+DELETE FROM EventAttraction;
+DELETE FROM Tickets;
+DELETE FROM UserRoles;
+DELETE FROM Users;
+DELETE FROM Events;
+DELETE FROM Attractions;
+DELETE FROM DateTimeConfigurations;
 
-WHAT THIS DOES:
-- Creates ONE admin user
-- Email: admin@test.com
-- Password: admin123
-- Role: Administrator
 
-NOTE: This script only ADDS data, it does NOT delete anything.
+-- CREATE ONE ADMIN USER
+-- Email: admin@test.com
+-- Password: admin123
 
-================================================================================
-*/
-
--- Insert Admin User
 INSERT INTO Users (Id, Name, LastName, Email, Password, BirthDate, MembershipLevel, Score)
-VALUES
-    (NEWID(),
-     'Admin',
-     'User',
-     'admin@test.com',
-     '$2a$11$TgMvdaYlj5ZLE7ybPvoFi.jqSqp6S39yr3JXz34wo/ReZThKeHuYq',
-     '1980-01-01',
-     2,
-     0);
-
--- Get the newly created user's ID and assign Administrator role
-DECLARE @AdminUserId UNIQUEIDENTIFIER;
-SELECT @AdminUserId = Id FROM Users WHERE Email = 'admin@test.com';
+VALUES ('11111111-1111-1111-1111-111111111111', 'Admin', 'User', 'admin@test.com', '$2a$11$TgMvdaYlj5ZLE7ybPvoFi.jqSqp6S39yr3JXz34wo/ReZThKeHuYq', '1980-01-01', 2, 0);
 
 INSERT INTO UserRoles (UserId, RoleId)
-VALUES (@AdminUserId, 1);
-
-/*
-================================================================================
-SUCCESS! Admin user created.
-
-CREDENTIALS:
-- Email: admin@test.com
-- Password: admin123
-
-================================================================================
-*/
+VALUES ('11111111-1111-1111-1111-111111111111', 1);
