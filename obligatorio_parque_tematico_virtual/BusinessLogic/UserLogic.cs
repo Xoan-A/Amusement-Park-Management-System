@@ -64,11 +64,11 @@ namespace BusinessLogic
             if (visitorRole != null)
             {
                 visitor.UserRoles.Add(new UserRole
-                { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
+                    { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
             }
 
             User res = await _userRepository.Create(visitor);
-            
+
             return new UserResponse
             {
                 Id = res.Id,

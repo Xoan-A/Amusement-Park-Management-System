@@ -28,7 +28,7 @@ namespace BusinessLogic
             bool isPasswordValid = _passwordLogic.VerifyPassword(password, user.Password);
             if (!isPasswordValid)
                 throw new ArgumentException("Invalid email or password.");
-            
+
             UserResponse userResponse = new UserResponse()
             {
                 Id = user.Id,

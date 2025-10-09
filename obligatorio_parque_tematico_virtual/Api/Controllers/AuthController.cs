@@ -24,7 +24,7 @@ namespace Api.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             UserResponse user = await _authLogic.Login(request.Email, request.Password);
-            
+
             string token = _tokenLogic.GenerateToken(user);
             string[] roles = user.UserRoles?.ToArray() ?? new string[0];
 
