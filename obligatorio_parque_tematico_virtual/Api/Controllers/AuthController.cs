@@ -4,6 +4,7 @@ using IBusinessLogic;
 using Models.In;
 using Models.Out;
 using Domain.Exceptions;
+using Domain;
 
 namespace Api.Controllers
 {
@@ -23,14 +24,15 @@ namespace Api.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var user = _authLogic.Login(request.Email, request.Password);
+            var user = await _authLogic.Login(request.Email, request.Password);
 
             if (user == null)
             {
                 throw new UnauthorizedException("Invalid email or password");
             }
+            
 
             var token = _tokenLogic.GenerateToken(user);
             var roles = user.UserRoles?.Select(ur => ur.Role.Name).ToArray() ?? new string[0];
@@ -47,9 +49,9 @@ namespace Api.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterVisitorRequest request)
+        public async Task<IActionResult> Register([FromBody] RegisterVisitorRequest request)
         {
-            var visitor = _userLogic.RegisterVisitor(request.Name, request.LastName, request.Email, request.Password, request.BirthDate);
+            var visitor = await _userLogic.RegisterVisitor(request.Name, request.LastName, request.Email, request.Password, request.BirthDate);
 
             if (visitor == null)
             {

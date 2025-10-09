@@ -1,16 +1,15 @@
-using System;
 using Domain;
 
 namespace IDataAccess
 {
     public interface IUserRepository
     {
-        User Create(User user);
-        User GetByEmail(string email);
-        User GetById(Guid id);
-        User GetByIdWithRoles(Guid id);
-        User GetByEmailWithRoles(string email);
-        bool IsEmailUnique(string email);
+        Task<User> Create(User user);
+        Task<User?> GetByEmail(string email);
+        Task<User?> GetById(Guid id);
+        Task<User?> GetByIdWithRoles(Guid id);
+        Task<User?> GetByEmailWithRoles(string email);
+        Task<bool> IsEmailUnique(string email);
         Task<List<User>> GetTopTen();
         Task ResetScores();
         Task Update(User user);

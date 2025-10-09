@@ -27,7 +27,7 @@ namespace BusinessLogic
         public async Task<Ticket> PurchaseTicketAsync(Guid visitorId, DateTime visitDate, TicketType ticketType,
             Guid? eventId)
         {
-            User visitor = _userRepository.GetById(visitorId);
+            User visitor = await _userRepository.GetById(visitorId);
             if (visitor == null)
             {
                 return null;

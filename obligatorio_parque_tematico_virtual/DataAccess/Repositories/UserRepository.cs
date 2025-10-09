@@ -17,42 +17,47 @@ namespace DataAccess.Repositories
             _context = context;
         }
 
-        public User Create(User user)
+        public async Task<User> Create(User user)
         {
-            _context.Users.Add(user);
-            _context.SaveChanges();
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
             return user;
         }
 
-        public User GetByEmail(string email)
+        public Task<User?> GetByEmail(string email)
         {
-            return _context.Users.FirstOrDefault(u => u.Email == email);
+            return _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public User GetById(Guid id)
+        public Task<User?> GetById(Guid id)
         {
-            return _context.Users.FirstOrDefault(u => u.Id == id);
+            return _context.Users.Include(u =>
+                    u.VisitorReports)
+                .ThenInclude(vr =>
+                    vr.Reports)
+                .ThenInclude(r
+                    => r.Attraction).FirstOrDefaultAsync(u => u.Id == id);
         }
 
-        public User GetByIdWithRoles(Guid id)
+        public Task<User?> GetByIdWithRoles(Guid id)
         {
             return _context.Users
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
-                .FirstOrDefault(u => u.Id == id);
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
 
-        public User GetByEmailWithRoles(string email)
+        public Task<User?> GetByEmailWithRoles(string email)
         {
             return _context.Users
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
-                .FirstOrDefault(u => u.Email == email);
+                .FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public bool IsEmailUnique(string email)
+        public async Task<bool> IsEmailUnique(string email)
         {
-            return !_context.Users.Any(u => u.Email == email);
+            return !await _context.Users.AnyAsync(u => u.Email == email);
         }
 
         public Task<List<User>> GetTopTen()

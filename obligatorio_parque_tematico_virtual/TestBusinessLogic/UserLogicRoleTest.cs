@@ -6,6 +6,8 @@ using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using BusinessLogic;
+using Models.In;
+using Models.Out;
 
 namespace TestBusinessLogic;
 
@@ -37,7 +39,7 @@ public class UserLogicRoleTest
     }
 
     [TestMethod]
-    public void RegisterVisitor_ShouldAssignVisitorRole()
+    public async Task RegisterVisitor_ShouldAssignVisitorRole()
     {
         string name = "John";
         string lastName = "Doe";
@@ -47,19 +49,19 @@ public class UserLogicRoleTest
 
         Role visitorRole = new Role { Id = 3, Name = Role.VISITOR };
 
-        _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
+        _mockUserRepository.Setup(r => r.IsEmailUnique(email)).ReturnsAsync(true);
         _mockPasswordService.Setup(p => p.HashPassword(password)).Returns("hashedPassword");
         _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns(visitorRole);
-        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).Returns<User>(u => u);
+        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
 
-        User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+        User result = await _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
         Assert.IsNotNull(result);
         _mockRoleRepository.Verify(r => r.GetByName(Role.VISITOR), Times.Once);
     }
 
     [TestMethod]
-    public void CreateUser_ShouldCreateUserWithRoles()
+    public async Task CreateUser_ShouldCreateUserWithRoles()
     {
         string name = "Admin";
         string lastName = "User";
@@ -70,127 +72,225 @@ public class UserLogicRoleTest
         Role adminRole = new Role { Id = 1, Name = Role.ADMINISTRATOR };
         Role operatorRole = new Role { Id = 2, Name = Role.OPERATOR };
 
-        _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
+        _mockUserRepository.Setup(r => r.IsEmailUnique(email)).ReturnsAsync(true);
         _mockPasswordService.Setup(p => p.HashPassword(password)).Returns("hashedPassword");
         _mockRoleRepository.Setup(r => r.GetByName(Role.ADMINISTRATOR)).Returns(adminRole);
         _mockRoleRepository.Setup(r => r.GetByName(Role.OPERATOR)).Returns(operatorRole);
-        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).Returns<User>(u => u);
+        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
 
-        User result = _userLogic.CreateUser(name, lastName, email, password, roles);
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = name,
+            LastName = lastName,
+            Email = email,
+            Password = password,
+            Roles = roles.ToList()
+        };
+        
+        UserResponse result = await _userLogic.CreateUser(request);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.UserRoles.Count);
     }
 
     [TestMethod]
-    public void CreateUser_ShouldReturnNull_WhenNameIsEmpty()
+    public async Task CreateUser_ShouldReturnNull_WhenNameIsEmpty()
     {
-        User result = _userLogic.CreateUser("", "Doe", "test@test.com", "password123", new[] { Role.VISITOR });
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "password123",
+            Roles = new List<string> { Role.VISITOR }
+        };
+        
+        UserResponse result = await _userLogic.CreateUser(request);
         Assert.IsNull(result);
     }
 
     [TestMethod]
-    public void CreateUser_ShouldReturnNull_WhenLastNameIsEmpty()
+    public async Task CreateUser_ShouldReturnNull_WhenLastNameIsEmpty()
     {
-        User result = _userLogic.CreateUser("John", "", "test@test.com", "password123", new[] { Role.VISITOR });
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "",
+            Email = "test@test.com",
+            Password = "password123",
+            Roles = new List<string> { Role.VISITOR }
+        };
+        
+        UserResponse result = await _userLogic.CreateUser(request);
         Assert.IsNull(result);
     }
 
     [TestMethod]
-    public void CreateUser_ShouldReturnNull_WhenEmailIsEmpty()
+    public async Task CreateUser_ShouldReturnNull_WhenEmailIsEmpty()
     {
-        User result = _userLogic.CreateUser("John", "Doe", "", "password123", new[] { Role.VISITOR });
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "",
+            Password = "password123",
+            Roles = new List<string> { Role.VISITOR }
+        };
+        
+        UserResponse result = await _userLogic.CreateUser(request);
         Assert.IsNull(result);
     }
 
     [TestMethod]
-    public void CreateUser_ShouldReturnNull_WhenPasswordIsEmpty()
+    public async Task CreateUser_ShouldReturnNull_WhenPasswordIsEmpty()
     {
-        User result = _userLogic.CreateUser("John", "Doe", "test@test.com", "", new[] { Role.VISITOR });
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "",
+            Roles = new List<string> { Role.VISITOR }
+        };
+        
+        UserResponse result = await _userLogic.CreateUser(request);
         Assert.IsNull(result);
     }
 
     [TestMethod]
-    public void CreateUser_ShouldReturnNull_WhenEmailIsNotUnique()
+    public async Task CreateUser_ShouldReturnNull_WhenEmailIsNotUnique()
     {
-        _mockUserRepository.Setup(r => r.IsEmailUnique("existing@test.com")).Returns(false);
+        _mockUserRepository.Setup(r => r.IsEmailUnique("existing@test.com")).ReturnsAsync(false);
 
-        User result = _userLogic.CreateUser("John", "Doe", "existing@test.com", "password123", new[] { Role.VISITOR });
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "existing@test.com",
+            Password = "password123",
+            Roles = new List<string> { Role.VISITOR }
+        };
+        
+        UserResponse result = await _userLogic.CreateUser(request);
         Assert.IsNull(result);
     }
 
     [TestMethod]
-    public void CreateUser_ShouldHashPassword_BeforeCreating()
+    public async Task CreateUser_ShouldHashPassword_BeforeCreating()
     {
         string plainPassword = "plainPassword123";
         string hashedPassword = "hashedPassword123";
 
-        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
         _mockPasswordService.Setup(p => p.HashPassword(plainPassword)).Returns(hashedPassword);
-        _mockUserRepository.Setup(r => r.Create(It.Is<User>(u => u.Password == hashedPassword))).Returns<User>(u => u);
+        _mockUserRepository.Setup(r => r.Create(It.Is<User>(u => u.Password == hashedPassword))).ReturnsAsync((User u) => u);
 
-        User result = _userLogic.CreateUser("John", "Doe", "test@test.com", plainPassword, null);
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = plainPassword,
+            Roles = null
+        };
+        
+        UserResponse result = await _userLogic.CreateUser(request);
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(hashedPassword, result.Password);
         _mockPasswordService.Verify(p => p.HashPassword(plainPassword), Times.Once);
     }
 
     [TestMethod]
-    public void CreateUser_ShouldCreateUserWithoutRoles_WhenRolesIsNull()
+    public async Task CreateUser_ShouldCreateUserWithoutRoles_WhenRolesIsNull()
     {
-        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
         _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
-        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).Returns<User>(u => u);
+        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
 
-        User result = _userLogic.CreateUser("John", "Doe", "test@test.com", "password123", null);
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "password123",
+            Roles = null
+        };
+        
+        UserResponse result = await _userLogic.CreateUser(request);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(0, result.UserRoles.Count);
     }
 
     [TestMethod]
-    public void CreateUser_ShouldCreateUserWithoutRoles_WhenRolesIsEmpty()
+    public async Task CreateUser_ShouldCreateUserWithoutRoles_WhenRolesIsEmpty()
     {
-        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
         _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
-        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).Returns<User>(u => u);
+        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
 
-        User result = _userLogic.CreateUser("John", "Doe", "test@test.com", "password123", new string[0]);
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "password123",
+            Roles = new List<string>()
+        };
+        
+        UserResponse result = await _userLogic.CreateUser(request);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(0, result.UserRoles.Count);
     }
 
     [TestMethod]
-    public void CreateUser_ShouldSkipInvalidRole_WhenRoleNotFound()
+    public async Task CreateUser_ShouldSkipInvalidRole_WhenRoleNotFound()
     {
-        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
         _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
         _mockRoleRepository.Setup(r => r.GetByName("InvalidRole")).Returns((Role)null);
-        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).Returns<User>(u => u);
+        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
 
-        User result = _userLogic.CreateUser("John", "Doe", "test@test.com", "password123", new[] { "InvalidRole" });
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "password123",
+            Roles = new List<string>() { "InvalidRole" }
+        };
+        
+        UserResponse result = await _userLogic.CreateUser(request);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(0, result.UserRoles.Count);
     }
 
     [TestMethod]
-    public void CreateUser_ShouldCreateUserWithSingleRole()
+    public async Task CreateUser_ShouldCreateUserWithSingleRole()
     {
         Role visitorRole = new Role { Id = 3, Name = Role.VISITOR };
 
-        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
         _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
         _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns(visitorRole);
-        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).Returns<User>(u => u);
+        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
+        
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "password123",
+            Roles = new List<string>() { Role.VISITOR }
+        };
 
-        User result = _userLogic.CreateUser("John", "Doe", "test@test.com", "password123", new[] { Role.VISITOR });
+        UserResponse result = await _userLogic.CreateUser(request);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(1, result.UserRoles.Count);
-        Assert.AreEqual(Role.VISITOR, result.UserRoles.First().Role.Name);
+        Assert.AreEqual(Role.VISITOR, result.UserRoles.First());
     }
 
     [TestMethod]
@@ -210,7 +310,7 @@ public class UserLogicRoleTest
 
         Role operatorRole = new Role { Id = 2, Name = Role.OPERATOR };
 
-        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
+        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(Task.FromResult(user));
         _mockRoleRepository.Setup(r => r.GetByName(roleName)).Returns(operatorRole);
         _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
 
@@ -227,7 +327,7 @@ public class UserLogicRoleTest
         Guid userId = Guid.NewGuid();
         string roleName = Role.OPERATOR;
 
-        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns((User)null);
+        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync((User)null);
 
         await Assert.ThrowsExceptionAsync<ArgumentException>(
             async () => await _userLogic.AddRoleToUser(userId, roleName),
@@ -252,7 +352,7 @@ public class UserLogicRoleTest
             UserRoles = new List<UserRole>()
         };
 
-        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
+        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(Task.FromResult(user));
         _mockRoleRepository.Setup(r => r.GetByName(roleName)).Returns((Role)null);
 
         await Assert.ThrowsExceptionAsync<ArgumentException>(
@@ -283,7 +383,7 @@ public class UserLogicRoleTest
             }
         };
 
-        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
+        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(Task.FromResult(user));
         _mockRoleRepository.Setup(r => r.GetByName(roleName)).Returns(visitorRole);
 
         await Assert.ThrowsExceptionAsync<ArgumentException>(
@@ -316,7 +416,7 @@ public class UserLogicRoleTest
             }
         };
 
-        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
+        _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(Task.FromResult(user));
         _mockRoleRepository.Setup(r => r.GetByName(newRoleName)).Returns(adminRole);
         _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
 
