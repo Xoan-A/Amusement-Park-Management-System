@@ -1,9 +1,10 @@
 using Domain;
+using Models.Out;
 
 namespace IBusinessLogic
 {
     public interface IAuthLogic
     {
-        Task<User> Login(string email, string password);
+        Task<UserResponse> Login(string email, string password);
     }
 }

@@ -70,15 +70,13 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            User result = await _userLogic.RegisterVisitor(request);
+            UserResponse result = await _userLogic.RegisterVisitor(request);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(name, result.Name);
             Assert.AreEqual(lastName, result.LastName);
             Assert.AreEqual(email, result.Email);
-            Assert.AreEqual(hashedPassword, result.Password);
             Assert.AreEqual(birthDate, result.BirthDate);
-            Assert.AreEqual(MembershipLevel.Standard, result.MembershipLevel);
 
             _mockUserRepository.Verify(r => r.IsEmailUnique(email), Times.Once);
             _mockPasswordService.Verify(p => p.HashPassword(password), Times.Once);
@@ -86,7 +84,8 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public async Task RegisterVisitor_ShouldReturnNull_WhenEmailIsNotUnique()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenEmailIsNotUnique()
         {
             string name = "John";
             string lastName = "Doe";
@@ -105,16 +104,12 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            User result = await _userLogic.RegisterVisitor(request);
-
-            Assert.IsNull(result);
-            _mockUserRepository.Verify(r => r.IsEmailUnique(email), Times.Once);
-            _mockPasswordService.Verify(p => p.HashPassword(It.IsAny<string>()), Times.Never);
-            _mockUserRepository.Verify(r => r.Create(It.IsAny<User>()), Times.Never);
+            await _userLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
-        public async Task RegisterVisitor_ShouldReturnNull_WhenEmailIsEmpty()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenEmailIsEmpty()
         {
             string name = "John";
             string lastName = "Doe";
@@ -131,13 +126,12 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            User result = await _userLogic.RegisterVisitor(request);
-
-            Assert.IsNull(result);
+            await _userLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
-        public async Task RegisterVisitor_ShouldReturnNull_WhenPasswordIsEmpty()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenPasswordIsEmpty()
         {
             string name = "John";
             string lastName = "Doe";
@@ -154,13 +148,12 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            User result = await _userLogic.RegisterVisitor(request);
-
-            Assert.IsNull(result);
+            await _userLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
-        public async Task RegisterVisitor_ShouldReturnNull_WhenNameIsEmpty()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenNameIsEmpty()
         {
             string name = "";
             string lastName = "Doe";
@@ -177,13 +170,12 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            User result = await _userLogic.RegisterVisitor(request);
-
-            Assert.IsNull(result);
+            await _userLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
-        public async Task RegisterVisitor_ShouldReturnNull_WhenLastNameIsEmpty()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenLastNameIsEmpty()
         {
             string name = "John";
             string lastName = "";
@@ -200,13 +192,12 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            User result = await _userLogic.RegisterVisitor(request);
-
-            Assert.IsNull(result);
+            await _userLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
-        public async Task RegisterVisitor_ShouldReturnNull_WhenBirthDateIsInFuture()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenBirthDateIsInFuture()
         {
             string name = "John";
             string lastName = "Doe";
@@ -223,9 +214,7 @@ namespace TestBusinessLogic
                 BirthDate = futureBirthDate
             };
 
-            User result = await _userLogic.RegisterVisitor(request);
-
-            Assert.IsNull(result);
+            await _userLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -263,10 +252,9 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            User result = await _userLogic.RegisterVisitor(request);
+            UserResponse result = await _userLogic.RegisterVisitor(request);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(hashedPassword, result.Password);
             _mockPasswordService.Verify(p => p.HashPassword(plainPassword), Times.Once);
         }
 

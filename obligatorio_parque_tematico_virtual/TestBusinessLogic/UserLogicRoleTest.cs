@@ -60,9 +60,10 @@ public class UserLogicRoleTest
             BirthDate = birthDate
         };
 
-        User result = await _userLogic.RegisterVisitor(request);
+        UserResponse result = await _userLogic.RegisterVisitor(request);
 
         Assert.IsNotNull(result);
+        Assert.AreEqual(email, result.Email);
         _mockRoleRepository.Verify(r => r.GetByName(Role.VISITOR), Times.Once);
     }
 
