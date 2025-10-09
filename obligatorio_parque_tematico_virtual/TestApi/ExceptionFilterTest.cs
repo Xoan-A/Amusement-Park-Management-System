@@ -32,8 +32,8 @@ public class ExceptionFilterTest
         _context.Exception = new Exception("Internal server error");
         _attribute.OnException(_context);
 
-        var response = _context.Result;
-        var concreteResponse = response as ObjectResult;
+        IActionResult? response = _context.Result;
+        ObjectResult? concreteResponse = response as ObjectResult;
 
 
         Assert.AreEqual((int)HttpStatusCode.InternalServerError, concreteResponse.StatusCode);
@@ -47,8 +47,8 @@ public class ExceptionFilterTest
         _context.Exception = new NotImplementedException();
         _attribute.OnException(_context);
 
-        var response = _context.Result;
-        var concreteResponse = response as ObjectResult;
+        IActionResult? response = _context.Result;
+        ObjectResult? concreteResponse = response as ObjectResult;
 
         Assert.AreEqual((int)HttpStatusCode.NotImplemented, concreteResponse.StatusCode);
         Assert.AreEqual("501", concreteResponse.StatusCode.ToString());
@@ -61,7 +61,7 @@ public class ExceptionFilterTest
         _context.Exception = new KeyNotFoundException("Attraction not found");
         _attribute.OnException(_context);
 
-        var response = _context.Result as ObjectResult;
+        ObjectResult? response = _context.Result as ObjectResult;
         Assert.AreEqual((int)HttpStatusCode.NotFound, response.StatusCode);
         Assert.AreEqual("404", response.StatusCode.ToString());
         Assert.AreEqual("Attraction not found", GetMessage(response.Value));
@@ -73,7 +73,7 @@ public class ExceptionFilterTest
         _context.Exception = new ArgumentException("Invalid data");
         _attribute.OnException(_context);
 
-        var response = _context.Result as ObjectResult;
+        ObjectResult? response = _context.Result as ObjectResult;
         Assert.AreEqual((int)HttpStatusCode.BadRequest, response.StatusCode);
         Assert.AreEqual("400", response.StatusCode.ToString());
         Assert.AreEqual("Invalid data", GetMessage(response.Value));
@@ -85,7 +85,7 @@ public class ExceptionFilterTest
         _context.Exception = new Domain.Exceptions.UnauthorizedException("Unauthorized access");
         _attribute.OnException(_context);
 
-        var response = _context.Result as ObjectResult;
+        ObjectResult? response = _context.Result as ObjectResult;
         Assert.AreEqual((int)HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.AreEqual("401", response.StatusCode.ToString());
         Assert.AreEqual("Unauthorized access", GetMessage(response.Value));
@@ -97,7 +97,7 @@ public class ExceptionFilterTest
         _context.Exception = new Domain.Exceptions.ForbiddenException("Forbidden access");
         _attribute.OnException(_context);
 
-        var response = _context.Result as ObjectResult;
+        ObjectResult? response = _context.Result as ObjectResult;
         Assert.AreEqual((int)HttpStatusCode.Forbidden, response.StatusCode);
         Assert.AreEqual("403", response.StatusCode.ToString());
         Assert.AreEqual("Forbidden access", GetMessage(response.Value));

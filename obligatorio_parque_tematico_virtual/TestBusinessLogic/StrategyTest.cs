@@ -28,7 +28,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public async Task ActiveStrategy_SetStrategy_ShouldSetStrategy()
         {
-            var activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -45,7 +45,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_GetStrategy_ShouldReturnDefaultWhenNoStrategySet()
         {
             SetupMocks();
-            var activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
             IConcreteStrategy result = await activeStrategy.GetStrategy();
 
@@ -57,7 +57,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_SetStrategy_WithCombo_ShouldSetComboWithN()
         {
             SetupMocks();
-            var activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -77,7 +77,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_SetStrategy_WithCombo_ShouldThrowWhenNIsNull()
         {
             SetupMocks();
-            var activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
             await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
                 await activeStrategy.SetStrategy(new SetStrategyRequest
@@ -90,7 +90,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public async Task ActiveStrategy_SetStrategy_ShouldThrowForInvalidStrategyName()
         {
-            var activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
             await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
                 await activeStrategy.SetStrategy(new SetStrategyRequest
@@ -102,8 +102,8 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ActiveStrategy_BasicCalculation_RollerCoaster_ShouldReturn2()
         {
-            var user = new User { Name = "Test" };
-            var attraction = new Attraction { Type = AttractionType.RollerCoaster };
+            User user = new User { Name = "Test" };
+            Attraction attraction = new Attraction { Type = AttractionType.RollerCoaster };
 
             int score = ActiveStrategy.BasicCalculation(user, attraction);
 
@@ -113,8 +113,8 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ActiveStrategy_BasicCalculation_Simulator_ShouldReturn2()
         {
-            var user = new User { Name = "Test" };
-            var attraction = new Attraction { Type = AttractionType.Simulator };
+            User user = new User { Name = "Test" };
+            Attraction attraction = new Attraction { Type = AttractionType.Simulator };
 
             int score = ActiveStrategy.BasicCalculation(user, attraction);
 
@@ -124,8 +124,8 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ActiveStrategy_BasicCalculation_Performance_ShouldReturn3()
         {
-            var user = new User { Name = "Test" };
-            var attraction = new Attraction { Type = AttractionType.Performance };
+            User user = new User { Name = "Test" };
+            Attraction attraction = new Attraction { Type = AttractionType.Performance };
 
             int score = ActiveStrategy.BasicCalculation(user, attraction);
 
@@ -135,8 +135,8 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ActiveStrategy_BasicCalculation_InteractiveZone_ShouldReturn4()
         {
-            var user = new User { Name = "Test" };
-            var attraction = new Attraction { Type = AttractionType.InteractiveZone };
+            User user = new User { Name = "Test" };
+            Attraction attraction = new Attraction { Type = AttractionType.InteractiveZone };
 
             int score = ActiveStrategy.BasicCalculation(user, attraction);
 
@@ -146,11 +146,11 @@ namespace TestBusinessLogic
         [TestMethod]
         public void PerAttraction_CalculateScore_ShouldReturnBasicCalculation()
         {
-            var strategy = new PerAttraction();
-            var user = new User { Name = "Test" };
-            var attraction = new Attraction { Type = AttractionType.Performance };
+            PerAttraction strategy = new PerAttraction();
+            User user = new User { Name = "Test" };
+            Attraction attraction = new Attraction { Type = AttractionType.Performance };
 
-            var request = new StrategyRequest();
+            StrategyRequest request = new StrategyRequest();
 
             int score = strategy.CalculateScore(user, attraction, request);
 
@@ -160,7 +160,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void PerAttraction_Name_ShouldBePerAttraction()
         {
-            var strategy = new PerAttraction();
+            PerAttraction strategy = new PerAttraction();
 
             Assert.AreEqual("PerAttraction", strategy.Name);
         }
@@ -168,11 +168,11 @@ namespace TestBusinessLogic
         [TestMethod]
         public void PerEvent_CalculateScore_NotSpecialEvent_ShouldReturnBaseScore()
         {
-            var strategy = new PerEvent();
-            var user = new User { Name = "Test" };
-            var attraction = new Attraction { Type = AttractionType.Performance };
+            PerEvent strategy = new PerEvent();
+            User user = new User { Name = "Test" };
+            Attraction attraction = new Attraction { Type = AttractionType.Performance };
 
-            var request = new StrategyRequest
+            StrategyRequest request = new StrategyRequest
             {
                 IsSepcialEvent = false
             };
@@ -185,11 +185,11 @@ namespace TestBusinessLogic
         [TestMethod]
         public void PerEvent_CalculateScore_SpecialEvent_ShouldReturnDoubleScore()
         {
-            var strategy = new PerEvent();
-            var user = new User { Name = "Test" };
-            var attraction = new Attraction { Type = AttractionType.Performance };
+            PerEvent strategy = new PerEvent();
+            User user = new User { Name = "Test" };
+            Attraction attraction = new Attraction { Type = AttractionType.Performance };
 
-            var request = new StrategyRequest
+            StrategyRequest request = new StrategyRequest
             {
                 IsSepcialEvent = true
             };
@@ -202,7 +202,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void PerEvent_Name_ShouldBePerEvent()
         {
-            var strategy = new PerEvent();
+            PerEvent strategy = new PerEvent();
 
             Assert.AreEqual("PerEvent", strategy.Name);
         }
@@ -211,14 +211,14 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_FirstVisit_ShouldReturnBaseScore()
         {
             SetupMocks();
-            var strategy = new Combo(30);
-            var user = new User { Name = "Test" };
-            var attraction = new Attraction { Type = AttractionType.Performance };
+            Combo strategy = new Combo(30);
+            User user = new User { Name = "Test" };
+            Attraction attraction = new Attraction { Type = AttractionType.Performance };
 
             DateTime firstVisit = new DateTime(2025, 10, 5, 10, 0, 0);
             user.RegisterEntry(attraction, firstVisit);
 
-            var request = new StrategyRequest
+            StrategyRequest request = new StrategyRequest
             {
                 EnterDate = firstVisit
             };
@@ -232,9 +232,9 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_SameAttraction_ShouldReturnBaseScore()
         {
             SetupMocks();
-            var strategy = new Combo(30);
-            var user = new User { Name = "Test" };
-            var attraction1 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Performance };
+            Combo strategy = new Combo(30);
+            User user = new User { Name = "Test" };
+            Attraction attraction1 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Performance };
 
             DateTime firstVisit = new DateTime(2025, 10, 5, 10, 0, 0);
             user.RegisterEntry(attraction1, firstVisit);
@@ -242,7 +242,7 @@ namespace TestBusinessLogic
             DateTime secondVisit = new DateTime(2025, 10, 5, 10, 20, 0);
             user.RegisterEntry(attraction1, secondVisit);
 
-            var request = new StrategyRequest
+            StrategyRequest request = new StrategyRequest
             {
                 EnterDate = secondVisit
             };
@@ -256,10 +256,10 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_DifferentAttractionWithinTime_ShouldReturnDoubleScore()
         {
             SetupMocks();
-            var strategy = new Combo(30);
-            var user = new User { Name = "Test" };
-            var attraction1 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.RollerCoaster };
-            var attraction2 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Performance };
+            Combo strategy = new Combo(30);
+            User user = new User { Name = "Test" };
+            Attraction attraction1 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.RollerCoaster };
+            Attraction attraction2 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Performance };
 
             DateTime firstVisit = new DateTime(2025, 10, 5, 10, 0, 0);
             user.RegisterEntry(attraction1, firstVisit);
@@ -267,7 +267,7 @@ namespace TestBusinessLogic
             DateTime secondVisit = new DateTime(2025, 10, 5, 10, 20, 0);
             user.RegisterEntry(attraction2, secondVisit);
 
-            var request = new StrategyRequest
+            StrategyRequest request = new StrategyRequest
             {
                 EnterDate = secondVisit
             };
@@ -281,10 +281,10 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_DifferentAttractionOutsideTime_ShouldReturnBaseScore()
         {
             SetupMocks();
-            var strategy = new Combo(30);
-            var user = new User { Name = "Test" };
-            var attraction1 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.RollerCoaster };
-            var attraction2 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Performance };
+            Combo strategy = new Combo(30);
+            User user = new User { Name = "Test" };
+            Attraction attraction1 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.RollerCoaster };
+            Attraction attraction2 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Performance };
 
             DateTime firstVisit = new DateTime(2025, 10, 5, 10, 0, 0);
             user.RegisterEntry(attraction1, firstVisit);
@@ -292,7 +292,7 @@ namespace TestBusinessLogic
             DateTime secondVisit = new DateTime(2025, 10, 5, 10, 40, 0);
             user.RegisterEntry(attraction2, secondVisit);
 
-            var request = new StrategyRequest
+            StrategyRequest request = new StrategyRequest
             {
                 EnterDate = secondVisit
             };
@@ -306,11 +306,11 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_MultipleVisits_ShouldCheckMostRecent()
         {
             SetupMocks();
-            var strategy = new Combo(30);
-            var user = new User { Name = "Test" };
-            var attraction1 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.RollerCoaster };
-            var attraction2 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Simulator };
-            var attraction3 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Performance };
+            Combo strategy = new Combo(30);
+            User user = new User { Name = "Test" };
+            Attraction attraction1 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.RollerCoaster };
+            Attraction attraction2 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Simulator };
+            Attraction attraction3 = new Attraction { Id = Guid.NewGuid(), Type = AttractionType.Performance };
 
             DateTime firstVisit = new DateTime(2025, 10, 5, 10, 0, 0);
             user.RegisterEntry(attraction1, firstVisit);
@@ -321,7 +321,7 @@ namespace TestBusinessLogic
             DateTime thirdVisit = new DateTime(2025, 10, 5, 10, 40, 0);
             user.RegisterEntry(attraction3, thirdVisit);
 
-            var request = new StrategyRequest
+            StrategyRequest request = new StrategyRequest
             {
                 EnterDate = thirdVisit
             };
@@ -335,7 +335,7 @@ namespace TestBusinessLogic
         public void Combo_Name_ShouldBeCombo()
         {
             SetupMocks();
-            var strategy = new Combo(30);
+            Combo strategy = new Combo(30);
 
             Assert.AreEqual("Combo", strategy.Name);
         }
@@ -344,7 +344,7 @@ namespace TestBusinessLogic
         public void Combo_Constructor_ShouldSetN()
         {
             SetupMocks();
-            var strategy = new Combo(45);
+            Combo strategy = new Combo(45);
 
             Assert.AreEqual(45, strategy.N);
         }
@@ -353,7 +353,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_GetStrategy_FirstStrategySet_ShouldReturnStrategyImmediately()
         {
             SetupMocks();
-            var activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -370,7 +370,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_GetStrategy_ShouldReturnSameStrategyRegardlessOfDate()
         {
             SetupMocks();
-            var activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -390,7 +390,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_GetStrategy_AfterMultipleSets_ShouldReturnLatestStrategy()
         {
             SetupMocks();
-            var activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -411,7 +411,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_GetStrategy_AfterSettingCombo_ShouldReturnComboWithCorrectN()
         {
             SetupMocks();
-            var activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -429,7 +429,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public async Task ActiveStrategy_GetStrategy_AfterChangingFromComboToPerAttraction_ShouldReturnPerAttraction()
         {
-            var activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -451,10 +451,10 @@ namespace TestBusinessLogic
         [TestMethod]
         public void Combo_CalculateScore_ShouldThrowWhenUserIsNull()
         {
-            var strategy = new Combo(30);
-            var attraction = new Attraction { Type = AttractionType.Performance };
+            Combo strategy = new Combo(30);
+            Attraction attraction = new Attraction { Type = AttractionType.Performance };
 
-            var request = new StrategyRequest
+            StrategyRequest request = new StrategyRequest
             {
                 EnterDate = new DateTime(2025, 10, 5, 10, 0, 0)
             };
@@ -466,10 +466,10 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_ShouldThrowWhenAttractionIsNull()
         {
             SetupMocks();
-            var strategy = new Combo(30);
-            var user = new User { Name = "Test" };
+            Combo strategy = new Combo(30);
+            User user = new User { Name = "Test" };
 
-            var request = new StrategyRequest
+            StrategyRequest request = new StrategyRequest
             {
                 EnterDate = new DateTime(2025, 10, 5, 10, 0, 0)
             };
@@ -481,11 +481,11 @@ namespace TestBusinessLogic
         public void Combo_CalculateScore_ShouldThrowWhenEnterDateIsNull()
         {
             SetupMocks();
-            var strategy = new Combo(30);
-            var user = new User { Name = "Test" };
-            var attraction = new Attraction { Type = AttractionType.Performance };
+            Combo strategy = new Combo(30);
+            User user = new User { Name = "Test" };
+            Attraction attraction = new Attraction { Type = AttractionType.Performance };
 
-            var request = new StrategyRequest
+            StrategyRequest request = new StrategyRequest
             {
                 EnterDate = null
             };

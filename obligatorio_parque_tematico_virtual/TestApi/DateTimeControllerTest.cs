@@ -33,7 +33,7 @@ namespace ApiTests
                 {
                     builder.ConfigureServices(services =>
                     {
-                        var descriptor = services.SingleOrDefault(
+                        ServiceDescriptor? descriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
                         if (descriptor != null) services.Remove(descriptor);
 
@@ -44,9 +44,9 @@ namespace ApiTests
                     });
                 });
 
-            using (var scope = _factory.Services.CreateScope())
+            using (IServiceScope scope = _factory.Services.CreateScope())
             {
-                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 context.Database.EnsureCreated();
             }
 
@@ -65,8 +65,8 @@ namespace ApiTests
         [TestMethod]
         public async Task GetDateTime_ReturnsCurrentDateTime()
         {
-            var expectedDateTime = new DateTime(2024, 1, 1, 12, 0, 0);
-            var expectedResponse = new DateTimeResponse
+            DateTime expectedDateTime = new DateTime(2024, 1, 1, 12, 0, 0);
+            DateTimeResponse expectedResponse = new DateTimeResponse
             {
                 CurrentDateTime = expectedDateTime
             };
@@ -74,11 +74,11 @@ namespace ApiTests
             _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime())
                              .ReturnsAsync(expectedDateTime);
 
-            var response = await _client.GetAsync("/api/datetime");
+            HttpResponseMessage response = await _client.GetAsync("/api/datetime");
 
             response.EnsureSuccessStatusCode();
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var dateTimeResponse = JsonSerializer.Deserialize<DateTimeResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            string responseContent = await response.Content.ReadAsStringAsync();
+            DateTimeResponse? dateTimeResponse = JsonSerializer.Deserialize<DateTimeResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.AreEqual(expectedResponse.CurrentDateTime, dateTimeResponse.CurrentDateTime);
         }
@@ -86,18 +86,18 @@ namespace ApiTests
         [TestMethod]
         public async Task SetDateTime_ValidDateTime_ReturnsSuccess()
         {
-            var request = new SetDateTimeRequest
+            SetDateTimeRequest request = new SetDateTimeRequest
             {
                 DateTime = "2024-01-01T12:00:00"
             };
-            var expectedDateTime = DateTime.Parse(request.DateTime);
+            DateTime expectedDateTime = DateTime.Parse(request.DateTime);
 
             _mockDateTimeLogic.Setup(x => x.SetDateTime(expectedDateTime));
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PutAsync("/api/datetime", content);
+            HttpResponseMessage response = await _client.PutAsync("/api/datetime", content);
 
             response.EnsureSuccessStatusCode();
             _mockDateTimeLogic.Verify(x => x.SetDateTime(expectedDateTime), Times.Once);

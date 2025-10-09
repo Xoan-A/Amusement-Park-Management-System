@@ -42,14 +42,14 @@ namespace TestApi
                             services.Remove(descriptor);
                         }
 
-                        var dateTimeDescriptor = services.SingleOrDefault(
+                        ServiceDescriptor? dateTimeDescriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(IDateTimeLogic));
                         if (dateTimeDescriptor != null)
                         {
                             services.Remove(dateTimeDescriptor);
                         }
 
-                        var dateTimeRepoDescriptor = services.SingleOrDefault(
+                        ServiceDescriptor? dateTimeRepoDescriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(IDateTimeRepository));
                         if (dateTimeRepoDescriptor != null)
                         {

@@ -67,8 +67,8 @@ namespace DataAccess.Repositories
 
         public async Task ResetScores()
         {
-            var users = await _context.Users.ToListAsync();
-            foreach (var user in users)
+            List<User> users = await _context.Users.ToListAsync();
+            foreach (User user in users)
             {
                 user.Score = 0;
             }
@@ -82,38 +82,6 @@ namespace DataAccess.Repositories
             {
                 _context.Users.Update(user);
             }
-
-            // Fix: Newly created Reports and VisitorReports have non-default Ids (from Guid.NewGuid())
-            // EF Core incorrectly marks them as Modified instead of Added
-            // Check if they exist in DB and correct their state
-            foreach (var entry in _context.ChangeTracker.Entries<Report>())
-            {
-                if (entry.State == EntityState.Modified)
-                {
-                    bool exists = await _context.Reports
-                        .AsNoTracking()
-                        .AnyAsync(r => r.Id == entry.Entity.Id);
-                    if (!exists)
-                    {
-                        entry.State = EntityState.Added;
-                    }
-                }
-            }
-
-            foreach (var entry in _context.ChangeTracker.Entries<VisitorReport>())
-            {
-                if (entry.State == EntityState.Modified)
-                {
-                    bool exists = await _context.VisitorReports
-                        .AsNoTracking()
-                        .AnyAsync(vr => vr.Id == entry.Entity.Id);
-                    if (!exists)
-                    {
-                        entry.State = EntityState.Added;
-                    }
-                }
-            }
-
             await _context.SaveChangesAsync();
         }
     }

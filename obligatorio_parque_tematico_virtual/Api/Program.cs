@@ -6,7 +6,7 @@ using Api.Filters;
 using Models;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers(option => { option.Filters.Add<ExceptionFilter>(); });
 
@@ -14,7 +14,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+JwtSettings? jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
 builder.Services.AddServices(builder.Configuration);
 
@@ -40,11 +40,11 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+using (Microsoft.Extensions.DependencyInjection.IServiceScope scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<DataAccess.Context.AppDbContext>();
+    DataAccess.Context.AppDbContext context = scope.ServiceProvider.GetRequiredService<DataAccess.Context.AppDbContext>();
 
     if (context.Database.IsSqlite())
     {

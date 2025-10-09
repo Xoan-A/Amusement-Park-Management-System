@@ -34,7 +34,7 @@ public class EventControllerTest
         {
             builder.ConfigureServices(services =>
             {
-                var descriptor = services.SingleOrDefault(
+                ServiceDescriptor? descriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
                 if (descriptor != null) services.Remove(descriptor);
 
@@ -45,22 +45,22 @@ public class EventControllerTest
             });
         });
 
-        using (var scope = _factory.Services.CreateScope())
+        using (IServiceScope scope = _factory.Services.CreateScope())
         {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Database.EnsureCreated();
         }
 
         _client = _factory.CreateClient();
 
-        var jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+        Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
         {
             SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
             Issuer = "ParqueTematico",
             Audience = "ParqueTematico",
             ExpirationHours = 1
         });
-        var tokenService = new BusinessLogic.TokenLogic(jwtSettings);
+        BusinessLogic.TokenLogic tokenService = new BusinessLogic.TokenLogic(jwtSettings);
 
         User adminUser = new User
         {
@@ -92,7 +92,7 @@ public class EventControllerTest
     [TestMethod]
     public async Task GetEvents_ReturnsOkResult_WithListOfEvents()
     {
-        var mockEvents = new List<EventResponse>
+        List<EventResponse> mockEvents = new List<EventResponse>
         {
             new EventResponse
             {
@@ -119,12 +119,12 @@ public class EventControllerTest
         _mockEventService.Setup(service => service.GetAllEvents())
             .ReturnsAsync(mockEvents);
 
-        var response = await _adminClient.GetAsync("/api/events");
+        HttpResponseMessage response = await _adminClient.GetAsync("/api/events");
 
         response.EnsureSuccessStatusCode();
-        var responseString = await response.Content.ReadAsStringAsync();
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var eventsResponse = JsonSerializer.Deserialize<List<EventResponse>>(responseString, options);
+        string responseString = await response.Content.ReadAsStringAsync();
+        JsonSerializerOptions options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        List<EventResponse>? eventsResponse = JsonSerializer.Deserialize<List<EventResponse>>(responseString, options);
 
         Assert.IsNotNull(eventsResponse);
         Assert.AreEqual(2, eventsResponse.Count);
@@ -135,7 +135,7 @@ public class EventControllerTest
     [TestMethod]
     public async Task GetEvents_InvalidAuthentication_ReturnsUnauthorized()
     {
-        var response = await _client.GetAsync("/api/events");
+        HttpResponseMessage response = await _client.GetAsync("/api/events");
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -158,12 +158,12 @@ public class EventControllerTest
         _mockEventService.Setup(service => service.GetEventById(eventId))
             .ReturnsAsync(mockEvent);
 
-        var response = await _adminClient.GetAsync($"/api/events/{eventId}");
+        HttpResponseMessage response = await _adminClient.GetAsync($"/api/events/{eventId}");
 
         response.EnsureSuccessStatusCode();
-        var responseString = await response.Content.ReadAsStringAsync();
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var eventResponse = JsonSerializer.Deserialize<EventResponse>(responseString, options);
+        string responseString = await response.Content.ReadAsStringAsync();
+        JsonSerializerOptions options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        EventResponse? eventResponse = JsonSerializer.Deserialize<EventResponse>(responseString, options);
 
         Assert.IsNotNull(eventResponse);
         Assert.AreEqual("Event 1", eventResponse.Name);
@@ -174,7 +174,7 @@ public class EventControllerTest
     {
         Guid eventId = Guid.NewGuid();
 
-        var response = await _client.GetAsync($"/api/events/{eventId}");
+        HttpResponseMessage response = await _client.GetAsync($"/api/events/{eventId}");
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -183,7 +183,7 @@ public class EventControllerTest
     public async Task CreateEvent_ValidRequest_ReturnsCreatedResult()
     {
         Guid newEventId = Guid.NewGuid();
-        var newEvent = new EventRequest
+        EventRequest newEvent = new EventRequest
         {
             Name = "New Event",
             Date = DateTime.Now.AddDays(30),
@@ -196,13 +196,13 @@ public class EventControllerTest
         _mockEventService.Setup(service => service.CreateEvent(It.IsAny<EventRequest>()))
             .ReturnsAsync(newEventId);
 
-        var content = new StringContent(JsonSerializer.Serialize(newEvent), Encoding.UTF8, "application/json");
-        var response = await _adminClient.PostAsync("/api/events", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(newEvent), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _adminClient.PostAsync("/api/events", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Created, response.StatusCode);
-        var responseString = await response.Content.ReadAsStringAsync();
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var createResponse = JsonSerializer.Deserialize<CreateEventResponse>(responseString, options);
+        string responseString = await response.Content.ReadAsStringAsync();
+        JsonSerializerOptions options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        CreateEventResponse? createResponse = JsonSerializer.Deserialize<CreateEventResponse>(responseString, options);
 
         Assert.IsNotNull(createResponse);
         Assert.AreEqual(newEventId, createResponse.Id);
@@ -213,7 +213,7 @@ public class EventControllerTest
     public async Task CreateEvent_InvalidAuthentication_ReturnsUnauthorized()
     {
         Guid newEventId = Guid.NewGuid();
-        var newEvent = new EventRequest
+        EventRequest newEvent = new EventRequest
         {
             Name = "New Event",
             Date = DateTime.Now.AddDays(30),
@@ -222,8 +222,8 @@ public class EventControllerTest
             Cost = 150,
             AttractionIds = new List<Guid>()
         };
-        var content = new StringContent(JsonSerializer.Serialize(newEvent), Encoding.UTF8, "application/json");
-        var response = await _client.PostAsync("/api/events", content);
+        StringContent content = new StringContent(JsonSerializer.Serialize(newEvent), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _client.PostAsync("/api/events", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockEventService.Verify(service => service.CreateEvent(It.IsAny<EventRequest>()), Times.Never);
@@ -237,7 +237,7 @@ public class EventControllerTest
         _mockEventService.Setup(service => service.DeleteEvent(eventId))
             .Returns(Task.CompletedTask);
 
-        var response = await _adminClient.DeleteAsync($"/api/events/{eventId}");
+        HttpResponseMessage response = await _adminClient.DeleteAsync($"/api/events/{eventId}");
 
         Assert.AreEqual(System.Net.HttpStatusCode.NoContent, response.StatusCode);
         _mockEventService.Verify(service => service.DeleteEvent(eventId), Times.Once);
@@ -248,7 +248,7 @@ public class EventControllerTest
     {
         Guid eventId = Guid.NewGuid();
 
-        var response = await _client.DeleteAsync($"/api/events/{eventId}");
+        HttpResponseMessage response = await _client.DeleteAsync($"/api/events/{eventId}");
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockEventService.Verify(service => service.DeleteEvent(eventId), Times.Never);

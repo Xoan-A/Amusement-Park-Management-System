@@ -10,7 +10,6 @@ namespace Domain
 
         public VisitorReport(DateTime date, Report report)
         {
-            Id = Guid.NewGuid();
             Date = date;
             Reports = new List<Report>();
             Reports.Add(report);
@@ -18,7 +17,6 @@ namespace Domain
 
         public VisitorReport()
         {
-            Id = Guid.NewGuid();
             Reports = new List<Report>();
         }
 

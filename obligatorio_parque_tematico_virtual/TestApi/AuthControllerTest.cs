@@ -36,7 +36,7 @@ namespace ApiTests
                 {
                     builder.ConfigureServices(services =>
                     {
-                        var descriptor = services.SingleOrDefault(
+                        ServiceDescriptor? descriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
                         if (descriptor != null) services.Remove(descriptor);
 
@@ -48,9 +48,9 @@ namespace ApiTests
                     });
                 });
 
-            using (var scope = _factory.Services.CreateScope())
+            using (IServiceScope scope = _factory.Services.CreateScope())
             {
-                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 context.Database.EnsureCreated();
             }
 
@@ -69,14 +69,14 @@ namespace ApiTests
         [TestMethod]
         public async Task Login_ValidCredentials_ReturnsLoginResponse()
         {
-            var request = new LoginRequest
+            LoginRequest request = new LoginRequest
             {
                 Email = "admin@test.com",
                 Password = "password123"
             };
 
-            var adminRole = new Domain.Role { Id = 1, Name = Domain.Role.ADMINISTRATOR };
-            var user = new Domain.User
+            Domain.Role adminRole = new Domain.Role { Id = 1, Name = Domain.Role.ADMINISTRATOR };
+            Domain.User user = new Domain.User
             {
                 Id = Guid.NewGuid(),
                 Name = "Admin",
@@ -92,14 +92,14 @@ namespace ApiTests
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
                          .ReturnsAsync(user);
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PostAsync("/api/auth/login", content);
+            HttpResponseMessage response = await _client.PostAsync("/api/auth/login", content);
 
             response.EnsureSuccessStatusCode();
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            string responseContent = await response.Content.ReadAsStringAsync();
+            LoginResponse? loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(loginResponse);
             Assert.IsNotNull(loginResponse.Token);
@@ -113,7 +113,7 @@ namespace ApiTests
         [TestMethod]
         public async Task Register_ValidVisitor_ReturnsRegisterResponse()
         {
-            var request = new RegisterVisitorRequest
+            RegisterVisitorRequest request = new RegisterVisitorRequest
             {
                 Name = "John",
                 LastName = "Doe",
@@ -121,14 +121,14 @@ namespace ApiTests
                 Password = "password123",
                 BirthDate = new DateTime(1990, 1, 1)
             };
-            var expectedResponse = new RegisterResponse
+            RegisterResponse expectedResponse = new RegisterResponse
             {
                 Id = Guid.NewGuid(),
                 Email = "john@test.com",
                 Message = "Registration successful"
             };
 
-            var user = new User
+            User user = new User
             {
                 Id = expectedResponse.Id,
                 Name = request.Name,
@@ -141,14 +141,14 @@ namespace ApiTests
             _mockUserLogic.Setup(x => x.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
                          .ReturnsAsync(user);
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PostAsync("/api/auth/register", content);
+            HttpResponseMessage response = await _client.PostAsync("/api/auth/register", content);
 
             response.EnsureSuccessStatusCode();
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var registerResponse = JsonSerializer.Deserialize<RegisterResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            string responseContent = await response.Content.ReadAsStringAsync();
+            RegisterResponse? registerResponse = JsonSerializer.Deserialize<RegisterResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.AreEqual(expectedResponse.Email, registerResponse.Email);
             Assert.AreEqual(expectedResponse.Message, registerResponse.Message);
@@ -157,7 +157,7 @@ namespace ApiTests
         [TestMethod]
         public async Task Login_InvalidCredentials_Returns401()
         {
-            var request = new LoginRequest
+            LoginRequest request = new LoginRequest
             {
                 Email = "invalid@test.com",
                 Password = "wrongpassword"
@@ -166,10 +166,10 @@ namespace ApiTests
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
                          .ReturnsAsync((User)null);
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PostAsync("/api/auth/login", content);
+            HttpResponseMessage response = await _client.PostAsync("/api/auth/login", content);
 
             Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         }
@@ -177,13 +177,13 @@ namespace ApiTests
         [TestMethod]
         public async Task Login_WithUserHavingNoRoles_ReturnsEmptyRolesArray()
         {
-            var request = new LoginRequest
+            LoginRequest request = new LoginRequest
             {
                 Email = "user@test.com",
                 Password = "password123"
             };
 
-            var user = new Domain.User
+            Domain.User user = new Domain.User
             {
                 Id = Guid.NewGuid(),
                 Name = "Test",
@@ -196,14 +196,14 @@ namespace ApiTests
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
                          .ReturnsAsync(user);
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PostAsync("/api/auth/login", content);
+            HttpResponseMessage response = await _client.PostAsync("/api/auth/login", content);
 
             response.EnsureSuccessStatusCode();
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            string responseContent = await response.Content.ReadAsStringAsync();
+            LoginResponse? loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(loginResponse);
             Assert.IsNotNull(loginResponse.Roles);
@@ -213,7 +213,7 @@ namespace ApiTests
         [TestMethod]
         public async Task Register_FailedRegistration_Returns400()
         {
-            var request = new RegisterVisitorRequest
+            RegisterVisitorRequest request = new RegisterVisitorRequest
             {
                 Name = "John",
                 LastName = "Doe",
@@ -225,10 +225,10 @@ namespace ApiTests
             _mockUserLogic.Setup(x => x.RegisterVisitor(request))
                          .ReturnsAsync((User)null);
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PostAsync("/api/auth/register", content);
+            HttpResponseMessage response = await _client.PostAsync("/api/auth/register", content);
 
             Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
         }

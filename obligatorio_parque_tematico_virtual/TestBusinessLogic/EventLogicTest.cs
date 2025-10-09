@@ -129,7 +129,7 @@ public class EventLogicTest
         List<Event> eventsList = new List<Event> { baseEvent };
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(eventsList);
 
-        var result = await _eventLogic.GetAllEvents();
+        List<EventResponse> result = await _eventLogic.GetAllEvents();
 
         Assert.AreEqual(1, result.Count);
         EventResponse returnedEvent = result[0];

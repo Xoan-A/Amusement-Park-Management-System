@@ -1441,7 +1441,7 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(UnauthorizedException))]
         public async Task ModifyUser_WhenActorSubIsNull_ThrowsUnauthorized()
         {
-            var userId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
             ModifyUserRequest request = new ModifyUserRequest
             { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
 

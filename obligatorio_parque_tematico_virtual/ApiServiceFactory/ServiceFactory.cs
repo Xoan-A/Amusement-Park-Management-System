@@ -24,7 +24,7 @@ public static class ServiceFactory
         services.AddScoped<IAttractionLogicEntity, AttractionLogic>();
         services.AddScoped<IEventLogic, EventLogic>();
 
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        string? connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
         services.AddScoped<IUserRepository, UserRepository>();

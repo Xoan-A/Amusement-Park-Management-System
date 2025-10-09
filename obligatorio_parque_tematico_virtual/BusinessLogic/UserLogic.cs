@@ -193,7 +193,7 @@ namespace BusinessLogic
 
             bool isEvent = even != null;
 
-            var strategyRequest = new StrategyRequest
+            StrategyRequest strategyRequest = new StrategyRequest
             {
                 UserId = user.Id,
                 AttractionId = attraction.Id,
@@ -273,7 +273,7 @@ namespace BusinessLogic
 
         public async Task<UserResponse> ModifyUser(Guid userId, string? actorSubClaim, ModifyUserRequest request)
         {
-            if (string.IsNullOrWhiteSpace(actorSubClaim) || !Guid.TryParse(actorSubClaim, out var actorUserId))
+            if (string.IsNullOrWhiteSpace(actorSubClaim) || !Guid.TryParse(actorSubClaim, out Guid actorUserId))
             {
                 throw new UnauthorizedException("Invalid token");
             }

@@ -598,12 +598,12 @@ public class AttractionLogicTest
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.AttractionsVisits.Count);
 
-        var attraction1Result = result.AttractionsVisits.FirstOrDefault(r => r.Item1.Id == attraction1Id);
+        (AttractionResponse, int) attraction1Result = result.AttractionsVisits.FirstOrDefault(r => r.Item1.Id == attraction1Id);
         Assert.IsNotNull(attraction1Result.Item1);
         Assert.AreEqual("Montaña Rusa", attraction1Result.Item1.Name);
         Assert.AreEqual(3, attraction1Result.Item2);
 
-        var attraction2Result = result.AttractionsVisits.FirstOrDefault(r => r.Item1.Id == attraction2Id);
+        (AttractionResponse, int) attraction2Result = result.AttractionsVisits.FirstOrDefault(r => r.Item1.Id == attraction2Id);
         Assert.IsNotNull(attraction2Result.Item1);
         Assert.AreEqual("Simulador", attraction2Result.Item1.Name);
         Assert.AreEqual(2, attraction2Result.Item2);

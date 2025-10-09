@@ -24,7 +24,7 @@ namespace BusinessLogic
 
         public async Task SetDateTime(string dateTimeString)
         {
-            var dateTime = DateTime.Parse(dateTimeString);
+            DateTime dateTime = DateTime.Parse(dateTimeString);
             await _dateTimeRepository.SetConfiguredDateTime(dateTime);
         }
     }

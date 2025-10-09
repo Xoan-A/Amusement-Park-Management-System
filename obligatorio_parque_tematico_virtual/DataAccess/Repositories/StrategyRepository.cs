@@ -21,7 +21,7 @@ public class StrategyRepository : IStrategyRepository
 
     public async Task Update(StrategyConfiguration strategyConfiguration)
     {
-        var existing = await _context.StrategyConfigurations.FirstOrDefaultAsync(s => s.Id == 1);
+        StrategyConfiguration? existing = await _context.StrategyConfigurations.FirstOrDefaultAsync(s => s.Id == 1);
 
         if (existing != null)
         {

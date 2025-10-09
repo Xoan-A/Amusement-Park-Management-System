@@ -19,7 +19,7 @@ public class Event
 
     public void AddAttraction(Attraction attraction)
     {
-        var eventAttraction = new EventAttraction
+        EventAttraction eventAttraction = new EventAttraction
         {
             EventId = this.Id,
             Event = this,

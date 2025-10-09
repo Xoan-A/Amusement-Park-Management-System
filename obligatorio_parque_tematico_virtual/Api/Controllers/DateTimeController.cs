@@ -19,9 +19,9 @@ namespace Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetDateTime()
         {
-            var currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+            DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
 
-            var response = new DateTimeResponse
+            DateTimeResponse response = new DateTimeResponse
             {
                 CurrentDateTime = currentDateTime
             };
@@ -32,7 +32,7 @@ namespace Api.Controllers
         [HttpPut]
         public async Task<IActionResult> SetDateTime([FromBody] SetDateTimeRequest request)
         {
-            var dateTime = DateTime.Parse(request.DateTime);
+            DateTime dateTime = DateTime.Parse(request.DateTime);
             await _dateTimeLogic.SetDateTime(dateTime);
 
             return Ok();

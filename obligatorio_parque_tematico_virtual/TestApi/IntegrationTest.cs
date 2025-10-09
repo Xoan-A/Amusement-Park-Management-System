@@ -81,7 +81,7 @@ namespace ApiTests
         [TestMethod]
         public async Task LoginEndpoint_RequiresNoAuthentication()
         {
-            var registerRequest = new RegisterVisitorRequest
+            RegisterVisitorRequest registerRequest = new RegisterVisitorRequest
             {
                 Name = "Test",
                 LastName = "User",
@@ -89,20 +89,20 @@ namespace ApiTests
                 Password = "password123",
                 BirthDate = new System.DateTime(1990, 1, 1)
             };
-            var registerJson = JsonSerializer.Serialize(registerRequest);
-            var registerContent = new StringContent(registerJson, Encoding.UTF8, "application/json");
+            string registerJson = JsonSerializer.Serialize(registerRequest);
+            StringContent registerContent = new StringContent(registerJson, Encoding.UTF8, "application/json");
             await _client.PostAsync("/api/auth/register", registerContent);
 
-            var request = new LoginRequest
+            LoginRequest request = new LoginRequest
             {
                 Email = "testlogin@test.com",
                 Password = "password123"
             };
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PostAsync("/api/auth/login", content);
+            HttpResponseMessage response = await _client.PostAsync("/api/auth/login", content);
 
             Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
@@ -110,7 +110,7 @@ namespace ApiTests
         [TestMethod]
         public async Task RegisterEndpoint_RequiresNoAuthentication()
         {
-            var request = new RegisterVisitorRequest
+            RegisterVisitorRequest request = new RegisterVisitorRequest
             {
                 Name = "John",
                 LastName = "Doe",
@@ -119,10 +119,10 @@ namespace ApiTests
                 BirthDate = new DateTime(1990, 1, 1)
             };
 
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PostAsync("/api/auth/register", content);
+            HttpResponseMessage response = await _client.PostAsync("/api/auth/register", content);
 
             Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
@@ -130,18 +130,18 @@ namespace ApiTests
         [TestMethod]
         public async Task DateTimeEndpoints_RequireNoAuthentication()
         {
-            var getResponse = await _client.GetAsync("/api/datetime");
+            HttpResponseMessage getResponse = await _client.GetAsync("/api/datetime");
             Assert.AreEqual(System.Net.HttpStatusCode.OK, getResponse.StatusCode);
 
-            var setRequest = new SetDateTimeRequest
+            SetDateTimeRequest setRequest = new SetDateTimeRequest
             {
                 DateTime = "2024-01-01T12:00:00"
             };
 
-            var json = JsonSerializer.Serialize(setRequest);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(setRequest);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var postResponse = await _client.PutAsync("/api/datetime", content);
+            HttpResponseMessage postResponse = await _client.PutAsync("/api/datetime", content);
             Assert.AreEqual(System.Net.HttpStatusCode.OK, postResponse.StatusCode);
         }
     }
