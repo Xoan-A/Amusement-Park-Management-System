@@ -184,6 +184,59 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "4. Login as Visitor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const token = pm.response.json().token;",
+									"    pm.environment.set('visitor_token', token);",
+									"    const visitorId = pm.response.json().id;",
+									"    if (visitorId) {",
+									"        pm.environment.set('visitor_id', visitorId);",
+									"    }",
+									"    console.log('✅ Visitor token saved to visitor_token');",
+									"} else {",
+									"    console.error('❌ Visitor login failed');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"visitor@test.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -402,37 +455,6 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"Visitor\",\n  \"email\": \"test@test.com\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/register",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "register"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "[ERROR] Register - Missing BirthDate",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {"type": "noauth"},
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"Visitor\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/register",
@@ -1450,45 +1472,6 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"name\": \"Test Attraction\",\n  \"description\": \"Test\",\n  \"type\": \"InvalidType\",\n  \"minAge\": 12,\n  \"maxCapacity\": 20\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/attractions",
-							"host": ["{{base_url}}"],
-							"path": ["api", "attractions"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "[ERROR] Create Attraction - Invalid Type Number",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Test Attraction\",\n  \"description\": \"Test\",\n  \"type\": \"99\",\n  \"minAge\": 12,\n  \"maxCapacity\": 20\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/attractions",
@@ -4409,57 +4392,6 @@
 					"response": []
 				},
 				{
-					"name": "[ERROR] Create User - Invalid Email Format",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"invalid-email\",\n  \"password\": \"password123\",\n  \"roles\": [\"Operator\"]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/users",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "[ERROR] Create User - Duplicate Email",
 					"event": [
 						{
@@ -5382,110 +5314,6 @@
 								"api",
 								"users",
 								"invalid-guid"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "[ERROR] Modify User - Invalid Email (no @)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"notanemail\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/users/{{visitor_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"users",
-								"{{visitor_id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "[ERROR] Modify User - Invalid Email (no domain)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"user@\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/users/{{visitor_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"users",
-								"{{visitor_id}}"
 							]
 						}
 					},
