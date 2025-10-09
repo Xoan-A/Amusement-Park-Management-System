@@ -694,8 +694,31 @@ public class AttractionControllerTest
         };
 
         AttractionsVisitResponse expectedResponse = new AttractionsVisitResponse();
-        expectedResponse.AttractionsVisits.Add((attraction1, 3));
-        expectedResponse.AttractionsVisits.Add((attraction2, 2));
+        AttractionResponse attractionRes1 = new AttractionResponse()
+        {
+            Id = attraction1.Id,
+            Name = attraction1.Name,
+            Description = attraction1.Description,
+            Type = attraction1.Type.ToString(),
+            MinAge = attraction1.MinAge,
+            MaxCapacity = attraction1.MaxCapacity,
+            CurrentCapacity = attraction1.CurrentCapacity,
+            IsActive = attraction1.IsActive
+        };
+        
+        AttractionResponse attractionRes2 = new AttractionResponse()
+        {
+            Id = attraction2.Id,
+            Name = attraction2.Name,
+            Description = attraction2.Description,
+            Type = attraction2.Type.ToString(),
+            MinAge = attraction2.MinAge,
+            MaxCapacity = attraction2.MaxCapacity,
+            CurrentCapacity = attraction2.CurrentCapacity,
+            IsActive = attraction2.IsActive
+        };
+        expectedResponse.AttractionsVisits.Add((attractionRes1, 3));
+        expectedResponse.AttractionsVisits.Add((attractionRes2, 2));
 
         _mockAttractionService.Setup(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitsRequest>()))
             .ReturnsAsync(expectedResponse);
