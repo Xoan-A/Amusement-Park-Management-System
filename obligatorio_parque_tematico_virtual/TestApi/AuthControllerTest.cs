@@ -226,5 +226,40 @@ namespace ApiTests
 
             Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
         }
+
+        [TestMethod]
+        public async Task Login_WithUserHavingNullRoles_ReturnsEmptyRolesArray()
+        {
+            LoginRequest request = new LoginRequest
+            {
+                Email = "user@test.com",
+                Password = "password123"
+            };
+
+            UserResponse userResponse = new UserResponse
+            {
+                Id = Guid.NewGuid(),
+                Name = "Test",
+                LastName = "User",
+                Email = "user@test.com",
+                UserRoles = null
+            };
+
+            _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
+                         .ReturnsAsync(userResponse);
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _client.PostAsync("/api/auth/login", content);
+
+            response.EnsureSuccessStatusCode();
+            string responseContent = await response.Content.ReadAsStringAsync();
+            LoginResponse? loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.IsNotNull(loginResponse);
+            Assert.IsNotNull(loginResponse.Roles);
+            Assert.AreEqual(0, loginResponse.Roles.Length);
+        }
     }
 }
