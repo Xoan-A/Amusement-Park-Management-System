@@ -37,7 +37,7 @@ namespace BusinessLogic
             string email = request.Email;
             string password = request.Password;
             DateTime birthDate = request.BirthDate;
-        
+
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
@@ -70,7 +70,7 @@ namespace BusinessLogic
             if (visitorRole != null)
             {
                 visitor.UserRoles.Add(new UserRole
-                { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
+                    { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
             }
 
             return await _userRepository.Create(visitor);
@@ -165,7 +165,7 @@ namespace BusinessLogic
             DateTime enterDate = request.EnterDate;
             Guid userId = request.UserId;
             Guid? eventId = request.EventId;
-            
+
             if (qr == null && nfc == null)
                 throw new ArgumentException("QR code or NFC must be provided.");
 
@@ -211,7 +211,7 @@ namespace BusinessLogic
         {
             Guid userId = request.userId;
             DateTime exitDate = request.exitDate;
-            
+
             User user = await _userRepository.GetById(userId);
             if (user == null)
                 throw new ArgumentException("User not found.");

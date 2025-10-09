@@ -24,6 +24,7 @@ namespace TestBusinessLogic
                 .Callback<StrategyConfiguration>(config => _storedConfig = config)
                 .Returns(Task.CompletedTask);
         }
+
         [TestMethod]
         public async Task ActiveStrategy_SetStrategy_ShouldSetStrategy()
         {
@@ -253,7 +254,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void  Combo_CalculateScore_DifferentAttractionWithinTime_ShouldReturnDoubleScore()
+        public void Combo_CalculateScore_DifferentAttractionWithinTime_ShouldReturnDoubleScore()
         {
             SetupMocks();
             var strategy = new Combo(30);
@@ -474,7 +475,7 @@ namespace TestBusinessLogic
                 EnterDate = new DateTime(2025, 10, 5, 10, 0, 0)
             };
 
-            Assert.ThrowsException<ArgumentException>(() =>  strategy.CalculateScore(user, null!, request));
+            Assert.ThrowsException<ArgumentException>(() => strategy.CalculateScore(user, null!, request));
         }
 
         [TestMethod]

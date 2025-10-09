@@ -64,7 +64,7 @@ namespace TestBusinessLogic
                 VisitDate = visitDate,
                 TicketType = (int)TicketType.General
             };
-            
+
             Ticket result = await _ticketLogic.PurchaseTicketAsync(request);
 
             Assert.IsNotNull(result);
@@ -89,7 +89,7 @@ namespace TestBusinessLogic
                 VisitDate = visitDate,
                 TicketType = (int)TicketType.General
             };
-            
+
             Ticket result = await _ticketLogic.PurchaseTicketAsync(request);
 
             Assert.IsNull(result);
@@ -120,7 +120,7 @@ namespace TestBusinessLogic
                 VisitDate = pastVisitDate,
                 TicketType = (int)TicketType.General
             };
-            
+
             Ticket result = await _ticketLogic.PurchaseTicketAsync(request);
 
             Assert.IsNull(result);
@@ -165,7 +165,7 @@ namespace TestBusinessLogic
                 TicketType = (int)TicketType.EventSpecial,
                 EventId = eventId
             };
-            
+
             Ticket result =
                 await _ticketLogic.PurchaseTicketAsync(request);
 

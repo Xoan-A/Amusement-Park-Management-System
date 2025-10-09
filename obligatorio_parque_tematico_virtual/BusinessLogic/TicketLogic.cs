@@ -26,9 +26,10 @@ namespace BusinessLogic
         {
             Guid visitorId = request.VisitorId;
             DateTime visitDate = request.VisitDate;
-            TicketType ticketType = (TicketType)request.TicketType;;
+            TicketType ticketType = (TicketType)request.TicketType;
+            ;
             Guid? eventId = request.EventId;
-            
+
             User visitor = await _userRepository.GetById(visitorId);
             if (visitor == null)
             {

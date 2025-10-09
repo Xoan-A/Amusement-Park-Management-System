@@ -69,7 +69,7 @@ namespace TestBusinessLogic
                 Password = password,
                 BirthDate = birthDate
             };
-            
+
             User result = await _userLogic.RegisterVisitor(request);
 
             Assert.IsNotNull(result);
@@ -104,7 +104,7 @@ namespace TestBusinessLogic
                 Password = password,
                 BirthDate = birthDate
             };
-            
+
             User result = await _userLogic.RegisterVisitor(request);
 
             Assert.IsNull(result);
@@ -130,7 +130,7 @@ namespace TestBusinessLogic
                 Password = password,
                 BirthDate = birthDate
             };
-            
+
             User result = await _userLogic.RegisterVisitor(request);
 
             Assert.IsNull(result);
@@ -153,7 +153,7 @@ namespace TestBusinessLogic
                 Password = password,
                 BirthDate = birthDate
             };
-            
+
             User result = await _userLogic.RegisterVisitor(request);
 
             Assert.IsNull(result);
@@ -176,7 +176,7 @@ namespace TestBusinessLogic
                 Password = password,
                 BirthDate = birthDate
             };
-            
+
             User result = await _userLogic.RegisterVisitor(request);
 
             Assert.IsNull(result);
@@ -199,7 +199,7 @@ namespace TestBusinessLogic
                 Password = password,
                 BirthDate = birthDate
             };
-            
+
             User result = await _userLogic.RegisterVisitor(request);
 
             Assert.IsNull(result);
@@ -222,7 +222,7 @@ namespace TestBusinessLogic
                 Password = password,
                 BirthDate = futureBirthDate
             };
-            
+
             User result = await _userLogic.RegisterVisitor(request);
 
             Assert.IsNull(result);
@@ -262,7 +262,7 @@ namespace TestBusinessLogic
                 Password = plainPassword,
                 BirthDate = birthDate
             };
-            
+
             User result = await _userLogic.RegisterVisitor(request);
 
             Assert.IsNotNull(result);
@@ -286,7 +286,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
         }
 
@@ -309,7 +309,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
         }
 
@@ -350,7 +350,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
 
             Assert.AreEqual(1, visitor.VisitorReports.Count);
@@ -410,7 +410,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(attractionId1, request);
             await _userLogic.RegisterEntry(attractionId2, request);
 
@@ -438,7 +438,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
         }
 
@@ -471,7 +471,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
         }
 
@@ -512,7 +512,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
 
             Assert.AreEqual(6, attraction.CurrentCapacity);
@@ -556,7 +556,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(userId, request);
         }
 
@@ -597,7 +597,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
 
             Assert.AreEqual(10, attraction.CurrentCapacity);
@@ -642,13 +642,13 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             RegisterExitRequest exitRequest = new RegisterExitRequest
             {
                 userId = userId,
                 exitDate = exitDate
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, entryRequest);
             await _userLogic.RegisterExit(attractionId, exitRequest);
 
@@ -672,7 +672,7 @@ namespace TestBusinessLogic
                 userId = userId,
                 exitDate = exitDate
             };
-            
+
             await _userLogic.RegisterExit(attractionId, request);
         }
 
@@ -700,7 +700,7 @@ namespace TestBusinessLogic
                 userId = userId,
                 exitDate = exitDate
             };
-            
+
             await _userLogic.RegisterExit(attractionId, request);
         }
 
@@ -742,13 +742,13 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             RegisterExitRequest exitRequest = new RegisterExitRequest
             {
                 userId = userId,
                 exitDate = exitDate
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, entryRequest);
             await _userLogic.RegisterExit(attractionId, exitRequest);
 
@@ -793,13 +793,13 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             RegisterExitRequest exitRequest = new RegisterExitRequest
             {
                 userId = userId,
                 exitDate = exitDate
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, entryRequest);
             await _userLogic.RegisterExit(attractionId, exitRequest);
 
@@ -844,13 +844,13 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             RegisterExitRequest exitRequest = new RegisterExitRequest
             {
                 userId = userId,
                 exitDate = exitDate
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, entryRequest);
             await _userLogic.RegisterExit(attractionId, exitRequest);
 
@@ -893,7 +893,7 @@ namespace TestBusinessLogic
                 NFC = userId,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
 
             Assert.AreEqual(1, visitor.VisitorReports.Count);
@@ -939,7 +939,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = eventId
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
 
             Assert.AreEqual(1, visitor.VisitorReports.Count);
@@ -985,7 +985,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = eventId
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
 
             Assert.AreEqual(1, visitor.VisitorReports.Count);
@@ -1006,7 +1006,7 @@ namespace TestBusinessLogic
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(false);
 
             RegisterEntryRequest request = new RegisterEntryRequest();
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
         }
 
@@ -1040,7 +1040,8 @@ namespace TestBusinessLogic
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
                 .ReturnsAsync((Event)null);
-            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
+            _mockActiveStrategy.Setup(s =>
+                    s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
                 .Returns(5);
 
             RegisterEntryRequest request = new RegisterEntryRequest
@@ -1051,7 +1052,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
 
             Assert.AreEqual(5, visitor.Score);
@@ -1095,10 +1096,12 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, specialEvent.Id)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, specialEvent.Id))
+                .ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
                 .ReturnsAsync(specialEvent);
-            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
+            _mockActiveStrategy.Setup(s =>
+                    s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
                 .Returns(6);
 
             RegisterEntryRequest request = new RegisterEntryRequest
@@ -1109,7 +1112,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = specialEvent.Id
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
 
             Assert.AreEqual(16, visitor.Score);
@@ -1162,7 +1165,8 @@ namespace TestBusinessLogic
                 .ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(It.IsAny<Guid>(), It.IsAny<DateTime>()))
                 .ReturnsAsync((Event)null);
-            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
+            _mockActiveStrategy.Setup(s =>
+                    s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
                 .Returns(3);
 
             RegisterEntryRequest entryRequest = new RegisterEntryRequest
@@ -1173,7 +1177,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             RegisterEntryRequest entryRequest2 = new RegisterEntryRequest
             {
                 UserId = userId,
@@ -1182,12 +1186,14 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(attractionId1, entryRequest);
             await _userLogic.RegisterEntry(attractionId2, entryRequest2);
 
             Assert.AreEqual(6, visitor.Score);
-            _mockActiveStrategy.Verify(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()), Times.Exactly(2));
+            _mockActiveStrategy.Verify(
+                s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()),
+                Times.Exactly(2));
         }
 
         [TestMethod]
@@ -1220,7 +1226,8 @@ namespace TestBusinessLogic
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
                 .ReturnsAsync((Event)null);
-            _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
+            _mockActiveStrategy.Setup(s =>
+                    s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
                 .Returns(0);
 
             RegisterEntryRequest request = new RegisterEntryRequest
@@ -1231,7 +1238,7 @@ namespace TestBusinessLogic
                 NFC = null,
                 EventId = null
             };
-            
+
             await _userLogic.RegisterEntry(attractionId, request);
 
             Assert.AreEqual(5, visitor.Score);
@@ -1435,7 +1442,8 @@ namespace TestBusinessLogic
         public async Task ModifyUser_WhenActorSubIsNull_ThrowsUnauthorized()
         {
             var userId = Guid.NewGuid();
-            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            ModifyUserRequest request = new ModifyUserRequest
+                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
 
             await _userLogic.ModifyUser(userId, null, request);
         }
@@ -1446,7 +1454,8 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             string actorSub = Guid.NewGuid().ToString();
-            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            ModifyUserRequest request = new ModifyUserRequest
+                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
 
             await _userLogic.ModifyUser(userId, actorSub, request);
         }
@@ -1457,7 +1466,8 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
-            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            ModifyUserRequest request = new ModifyUserRequest
+                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync((User)null);
 
@@ -1472,7 +1482,7 @@ namespace TestBusinessLogic
             string actorSub = userId.ToString();
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "A", LastName = "B", Email = "new@example.com", Password = "p" };
+                { Name = "A", LastName = "B", Email = "new@example.com", Password = "p" };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
             _mockUserRepository.Setup(r => r.IsEmailUnique("new@example.com")).ReturnsAsync(false);
@@ -1488,7 +1498,7 @@ namespace TestBusinessLogic
             string actorSub = userId.ToString();
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "", LastName = "B", Email = "new@example.com", Password = "p" };
+                { Name = "", LastName = "B", Email = "new@example.com", Password = "p" };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1503,7 +1513,7 @@ namespace TestBusinessLogic
             string actorSub = userId.ToString();
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "A", LastName = "", Email = "new@example.com", Password = "p" };
+                { Name = "A", LastName = "", Email = "new@example.com", Password = "p" };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1517,7 +1527,8 @@ namespace TestBusinessLogic
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
-            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "", Password = "p" };
+            ModifyUserRequest request = new ModifyUserRequest
+                { Name = "A", LastName = "B", Email = "", Password = "p" };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1531,7 +1542,8 @@ namespace TestBusinessLogic
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
-            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "x@y.com", Password = "" };
+            ModifyUserRequest request = new ModifyUserRequest
+                { Name = "A", LastName = "B", Email = "x@y.com", Password = "" };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1546,7 +1558,7 @@ namespace TestBusinessLogic
             string actorSub = userId.ToString();
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "A", LastName = "B", Email = "x@y.com", Password = "p", BirthDate = DateTime.Now.AddDays(1) };
+                { Name = "A", LastName = "B", Email = "x@y.com", Password = "p", BirthDate = DateTime.Now.AddDays(1) };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 

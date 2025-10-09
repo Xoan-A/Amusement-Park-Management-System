@@ -59,7 +59,7 @@ public class UserLogicRoleTest
             Password = password,
             BirthDate = birthDate
         };
-        
+
         User result = await _userLogic.RegisterVisitor(request);
 
         Assert.IsNotNull(result);

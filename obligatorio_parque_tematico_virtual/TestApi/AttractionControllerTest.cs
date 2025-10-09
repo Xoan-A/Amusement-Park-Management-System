@@ -352,14 +352,14 @@ public class AttractionControllerTest
         Guid attractionId = Guid.NewGuid();
         Guid userId = Guid.NewGuid();
         DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-        
+
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
             EnterDate = enterDate,
             UserId = userId
         };
-        
+
         _mockUserLogic.Setup(s =>
                 s.RegisterEntry(userId, requestBody))
             .Returns(Task.CompletedTask);
@@ -418,7 +418,7 @@ public class AttractionControllerTest
 
         _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
             .Returns(Task.CompletedTask);
-        
+
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
         var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
@@ -448,7 +448,7 @@ public class AttractionControllerTest
             UserId = userId,
             NFC = userId
         };
-        
+
         _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
             .Returns(Task.CompletedTask);
 
@@ -484,7 +484,7 @@ public class AttractionControllerTest
             Qr = qrCode,
             EventId = eventId
         };
-        
+
         _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
             .Returns(Task.CompletedTask);
 
@@ -519,7 +519,7 @@ public class AttractionControllerTest
             NFC = userId,
             EventId = eventId
         };
-        
+
         _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
             .Returns(Task.CompletedTask);
 
@@ -553,16 +553,15 @@ public class AttractionControllerTest
             UserId = userId,
             Qr = qrCode
         };
-        
+
         _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()))
             .ThrowsAsync(new ArgumentException("User does not have a valid ticket."));
-        
+
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
         var response = await _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
 
         _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
-        
     }
 
     [TestMethod]
@@ -572,14 +571,13 @@ public class AttractionControllerTest
         Guid userId = Guid.NewGuid();
         DateTime exitDate = new DateTime(2025, 10, 1, 12, 0, 0);
 
-        
 
         RegisterExitRequest requestBody = new RegisterExitRequest
         {
             exitDate = exitDate,
             userId = userId
         };
-        
+
         _mockUserLogic.Setup(s => s.RegisterExit(attractionId, requestBody))
             .Returns(Task.CompletedTask);
 
