@@ -79,7 +79,7 @@ namespace TestBusinessLogic
             SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(async() =>
+            await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
                 await activeStrategy.SetStrategy(new SetStrategyRequest
                 {
                     StrategyName = "Combo",
