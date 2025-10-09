@@ -37,7 +37,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void RegisterVisitor_ShouldCreateVisitor_WithStandardMembership()
+        public async Task RegisterVisitor_ShouldCreateVisitor_WithStandardMembership()
         {
             string name = "John";
             string lastName = "Doe";
@@ -46,7 +46,7 @@ namespace TestBusinessLogic
             string hashedPassword = "hashedPassword123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
-            _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
+            _mockUserRepository.Setup(r => r.IsEmailUnique(email)).ReturnsAsync(true);
             _mockPasswordService.Setup(p => p.HashPassword(password)).Returns(hashedPassword);
 
             User expectedUser = new User
@@ -59,9 +59,9 @@ namespace TestBusinessLogic
                 MembershipLevel = MembershipLevel.Standard
             };
 
-            _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).Returns(expectedUser);
+            _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync(expectedUser);
 
-            User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+            User result = await _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(name, result.Name);
@@ -77,7 +77,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void RegisterVisitor_ShouldReturnNull_WhenEmailIsNotUnique()
+        public async Task RegisterVisitor_ShouldReturnNull_WhenEmailIsNotUnique()
         {
             string name = "John";
             string lastName = "Doe";
@@ -85,9 +85,9 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
-            _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(false);
+            _mockUserRepository.Setup(r => r.IsEmailUnique(email)).ReturnsAsync(false);
 
-            User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+            User result = await _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
             Assert.IsNull(result);
             _mockUserRepository.Verify(r => r.IsEmailUnique(email), Times.Once);
@@ -96,7 +96,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void RegisterVisitor_ShouldReturnNull_WhenEmailIsEmpty()
+        public async Task RegisterVisitor_ShouldReturnNull_WhenEmailIsEmpty()
         {
             string name = "John";
             string lastName = "Doe";
@@ -104,13 +104,13 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
-            User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+            User result = await _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void RegisterVisitor_ShouldReturnNull_WhenPasswordIsEmpty()
+        public async Task RegisterVisitor_ShouldReturnNull_WhenPasswordIsEmpty()
         {
             string name = "John";
             string lastName = "Doe";
@@ -118,13 +118,13 @@ namespace TestBusinessLogic
             string password = "";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
-            User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+            User result = await _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void RegisterVisitor_ShouldReturnNull_WhenNameIsEmpty()
+        public async Task RegisterVisitor_ShouldReturnNull_WhenNameIsEmpty()
         {
             string name = "";
             string lastName = "Doe";
@@ -132,13 +132,13 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
-            User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+            User result = await _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void RegisterVisitor_ShouldReturnNull_WhenLastNameIsEmpty()
+        public async Task RegisterVisitor_ShouldReturnNull_WhenLastNameIsEmpty()
         {
             string name = "John";
             string lastName = "";
@@ -146,13 +146,13 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
-            User result = _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
+            User result = await _userLogic.RegisterVisitor(name, lastName, email, password, birthDate);
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void RegisterVisitor_ShouldReturnNull_WhenBirthDateIsInFuture()
+        public async Task RegisterVisitor_ShouldReturnNull_WhenBirthDateIsInFuture()
         {
             string name = "John";
             string lastName = "Doe";
@@ -160,13 +160,13 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime futureBirthDate = DateTime.Now.AddDays(1);
 
-            User result = _userLogic.RegisterVisitor(name, lastName, email, password, futureBirthDate);
+            User result = await _userLogic.RegisterVisitor(name, lastName, email, password, futureBirthDate);
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void RegisterVisitor_ShouldHashPassword_BeforeCreating()
+        public async Task RegisterVisitor_ShouldHashPassword_BeforeCreating()
         {
             string name = "John";
             string lastName = "Doe";
@@ -175,7 +175,7 @@ namespace TestBusinessLogic
             string hashedPassword = "hashedPassword123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
-            _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
+            _mockUserRepository.Setup(r => r.IsEmailUnique(email)).ReturnsAsync(true);
             _mockPasswordService.Setup(p => p.HashPassword(plainPassword)).Returns(hashedPassword);
 
             User createdUser = new User
@@ -189,9 +189,9 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.Create(It.Is<User>(v => v.Password == hashedPassword)))
-                .Returns(createdUser);
+                .ReturnsAsync(createdUser);
 
-            User result = _userLogic.RegisterVisitor(name, lastName, email, plainPassword, birthDate);
+            User result = await _userLogic.RegisterVisitor(name, lastName, email, plainPassword, birthDate);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(hashedPassword, result.Password);
@@ -248,7 +248,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
@@ -297,7 +297,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).ReturnsAsync(attraction1);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).ReturnsAsync(attraction2);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate1, null)).ReturnsAsync(true);
@@ -319,7 +319,7 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns((User)null);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync((User)null);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
             await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
@@ -342,7 +342,7 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync((Attraction)null);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
@@ -374,7 +374,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 5
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
@@ -409,7 +409,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 10
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
@@ -441,7 +441,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 9
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
@@ -477,7 +477,7 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
@@ -497,7 +497,7 @@ namespace TestBusinessLogic
             Guid attractionId = Guid.NewGuid();
             DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns((User)null);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync((User)null);
 
             await _userLogic.RegisterExit(userId, attractionId, exitDate);
         }
@@ -518,7 +518,7 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync((Attraction)null);
 
             await _userLogic.RegisterExit(userId, attractionId, exitDate);
@@ -550,7 +550,7 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
@@ -586,7 +586,7 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
@@ -622,7 +622,7 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
@@ -656,7 +656,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(null, userId, enterDate, null)).ReturnsAsync(true);
 
@@ -693,7 +693,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(true);
 
@@ -730,7 +730,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 5
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(true);
 
@@ -781,7 +781,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
@@ -830,7 +830,7 @@ namespace TestBusinessLogic
                 Date = enterDate
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
@@ -883,7 +883,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).ReturnsAsync(attraction1);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).ReturnsAsync(attraction2);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, It.IsAny<DateTime>(), null))
@@ -925,7 +925,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))

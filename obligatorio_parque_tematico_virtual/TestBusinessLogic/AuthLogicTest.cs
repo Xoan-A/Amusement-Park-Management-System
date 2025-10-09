@@ -24,7 +24,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void Login_ShouldReturnUser_WhenCredentialsAreValid()
+        public async Task Login_ShouldReturnUser_WhenCredentialsAreValid()
         {
             string email = "admin@test.com";
             string password = "password123";
@@ -43,10 +43,10 @@ namespace TestBusinessLogic
                 new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
             };
 
-            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(admin);
+            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).ReturnsAsync(admin);
             _mockPasswordService.Setup(p => p.VerifyPassword(password, hashedPassword)).Returns(true);
 
-            User result = _authLogic.Login(email, password);
+            User result = await _authLogic.Login(email, password);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(admin.Email, result.Email);
@@ -55,14 +55,14 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void Login_ShouldReturnNull_WhenUserNotFound()
+        public async Task Login_ShouldReturnNull_WhenUserNotFound()
         {
             string email = "nonexistent@test.com";
             string password = "password123";
 
-            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns((User)null);
+            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).ReturnsAsync(() => (User)null!);
 
-            User result = _authLogic.Login(email, password);
+            User result = await _authLogic.Login(email, password);
 
             Assert.IsNull(result);
             _mockUserRepository.Verify(r => r.GetByEmailWithRoles(email), Times.Once);
@@ -70,7 +70,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void Login_ShouldReturnNull_WhenPasswordIsInvalid()
+        public async Task Login_ShouldReturnNull_WhenPasswordIsInvalid()
         {
             string email = "admin@test.com";
             string password = "wrongPassword";
@@ -89,10 +89,10 @@ namespace TestBusinessLogic
                 new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
             };
 
-            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(admin);
+            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).ReturnsAsync(admin);
             _mockPasswordService.Setup(p => p.VerifyPassword(password, hashedPassword)).Returns(false);
 
-            User result = _authLogic.Login(email, password);
+            User result = await _authLogic.Login(email, password);
 
             Assert.IsNull(result);
             _mockUserRepository.Verify(r => r.GetByEmailWithRoles(email), Times.Once);
@@ -100,7 +100,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void Login_ShouldWork_ForAllUserTypes()
+        public async Task Login_ShouldWork_ForAllUserTypes()
         {
             string email = "visitor@test.com";
             string password = "password123";
@@ -117,22 +117,22 @@ namespace TestBusinessLogic
                 MembershipLevel = MembershipLevel.Standard
             };
 
-            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).ReturnsAsync(visitor);
             _mockPasswordService.Setup(p => p.VerifyPassword(password, hashedPassword)).Returns(true);
 
-            User result = _authLogic.Login(email, password);
+            User result = await _authLogic.Login(email, password);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(visitor.Email, result.Email);
         }
 
         [TestMethod]
-        public void Login_ShouldHandleEmptyCredentials()
+        public async Task Login_ShouldHandleEmptyCredentials()
         {
-            User result1 = _authLogic.Login("", "password");
-            User result2 = _authLogic.Login("email@test.com", "");
-            User result3 = _authLogic.Login(null, "password");
-            User result4 = _authLogic.Login("email@test.com", null);
+            User result1 = await _authLogic.Login("", "password");
+            User result2 = await _authLogic.Login("email@test.com", "");
+            User result3 = await _authLogic.Login(null, "password");
+            User result4 = await _authLogic.Login("email@test.com", null);
 
             Assert.IsNull(result1);
             Assert.IsNull(result2);
@@ -141,7 +141,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void Login_ShouldLoadUserWithRoles()
+        public async Task Login_ShouldLoadUserWithRoles()
         {
             string email = "admin@test.com";
             string password = "password123";
@@ -156,10 +156,10 @@ namespace TestBusinessLogic
                 Password = hashedPassword
             };
 
-            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(user);
+            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).ReturnsAsync(user);
             _mockPasswordService.Setup(p => p.VerifyPassword(password, hashedPassword)).Returns(true);
 
-            User result = _authLogic.Login(email, password);
+            User result = await _authLogic.Login(email, password);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(user.Email, result.Email);

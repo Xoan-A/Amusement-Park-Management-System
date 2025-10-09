@@ -10,42 +10,42 @@ public class ExceptionFilter : IExceptionFilter
     {
         if (context.Exception is UnauthorizedException)
         {
-            context.Result = new ObjectResult(new { Message = "Required privileges not met" })
+            context.Result = new ObjectResult(new { Message = context.Exception.Message })
             {
                 StatusCode = 401
             };
         }
         else if (context.Exception is ForbiddenException)
         {
-            context.Result = new ObjectResult(new { Message = "An authorization is mandatory for this request" })
+            context.Result = new ObjectResult(new { Message = context.Exception.Message })
             {
                 StatusCode = 403
             };
         }
         else if (context.Exception is KeyNotFoundException)
         {
-            context.Result = new ObjectResult(new { Message = "Key not found in server" })
+            context.Result = new ObjectResult(new { Message = context.Exception.Message })
             {
                 StatusCode = 404
             };
         }
         else if (context.Exception is ArgumentException)
         {
-            context.Result = new ObjectResult(new { Message = "Incorrect request data" })
+            context.Result = new ObjectResult(new { Message = context.Exception.Message })
             {
                 StatusCode = 400
             };
         }
         else if (context.Exception is NotImplementedException)
         {
-            context.Result = new ObjectResult(new { Message = "Not implemented" })
+            context.Result = new ObjectResult(new { Message = context.Exception.Message })
             {
                 StatusCode = 501
             };
         }
         else
         {
-            context.Result = new ObjectResult(new { Message = "Internal server error" })
+            context.Result = new ObjectResult(new { Message = context.Exception.Message })
             {
                 StatusCode = 500
             };

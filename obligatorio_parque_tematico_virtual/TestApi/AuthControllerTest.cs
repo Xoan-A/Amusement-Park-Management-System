@@ -1,19 +1,14 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using BusinessLogic;
 using IBusinessLogic;
 using Models.In;
 using Models.Out;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
+using Domain;
 using Microsoft.Data.Sqlite;
 
 namespace ApiTests
@@ -95,7 +90,7 @@ namespace ApiTests
             };
 
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
-                         .Returns(user);
+                         .ReturnsAsync(user);
 
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -144,7 +139,7 @@ namespace ApiTests
             };
 
             _mockUserLogic.Setup(x => x.RegisterVisitor(request.Name, request.LastName, request.Email, request.Password, request.BirthDate))
-                         .Returns(user);
+                         .ReturnsAsync(user);
 
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -169,7 +164,7 @@ namespace ApiTests
             };
 
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
-                         .Returns((Domain.User)null);
+                         .ReturnsAsync((User)null);
 
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -199,7 +194,7 @@ namespace ApiTests
             };
 
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
-                         .Returns(user);
+                         .ReturnsAsync(user);
 
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -228,7 +223,7 @@ namespace ApiTests
             };
 
             _mockUserLogic.Setup(x => x.RegisterVisitor(request.Name, request.LastName, request.Email, request.Password, request.BirthDate))
-                         .Returns((Domain.User)null);
+                         .ReturnsAsync((User)null);
 
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");

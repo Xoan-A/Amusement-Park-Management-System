@@ -37,7 +37,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void Create_ShouldAddUserToDatabase()
+        public async Task Create_ShouldAddUserToDatabase()
         {
             User admin = new User
             {
@@ -52,7 +52,7 @@ namespace TestDataAccess
                 new UserRole { RoleId = adminRole.Id }
             };
 
-            User result = _userRepository.Create(admin);
+            User result = await _userRepository.Create(admin);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("newadmin@test.com", result.Email);
@@ -60,7 +60,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetByEmail_ShouldReturnUser_WhenUserExists()
+        public async Task GetByEmail_ShouldReturnUser_WhenUserExists()
         {
             User visitor = new User
             {
@@ -79,7 +79,7 @@ namespace TestDataAccess
             _context.Users.Add(visitor);
             _context.SaveChanges();
 
-            User result = _userRepository.GetByEmail("test@test.com");
+            User result = await _userRepository.GetByEmail("test@test.com");
 
             Assert.IsNotNull(result);
             Assert.AreEqual("test@test.com", result.Email);
@@ -87,15 +87,15 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetByEmail_ShouldReturnNull_WhenUserDoesNotExist()
+        public async Task GetByEmail_ShouldReturnNull_WhenUserDoesNotExist()
         {
-            User result = _userRepository.GetByEmail("nonexistent@test.com");
+            User result = await _userRepository.GetByEmail("nonexistent@test.com");
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void GetById_ShouldReturnUser_WhenUserExists()
+        public async Task GetById_ShouldReturnUser_WhenUserExists()
         {
             User op = new User
             {
@@ -112,7 +112,7 @@ namespace TestDataAccess
             _context.Users.Add(op);
             _context.SaveChanges();
 
-            User result = _userRepository.GetById(op.Id);
+            User result = await _userRepository.GetById(op.Id);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(op.Id, result.Id);
@@ -120,17 +120,17 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetById_ShouldReturnNull_WhenUserDoesNotExist()
+        public async Task GetById_ShouldReturnNull_WhenUserDoesNotExist()
         {
             Guid nonExistentId = Guid.NewGuid();
 
-            User result = _userRepository.GetById(nonExistentId);
+            User result = await _userRepository.GetById(nonExistentId);
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void IsEmailUnique_ShouldReturnFalse_WhenEmailExists()
+        public async Task IsEmailUnique_ShouldReturnFalse_WhenEmailExists()
         {
             User admin = new User
             {
@@ -147,21 +147,21 @@ namespace TestDataAccess
             _context.Users.Add(admin);
             _context.SaveChanges();
 
-            bool result = _userRepository.IsEmailUnique("existing@test.com");
+            bool result = await _userRepository.IsEmailUnique("existing@test.com");
 
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void IsEmailUnique_ShouldReturnTrue_WhenEmailDoesNotExist()
+        public async Task IsEmailUnique_ShouldReturnTrue_WhenEmailDoesNotExist()
         {
-            bool result = _userRepository.IsEmailUnique("new@test.com");
+            bool result = await _userRepository.IsEmailUnique("new@test.com");
 
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void GetByIdWithRoles_ShouldReturnUser_WithRoles()
+        public async Task GetByIdWithRoles_ShouldReturnUser_WithRoles()
         {
             _context.Database.EnsureCreated();
 
@@ -180,7 +180,7 @@ namespace TestDataAccess
             _context.UserRoles.Add(userRole);
             _context.SaveChanges();
 
-            User result = _userRepository.GetByIdWithRoles(user.Id);
+            User result = await _userRepository.GetByIdWithRoles(user.Id);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(user.Id, result.Id);
@@ -189,7 +189,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetByEmailWithRoles_ShouldReturnUser_WithRoles()
+        public async Task GetByEmailWithRoles_ShouldReturnUser_WithRoles()
         {
             _context.Database.EnsureCreated();
 
@@ -208,7 +208,7 @@ namespace TestDataAccess
             _context.UserRoles.Add(userRole);
             _context.SaveChanges();
 
-            User result = _userRepository.GetByEmailWithRoles("test@test.com");
+            User result = await _userRepository.GetByEmailWithRoles("test@test.com");
 
             Assert.IsNotNull(result);
             Assert.AreEqual("test@test.com", result.Email);
@@ -545,7 +545,7 @@ namespace TestDataAccess
 
             await _userRepository.Update(user);
 
-            var updatedUser = _userRepository.GetByIdWithRoles(user.Id);
+            var updatedUser = await _userRepository.GetByIdWithRoles(user.Id);
             Assert.AreEqual(1, updatedUser.UserRoles.Count);
             Assert.AreEqual(Role.VISITOR, updatedUser.UserRoles.First().Role.Name);
         }

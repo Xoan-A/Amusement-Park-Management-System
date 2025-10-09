@@ -59,7 +59,7 @@ namespace TestBusinessLogic
             };
 
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(currentDate);
-            _mockUserRepository.Setup(u => u.GetById(visitorId)).Returns(visitor);
+            _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
             _mockTicketRepository.Setup(t => t.AddAsync(It.IsAny<Ticket>())).ReturnsAsync(expectedTicket);
 
             Ticket result = await _ticketLogic.PurchaseTicketAsync(visitorId, visitDate, TicketType.General, null);
@@ -78,7 +78,7 @@ namespace TestBusinessLogic
             Guid visitorId = Guid.NewGuid();
             DateTime visitDate = DateTime.Now.AddDays(7);
 
-            _mockUserRepository.Setup(u => u.GetById(visitorId)).Returns((User)null);
+            _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync((User)null);
 
             Ticket result = await _ticketLogic.PurchaseTicketAsync(visitorId, visitDate, TicketType.General, null);
 
@@ -102,7 +102,7 @@ namespace TestBusinessLogic
             };
 
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(currentDate);
-            _mockUserRepository.Setup(u => u.GetById(visitorId)).Returns(visitor);
+            _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
 
             Ticket result = await _ticketLogic.PurchaseTicketAsync(visitorId, pastVisitDate, TicketType.General, null);
 
@@ -138,7 +138,7 @@ namespace TestBusinessLogic
             };
 
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(currentDate);
-            _mockUserRepository.Setup(u => u.GetById(visitorId)).Returns(visitor);
+            _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
             _mockTicketRepository.Setup(t => t.AddAsync(It.IsAny<Ticket>())).ReturnsAsync(expectedTicket);
 
             Ticket result =

@@ -1,6 +1,7 @@
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
+using System.Threading.Tasks;
 
 namespace BusinessLogic
 {
@@ -15,14 +16,14 @@ namespace BusinessLogic
             _passwordLogic = passwordLogic;
         }
 
-        public User Login(string email, string password)
+        public async Task<User> Login(string email, string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
                 return null;
             }
 
-            User user = _userRepository.GetByEmailWithRoles(email);
+            User user = await _userRepository.GetByEmailWithRoles(email);
             if (user == null)
             {
                 return null;

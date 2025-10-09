@@ -4,6 +4,6 @@ namespace IBusinessLogic
 {
     public interface IAuthLogic
     {
-        User Login(string email, string password);
+        Task<User> Login(string email, string password);
     }
 }

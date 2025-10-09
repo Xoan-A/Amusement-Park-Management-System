@@ -3,6 +3,7 @@ using System.Linq;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
+using Models.In;
 using Models.Out;
 
 namespace BusinessLogic
@@ -30,7 +31,8 @@ namespace BusinessLogic
             _activeStrategy = activeStrategy;
         }
 
-        public User RegisterVisitor(string name, string lastName, string email, string password, DateTime birthDate)
+        public async Task<User> RegisterVisitor(string name, string lastName, string email, string password,
+            DateTime birthDate)
         {
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
@@ -43,7 +45,7 @@ namespace BusinessLogic
                 return null;
             }
 
-            if (!_userRepository.IsEmailUnique(email))
+            if (!await _userRepository.IsEmailUnique(email))
             {
                 return null;
             }
@@ -67,18 +69,24 @@ namespace BusinessLogic
                 { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
             }
 
-            return _userRepository.Create(visitor);
+            return await _userRepository.Create(visitor);
         }
 
-        public User CreateUser(string name, string lastName, string email, string password, string[] roles)
+        public async Task<UserResponse> CreateUser(CreateUserRequest request)
         {
+            string name = request.Name;
+            string lastName = request.LastName;
+            string email = request.Email;
+            string password = request.Password;
+            List<string> roles = request.Roles;
+
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
                 return null;
             }
 
-            if (!_userRepository.IsEmailUnique(email))
+            if (!await _userRepository.IsEmailUnique(email))
             {
                 return null;
             }
@@ -93,7 +101,7 @@ namespace BusinessLogic
                 Password = hashedPassword
             };
 
-            if (roles != null && roles.Length > 0)
+            if (roles != null && roles.Count > 0)
             {
                 foreach (string roleName in roles)
                 {
@@ -105,7 +113,45 @@ namespace BusinessLogic
                 }
             }
 
-            return _userRepository.Create(user);
+            User returnedUser = await _userRepository.Create(user);
+            return new UserResponse
+            {
+                Id = returnedUser.Id,
+                Name = returnedUser.Name,
+                LastName = returnedUser.LastName,
+                Email = returnedUser.Email,
+                BirthDate = returnedUser.BirthDate,
+                MembershipLevel = (int?)returnedUser.MembershipLevel,
+                UserRoles = returnedUser.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                Score = returnedUser.Score
+            };
+        }
+
+        public async Task<User> GetUserById(Guid userId)
+        {
+            User user = await _userRepository.GetByIdWithRoles(userId);
+            return user;
+        }
+
+        public async Task<UserResponse> GetUserResponseById(Guid userId)
+        {
+            User user = await _userRepository.GetByIdWithRoles(userId);
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found");
+            }
+
+            return new UserResponse
+            {
+                Id = user.Id,
+                Name = user.Name,
+                LastName = user.LastName,
+                Email = user.Email,
+                BirthDate = user.BirthDate,
+                MembershipLevel = (int?)user.MembershipLevel,
+                UserRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                Score = user.Score
+            };
         }
 
         public async Task RegisterEntry(Guid userId, Guid attractionId, DateTime enterDate, Guid? qr, Guid? nfc,
@@ -118,7 +164,7 @@ namespace BusinessLogic
             if (!isValidTicket)
                 throw new ArgumentException("User does not have a valid ticket.");
 
-            User user = _userRepository.GetById(userId);
+            User user = await _userRepository.GetById(userId);
             if (user == null)
                 throw new ArgumentException("User not found.");
 
@@ -149,12 +195,12 @@ namespace BusinessLogic
             int score = _activeStrategy.CalculateScore(strategyRequest);
 
             user.Score += score;
-            _userRepository.Update(user);
+            await _userRepository.Update(user);
         }
 
         public async Task RegisterExit(Guid userId, Guid attractionId, DateTime exitDate)
         {
-            User user = _userRepository.GetById(userId);
+            User user = await _userRepository.GetById(userId);
             if (user == null)
                 throw new ArgumentException("User not found.");
 
@@ -180,7 +226,7 @@ namespace BusinessLogic
 
         public async Task AddRoleToUser(Guid userId, string roleName)
         {
-            User user = _userRepository.GetByIdWithRoles(userId);
+            User user = await _userRepository.GetByIdWithRoles(userId);
             if (user == null)
             {
                 throw new ArgumentException("User not found.");
