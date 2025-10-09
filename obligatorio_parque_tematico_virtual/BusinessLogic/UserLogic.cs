@@ -63,8 +63,7 @@ namespace BusinessLogic
             Role visitorRole = _roleRepository.GetByName(Role.VISITOR);
             if (visitorRole != null)
             {
-                visitor.UserRoles.Add(new UserRole
-                    { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
+                visitor.UserRoles.Add(new UserRole { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
             }
 
             User res = await _userRepository.Create(visitor);
