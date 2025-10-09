@@ -546,5 +546,99 @@ namespace TestDataAccess
             Assert.AreEqual(1, updatedUser.UserRoles.Count);
             Assert.AreEqual(Role.VISITOR, updatedUser.UserRoles.First().Role.Name);
         }
+
+        [TestMethod]
+        public async Task Update_ShouldInsertNewReportsWhenUserHasVisitorReports()
+        {
+            // Arrange: Create and save User
+            User user = new User
+            {
+                Name = "Visitor",
+                LastName = "Test",
+                Email = "visitor@test.com",
+                Password = "password",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 0
+            };
+            _context.Users.Add(user);
+
+            // Create and save Attraction
+            Attraction attraction = new Attraction
+            {
+                Name = "Test Attraction",
+                Description = "Test",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 100,
+                CurrentCapacity = 0,
+                MinAge = 10
+            };
+            _context.Attractions.Add(attraction);
+            _context.SaveChanges();
+
+            // Act: Load user (now tracked), call RegisterEntry, then Update
+            var trackedUser = await _userRepository.GetById(user.Id);
+            trackedUser.RegisterEntry(attraction, DateTime.Now);
+            trackedUser.Score = 10;
+
+            await _userRepository.Update(trackedUser);
+
+            // Assert: Verify Report and VisitorReport were inserted
+            var reports = _context.Reports.ToList();
+            var visitorReports = _context.VisitorReports.ToList();
+
+            Assert.AreEqual(1, reports.Count, "Report should be inserted");
+            Assert.AreEqual(1, visitorReports.Count, "VisitorReport should be inserted");
+            Assert.AreEqual(attraction.Id, reports[0].AttractionId);
+            Assert.AreEqual(user.Id, visitorReports[0].VisitorId);
+        }
+
+        [TestMethod]
+        public async Task Update_ShouldInsertMultipleVisitorReportsForDifferentDates()
+        {
+            // Arrange: Create and save User
+            User user = new User
+            {
+                Name = "Visitor",
+                LastName = "Test",
+                Email = "multiday@test.com",
+                Password = "password",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 0
+            };
+            _context.Users.Add(user);
+
+            // Create and save Attraction
+            Attraction attraction = new Attraction
+            {
+                Name = "Multi Day Attraction",
+                Description = "Test",
+                Type = AttractionType.Performance,
+                MaxCapacity = 50,
+                CurrentCapacity = 0,
+                MinAge = 5
+            };
+            _context.Attractions.Add(attraction);
+            _context.SaveChanges();
+
+            // Act: Load user, register entries on two different dates
+            var trackedUser = await _userRepository.GetById(user.Id);
+            DateTime date1 = new DateTime(2025, 10, 1, 10, 0, 0);
+            DateTime date2 = new DateTime(2025, 10, 2, 14, 0, 0);
+
+            trackedUser.RegisterEntry(attraction, date1);
+            trackedUser.RegisterEntry(attraction, date2);
+            trackedUser.Score = 20;
+
+            await _userRepository.Update(trackedUser);
+
+            // Assert: Verify both VisitorReports and Reports were inserted
+            var reports = _context.Reports.ToList();
+            var visitorReports = _context.VisitorReports.ToList();
+
+            Assert.AreEqual(2, reports.Count, "Two Reports should be inserted");
+            Assert.AreEqual(2, visitorReports.Count, "Two VisitorReports should be inserted");
+            Assert.IsTrue(visitorReports.Any(vr => vr.Date.Date == date1.Date));
+            Assert.IsTrue(visitorReports.Any(vr => vr.Date.Date == date2.Date));
+        }
     }
 }

@@ -185,7 +185,6 @@ namespace BusinessLogic
             {
                 user.RegisterEntry(attraction, enterDate);
                 attraction.CurrentCapacity++;
-                await _attractionRepository.Update(attraction);
             }
             else
                 throw new ArgumentException("Attraction is at full capacity.");
