@@ -16,5 +16,6 @@ namespace IBusinessLogic
         Task AddRoleToUser(Guid userId, string role);
         Task<User> GetUserById(Guid userId);
         Task<UserResponse> GetUserResponseById(Guid userId);
+        Task<UserResponse> ModifyUser(Guid userId, string? actorSubClaim, ModifyUserRequest request);
     }
 }
