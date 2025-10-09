@@ -4,5 +4,5 @@ namespace Models.Out;
 
 public class TopTenResponse
 {
-    public List<User> TopTenUsers { get; set; }
+    public List<UserResponse> TopTenUsers { get; set; } = new List<UserResponse>();
 }

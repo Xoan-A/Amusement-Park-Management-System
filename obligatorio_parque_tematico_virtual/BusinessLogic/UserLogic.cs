@@ -219,9 +219,21 @@ namespace BusinessLogic
 
         public async Task<TopTenResponse> GetTopTenUsers()
         {
-            TopTenResponse result = new TopTenResponse();
-            result.TopTenUsers = await _userRepository.GetTopTen();
-            return result;
+            List<User> users = await _userRepository.GetTopTen();
+            return new TopTenResponse
+            {
+                TopTenUsers = users.Select(u => new UserResponse
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    LastName = u.LastName,
+                    Email = u.Email,
+                    BirthDate = u.BirthDate,
+                    MembershipLevel = (int?)u.MembershipLevel,
+                    UserRoles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                    Score = u.Score
+                }).ToList()
+            };
         }
 
         public async Task AddRoleToUser(Guid userId, string roleName)

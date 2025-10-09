@@ -335,45 +335,45 @@ namespace ApiTests
         {
             var topTenResponse = new TopTenResponse
             {
-                TopTenUsers = new List<User>
+                TopTenUsers = new List<UserResponse>
                 {
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User1", LastName = "Test", Email = "user1@test.com", Score = 100
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User2", LastName = "Test", Email = "user2@test.com", Score = 90
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User3", LastName = "Test", Email = "user3@test.com", Score = 80
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User4", LastName = "Test", Email = "user4@test.com", Score = 70
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User5", LastName = "Test", Email = "user5@test.com", Score = 60
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User6", LastName = "Test", Email = "user6@test.com", Score = 50
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User7", LastName = "Test", Email = "user7@test.com", Score = 40
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User8", LastName = "Test", Email = "user8@test.com", Score = 30
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User9", LastName = "Test", Email = "user9@test.com", Score = 20
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User10", LastName = "Test", Email = "user10@test.com", Score = 10
                     }
@@ -412,7 +412,7 @@ namespace ApiTests
         {
             var topTenResponse = new TopTenResponse
             {
-                TopTenUsers = new List<User>()
+                TopTenUsers = new List<UserResponse>()
             };
 
             _mockUserLogic.Setup(x => x.GetTopTenUsers()).ReturnsAsync(topTenResponse);
@@ -436,17 +436,17 @@ namespace ApiTests
         {
             var topTenResponse = new TopTenResponse
             {
-                TopTenUsers = new List<User>
+                TopTenUsers = new List<UserResponse>
                 {
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User1", LastName = "Test", Email = "user1@test.com", Score = 50
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User2", LastName = "Test", Email = "user2@test.com", Score = 40
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User3", LastName = "Test", Email = "user3@test.com", Score = 30
                     }
@@ -476,17 +476,17 @@ namespace ApiTests
         {
             var topTenResponse = new TopTenResponse
             {
-                TopTenUsers = new List<User>
+                TopTenUsers = new List<UserResponse>
                 {
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User1", LastName = "Test", Email = "user1@test.com", Score = 100
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User2", LastName = "Test", Email = "user2@test.com", Score = 90
                     },
-                    new User
+                    new UserResponse
                     {
                         Id = Guid.NewGuid(), Name = "User3", LastName = "Test", Email = "user3@test.com", Score = 80
                     }
