@@ -24,9 +24,9 @@ public class StrategyController : ControllerBase
 
     [HttpGet]
     [Authorize(Roles = "Administrator")]
-    public IActionResult GetStrategy()
+    public async Task<IActionResult> GetStrategy()
     {
-        IContreteStrategy strategy = _activeStrategy.GetStrategy();
+        IConcreteStrategy strategy = await _activeStrategy.GetStrategy();
 
         StrategyResponse response = new StrategyResponse
         {
@@ -38,9 +38,9 @@ public class StrategyController : ControllerBase
 
     [HttpPut]
     [Authorize(Roles = "Administrator")]
-    public IActionResult SetStrategy([FromBody] SetStrategyRequest setStrategyRequest)
+    public async Task<IActionResult> SetStrategy([FromBody] SetStrategyRequest setStrategyRequest)
     {
-        _activeStrategy.SetStrategy(setStrategyRequest);
+        await _activeStrategy.SetStrategy(setStrategyRequest);
 
         MessageResponse response = new MessageResponse
         {

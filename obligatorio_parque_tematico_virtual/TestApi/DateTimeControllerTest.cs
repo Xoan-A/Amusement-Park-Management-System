@@ -76,7 +76,7 @@ namespace ApiTests
             };
 
             _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime())
-                             .Returns(expectedDateTime);
+                             .ReturnsAsync(expectedDateTime);
 
             var response = await _client.GetAsync("/api/datetime");
 

@@ -193,7 +193,7 @@ namespace BusinessLogic
                 IsSepcialEvent = isEvent,
             };
 
-            int score = await _activeStrategy.CalculateScore(user, attraction, strategyRequest);
+            int score = _activeStrategy.CalculateScore(user, attraction, strategyRequest);
 
             user.Score += score;
             await _userRepository.Update(user);

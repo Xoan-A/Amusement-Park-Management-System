@@ -33,7 +33,7 @@ namespace BusinessLogic
                 return null;
             }
 
-            DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime();
+            DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
             if (visitDate.Date < currentDateTime.Date)
             {
                 return null;

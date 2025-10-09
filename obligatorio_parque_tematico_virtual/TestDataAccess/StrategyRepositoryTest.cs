@@ -47,32 +47,32 @@ public class StrategyRepositoryTest
     }
 
     [TestMethod]
-    public void Get_ShouldReturnConfiguration_WhenConfigurationExists()
+    public async Task Get_ShouldReturnConfiguration_WhenConfigurationExists()
     {
         strategyConfiguration.Id = 1;
         _context.StrategyConfigurations.Add(strategyConfiguration);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
-        StrategyConfiguration? result = _strategyRepository.Get();
+        StrategyConfiguration? result = await _strategyRepository.Get();
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Combo", result.StrategyName);
     }
 
     [TestMethod]
-    public void Get_ShouldReturnNull_WhenConfigurationDoesNotExist()
+    public async Task Get_ShouldReturnNull_WhenConfigurationDoesNotExist()
     {
-        StrategyConfiguration? result = _strategyRepository.Get();
+        StrategyConfiguration? result = await _strategyRepository.Get();
 
         Assert.IsNull(result);
     }
 
     [TestMethod]
-    public void Update_ShouldCreateConfiguration_WhenConfigurationDoesNotExist()
+    public async Task Update_ShouldCreateConfiguration_WhenConfigurationDoesNotExist()
     {
-        _strategyRepository.Update(strategyConfiguration);
+        await _strategyRepository.Update(strategyConfiguration);
 
-        StrategyConfiguration? result = _strategyRepository.Get();
+        StrategyConfiguration? result = await _strategyRepository.Get();
 
         Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Id);
@@ -82,11 +82,11 @@ public class StrategyRepositoryTest
     }
 
     [TestMethod]
-    public void Update_ShouldUpdateConfiguration_WhenConfigurationExists()
+    public async Task Update_ShouldUpdateConfiguration_WhenConfigurationExists()
     {
         strategyConfiguration.Id = 1;
         _context.StrategyConfigurations.Add(strategyConfiguration);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         StrategyConfiguration updatedConfiguration = new StrategyConfiguration
         {
@@ -94,9 +94,9 @@ public class StrategyRepositoryTest
             N = null,
         };
 
-        _strategyRepository.Update(updatedConfiguration);
+        await _strategyRepository.Update(updatedConfiguration);
 
-        StrategyConfiguration? result = _strategyRepository.Get();
+        StrategyConfiguration? result = await _strategyRepository.Get();
 
         Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Id);
@@ -106,7 +106,7 @@ public class StrategyRepositoryTest
     }
 
     [TestMethod]
-    public void Update_ShouldAlwaysSetIdToOne_WhenCreatingNewConfiguration()
+    public async Task Update_ShouldAlwaysSetIdToOne_WhenCreatingNewConfiguration()
     {
         StrategyConfiguration configWithDifferentId = new StrategyConfiguration
         {
@@ -115,9 +115,9 @@ public class StrategyRepositoryTest
             N = null,
         };
 
-        _strategyRepository.Update(configWithDifferentId);
+        await _strategyRepository.Update(configWithDifferentId);
 
-        StrategyConfiguration? result = _strategyRepository.Get();
+        StrategyConfiguration? result = await _strategyRepository.Get();
 
         Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Id);

@@ -58,7 +58,7 @@ namespace TestBusinessLogic
                 QRCode = Guid.NewGuid()
             };
 
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(currentDate);
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
             _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
             _mockTicketRepository.Setup(t => t.AddAsync(It.IsAny<Ticket>())).ReturnsAsync(expectedTicket);
 
@@ -101,7 +101,7 @@ namespace TestBusinessLogic
                 Email = "john@test.com"
             };
 
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(currentDate);
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
             _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
 
             Ticket result = await _ticketLogic.PurchaseTicketAsync(visitorId, pastVisitDate, TicketType.General, null);
@@ -137,7 +137,7 @@ namespace TestBusinessLogic
                 EventId = eventId
             };
 
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(currentDate);
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
             _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
             _mockTicketRepository.Setup(t => t.AddAsync(It.IsAny<Ticket>())).ReturnsAsync(expectedTicket);
 

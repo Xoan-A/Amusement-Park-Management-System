@@ -789,7 +789,7 @@ namespace TestBusinessLogic
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
                 .ReturnsAsync((Event)null);
             _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
-                .ReturnsAsync(5);
+                .Returns(5);
 
             await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
 
@@ -838,7 +838,7 @@ namespace TestBusinessLogic
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
                 .ReturnsAsync(specialEvent);
             _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
-                .ReturnsAsync(6);
+                .Returns(6);
 
             await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
 
@@ -893,7 +893,7 @@ namespace TestBusinessLogic
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(It.IsAny<Guid>(), It.IsAny<DateTime>()))
                 .ReturnsAsync((Event)null);
             _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
-                .ReturnsAsync(3);
+                .Returns(3);
 
             await _userLogic.RegisterEntry(userId, attractionId1, enterDate1, qrCode, null, null);
             await _userLogic.RegisterEntry(userId, attractionId2, enterDate2, qrCode, null, null);
@@ -933,7 +933,7 @@ namespace TestBusinessLogic
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
                 .ReturnsAsync((Event)null);
             _mockActiveStrategy.Setup(s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
-                .ReturnsAsync(0);
+                .Returns(0);
 
             await _userLogic.RegisterEntry(userId, attractionId, enterDate, qrCode, null, null);
 
