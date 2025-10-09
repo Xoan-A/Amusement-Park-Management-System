@@ -14,7 +14,7 @@ namespace TestBusinessLogic
         private StrategyConfiguration? _storedConfig;
 
         [TestInitialize]
-        private void SetupMocks()
+        public void SetupMocks()
         {
             _storedConfig = null;
             _mockRepo = new Mock<IStrategyRepository>();
@@ -74,13 +74,13 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void ActiveStrategy_SetStrategy_WithCombo_ShouldThrowWhenNIsNull()
+        public async Task ActiveStrategy_SetStrategy_WithCombo_ShouldThrowWhenNIsNull()
         {
             SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            Assert.ThrowsException<ArgumentException>(() =>
-                activeStrategy.SetStrategy(new SetStrategyRequest
+            await Assert.ThrowsExceptionAsync<ArgumentException>(async() =>
+                await activeStrategy.SetStrategy(new SetStrategyRequest
                 {
                     StrategyName = "Combo",
                     N = null,
@@ -88,13 +88,12 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void ActiveStrategy_SetStrategy_ShouldThrowForInvalidStrategyName()
+        public async Task ActiveStrategy_SetStrategy_ShouldThrowForInvalidStrategyName()
         {
-            SetupMocks();
             var activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
-            Assert.ThrowsException<ArgumentException>(() =>
-                activeStrategy.SetStrategy(new SetStrategyRequest
+            await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+                await activeStrategy.SetStrategy(new SetStrategyRequest
                 {
                     StrategyName = "InvalidStrategy",
                 }));
