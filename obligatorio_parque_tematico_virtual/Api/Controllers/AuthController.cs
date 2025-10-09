@@ -32,7 +32,7 @@ namespace Api.Controllers
             {
                 throw new UnauthorizedException("Invalid email or password");
             }
-            
+
 
             var token = _tokenLogic.GenerateToken(user);
             var roles = user.UserRoles?.Select(ur => ur.Role.Name).ToArray() ?? new string[0];
@@ -51,7 +51,8 @@ namespace Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterVisitorRequest request)
         {
-            var visitor = await _userLogic.RegisterVisitor(request.Name, request.LastName, request.Email, request.Password, request.BirthDate);
+            var visitor = await _userLogic.RegisterVisitor(request.Name, request.LastName, request.Email,
+                request.Password, request.BirthDate);
 
             if (visitor == null)
             {

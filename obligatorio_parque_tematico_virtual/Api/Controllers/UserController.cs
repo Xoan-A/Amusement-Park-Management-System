@@ -16,7 +16,7 @@ public class UserController : ControllerBase
     {
         _userLogic = userLogic;
     }
-    
+
     [HttpGet("{userId}")]
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetUserById(Guid userId)
@@ -24,7 +24,7 @@ public class UserController : ControllerBase
         UserResponse user = await _userLogic.GetUserResponseById(userId);
         return Ok(user);
     }
-    
+
     [HttpPost]
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)

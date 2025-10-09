@@ -86,7 +86,7 @@ public class UserLogicRoleTest
             Password = password,
             Roles = roles.ToList()
         };
-        
+
         UserResponse result = await _userLogic.CreateUser(request);
 
         Assert.IsNotNull(result);
@@ -104,7 +104,7 @@ public class UserLogicRoleTest
             Password = "password123",
             Roles = new List<string> { Role.VISITOR }
         };
-        
+
         UserResponse result = await _userLogic.CreateUser(request);
         Assert.IsNull(result);
     }
@@ -120,7 +120,7 @@ public class UserLogicRoleTest
             Password = "password123",
             Roles = new List<string> { Role.VISITOR }
         };
-        
+
         UserResponse result = await _userLogic.CreateUser(request);
         Assert.IsNull(result);
     }
@@ -136,7 +136,7 @@ public class UserLogicRoleTest
             Password = "password123",
             Roles = new List<string> { Role.VISITOR }
         };
-        
+
         UserResponse result = await _userLogic.CreateUser(request);
         Assert.IsNull(result);
     }
@@ -152,7 +152,7 @@ public class UserLogicRoleTest
             Password = "",
             Roles = new List<string> { Role.VISITOR }
         };
-        
+
         UserResponse result = await _userLogic.CreateUser(request);
         Assert.IsNull(result);
     }
@@ -170,7 +170,7 @@ public class UserLogicRoleTest
             Password = "password123",
             Roles = new List<string> { Role.VISITOR }
         };
-        
+
         UserResponse result = await _userLogic.CreateUser(request);
         Assert.IsNull(result);
     }
@@ -183,7 +183,8 @@ public class UserLogicRoleTest
 
         _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
         _mockPasswordService.Setup(p => p.HashPassword(plainPassword)).Returns(hashedPassword);
-        _mockUserRepository.Setup(r => r.Create(It.Is<User>(u => u.Password == hashedPassword))).ReturnsAsync((User u) => u);
+        _mockUserRepository.Setup(r => r.Create(It.Is<User>(u => u.Password == hashedPassword)))
+            .ReturnsAsync((User u) => u);
 
         CreateUserRequest request = new CreateUserRequest
         {
@@ -193,7 +194,7 @@ public class UserLogicRoleTest
             Password = plainPassword,
             Roles = null
         };
-        
+
         UserResponse result = await _userLogic.CreateUser(request);
 
         Assert.IsNotNull(result);
@@ -215,7 +216,7 @@ public class UserLogicRoleTest
             Password = "password123",
             Roles = null
         };
-        
+
         UserResponse result = await _userLogic.CreateUser(request);
 
         Assert.IsNotNull(result);
@@ -237,7 +238,7 @@ public class UserLogicRoleTest
             Password = "password123",
             Roles = new List<string>()
         };
-        
+
         UserResponse result = await _userLogic.CreateUser(request);
 
         Assert.IsNotNull(result);
@@ -260,7 +261,7 @@ public class UserLogicRoleTest
             Password = "password123",
             Roles = new List<string>() { "InvalidRole" }
         };
-        
+
         UserResponse result = await _userLogic.CreateUser(request);
 
         Assert.IsNotNull(result);
@@ -276,7 +277,7 @@ public class UserLogicRoleTest
         _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
         _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns(visitorRole);
         _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
-        
+
         CreateUserRequest request = new CreateUserRequest
         {
             Name = "John",

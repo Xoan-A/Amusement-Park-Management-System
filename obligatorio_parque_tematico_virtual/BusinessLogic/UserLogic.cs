@@ -31,7 +31,8 @@ namespace BusinessLogic
             _activeStrategy = activeStrategy;
         }
 
-        public async Task<User> RegisterVisitor(string name, string lastName, string email, string password, DateTime birthDate)
+        public async Task<User> RegisterVisitor(string name, string lastName, string email, string password,
+            DateTime birthDate)
         {
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
@@ -65,7 +66,7 @@ namespace BusinessLogic
             if (visitorRole != null)
             {
                 visitor.UserRoles.Add(new UserRole
-                { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
+                    { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
             }
 
             return await _userRepository.Create(visitor);
@@ -78,7 +79,7 @@ namespace BusinessLogic
             string email = request.Email;
             string password = request.Password;
             List<string> roles = request.Roles;
-            
+
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
@@ -125,13 +126,13 @@ namespace BusinessLogic
                 Score = returnedUser.Score
             };
         }
-        
+
         public async Task<User> GetUserById(Guid userId)
         {
             User user = await _userRepository.GetByIdWithRoles(userId);
             return user;
         }
-        
+
         public async Task<UserResponse> GetUserResponseById(Guid userId)
         {
             User user = await _userRepository.GetByIdWithRoles(userId);
@@ -139,6 +140,7 @@ namespace BusinessLogic
             {
                 throw new KeyNotFoundException("User not found");
             }
+
             return new UserResponse
             {
                 Id = user.Id,
