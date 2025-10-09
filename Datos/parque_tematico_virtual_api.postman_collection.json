@@ -1,0 +1,6011 @@
+{
+	"info": {
+		"_postman_id": "a42db678-0767-4a91-bb86-9fe73ce6c0bc",
+		"name": "Parque Temático Virtual API",
+		"description": "API collection for testing the Virtual Theme Park system with role-based authentication",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15180958",
+		"_collection_link": "https://alvarez-atrio-viera.postman.co/workspace/Alvarez-Atrio-Viera~fb7538f7-44fb-4f75-90eb-208cb9d52a12/collection/15180958-a42db678-0767-4a91-bb86-9fe73ce6c0bc?action=share&source=collection_link&creator=15180958"
+	},
+	"item": [
+		{
+			"name": "🔐 Setup - Run First",
+			"description": "Run this folder first to authenticate all users and populate tokens. Use 'Run Folder' button to execute all 3 requests at once.",
+			"item": [
+				{
+					"name": "1. Login as Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const token = pm.response.json().token;",
+									"    pm.environment.set('admin_token', token);",
+									"    pm.environment.set('token', token);",
+									"    console.log('✅ Admin token saved to admin_token');",
+									"} else {",
+									"    console.error('❌ Admin login failed');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Login as Operator",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const token = pm.response.json().token;",
+									"    pm.environment.set('operator_token', token);",
+									"    console.log('✅ Operator token saved to operator_token');",
+									"} else {",
+									"    console.error('❌ Operator login failed');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"operator@test.com\",\n  \"password\": \"operator123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Register & Login as Visitor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Try to register first, then login",
+									"if (pm.response.code === 200 || pm.response.code === 400) {",
+									"    // Login after registration (or if already exists)",
+									"    const loginRequest = {",
+									"        url: pm.variables.get('base_url') + '/api/auth/login',",
+									"        method: 'POST',",
+									"        header: { 'Content-Type': 'application/json' },",
+									"        body: {",
+									"            mode: 'raw',",
+									"            raw: JSON.stringify({",
+									"                email: 'visitor@test.com',",
+									"                password: 'password123'",
+									"            })",
+									"        }",
+									"    };",
+									"    ",
+									"    pm.sendRequest(loginRequest, (err, response) => {",
+									"        if (!err && response.code === 200) {",
+									"            const token = response.json().token;",
+									"            pm.environment.set('visitor_token', token);",
+									"            const visitorId = response.json().id || pm.response.json().id || '';",
+									"            if (visitorId) {",
+									"                pm.environment.set('visitor_id', visitorId);",
+									"            }",
+									"            console.log('✅ Visitor token saved to visitor_token');",
+									"        } else {",
+									"            console.error('❌ Visitor login failed');",
+									"        }",
+									"    });",
+									"} else {",
+									"    console.error('❌ Visitor registration failed');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"Visitor\",\n  \"email\": \"visitor@test.com\",\n  \"password\": \"password123\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Login as Visitor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const token = pm.response.json().token;",
+									"    pm.environment.set('visitor_token', token);",
+									"    const visitorId = pm.response.json().id;",
+									"    if (visitorId) {",
+									"        pm.environment.set('visitor_id', visitorId);",
+									"    }",
+									"    console.log('✅ Visitor token saved to visitor_token');",
+									"} else {",
+									"    console.error('❌ Visitor login failed');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"visitor@test.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register Visitor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"Visitor\",\n  \"email\": \"visitor@test.com\",\n  \"password\": \"password123\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.token).to.exist;",
+									"    pm.environment.set(\"token\", jsonData.token);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"visitor@test.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Missing Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lastName\": \"Visitor\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Missing LastName",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Missing Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"Visitor\",\n  \"password\": \"password123\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Missing Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"Visitor\",\n  \"email\": \"test@test.com\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Invalid Email Format",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"Visitor\",\n  \"email\": \"notanemail\",\n  \"password\": \"password123\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Invalid Email Format 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"Visitor\",\n  \"email\": \"test@\",\n  \"password\": \"password123\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Duplicate Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 or 409\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 409]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"Visitor\",\n  \"email\": \"visitor@test.com\",\n  \"password\": \"password123\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Future BirthDate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"Visitor\",\n  \"email\": \"future@test.com\",\n  \"password\": \"password123\",\n  \"birthDate\": \"2030-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Invalid Date Format",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"Visitor\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"birthDate\": \"invalid-date\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Empty Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"\",\n  \"lastName\": \"Visitor\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Empty Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"Visitor\",\n  \"email\": \"test@test.com\",\n  \"password\": \"\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Null Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": null,\n  \"lastName\": \"Visitor\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"birthDate\": \"1990-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Register - Empty Body",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DateTime",
+			"item": [
+				{
+					"name": "Get Current DateTime",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/datetime",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"datetime"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set DateTime",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"dateTime\": \"2025-12-25T10:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/datetime",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"datetime"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Attractions",
+			"item": [
+				{
+					"name": "Get All Attractions (Any)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attractions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attraction By Id (Any)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attractions/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attractions",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "b9aa621a-0dc5-4326-962f-22dfba030322"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Attraction (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Roller Coaster\",\n  \"description\": \"Exciting roller coaster ride\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": 12,\n  \"maxCapacity\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attractions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Attraction (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Roller Coaster Updated\",\n  \"description\": \"Updated description\",\n  \"type\": \"RollerCoaster\",\n  \"maxCapacity\": 25,\n  \"currentCapacity\": 6,\n  \"minAge\": 12\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attractions",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "b9aa621a-0dc5-4326-962f-22dfba030322"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Attraction (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attractions/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attractions",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Attraction Entry (Operator)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"operator_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"enterDate\": \"2025-12-25T10:00:00\",\n    \"userId\": \"6F362D09-D1D4-4F09-B514-018D4192F52C\",\n    \"qr\": null,\n    \"nfc\": \"6F362D09-D1D4-4F09-B514-018D4192F52C\",\n    \"eventId\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions/entry/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attractions",
+								"entry",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "4AE6F9CD-1C1D-4E2C-91E0-07ED1B1B68CA"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Attraction Exit (Operator)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"operator_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"exitDate\": \"2025-10-08T15:50:32.382Z\",\n    \"userId\": \"11111111-1111-1111-1111-111111111111\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions/exit/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attractions",
+								"exit",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "4D26662A-CDE4-40F2-A0F6-45D886893BDA"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Capacity (Admin)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attractions/capacity/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attractions",
+								"capacity",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "4D26662A-CDE4-40F2-A0F6-45D886893BDA"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attractions Visits (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attractions/visits?startDate=2025-12-25&endDate=2025-12-25",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attractions",
+								"visits"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-12-25"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-12-25"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Attraction - Missing Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Test attraction\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": 12,\n  \"maxCapacity\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Attraction - Empty Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"\",\n  \"description\": \"Test\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": 12,\n  \"maxCapacity\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Attraction - Null Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": null,\n  \"description\": \"Test\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": 12,\n  \"maxCapacity\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Attraction - Invalid Type String",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Attraction\",\n  \"description\": \"Test\",\n  \"type\": \"InvalidType\",\n  \"minAge\": 12,\n  \"maxCapacity\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Attraction - Negative MinAge",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Attraction\",\n  \"description\": \"Test\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": -5,\n  \"maxCapacity\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Attraction - Excessive MinAge",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Attraction\",\n  \"description\": \"Test\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": 200,\n  \"maxCapacity\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Attraction - Zero MaxCapacity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Attraction\",\n  \"description\": \"Test\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": 12,\n  \"maxCapacity\": 0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Attraction - Negative MaxCapacity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Attraction\",\n  \"description\": \"Test\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": 12,\n  \"maxCapacity\": -10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Attraction - Empty Body",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Attraction - No Auth Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"description\": \"Test\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": 12,\n  \"maxCapacity\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Attraction - Visitor Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"description\": \"Test\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": 12,\n  \"maxCapacity\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Attraction - Operator Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"operator_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"description\": \"Test\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": 12,\n  \"maxCapacity\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Update Attraction - Non-existent ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated\",\n  \"description\": \"Test\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": 12,\n  \"maxCapacity\": 25\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions/00000000-0000-0000-0000-000000000001",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions", "00000000-0000-0000-0000-000000000001"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Update Attraction - Invalid GUID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated\",\n  \"description\": \"Test\",\n  \"type\": \"RollerCoaster\",\n  \"minAge\": 12,\n  \"maxCapacity\": 25\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attractions/not-a-guid",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions", "not-a-guid"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Delete Attraction - Non-existent ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attractions/00000000-0000-0000-0000-000000000001",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions", "00000000-0000-0000-0000-000000000001"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Delete Attraction - Invalid GUID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attractions/invalid-guid-123",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions", "invalid-guid-123"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Get Attraction - Non-existent ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attractions/00000000-0000-0000-0000-000000000001",
+							"host": ["{{base_url}}"],
+							"path": ["api", "attractions", "00000000-0000-0000-0000-000000000001"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Events",
+			"item": [
+				{
+					"name": "Get All Events (Any)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Event By Id (Any)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "728B395F-7CD2-42C1-8821-23B7C6D71620"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Event (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Summer Concert\",\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": 18,\n  \"maxCapacity\": 50,\n  \"cost\": 100,\n  \"AttractionIds\": [\"4AE6F9CD-1C1D-4E2C-91E0-07ED1B1B68CA\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Event (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"events",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Missing Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": 18,\n  \"maxCapacity\": 50,\n  \"cost\": 100,\n  \"AttractionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Empty Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"\",\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": 18,\n  \"maxCapacity\": 50,\n  \"cost\": 100,\n  \"AttractionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Null Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": null,\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": 18,\n  \"maxCapacity\": 50,\n  \"cost\": 100,\n  \"AttractionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Past Date",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Past Event\",\n  \"date\": \"2020-01-01T10:00:00\",\n  \"hour\": 18,\n  \"maxCapacity\": 50,\n  \"cost\": 100,\n  \"AttractionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Invalid Date Format",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Event\",\n  \"date\": \"invalid-date\",\n  \"hour\": 18,\n  \"maxCapacity\": 50,\n  \"cost\": 100,\n  \"AttractionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Negative Hour",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Event\",\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": -5,\n  \"maxCapacity\": 50,\n  \"cost\": 100,\n  \"AttractionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Hour Greater Than 23",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Event\",\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": 25,\n  \"maxCapacity\": 50,\n  \"cost\": 100,\n  \"AttractionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Zero MaxCapacity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Event\",\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": 18,\n  \"maxCapacity\": 0,\n  \"cost\": 100,\n  \"AttractionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Negative MaxCapacity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Event\",\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": 18,\n  \"maxCapacity\": -10,\n  \"cost\": 100,\n  \"AttractionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Negative Cost",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Event\",\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": 18,\n  \"maxCapacity\": 50,\n  \"cost\": -100,\n  \"AttractionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Non-existent Attraction ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 or 400\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 404]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Event\",\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": 18,\n  \"maxCapacity\": 50,\n  \"cost\": 100,\n  \"AttractionIds\": [\"00000000-0000-0000-0000-000000000001\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Malformed Attraction GUID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Event\",\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": 18,\n  \"maxCapacity\": 50,\n  \"cost\": 100,\n  \"AttractionIds\": [\"not-a-valid-guid\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Empty Body",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - No Auth Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": 18,\n  \"maxCapacity\": 50,\n  \"cost\": 100,\n  \"AttractionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create Event - Visitor Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"date\": \"2025-12-26T10:00:00\",\n  \"hour\": 18,\n  \"maxCapacity\": 50,\n  \"cost\": 100,\n  \"AttractionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Delete Event - Non-existent ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/00000000-0000-0000-0000-000000000001",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events", "00000000-0000-0000-0000-000000000001"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Get Event - Non-existent ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/00000000-0000-0000-0000-000000000001",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events", "00000000-0000-0000-0000-000000000001"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Incidents",
+			"item": [
+				{
+					"name": "Get All Incidents (Operator)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"operator_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/incidents/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"incidents",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "B9AA621A-0DC5-4326-962F-22DFBA030322"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report Incident (Operator)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"operator_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"incident\": \"flood\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/incidents/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"incidents",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "B9AA621A-0DC5-4326-962F-22DFBA030322"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Incident (Operator)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"operator_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/incidents/:id?incident=flood",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"incidents",
+								":id"
+							],
+							"query": [
+								{
+									"key": "incident",
+									"value": "flood"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "B9AA621A-0DC5-4326-962F-22DFBA030322"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tickets",
+			"item": [
+				{
+					"name": "Get Ticket By Id (Visitor)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/tickets/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tickets",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Visitor Tickets (Visitor)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/tickets/visitor/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tickets",
+								"visitor",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Purchase Ticket (Visitor)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"visitorId\": \"6F362D09-D1D4-4F09-B514-018D4192F52C\",\n  \"visitDate\": \"2025-12-25T10:00:00\",\n  \"ticketType\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tickets"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Purchase Ticket - Non-existent Visitor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 or 400\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 404]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"visitorId\": \"00000000-0000-0000-0000-000000000001\",\n  \"visitDate\": \"2025-12-25T10:00:00\",\n  \"ticketType\": 0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Purchase Ticket - Invalid Visitor GUID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"visitorId\": \"not-a-guid\",\n  \"visitDate\": \"2025-12-25T10:00:00\",\n  \"ticketType\": 0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Purchase Ticket - Past Visit Date",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"visitorId\": \"6F362D09-D1D4-4F09-B514-018D4192F52C\",\n  \"visitDate\": \"2020-01-01T10:00:00\",\n  \"ticketType\": 0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Purchase Ticket - Invalid Ticket Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"visitorId\": \"6F362D09-D1D4-4F09-B514-018D4192F52C\",\n  \"visitDate\": \"2025-12-25T10:00:00\",\n  \"ticketType\": 99\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Purchase Ticket - EventSpecial Without EventId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"visitorId\": \"6F362D09-D1D4-4F09-B514-018D4192F52C\",\n  \"visitDate\": \"2025-12-25T10:00:00\",\n  \"ticketType\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Purchase Ticket - Non-existent EventId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 or 400\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 404]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"visitorId\": \"6F362D09-D1D4-4F09-B514-018D4192F52C\",\n  \"visitDate\": \"2025-12-25T10:00:00\",\n  \"ticketType\": 1,\n  \"eventId\": \"00000000-0000-0000-0000-000000000001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Purchase Ticket - Empty Body",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Purchase Ticket - Null VisitorId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"visitorId\": null,\n  \"visitDate\": \"2025-12-25T10:00:00\",\n  \"ticketType\": 0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Purchase Ticket - No Auth Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"visitorId\": \"6F362D09-D1D4-4F09-B514-018D4192F52C\",\n  \"visitDate\": \"2025-12-25T10:00:00\",\n  \"ticketType\": 0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Purchase Ticket - Admin Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"visitorId\": \"6F362D09-D1D4-4F09-B514-018D4192F52C\",\n  \"visitDate\": \"2025-12-25T10:00:00\",\n  \"ticketType\": 0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Purchase Ticket - Operator Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"operator_token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"visitorId\": \"6F362D09-D1D4-4F09-B514-018D4192F52C\",\n  \"visitDate\": \"2025-12-25T10:00:00\",\n  \"ticketType\": 0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Strategy",
+			"item": [
+				{
+					"name": "Get Active Strategy (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/strategy",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"strategy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Strategy (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"strategyName\": \"PerEvent\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/strategy",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"strategy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Top Ten (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/strategy/topTen",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"strategy",
+								"topTen"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get User By Id (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has user data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.exist;",
+									"    pm.expect(jsonData.email).to.exist;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/:userId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "{{visitor_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Get User - Non-existent ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/99999999-9999-9999-9999-999999999999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"99999999-9999-9999-9999-999999999999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Get User - Invalid GUID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/invalid-guid",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"invalid-guid"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Get User - No Auth Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Get User - Visitor Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Get User - Operator Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"operator_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create User (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has user data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.exist;",
+									"    pm.expect(jsonData.email).to.exist;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"New\",\n  \"lastName\": \"User\",\n  \"email\": \"newuser@test.com\",\n  \"password\": \"password123\",\n  \"birthDate\": \"1995-05-15T00:00:00\",\n  \"membershipLevel\": \"Gold\",\n  \"roles\": [\"Operator\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - Missing Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lastName\": \"User\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"roles\": [\"Operator\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - Missing LastName",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"roles\": [\"Operator\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - Missing Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"User\",\n  \"password\": \"password123\",\n  \"roles\": [\"Operator\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - Missing Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"test@test.com\",\n  \"roles\": [\"Operator\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - Missing Roles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - Empty Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"\",\n  \"lastName\": \"User\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"roles\": [\"Operator\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - Empty Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"\",\n  \"password\": \"password123\",\n  \"roles\": [\"Operator\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - Duplicate Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"visitor@test.com\",\n  \"password\": \"password123\",\n  \"roles\": [\"Operator\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - Null Values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": null,\n  \"lastName\": null,\n  \"email\": null,\n  \"password\": null,\n  \"roles\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - Empty Body",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - No Auth Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"roles\": [\"Operator\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - Visitor Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"roles\": [\"Operator\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Create User - Operator Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"operator_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"roles\": [\"Operator\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Role To User (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"Operator\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/:id/roles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":id",
+								"roles"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "11111111-1111-1111-1111-111111111111"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modify User - Admin Updates Own Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has updated user data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.exist;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"AdminUpdated\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/11111111-1111-1111-1111-111111111111",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"11111111-1111-1111-1111-111111111111"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modify User - Operator Updates Own LastName",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"operator_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lastName\": \"OperatorUpdated\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/22222222-2222-2222-2222-222222222222",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"22222222-2222-2222-2222-222222222222"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modify User - Visitor Updates Own Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"visitorupdated@test.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modify User - Update Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"newpassword456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modify User - Update BirthDate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"birthDate\": \"1992-05-15T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modify User - Update Multiple Fields",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"MultiUpdate\",\n  \"lastName\": \"Test\",\n  \"email\": \"multiupdate@test.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - No Auth Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Trying to modify another user (Visitor → Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 or 400\", function () {",
+									"    pm.expect([400, 403]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"HackerAttempt\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/11111111-1111-1111-1111-111111111111",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"11111111-1111-1111-1111-111111111111"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Trying to modify another user (Admin → Visitor)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 or 400\", function () {",
+									"    pm.expect([400, 403]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"admin_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"AdminHack\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Non-existent User ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/99999999-9999-9999-9999-999999999999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"99999999-9999-9999-9999-999999999999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Invalid GUID Format",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/invalid-guid",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"invalid-guid"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Empty Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Empty Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Empty LastName",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lastName\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Null Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 or 200\", function () {",
+									"    pm.expect([200, 400]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Null Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 or 200\", function () {",
+									"    pm.expect([200, 400]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Empty Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Null Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 or 200\", function () {",
+									"    pm.expect([200, 400]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Future BirthDate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"birthDate\": \"2030-01-01T00:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Invalid Date Format",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"birthDate\": \"invalid-date\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Null BirthDate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 or 200\", function () {",
+									"    pm.expect([200, 400]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"birthDate\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Empty Body",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 or 200\", function () {",
+									"    pm.expect([200, 400]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - All Null Values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": null,\n  \"lastName\": null,\n  \"email\": null,\n  \"password\": null,\n  \"birthDate\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[ERROR] Modify User - Duplicate Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.environment.get(\"visitor_token\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@test.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{visitor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{visitor_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	}
+}
