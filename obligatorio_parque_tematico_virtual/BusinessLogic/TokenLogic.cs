@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
@@ -34,7 +31,6 @@ namespace BusinessLogic
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
             };
 
-            // Add all roles as separate claims
             if (user.UserRoles != null && user.UserRoles.Any())
             {
                 foreach (var userRole in user.UserRoles)

@@ -1,7 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 using Domain;
 using DataAccess.Context;
 using DataAccess.Repositories;
@@ -56,7 +53,7 @@ namespace TestDataAccess
 
             Assert.IsNotNull(result);
             Assert.AreEqual("newadmin@test.com", result.Email);
-            Assert.AreEqual(3, _context.Users.Count()); // 2 from seed + 1 new
+            Assert.AreEqual(3, _context.Users.Count());
         }
 
         [TestMethod]

@@ -1,7 +1,5 @@
-using BusinessLogic;
 using IBusinessLogic;
 using IBusinessLogic.Strategy;
-using IDataAccess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.In;

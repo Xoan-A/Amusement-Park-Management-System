@@ -1,6 +1,3 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Linq;
 using Domain;
 
 namespace TestDomain
@@ -11,7 +8,6 @@ namespace TestDomain
         [TestMethod]
         public void User_ShouldCreateUser_WithRequiredProperties()
         {
-            // Arrange & Act
             User user = new User
             {
                 Name = "John",
@@ -20,7 +16,6 @@ namespace TestDomain
                 Password = "hashedPassword123"
             };
 
-            // Assert
             Assert.IsNotNull(user.Id);
             Assert.AreEqual("John", user.Name);
             Assert.AreEqual("Doe", user.LastName);
@@ -31,21 +26,17 @@ namespace TestDomain
         [TestMethod]
         public void User_ShouldHaveUniqueId()
         {
-            // Arrange & Act
             User user1 = new User();
             User user2 = new User();
 
-            // Assert
             Assert.AreNotEqual(user1.Id, user2.Id);
         }
 
         [TestMethod]
         public void User_ShouldInitializeUserRolesCollection()
         {
-            // Arrange & Act
             User user = new User();
 
-            // Assert
             Assert.IsNotNull(user.UserRoles);
             Assert.AreEqual(0, user.UserRoles.Count);
         }
@@ -53,10 +44,8 @@ namespace TestDomain
         [TestMethod]
         public void User_ShouldInitializeVisitorReportsCollection()
         {
-            // Arrange & Act
             User user = new User();
 
-            // Assert
             Assert.IsNotNull(user.VisitorReports);
             Assert.AreEqual(0, user.VisitorReports.Count);
         }
@@ -64,10 +53,8 @@ namespace TestDomain
         [TestMethod]
         public void User_ShouldSupportBirthDate_ForVisitors()
         {
-            // Arrange
             DateTime birthDate = new DateTime(1990, 1, 1);
 
-            // Act
             User user = new User
             {
                 Name = "Visitor",
@@ -77,14 +64,12 @@ namespace TestDomain
                 BirthDate = birthDate
             };
 
-            // Assert
             Assert.AreEqual(birthDate, user.BirthDate);
         }
 
         [TestMethod]
         public void User_ShouldSupportMembershipLevel_ForVisitors()
         {
-            // Arrange & Act
             User user = new User
             {
                 Name = "Visitor",
@@ -94,14 +79,12 @@ namespace TestDomain
                 MembershipLevel = MembershipLevel.Premium
             };
 
-            // Assert
             Assert.AreEqual(MembershipLevel.Premium, user.MembershipLevel);
         }
 
         [TestMethod]
         public void User_ShouldSupportMultipleRoles()
         {
-            // Arrange
             User user = new User
             {
                 Name = "MultiRole",
@@ -116,11 +99,9 @@ namespace TestDomain
             UserRole userRole1 = new UserRole { User = user, Role = adminRole, UserId = user.Id, RoleId = adminRole.Id };
             UserRole userRole2 = new UserRole { User = user, Role = operatorRole, UserId = user.Id, RoleId = operatorRole.Id };
 
-            // Act
             user.UserRoles.Add(userRole1);
             user.UserRoles.Add(userRole2);
 
-            // Assert
             Assert.AreEqual(2, user.UserRoles.Count);
             Assert.IsTrue(user.UserRoles.Any(ur => ur.Role.Name == "Administrator"));
             Assert.IsTrue(user.UserRoles.Any(ur => ur.Role.Name == "Operator"));
@@ -129,7 +110,6 @@ namespace TestDomain
         [TestMethod]
         public void User_BirthDateAndMembershipLevel_ShouldBeNullable()
         {
-            // Arrange & Act
             User user = new User
             {
                 Name = "Admin",
@@ -138,7 +118,6 @@ namespace TestDomain
                 Password = "pass"
             };
 
-            // Assert - Should not have BirthDate or MembershipLevel set for non-visitors
             Assert.IsNull(user.BirthDate);
             Assert.IsNull(user.MembershipLevel);
         }
@@ -146,7 +125,6 @@ namespace TestDomain
         [TestMethod]
         public void MembershipLevel_ShouldHaveCorrectValues()
         {
-            // Assert
             Assert.AreEqual(0, (int)MembershipLevel.Standard);
             Assert.AreEqual(1, (int)MembershipLevel.Premium);
             Assert.AreEqual(2, (int)MembershipLevel.VIP);

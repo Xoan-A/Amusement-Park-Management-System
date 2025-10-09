@@ -1,7 +1,5 @@
-using System;
 using IBusinessLogic;
 using IDataAccess;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BusinessLogic
 {

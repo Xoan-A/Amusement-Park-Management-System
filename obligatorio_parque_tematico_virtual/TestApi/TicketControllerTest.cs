@@ -1,17 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Domain;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Models.In;
 using Models.Out;
 using IBusinessLogic;
@@ -34,7 +27,6 @@ namespace TestApi
         [TestInitialize]
         public void TestInitialize()
         {
-            // Create shared in-memory connection
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 
@@ -43,7 +35,6 @@ namespace TestApi
                 {
                     builder.ConfigureServices(services =>
                     {
-                        // Remove SQL Server DbContext
                         ServiceDescriptor descriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
                         if (descriptor != null)
@@ -51,7 +42,6 @@ namespace TestApi
                             services.Remove(descriptor);
                         }
 
-                        // Remove existing IDateTimeLogic registration
                         var dateTimeDescriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(IDateTimeLogic));
                         if (dateTimeDescriptor != null)
@@ -59,7 +49,6 @@ namespace TestApi
                             services.Remove(dateTimeDescriptor);
                         }
 
-                        // Remove existing IDateTimeRepository registration
                         var dateTimeRepoDescriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(IDateTimeRepository));
                         if (dateTimeRepoDescriptor != null)
@@ -67,7 +56,6 @@ namespace TestApi
                             services.Remove(dateTimeRepoDescriptor);
                         }
 
-                        // Add SQLite DbContext with shared connection
                         services.AddDbContext<AppDbContext>(options =>
                             options.UseSqlite(_connection));
 
@@ -76,7 +64,6 @@ namespace TestApi
                     });
                 });
 
-            // Initialize database schema
             using (IServiceScope scope = _factory.Services.CreateScope())
             {
                 AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -168,7 +155,6 @@ namespace TestApi
         [TestMethod]
         public async Task TestPurchaseTicket_VisitorNotFound()
         {
-            // Register and login a user for authentication
             await _client.PostAsync("/api/auth/register", new StringContent(
                 JsonSerializer.Serialize(new RegisterVisitorRequest
                 {

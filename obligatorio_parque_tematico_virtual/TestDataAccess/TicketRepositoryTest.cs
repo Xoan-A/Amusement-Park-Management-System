@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using DataAccess.Context;
 using DataAccess.Repositories;
 using Domain;
 using IDataAccess;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TestDataAccess
 {
@@ -30,7 +25,6 @@ namespace TestDataAccess
             _context.Database.EnsureDeleted();
             _context.Database.EnsureCreated();
 
-            // Create a visitor for ticket tests
             _visitorId = Guid.NewGuid();
             User visitor = new User
             {

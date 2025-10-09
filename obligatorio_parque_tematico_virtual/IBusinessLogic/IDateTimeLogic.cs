@@ -1,5 +1,3 @@
-using System;
-
 namespace IBusinessLogic
 {
     public interface IDateTimeLogic

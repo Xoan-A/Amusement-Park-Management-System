@@ -1,5 +1,4 @@
-﻿using Domain;
-using Models.In;
+﻿using Models.In;
 using Models.Out;
 
 namespace IBusinessLogic;

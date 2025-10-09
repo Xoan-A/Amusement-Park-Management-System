@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System.Text;
 using System.Text.Json;
-using BusinessLogic;
 using Domain;
 using IBusinessLogic;
 using Models.In;
@@ -31,7 +30,6 @@ public class AttractionControllerTest
         _mockAttractionService = new Mock<IAttractionLogic>();
         _mockUserLogic = new Mock<IUserLogic>();
 
-        // Create shared in-memory connection
         _connection = new SqliteConnection("DataSource=:memory:");
         _connection.Open();
 
@@ -39,7 +37,6 @@ public class AttractionControllerTest
         {
             builder.ConfigureServices(services =>
             {
-                // Remove SQL Server DbContext
                 var descriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
                 if (descriptor != null)
@@ -47,7 +44,6 @@ public class AttractionControllerTest
                     services.Remove(descriptor);
                 }
 
-                // Add SQLite DbContext with shared connection
                 services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlite(_connection));
 
@@ -56,7 +52,6 @@ public class AttractionControllerTest
             });
         });
 
-        // Initialize database schema
         using (var scope = _factory.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();

@@ -1,4 +1,3 @@
-using BCrypt.Net;
 using IBusinessLogic;
 
 namespace BusinessLogic

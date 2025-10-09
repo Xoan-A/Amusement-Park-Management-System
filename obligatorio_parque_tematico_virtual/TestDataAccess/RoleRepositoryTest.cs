@@ -35,12 +35,8 @@ public class RoleRepositoryTest
     [TestMethod]
     public void GetAll_ShouldReturnAllRoles()
     {
-        // Arrange - Seed data should be in context
-
-        // Act
         List<Role> roles = _repository.GetAll();
 
-        // Assert
         Assert.IsNotNull(roles);
         Assert.AreEqual(3, roles.Count);
     }
@@ -48,10 +44,8 @@ public class RoleRepositoryTest
     [TestMethod]
     public void GetByName_ShouldReturnRole_WhenRoleExists()
     {
-        // Act
         Role? role = _repository.GetByName(Role.ADMINISTRATOR);
 
-        // Assert
         Assert.IsNotNull(role);
         Assert.AreEqual(Role.ADMINISTRATOR, role.Name);
     }
@@ -59,20 +53,16 @@ public class RoleRepositoryTest
     [TestMethod]
     public void GetByName_ShouldReturnNull_WhenRoleDoesNotExist()
     {
-        // Act
         Role? role = _repository.GetByName("NonExistentRole");
 
-        // Assert
         Assert.IsNull(role);
     }
 
     [TestMethod]
     public void SeedData_ShouldContainAdministratorRole()
     {
-        // Act
         Role? role = _repository.GetByName(Role.ADMINISTRATOR);
 
-        // Assert
         Assert.IsNotNull(role);
         Assert.AreEqual("Administrator", role.Name);
     }
@@ -80,10 +70,8 @@ public class RoleRepositoryTest
     [TestMethod]
     public void SeedData_ShouldContainOperatorRole()
     {
-        // Act
         Role? role = _repository.GetByName(Role.OPERATOR);
 
-        // Assert
         Assert.IsNotNull(role);
         Assert.AreEqual("Operator", role.Name);
     }
@@ -91,10 +79,8 @@ public class RoleRepositoryTest
     [TestMethod]
     public void SeedData_ShouldContainVisitorRole()
     {
-        // Act
         Role? role = _repository.GetByName(Role.VISITOR);
 
-        // Assert
         Assert.IsNotNull(role);
         Assert.AreEqual("Visitor", role.Name);
     }

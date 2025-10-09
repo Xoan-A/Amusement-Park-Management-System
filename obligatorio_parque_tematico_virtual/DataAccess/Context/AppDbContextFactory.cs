@@ -11,7 +11,6 @@ namespace DataAccess.Context
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
-            // Use a connection string for design-time operations
             optionsBuilder.UseSqlServer("Server=localhost,1433;Database=ParqueTematicoDB;User ID=SA;Password=Your_password123;TrustServerCertificate=True;Encrypt=False;");
 
             return new AppDbContext(optionsBuilder.Options);
