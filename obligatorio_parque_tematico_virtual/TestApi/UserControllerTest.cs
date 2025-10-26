@@ -68,16 +68,13 @@ namespace ApiTests
             });
             TokenLogic tokenService = new TokenLogic(jwtSettings);
 
-            User adminUser = new User
+            UserResponse adminUser = new UserResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "Admin",
                 LastName = "User",
-                Email = "admin@example.com"
-            };
-            adminUser.UserRoles = new List<UserRole>
-            {
-                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+                Email = "admin@example.com",
+                UserRoles = new List<string> { Role.ADMINISTRATOR }
             };
             string adminToken = tokenService.GenerateToken(adminUser);
 
@@ -287,7 +284,7 @@ namespace ApiTests
             TokenLogic tokenService = new TokenLogic(jwtSettings);
 
             Guid userId = Guid.NewGuid();
-            User user = new User { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com" };
+            UserResponse user = new UserResponse { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>() };
             string token = tokenService.GenerateToken(user);
             HttpClient authedClient = _factory.CreateClient();
             authedClient.DefaultRequestHeaders.Authorization =
@@ -367,7 +364,7 @@ namespace ApiTests
             TokenLogic tokenService = new TokenLogic(jwtSettings);
 
             Guid routeUserId = Guid.NewGuid();
-            User tokenUser = new User { Id = Guid.NewGuid(), Name = "Other", LastName = "User", Email = "o@u.com" };
+            UserResponse tokenUser = new UserResponse { Id = Guid.NewGuid(), Name = "Other", LastName = "User", Email = "o@u.com", UserRoles = new List<string>() };
             string token = tokenService.GenerateToken(tokenUser);
             HttpClient authedClient = _factory.CreateClient();
             authedClient.DefaultRequestHeaders.Authorization =
@@ -402,7 +399,7 @@ namespace ApiTests
             TokenLogic tokenService = new TokenLogic(jwtSettings);
 
             Guid userId = Guid.NewGuid();
-            User user = new User { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com" };
+            UserResponse user = new UserResponse { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>() };
             string token = tokenService.GenerateToken(user);
             HttpClient authedClient = _factory.CreateClient();
             authedClient.DefaultRequestHeaders.Authorization =
@@ -435,7 +432,7 @@ namespace ApiTests
             TokenLogic tokenService = new TokenLogic(jwtSettings);
 
             Guid userId = Guid.NewGuid();
-            User user = new User { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com" };
+            UserResponse user = new UserResponse { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>() };
             string token = tokenService.GenerateToken(user);
             HttpClient authedClient = _factory.CreateClient();
             authedClient.DefaultRequestHeaders.Authorization =
@@ -468,7 +465,7 @@ namespace ApiTests
             TokenLogic tokenService = new TokenLogic(jwtSettings);
 
             Guid userId = Guid.NewGuid();
-            User user = new User { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com" };
+            UserResponse user = new UserResponse { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>() };
             string token = tokenService.GenerateToken(user);
             HttpClient authedClient = _factory.CreateClient();
             authedClient.DefaultRequestHeaders.Authorization =

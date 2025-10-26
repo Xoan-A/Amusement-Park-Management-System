@@ -62,16 +62,13 @@ public class EventControllerTest
         });
         BusinessLogic.TokenLogic tokenService = new BusinessLogic.TokenLogic(jwtSettings);
 
-        User adminUser = new User
+        UserResponse adminUser = new UserResponse
         {
             Id = Guid.NewGuid(),
             Name = "Admin",
             LastName = "User",
-            Email = "admin@example.com"
-        };
-        adminUser.UserRoles = new List<UserRole>
-        {
-            new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+            Email = "admin@example.com",
+            UserRoles = new List<string> { Role.ADMINISTRATOR }
         };
         string adminToken = tokenService.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();

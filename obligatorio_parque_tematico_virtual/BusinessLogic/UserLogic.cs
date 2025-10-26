@@ -30,7 +30,7 @@ namespace BusinessLogic
             _activeStrategy = activeStrategy;
         }
 
-        public async Task<User> RegisterVisitor(RegisterVisitorRequest request)
+        public async Task<UserResponse> RegisterVisitor(RegisterVisitorRequest request)
         {
             string name = request.Name;
             string lastName = request.LastName;
@@ -40,19 +40,13 @@ namespace BusinessLogic
 
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-            {
-                return null;
-            }
+                throw new ArgumentException("Name, last name, email, and password must be provided.");
 
             if (birthDate >= DateTime.Now)
-            {
-                return null;
-            }
+                throw new ArgumentException("Birth date cannot be after today.");
 
             if (!await _userRepository.IsEmailUnique(email))
-            {
-                return null;
-            }
+                throw new ArgumentException("Email is already in use.");
 
             string hashedPassword = _passwordLogic.HashPassword(password);
 
@@ -69,11 +63,22 @@ namespace BusinessLogic
             Role visitorRole = _roleRepository.GetByName(Role.VISITOR);
             if (visitorRole != null)
             {
-                visitor.UserRoles.Add(new UserRole
-                { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
+                visitor.UserRoles.Add(new UserRole { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
             }
 
-            return await _userRepository.Create(visitor);
+            User res = await _userRepository.Create(visitor);
+
+            return new UserResponse
+            {
+                Id = res.Id,
+                Name = res.Name,
+                LastName = res.LastName,
+                Email = res.Email,
+                BirthDate = res.BirthDate,
+                MembershipLevel = (int?)res.MembershipLevel,
+                UserRoles = res.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                Score = res.Score
+            };
         }
 
         public async Task<UserResponse> CreateUser(CreateUserRequest request)
@@ -129,12 +134,6 @@ namespace BusinessLogic
                 UserRoles = returnedUser.UserRoles.Select(ur => ur.Role.Name).ToList(),
                 Score = returnedUser.Score
             };
-        }
-
-        public async Task<User> GetUserById(Guid userId)
-        {
-            User user = await _userRepository.GetByIdWithRoles(userId);
-            return user;
         }
 
         public async Task<UserResponse> GetUserResponseById(Guid userId)

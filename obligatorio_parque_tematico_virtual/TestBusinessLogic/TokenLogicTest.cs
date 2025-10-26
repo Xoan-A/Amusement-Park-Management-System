@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Domain;
 using IBusinessLogic;
 using BusinessLogic;
+using Models.Out;
 
 namespace TestBusinessLogic
 {
@@ -27,17 +28,13 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GenerateToken_ShouldReturnValidJwtToken_ForAdministrator()
         {
-            User admin = new User
+            UserResponse admin = new UserResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "Admin",
                 LastName = "User",
                 Email = "admin@test.com",
-                Password = "hashedPassword"
-            };
-            admin.UserRoles = new System.Collections.Generic.List<UserRole>
-            {
-                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+                UserRoles = new List<string> { Role.ADMINISTRATOR }
             };
 
             string token = _tokenLogic.GenerateToken(admin);
@@ -56,17 +53,13 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GenerateToken_ShouldReturnValidJwtToken_ForOperator()
         {
-            User op = new User
+            UserResponse op = new UserResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "Operator",
                 LastName = "User",
                 Email = "operator@test.com",
-                Password = "hashedPassword"
-            };
-            op.UserRoles = new System.Collections.Generic.List<UserRole>
-            {
-                new UserRole { Role = new Role { Name = Role.OPERATOR } }
+                UserRoles = new List<string> { Role.OPERATOR }
             };
 
             string token = _tokenLogic.GenerateToken(op);
@@ -82,19 +75,15 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GenerateToken_ShouldReturnValidJwtToken_ForVisitor()
         {
-            User visitor = new User
+            UserResponse visitor = new UserResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "Visitor",
                 LastName = "User",
                 Email = "visitor@test.com",
-                Password = "hashedPassword",
                 BirthDate = new DateTime(1990, 1, 1),
-                MembershipLevel = MembershipLevel.Premium
-            };
-            visitor.UserRoles = new System.Collections.Generic.List<UserRole>
-            {
-                new UserRole { Role = new Role { Name = Role.VISITOR } }
+                MembershipLevel = (int)Domain.MembershipLevel.Premium,
+                UserRoles = new List<string> { Role.VISITOR }
             };
 
             string token = _tokenLogic.GenerateToken(visitor);
@@ -111,17 +100,13 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GenerateToken_ShouldIncludeExpirationClaim()
         {
-            User admin = new User
+            UserResponse admin = new UserResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "Test",
                 LastName = "User",
                 Email = "test@test.com",
-                Password = "password"
-            };
-            admin.UserRoles = new System.Collections.Generic.List<UserRole>
-            {
-                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+                UserRoles = new List<string> { Role.ADMINISTRATOR }
             };
 
             string token = _tokenLogic.GenerateToken(admin);
@@ -136,17 +121,13 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GenerateToken_ShouldGenerateDifferentTokens_ForSameUser()
         {
-            User admin = new User
+            UserResponse admin = new UserResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "Test",
                 LastName = "User",
                 Email = "test@test.com",
-                Password = "password"
-            };
-            admin.UserRoles = new System.Collections.Generic.List<UserRole>
-            {
-                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+                UserRoles = new List<string> { Role.ADMINISTRATOR }
             };
 
             string token1 = _tokenLogic.GenerateToken(admin);
@@ -158,20 +139,14 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GenerateToken_ShouldIncludeAllRoles_ForUserWithMultipleRoles()
         {
-            User user = new User
+            UserResponse user = new UserResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "Multi",
                 LastName = "Role",
                 Email = "multi@test.com",
-                Password = "hashedPassword"
+                UserRoles = new List<string> { Role.ADMINISTRATOR, Role.OPERATOR }
             };
-
-            Role adminRole = new Role { Id = 1, Name = "Administrator" };
-            Role operatorRole = new Role { Id = 2, Name = "Operator" };
-
-            user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = adminRole.Id, Role = adminRole });
-            user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = operatorRole.Id, Role = operatorRole });
 
             string token = _tokenLogic.GenerateToken(user);
 
@@ -188,17 +163,14 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GenerateToken_ShouldIncludeSingleRole_ForUserWithOneRole()
         {
-            User user = new User
+            UserResponse user = new UserResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "Single",
                 LastName = "Role",
                 Email = "single@test.com",
-                Password = "hashedPassword"
+                UserRoles = new List<string> { Role.VISITOR }
             };
-
-            Role visitorRole = new Role { Id = 3, Name = "Visitor" };
-            user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = visitorRole.Id, Role = visitorRole });
 
             string token = _tokenLogic.GenerateToken(user);
 
@@ -214,13 +186,13 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GenerateToken_ShouldNotIncludeRoleClaim_ForUserWithoutRoles()
         {
-            User user = new User
+            UserResponse user = new UserResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "No",
                 LastName = "Roles",
                 Email = "noroles@test.com",
-                Password = "hashedPassword"
+                UserRoles = new List<string>()
             };
 
             string token = _tokenLogic.GenerateToken(user);

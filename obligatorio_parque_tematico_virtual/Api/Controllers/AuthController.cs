@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
 using Models.In;
 using Models.Out;
-using Domain.Exceptions;
 
 namespace Api.Controllers
 {
@@ -24,16 +23,10 @@ namespace Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            Domain.User user = await _authLogic.Login(request.Email, request.Password);
-
-            if (user == null)
-            {
-                throw new UnauthorizedException("Invalid email or password");
-            }
-
+            UserResponse user = await _authLogic.Login(request.Email, request.Password);
 
             string token = _tokenLogic.GenerateToken(user);
-            string[] roles = user.UserRoles?.Select(ur => ur.Role.Name).ToArray() ?? new string[0];
+            string[] roles = user.UserRoles?.ToArray() ?? new string[0];
 
             LoginResponse response = new LoginResponse
             {
@@ -49,12 +42,7 @@ namespace Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterVisitorRequest request)
         {
-            Domain.User visitor = await _userLogic.RegisterVisitor(request);
-
-            if (visitor == null)
-            {
-                return BadRequest(new { Message = "Registration failed" });
-            }
+            UserResponse visitor = await _userLogic.RegisterVisitor(request);
 
             RegisterResponse response = new RegisterResponse
             {

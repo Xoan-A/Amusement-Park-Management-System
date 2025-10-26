@@ -69,32 +69,26 @@ public class AttractionControllerTest
         });
         BusinessLogic.TokenLogic tokenService = new BusinessLogic.TokenLogic(jwtSettings);
 
-        User adminUser = new User
+        UserResponse adminUser = new UserResponse
         {
             Id = Guid.NewGuid(),
             Name = "Admin",
             LastName = "User",
-            Email = "admin@example.com"
-        };
-        adminUser.UserRoles = new List<UserRole>
-        {
-            new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+            Email = "admin@example.com",
+            UserRoles = new List<string> { Role.ADMINISTRATOR }
         };
         string adminToken = tokenService.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();
         _adminClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
 
-        User operatorUser = new User
+        UserResponse operatorUser = new UserResponse
         {
             Id = Guid.NewGuid(),
             Name = "Operator",
             LastName = "User",
-            Email = "operator@example.com"
-        };
-        operatorUser.UserRoles = new List<UserRole>
-        {
-            new UserRole { Role = new Role { Name = Role.OPERATOR } }
+            Email = "operator@example.com",
+            UserRoles = new List<string> { Role.OPERATOR }
         };
         string operatorToken = tokenService.GenerateToken(operatorUser);
         _operatorClient = _factory.CreateClient();

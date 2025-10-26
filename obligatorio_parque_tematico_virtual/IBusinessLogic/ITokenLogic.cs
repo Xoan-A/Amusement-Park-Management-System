@@ -1,9 +1,10 @@
 using Domain;
+using Models.Out;
 
 namespace IBusinessLogic
 {
     public interface ITokenLogic
     {
-        string GenerateToken(User user);
+        string GenerateToken(UserResponse user);
     }
 }

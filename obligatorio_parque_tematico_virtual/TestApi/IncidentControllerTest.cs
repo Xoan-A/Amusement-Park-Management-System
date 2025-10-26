@@ -58,16 +58,13 @@ public class IncidentControllerTest
             ExpirationHours = 1
         });
         TokenLogic tokenLogic = new TokenLogic(jwtSettings);
-        User operatorUser = new User
+        Models.Out.UserResponse operatorUser = new Models.Out.UserResponse
         {
             Id = Guid.NewGuid(),
             Name = "Operator",
             LastName = "User",
-            Email = "operator@example.com"
-        };
-        operatorUser.UserRoles = new List<UserRole>
-        {
-            new UserRole { Role = new Role { Name = Role.OPERATOR } }
+            Email = "operator@example.com",
+            UserRoles = new List<string> { Role.OPERATOR }
         };
         string operatorToken = tokenLogic.GenerateToken(operatorUser);
         _operatorClient = _factory.CreateClient();

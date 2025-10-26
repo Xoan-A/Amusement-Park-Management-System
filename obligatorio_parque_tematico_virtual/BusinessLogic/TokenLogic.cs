@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Domain;
 using IBusinessLogic;
 using Models;
+using Models.Out;
 
 namespace BusinessLogic
 {
@@ -18,7 +19,7 @@ namespace BusinessLogic
             _jwtSettings = jwtSettings.Value;
         }
 
-        public string GenerateToken(User user)
+        public string GenerateToken(UserResponse user)
         {
             string fullName = $"{user.Name} {user.LastName}";
 
@@ -33,9 +34,9 @@ namespace BusinessLogic
 
             if (user.UserRoles != null && user.UserRoles.Any())
             {
-                foreach (UserRole userRole in user.UserRoles)
+                foreach (string roleName in user.UserRoles)
                 {
-                    claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
+                    claims.Add(new Claim(ClaimTypes.Role, roleName));
                 }
             }
 
