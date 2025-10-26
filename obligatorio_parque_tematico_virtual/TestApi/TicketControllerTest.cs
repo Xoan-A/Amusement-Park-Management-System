@@ -150,6 +150,8 @@ namespace TestApi
             Assert.AreEqual(registerResult.Id, ticketResult.VisitorId);
             Assert.AreEqual((int)TicketType.General, ticketResult.Type);
             Assert.AreNotEqual(Guid.Empty, ticketResult.QRCode);
+            Assert.AreEqual("Test", ticketResult.VisitorName);
+            Assert.AreEqual("User", ticketResult.VisitorLastName);
         }
 
         [TestMethod]
@@ -286,6 +288,8 @@ namespace TestApi
             Assert.IsNotNull(getResult);
             Assert.AreEqual(purchaseResult.Id, getResult.Id);
             Assert.AreEqual(purchaseResult.QRCode, getResult.QRCode);
+            Assert.AreEqual("Test3", getResult.VisitorName);
+            Assert.AreEqual("User3", getResult.VisitorLastName);
         }
 
         [TestMethod]
@@ -377,6 +381,8 @@ namespace TestApi
             Assert.IsNotNull(tickets);
             Assert.AreEqual(2, tickets.Count);
             Assert.IsTrue(tickets.All(t => t.VisitorId == registerResult.Id));
+            Assert.IsTrue(tickets.All(t => t.VisitorName == "Test4"));
+            Assert.IsTrue(tickets.All(t => t.VisitorLastName == "User4"));
         }
 
         [TestMethod]
@@ -414,6 +420,268 @@ namespace TestApi
             HttpResponseMessage response = await _client.GetAsync($"/api/tickets/visitor/{Guid.NewGuid()}");
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task TestGetTicketByQRCode_Success()
+        {
+            RegisterVisitorRequest registerRequest = new RegisterVisitorRequest
+            {
+                Name = "QRTest",
+                LastName = "User",
+                Email = "qrtest@test.com",
+                Password = "password123",
+                BirthDate = new DateTime(1990, 1, 1)
+            };
+
+            HttpContent registerContent = new StringContent(
+                JsonSerializer.Serialize(registerRequest),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            HttpResponseMessage registerResponse = await _client.PostAsync("/api/auth/register", registerContent);
+            registerResponse.EnsureSuccessStatusCode();
+
+            String registerResponseBody = await registerResponse.Content.ReadAsStringAsync();
+            RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            HttpClient authenticatedClient = await CreateAuthenticatedClient("qrtest@test.com", "password123");
+
+            PurchaseTicketRequest purchaseRequest = new PurchaseTicketRequest
+            {
+                VisitorId = registerResult.Id,
+                VisitDate = DateTime.Now.AddDays(7),
+                TicketType = (int)TicketType.General
+            };
+
+            HttpContent purchaseContent = new StringContent(
+                JsonSerializer.Serialize(purchaseRequest),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            HttpResponseMessage purchaseResponse = await authenticatedClient.PostAsync("/api/tickets", purchaseContent);
+            purchaseResponse.EnsureSuccessStatusCode();
+
+            String purchaseResponseBody = await purchaseResponse.Content.ReadAsStringAsync();
+            TicketResponse purchaseResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            HttpResponseMessage getResponse = await authenticatedClient.GetAsync($"/api/tickets/qr/{purchaseResult.QRCode}");
+
+            Assert.AreEqual(HttpStatusCode.OK, getResponse.StatusCode);
+
+            String getResponseBody = await getResponse.Content.ReadAsStringAsync();
+            TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.IsNotNull(getResult);
+            Assert.AreEqual(purchaseResult.Id, getResult.Id);
+            Assert.AreEqual(purchaseResult.QRCode, getResult.QRCode);
+            Assert.AreEqual(purchaseResult.VisitorId, getResult.VisitorId);
+            Assert.AreEqual("QRTest", getResult.VisitorName);
+            Assert.AreEqual("User", getResult.VisitorLastName);
+        }
+
+        [TestMethod]
+        public async Task TestGetTicketByQRCode_NotFound()
+        {
+            await _client.PostAsync("/api/auth/register", new StringContent(
+                JsonSerializer.Serialize(new RegisterVisitorRequest
+                {
+                    Name = "QRAuth",
+                    LastName = "User",
+                    Email = "qrauth@test.com",
+                    Password = "password123",
+                    BirthDate = new DateTime(1990, 1, 1)
+                }),
+                Encoding.UTF8,
+                "application/json"
+            ));
+            HttpClient authenticatedClient = await CreateAuthenticatedClient("qrauth@test.com", "password123");
+
+            HttpResponseMessage response = await authenticatedClient.GetAsync($"/api/tickets/qr/{Guid.NewGuid()}");
+
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task TestGetTicketByQRCode_Unauthorized()
+        {
+            HttpResponseMessage response = await _client.GetAsync($"/api/tickets/qr/{Guid.NewGuid()}");
+
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task TestGetTicketByQRCode_OperatorCanAccess()
+        {
+            RegisterVisitorRequest visitorRequest = new RegisterVisitorRequest
+            {
+                Name = "QRVisitor",
+                LastName = "User",
+                Email = "qrvisitor@test.com",
+                Password = "password123",
+                BirthDate = new DateTime(1990, 1, 1)
+            };
+
+            HttpContent visitorContent = new StringContent(
+                JsonSerializer.Serialize(visitorRequest),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            HttpResponseMessage visitorResponse = await _client.PostAsync("/api/auth/register", visitorContent);
+            visitorResponse.EnsureSuccessStatusCode();
+
+            String visitorResponseBody = await visitorResponse.Content.ReadAsStringAsync();
+            RegisterResponse visitorResult = JsonSerializer.Deserialize<RegisterResponse>(visitorResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            HttpClient visitorClient = await CreateAuthenticatedClient("qrvisitor@test.com", "password123");
+
+            PurchaseTicketRequest purchaseRequest = new PurchaseTicketRequest
+            {
+                VisitorId = visitorResult.Id,
+                VisitDate = DateTime.Now.AddDays(7),
+                TicketType = (int)TicketType.General
+            };
+
+            HttpContent purchaseContent = new StringContent(
+                JsonSerializer.Serialize(purchaseRequest),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            HttpResponseMessage purchaseResponse = await visitorClient.PostAsync("/api/tickets", purchaseContent);
+            purchaseResponse.EnsureSuccessStatusCode();
+
+            String purchaseResponseBody = await purchaseResponse.Content.ReadAsStringAsync();
+            TicketResponse purchaseResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            using (IServiceScope scope = _factory.Services.CreateScope())
+            {
+                AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                IPasswordLogic passwordLogic = scope.ServiceProvider.GetRequiredService<IPasswordLogic>();
+
+                Role operatorRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == Role.OPERATOR);
+                if (operatorRole == null)
+                {
+                    operatorRole = new Role { Name = Role.OPERATOR };
+                    context.Roles.Add(operatorRole);
+                    await context.SaveChangesAsync();
+                }
+
+                User operatorUser = new User
+                {
+                    Name = "Test",
+                    LastName = "Operator",
+                    Email = "qroperator@test.com",
+                    Password = passwordLogic.HashPassword("password123")
+                };
+                operatorUser.UserRoles = new List<UserRole>
+                {
+                    new UserRole { Role = operatorRole }
+                };
+                context.Users.Add(operatorUser);
+                await context.SaveChangesAsync();
+            }
+
+            HttpClient operatorClient = await CreateAuthenticatedClient("qroperator@test.com", "password123");
+
+            HttpResponseMessage getResponse = await operatorClient.GetAsync($"/api/tickets/qr/{purchaseResult.QRCode}");
+
+            Assert.AreEqual(HttpStatusCode.OK, getResponse.StatusCode);
+
+            String getResponseBody = await getResponse.Content.ReadAsStringAsync();
+            TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.IsNotNull(getResult);
+            Assert.AreEqual(purchaseResult.QRCode, getResult.QRCode);
+        }
+
+        [TestMethod]
+        public async Task TestGetTicketByQRCode_AdministratorCanAccess()
+        {
+            RegisterVisitorRequest visitorRequest = new RegisterVisitorRequest
+            {
+                Name = "QRVisitor2",
+                LastName = "User",
+                Email = "qrvisitor2@test.com",
+                Password = "password123",
+                BirthDate = new DateTime(1990, 1, 1)
+            };
+
+            HttpContent visitorContent = new StringContent(
+                JsonSerializer.Serialize(visitorRequest),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            HttpResponseMessage visitorResponse = await _client.PostAsync("/api/auth/register", visitorContent);
+            visitorResponse.EnsureSuccessStatusCode();
+
+            String visitorResponseBody = await visitorResponse.Content.ReadAsStringAsync();
+            RegisterResponse visitorResult = JsonSerializer.Deserialize<RegisterResponse>(visitorResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            HttpClient visitorClient = await CreateAuthenticatedClient("qrvisitor2@test.com", "password123");
+
+            PurchaseTicketRequest purchaseRequest = new PurchaseTicketRequest
+            {
+                VisitorId = visitorResult.Id,
+                VisitDate = DateTime.Now.AddDays(7),
+                TicketType = (int)TicketType.General
+            };
+
+            HttpContent purchaseContent = new StringContent(
+                JsonSerializer.Serialize(purchaseRequest),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            HttpResponseMessage purchaseResponse = await visitorClient.PostAsync("/api/tickets", purchaseContent);
+            purchaseResponse.EnsureSuccessStatusCode();
+
+            String purchaseResponseBody = await purchaseResponse.Content.ReadAsStringAsync();
+            TicketResponse purchaseResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            using (IServiceScope scope = _factory.Services.CreateScope())
+            {
+                AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                IPasswordLogic passwordLogic = scope.ServiceProvider.GetRequiredService<IPasswordLogic>();
+
+                Role adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == Role.ADMINISTRATOR);
+                if (adminRole == null)
+                {
+                    adminRole = new Role { Name = Role.ADMINISTRATOR };
+                    context.Roles.Add(adminRole);
+                    await context.SaveChangesAsync();
+                }
+
+                User adminUser = new User
+                {
+                    Name = "Test",
+                    LastName = "Admin",
+                    Email = "qradmin@test.com",
+                    Password = passwordLogic.HashPassword("password123")
+                };
+                adminUser.UserRoles = new List<UserRole>
+                {
+                    new UserRole { Role = adminRole }
+                };
+                context.Users.Add(adminUser);
+                await context.SaveChangesAsync();
+            }
+
+            HttpClient adminClient = await CreateAuthenticatedClient("qradmin@test.com", "password123");
+
+            HttpResponseMessage getResponse = await adminClient.GetAsync($"/api/tickets/qr/{purchaseResult.QRCode}");
+
+            Assert.AreEqual(HttpStatusCode.OK, getResponse.StatusCode);
+
+            String getResponseBody = await getResponse.Content.ReadAsStringAsync();
+            TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.IsNotNull(getResult);
+            Assert.AreEqual(purchaseResult.QRCode, getResult.QRCode);
         }
     }
 }
