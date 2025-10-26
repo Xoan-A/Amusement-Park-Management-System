@@ -23,19 +23,24 @@ namespace DataAccess.Repositories
 
         public async Task<Ticket> GetByIdAsync(Guid id)
         {
-            return await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
+            return await _context.Tickets
+                .Include(t => t.Visitor)
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<IEnumerable<Ticket>> GetByVisitorIdAsync(Guid visitorId)
         {
             return await _context.Tickets
+                .Include(t => t.Visitor)
                 .Where(t => t.VisitorId == visitorId)
                 .ToListAsync();
         }
 
         public async Task<Ticket> GetByQRCodeAsync(Guid qrCode)
         {
-            return await _context.Tickets.FirstOrDefaultAsync(t => t.QRCode == qrCode);
+            return await _context.Tickets
+                .Include(t => t.Visitor)
+                .FirstOrDefaultAsync(t => t.QRCode == qrCode);
         }
 
         public async Task<IEnumerable<Ticket>> GetByVisitDateAsync(DateTime visitDate)

@@ -33,6 +33,8 @@ namespace Api.Controllers
             {
                 Id = ticket.Id,
                 VisitorId = ticket.VisitorId,
+                VisitorName = ticket.Visitor?.Name,
+                VisitorLastName = ticket.Visitor?.LastName,
                 PurchaseDate = ticket.PurchaseDate,
                 VisitDate = ticket.VisitDate,
                 Type = (int)ticket.Type,
@@ -41,6 +43,33 @@ namespace Api.Controllers
             };
 
             return CreatedAtAction(nameof(GetTicketById), new { id = ticket.Id }, response);
+        }
+
+        [HttpGet("qr/{qrCode}")]
+        [Authorize(Roles = "Visitor, Operator, Administrator")]
+        public async Task<IActionResult> GetTicketByQRCode(Guid qrCode)
+        {
+            Ticket ticket = await _ticketLogic.GetTicketByQRCodeAsync(qrCode);
+
+            if (ticket == null)
+            {
+                return NotFound();
+            }
+
+            TicketResponse response = new TicketResponse
+            {
+                Id = ticket.Id,
+                VisitorId = ticket.VisitorId,
+                VisitorName = ticket.Visitor?.Name,
+                VisitorLastName = ticket.Visitor?.LastName,
+                PurchaseDate = ticket.PurchaseDate,
+                VisitDate = ticket.VisitDate,
+                Type = (int)ticket.Type,
+                QRCode = ticket.QRCode,
+                EventId = ticket.EventId
+            };
+
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
@@ -58,6 +87,8 @@ namespace Api.Controllers
             {
                 Id = ticket.Id,
                 VisitorId = ticket.VisitorId,
+                VisitorName = ticket.Visitor?.Name,
+                VisitorLastName = ticket.Visitor?.LastName,
                 PurchaseDate = ticket.PurchaseDate,
                 VisitDate = ticket.VisitDate,
                 Type = (int)ticket.Type,
@@ -78,6 +109,8 @@ namespace Api.Controllers
             {
                 Id = ticket.Id,
                 VisitorId = ticket.VisitorId,
+                VisitorName = ticket.Visitor?.Name,
+                VisitorLastName = ticket.Visitor?.LastName,
                 PurchaseDate = ticket.PurchaseDate,
                 VisitDate = ticket.VisitDate,
                 Type = (int)ticket.Type,
