@@ -1,0 +1,160 @@
+<app-navbar></app-navbar>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Create New Event</h2>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger alert-dismissible fade show">
+              {{ errorMessage }}
+              <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+            </div>
+          }
+
+          @if (successMessage) {
+            <div class="alert alert-success">
+              {{ successMessage }}
+            </div>
+          }
+
+          <form [formGroup]="eventForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="name" class="form-label">Event Name *</label>
+              <input
+                type="text"
+                class="form-control"
+                [class.is-invalid]="eventForm.get('name')?.invalid && eventForm.get('name')?.touched"
+                id="name"
+                formControlName="name"
+                placeholder="Enter event name"
+              >
+              @if (eventForm.get('name')?.invalid && eventForm.get('name')?.touched) {
+                <div class="invalid-feedback">
+                  @if (eventForm.get('name')?.errors?.['required']) {
+                    Event name is required
+                  }
+                  @if (eventForm.get('name')?.errors?.['minlength']) {
+                    Name must be at least 3 characters
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="date" class="form-label">Date *</label>
+                <input
+                  type="datetime-local"
+                  class="form-control"
+                  [class.is-invalid]="eventForm.get('date')?.invalid && eventForm.get('date')?.touched"
+                  id="date"
+                  formControlName="date"
+                >
+                @if (eventForm.get('date')?.invalid && eventForm.get('date')?.touched) {
+                  <div class="invalid-feedback">
+                    Date is required
+                  </div>
+                }
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="hour" class="form-label">Hour (0-23) *</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [class.is-invalid]="eventForm.get('hour')?.invalid && eventForm.get('hour')?.touched"
+                  id="hour"
+                  formControlName="hour"
+                  min="0"
+                  max="23"
+                >
+                @if (eventForm.get('hour')?.invalid && eventForm.get('hour')?.touched) {
+                  <div class="invalid-feedback">
+                    Valid hour required (0-23)
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="maxCapacity" class="form-label">Maximum Capacity *</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [class.is-invalid]="eventForm.get('maxCapacity')?.invalid && eventForm.get('maxCapacity')?.touched"
+                  id="maxCapacity"
+                  formControlName="maxCapacity"
+                  min="1"
+                >
+                @if (eventForm.get('maxCapacity')?.invalid && eventForm.get('maxCapacity')?.touched) {
+                  <div class="invalid-feedback">
+                    Capacity must be at least 1
+                  </div>
+                }
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="cost" class="form-label">Cost ($) *</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [class.is-invalid]="eventForm.get('cost')?.invalid && eventForm.get('cost')?.touched"
+                  id="cost"
+                  formControlName="cost"
+                  min="0"
+                  step="0.01"
+                >
+                @if (eventForm.get('cost')?.invalid && eventForm.get('cost')?.touched) {
+                  <div class="invalid-feedback">
+                    Cost must be 0 or greater
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Select Attractions *</label>
+              <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                @if (attractions.length === 0) {
+                  <p class="text-muted">No attractions available. Please create attractions first.</p>
+                } @else {
+                  @for (attraction of attractions; track attraction.id) {
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [id]="'attraction-' + attraction.id"
+                        [checked]="isAttractionSelected(attraction.id)"
+                        (change)="toggleAttraction(attraction.id)"
+                      >
+                      <label class="form-check-label" [for]="'attraction-' + attraction.id">
+                        {{ attraction.name }}
+                      </label>
+                    </div>
+                  }
+                }
+              </div>
+              <small class="text-muted">Selected: {{ selectedAttractions.size }} attraction(s)</small>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+              <button type="submit" class="btn btn-primary" [disabled]="loading">
+                @if (loading) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                  Creating...
+                } @else {
+                  Create Event
+                }
+              </button>
+              <a routerLink="/admin/events" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,145 @@
+<app-navbar></app-navbar>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title mb-4">
+            {{ isEditMode ? 'Edit Attraction' : 'Create New Attraction' }}
+          </h2>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger alert-dismissible fade show">
+              {{ errorMessage }}
+              <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+            </div>
+          }
+
+          @if (successMessage) {
+            <div class="alert alert-success">
+              {{ successMessage }}
+            </div>
+          }
+
+          <form [formGroup]="attractionForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="name" class="form-label">Attraction Name *</label>
+              <input
+                type="text"
+                class="form-control"
+                [class.is-invalid]="attractionForm.get('name')?.invalid && attractionForm.get('name')?.touched"
+                id="name"
+                formControlName="name"
+                placeholder="Enter attraction name"
+              >
+              @if (attractionForm.get('name')?.invalid && attractionForm.get('name')?.touched) {
+                <div class="invalid-feedback">
+                  @if (attractionForm.get('name')?.errors?.['required']) {
+                    Attraction name is required
+                  }
+                  @if (attractionForm.get('name')?.errors?.['minlength']) {
+                    Name must be at least 3 characters
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label for="description" class="form-label">Description *</label>
+              <textarea
+                class="form-control"
+                [class.is-invalid]="attractionForm.get('description')?.invalid && attractionForm.get('description')?.touched"
+                id="description"
+                formControlName="description"
+                rows="3"
+                placeholder="Enter attraction description"
+              ></textarea>
+              @if (attractionForm.get('description')?.invalid && attractionForm.get('description')?.touched) {
+                <div class="invalid-feedback">
+                  @if (attractionForm.get('description')?.errors?.['required']) {
+                    Description is required
+                  }
+                  @if (attractionForm.get('description')?.errors?.['minlength']) {
+                    Description must be at least 10 characters
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="type" class="form-label">Type *</label>
+                <select class="form-select" id="type" formControlName="type">
+                  @for (type of attractionTypes; track type) {
+                    <option [value]="type">{{ type }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="minAge" class="form-label">Minimum Age *</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [class.is-invalid]="attractionForm.get('minAge')?.invalid && attractionForm.get('minAge')?.touched"
+                  id="minAge"
+                  formControlName="minAge"
+                  min="0"
+                  max="100"
+                >
+                @if (attractionForm.get('minAge')?.invalid && attractionForm.get('minAge')?.touched) {
+                  <div class="invalid-feedback">
+                    Valid age required (0-100)
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="maxCapacity" class="form-label">Maximum Capacity *</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [class.is-invalid]="attractionForm.get('maxCapacity')?.invalid && attractionForm.get('maxCapacity')?.touched"
+                  id="maxCapacity"
+                  formControlName="maxCapacity"
+                  min="1"
+                >
+                @if (attractionForm.get('maxCapacity')?.invalid && attractionForm.get('maxCapacity')?.touched) {
+                  <div class="invalid-feedback">
+                    Capacity must be at least 1
+                  </div>
+                }
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="currentCapacity" class="form-label">Current Capacity</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="currentCapacity"
+                  formControlName="currentCapacity"
+                  min="0"
+                >
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+              <button type="submit" class="btn btn-primary" [disabled]="loading">
+                @if (loading) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                  {{ isEditMode ? 'Updating...' : 'Creating...' }}
+                } @else {
+                  {{ isEditMode ? 'Update Attraction' : 'Create Attraction' }}
+                }
+              </button>
+              <a routerLink="/admin/attractions" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

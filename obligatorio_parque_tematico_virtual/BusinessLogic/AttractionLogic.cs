@@ -82,7 +82,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
 
     public async Task UpdateAttraction(Guid id, AttractionRequest existingAttraction)
     {
-        await ValidateAttractionRequest(existingAttraction, true);
+        await ValidateAttractionRequest(existingAttraction, true, id);
         Attraction attraction = await _attractionRepository.GetById(id);
         attraction.Name = existingAttraction.Name;
         attraction.Description = existingAttraction.Description;
@@ -191,9 +191,9 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         return attractionsVisits;
     }
 
-    private async Task ValidateAttractionRequest(AttractionRequest request, bool checkCurrentCapacity = false)
+    private async Task ValidateAttractionRequest(AttractionRequest request, bool checkCurrentCapacity = false, Guid? excludeAttractionId = null)
     {
-        if (!await IsValidNameAsync(request.Name))
+        if (!await IsValidNameAsync(request.Name, excludeAttractionId))
         {
             throw new ArgumentException("Invalid or duplicate attraction name.");
         }
@@ -222,16 +222,24 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         }
     }
 
-    private async Task<bool> IsAttractionNameUnique(string name)
+    private async Task<bool> IsAttractionNameUnique(string name, Guid? excludeId = null)
     {
-        return await _attractionRepository.IsNameUnique(name);
+        Attraction existingAttraction = await _attractionRepository.GetByName(name);
+
+        if (existingAttraction == null)
+            return true;
+
+        if (excludeId.HasValue && existingAttraction.Id == excludeId.Value)
+            return true;
+
+        return false;
     }
 
-    private async Task<bool> IsValidNameAsync(string name)
+    private async Task<bool> IsValidNameAsync(string name, Guid? excludeAttractionId = null)
     {
         return !string.IsNullOrWhiteSpace(name)
                && name.Length <= _nameMaxLength
-               && await IsAttractionNameUnique(name);
+               && await IsAttractionNameUnique(name, excludeAttractionId);
     }
 
     private bool IsValidDescription(string description)

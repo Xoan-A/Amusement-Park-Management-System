@@ -1,0 +1,82 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" [routerLink]="authService.getDashboardRoute()">
+      🎢 Parque Temático Virtual
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      (click)="toggleNavbar()"
+      [attr.aria-expanded]="!isCollapsed"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" [class.show]="!isCollapsed">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        @if (isAdmin) {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/attractions" routerLinkActive="active">Attractions</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/events" routerLinkActive="active">Events</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/users" routerLinkActive="active">Users</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/reports" routerLinkActive="active">Reports</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/strategy" routerLinkActive="active">Strategy</a>
+          </li>
+        }
+
+        @if (isOperator) {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/operator/dashboard" routerLinkActive="active">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/operator/entry-exit" routerLinkActive="active">Entry/Exit</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/operator/incidents" routerLinkActive="active">Incidents</a>
+          </li>
+        }
+
+        @if (isVisitor) {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/visitor/dashboard" routerLinkActive="active">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/visitor/attractions" routerLinkActive="active">Attractions</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/visitor/events" routerLinkActive="active">Events</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/visitor/tickets" routerLinkActive="active">My Tickets</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/visitor/profile" routerLinkActive="active">Profile</a>
+          </li>
+        }
+      </ul>
+
+      <div class="d-flex align-items-center">
+        @if (currentUser) {
+          <span class="navbar-text text-white me-3">
+            Welcome, {{ currentUser.name }}!
+          </span>
+          <button class="btn btn-outline-light btn-sm" (click)="logout()">
+            Logout
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,69 @@
+<app-navbar></app-navbar>
+
+<div class="container mt-4">
+  <h1 class="mb-4">Attraction Visit Reports</h1>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <form [formGroup]="dateRangeForm" (ngSubmit)="loadReport()">
+        <div class="row">
+          <div class="col-md-4">
+            <label class="form-label">Start Date</label>
+            <input type="date" class="form-control" formControlName="startDate">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">End Date</label>
+            <input type="date" class="form-control" formControlName="endDate">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label d-block">&nbsp;</label>
+            <button type="submit" class="btn btn-primary" [disabled]="loading">
+              {{ loading ? 'Loading...' : 'Generate Report' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  @if (reportData && reportData.attractionVisits) {
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Visits Chart</h5>
+      </div>
+      <div class="card-body">
+        <canvas baseChart
+          [data]="barChartData"
+          [options]="barChartOptions"
+          type="bar">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Detailed Report</h5>
+      </div>
+      <div class="card-body">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Attraction</th>
+              <th>Total Visits</th>
+              <th>Avg Stay (minutes)</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (visit of reportData.attractionVisits; track visit.attractionId) {
+              <tr>
+                <td>{{ visit.attractionName }}</td>
+                <td>{{ visit.totalVisits }}</td>
+                <td>{{ visit.averageStayMinutes | number:'1.0-1' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
