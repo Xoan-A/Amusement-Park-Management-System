@@ -36,7 +36,7 @@ public class EventLogicTest
         baseEventRequest = new EventRequest
         {
             Name = "Base Event",
-            Date = new DateTime(2025, 10, 10),
+            Date = DateTime.Now.AddDays(7),
             Hour = 10,
             MaxCapacity = 1000,
             Cost = 50,
