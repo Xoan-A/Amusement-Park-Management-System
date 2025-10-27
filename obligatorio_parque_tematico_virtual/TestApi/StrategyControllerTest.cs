@@ -23,6 +23,7 @@ namespace ApiTests
         private WebApplicationFactory<Program> _factory = null!;
         private HttpClient _client = null!;
         private HttpClient _adminClient = null!;
+        private HttpClient _operatorClient = null!;
         private Mock<IActiveStrategy> _mockActiveStrategy = null!;
         private Mock<IUserLogic> _mockUserLogic = null!;
 
@@ -82,6 +83,22 @@ namespace ApiTests
             _adminClient = _factory.CreateClient();
             _adminClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
+
+            User operatorUser = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = "Operator",
+                LastName = "User",
+                Email = "operator@example.com"
+            };
+            operatorUser.UserRoles = new List<UserRole>
+            {
+                new UserRole { Role = new Role { Name = Role.OPERATOR } }
+            };
+            string operatorToken = tokenLogic.GenerateToken(operatorUser);
+            _operatorClient = _factory.CreateClient();
+            _operatorClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", operatorToken);
         }
 
         [TestCleanup]
@@ -89,6 +106,7 @@ namespace ApiTests
         {
             _client?.Dispose();
             _adminClient?.Dispose();
+            _operatorClient?.Dispose();
             _factory?.Dispose();
             _connection?.Close();
             _connection?.Dispose();
@@ -506,6 +524,18 @@ namespace ApiTests
             {
                 Assert.IsTrue(result.TopTenUsers[i].Score >= result.TopTenUsers[i + 1].Score);
             }
+        }
+
+        [TestMethod]
+        public async Task SetStrategy_OperatorRole_ReturnsForbidden()
+        {
+            SetStrategyRequest request = new SetStrategyRequest { StrategyName = "PerVisitor", N = 5 };
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _operatorClient.PutAsync("/api/strategy", content);
+
+            Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
     }
 }
