@@ -96,16 +96,13 @@ public class AttractionControllerTest
         _operatorClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", operatorToken);
 
-        User visitorUser = new User
+        UserResponse visitorUser = new UserResponse
         {
             Id = Guid.NewGuid(),
             Name = "Visitor",
             LastName = "User",
-            Email = "visitor@example.com"
-        };
-        visitorUser.UserRoles = new List<UserRole>
-        {
-            new UserRole { Role = new Role { Name = Role.VISITOR } }
+            Email = "visitor@example.com",
+            UserRoles = new List<string> { Role.VISITOR }
         };
         string visitorToken = tokenService.GenerateToken(visitorUser);
         _visitorClient = _factory.CreateClient();

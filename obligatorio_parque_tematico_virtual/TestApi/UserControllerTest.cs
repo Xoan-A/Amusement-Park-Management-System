@@ -83,16 +83,13 @@ namespace ApiTests
             _adminClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
 
-            User operatorUser = new User
+            UserResponse operatorUser = new UserResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "Operator",
                 LastName = "User",
-                Email = "operator@example.com"
-            };
-            operatorUser.UserRoles = new List<UserRole>
-            {
-                new UserRole { Role = new Role { Name = Role.OPERATOR } }
+                Email = "operator@example.com",
+                UserRoles = new List<string> { Role.OPERATOR }
             };
             string operatorToken = tokenService.GenerateToken(operatorUser);
             _operatorClient = _factory.CreateClient();

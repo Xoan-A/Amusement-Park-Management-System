@@ -73,16 +73,13 @@ public class IncidentControllerTest
         _operatorClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", operatorToken);
 
-        User adminUser = new User
+        Models.Out.UserResponse adminUser = new Models.Out.UserResponse
         {
             Id = Guid.NewGuid(),
             Name = "Admin",
             LastName = "User",
-            Email = "admin@example.com"
-        };
-        adminUser.UserRoles = new List<UserRole>
-        {
-            new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+            Email = "admin@example.com",
+            UserRoles = new List<string> { Role.ADMINISTRATOR }
         };
         string adminToken = tokenLogic.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();
