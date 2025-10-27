@@ -846,4 +846,22 @@ public class AttractionControllerTest
 
         Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
     }
+
+    [TestMethod]
+    public async Task GetAttractions_EmptyList_ReturnsEmptyResponse()
+    {
+        _mockAttractionService.Setup(s => s.GetAllAttractions())
+            .ReturnsAsync(new List<AttractionResponse>());
+
+        HttpResponseMessage response = await _adminClient.GetAsync("/api/attractions");
+
+        response.EnsureSuccessStatusCode();
+        string content = await response.Content.ReadAsStringAsync();
+        AllAttractionsResponse? result = JsonSerializer.Deserialize<AllAttractionsResponse>(content,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        Assert.IsNotNull(result);
+        Assert.IsNotNull(result.Attractions);
+        Assert.AreEqual(0, result.Attractions.Count);
+    }
 }
