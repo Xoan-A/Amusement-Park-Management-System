@@ -309,8 +309,18 @@ export class EntryExitComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
+    // Format current local datetime as ISO string WITHOUT timezone conversion
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const localDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+
     const request = {
-      enterDate: new Date().toISOString(),
+      enterDate: localDateTimeString,
       userId: this.scannedTicket.visitorId,
       qr: this.scannedTicket.qrCode,
       eventId: this.scannedTicket.eventId || undefined
@@ -337,9 +347,19 @@ export class EntryExitComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
+    // Format current local datetime as ISO string WITHOUT timezone conversion
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const localDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+
     const request = {
       userId: this.scannedTicket.visitorId,
-      exitDate: new Date().toISOString()
+      exitDate: localDateTimeString
     };
 
     this.attractionService.registerExit(this.selectedAttractionId, request).subscribe({
