@@ -57,6 +57,16 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
             _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
             _mockTicketRepository.Setup(t => t.AddAsync(It.IsAny<Ticket>())).ReturnsAsync(expectedTicket);
+            _mockTicketRepository.Setup(t => t.GetByIdAsync(expectedTicket.Id)).ReturnsAsync(new Ticket
+            {
+                Id = expectedTicket.Id,
+                VisitorId = expectedTicket.VisitorId,
+                PurchaseDate = expectedTicket.PurchaseDate,
+                VisitDate = expectedTicket.VisitDate,
+                Type = expectedTicket.Type,
+                QRCode = expectedTicket.QRCode,
+                Visitor = visitor
+            });
 
             PurchaseTicketRequest request = new PurchaseTicketRequest
             {
@@ -157,6 +167,17 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
             _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
             _mockTicketRepository.Setup(t => t.AddAsync(It.IsAny<Ticket>())).ReturnsAsync(expectedTicket);
+            _mockTicketRepository.Setup(t => t.GetByIdAsync(expectedTicket.Id)).ReturnsAsync(new Ticket
+            {
+                Id = expectedTicket.Id,
+                VisitorId = expectedTicket.VisitorId,
+                PurchaseDate = expectedTicket.PurchaseDate,
+                VisitDate = expectedTicket.VisitDate,
+                Type = expectedTicket.Type,
+                QRCode = expectedTicket.QRCode,
+                EventId = expectedTicket.EventId,
+                Visitor = visitor
+            });
 
             PurchaseTicketRequest request = new PurchaseTicketRequest
             {
