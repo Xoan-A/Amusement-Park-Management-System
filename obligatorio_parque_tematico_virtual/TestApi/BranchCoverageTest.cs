@@ -9,6 +9,9 @@ using Models.In;
 using Models.Out;
 using IBusinessLogic;
 using Moq;
+using Microsoft.EntityFrameworkCore;
+using DataAccess.Context;
+using Microsoft.Data.Sqlite;
 
 namespace ApiTests
 {
@@ -18,6 +21,9 @@ namespace ApiTests
         [TestMethod]
         public async Task PurchaseTicket_WithNullVisitorNavigation_ReturnsNullNames()
         {
+            SqliteConnection connection = new SqliteConnection("DataSource=:memory:");
+            connection.Open();
+
             Ticket ticketWithNullVisitor = new Ticket
             {
                 Id = Guid.NewGuid(),
@@ -56,6 +62,10 @@ namespace ApiTests
                 {
                     builder.ConfigureServices(services =>
                     {
+                        ServiceDescriptor dbDescriptor = services.SingleOrDefault(
+                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                        if (dbDescriptor != null) services.Remove(dbDescriptor);
+
                         ServiceDescriptor ticketDescriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(ITicketLogic));
                         if (ticketDescriptor != null) services.Remove(ticketDescriptor);
@@ -68,11 +78,18 @@ namespace ApiTests
                             d => d.ServiceType == typeof(IAuthLogic));
                         if (authDescriptor != null) services.Remove(authDescriptor);
 
+                        services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
                         services.AddSingleton(mockTicketLogic.Object);
                         services.AddSingleton(mockUserLogic.Object);
                         services.AddSingleton(mockAuthLogic.Object);
                     });
                 });
+
+            using (IServiceScope scope = factory.Services.CreateScope())
+            {
+                AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                context.Database.EnsureCreated();
+            }
 
             HttpClient client = factory.CreateClient();
 
@@ -136,11 +153,16 @@ namespace ApiTests
 
             factory.Dispose();
             client.Dispose();
+            connection.Close();
+            connection.Dispose();
         }
 
         [TestMethod]
         public async Task GetTicketById_WithNullVisitorNavigation_ReturnsNullNames()
         {
+            SqliteConnection connection = new SqliteConnection("DataSource=:memory:");
+            connection.Open();
+
             Ticket ticketWithNullVisitor = new Ticket
             {
                 Id = Guid.NewGuid(),
@@ -179,6 +201,10 @@ namespace ApiTests
                 {
                     builder.ConfigureServices(services =>
                     {
+                        ServiceDescriptor dbDescriptor = services.SingleOrDefault(
+                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                        if (dbDescriptor != null) services.Remove(dbDescriptor);
+
                         ServiceDescriptor ticketDescriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(ITicketLogic));
                         if (ticketDescriptor != null) services.Remove(ticketDescriptor);
@@ -191,11 +217,18 @@ namespace ApiTests
                             d => d.ServiceType == typeof(IAuthLogic));
                         if (authDescriptor != null) services.Remove(authDescriptor);
 
+                        services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
                         services.AddSingleton(mockTicketLogic.Object);
                         services.AddSingleton(mockUserLogic.Object);
                         services.AddSingleton(mockAuthLogic.Object);
                     });
                 });
+
+            using (IServiceScope scope = factory.Services.CreateScope())
+            {
+                AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                context.Database.EnsureCreated();
+            }
 
             HttpClient client = factory.CreateClient();
 
@@ -246,11 +279,16 @@ namespace ApiTests
 
             factory.Dispose();
             client.Dispose();
+            connection.Close();
+            connection.Dispose();
         }
 
         [TestMethod]
         public async Task GetTicketByQRCode_WithNullVisitorNavigation_ReturnsNullNames()
         {
+            SqliteConnection connection = new SqliteConnection("DataSource=:memory:");
+            connection.Open();
+
             Guid qrCode = Guid.NewGuid();
             Ticket ticketWithNullVisitor = new Ticket
             {
@@ -290,6 +328,10 @@ namespace ApiTests
                 {
                     builder.ConfigureServices(services =>
                     {
+                        ServiceDescriptor dbDescriptor = services.SingleOrDefault(
+                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                        if (dbDescriptor != null) services.Remove(dbDescriptor);
+
                         ServiceDescriptor ticketDescriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(ITicketLogic));
                         if (ticketDescriptor != null) services.Remove(ticketDescriptor);
@@ -302,11 +344,18 @@ namespace ApiTests
                             d => d.ServiceType == typeof(IAuthLogic));
                         if (authDescriptor != null) services.Remove(authDescriptor);
 
+                        services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
                         services.AddSingleton(mockTicketLogic.Object);
                         services.AddSingleton(mockUserLogic.Object);
                         services.AddSingleton(mockAuthLogic.Object);
                     });
                 });
+
+            using (IServiceScope scope = factory.Services.CreateScope())
+            {
+                AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                context.Database.EnsureCreated();
+            }
 
             HttpClient client = factory.CreateClient();
 
@@ -357,11 +406,16 @@ namespace ApiTests
 
             factory.Dispose();
             client.Dispose();
+            connection.Close();
+            connection.Dispose();
         }
 
         [TestMethod]
         public async Task GetVisitorTickets_WithNullVisitorNavigation_ReturnsNullNames()
         {
+            SqliteConnection connection = new SqliteConnection("DataSource=:memory:");
+            connection.Open();
+
             Guid visitorId = Guid.NewGuid();
             List<Ticket> ticketsWithNullVisitor = new List<Ticket>
             {
@@ -404,6 +458,10 @@ namespace ApiTests
                 {
                     builder.ConfigureServices(services =>
                     {
+                        ServiceDescriptor dbDescriptor = services.SingleOrDefault(
+                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                        if (dbDescriptor != null) services.Remove(dbDescriptor);
+
                         ServiceDescriptor ticketDescriptor = services.SingleOrDefault(
                             d => d.ServiceType == typeof(ITicketLogic));
                         if (ticketDescriptor != null) services.Remove(ticketDescriptor);
@@ -416,11 +474,18 @@ namespace ApiTests
                             d => d.ServiceType == typeof(IAuthLogic));
                         if (authDescriptor != null) services.Remove(authDescriptor);
 
+                        services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
                         services.AddSingleton(mockTicketLogic.Object);
                         services.AddSingleton(mockUserLogic.Object);
                         services.AddSingleton(mockAuthLogic.Object);
                     });
                 });
+
+            using (IServiceScope scope = factory.Services.CreateScope())
+            {
+                AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                context.Database.EnsureCreated();
+            }
 
             HttpClient client = factory.CreateClient();
 
@@ -472,6 +537,8 @@ namespace ApiTests
 
             factory.Dispose();
             client.Dispose();
+            connection.Close();
+            connection.Dispose();
         }
     }
 }
