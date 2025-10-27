@@ -102,5 +102,21 @@ namespace ApiTests
             response.EnsureSuccessStatusCode();
             _mockDateTimeLogic.Verify(x => x.SetDateTime(expectedDateTime), Times.Once);
         }
+
+        [TestMethod]
+        public async Task SetDateTime_InvalidFormat_Returns500()
+        {
+            SetDateTimeRequest request = new SetDateTimeRequest
+            {
+                DateTime = "invalid-date-format"
+            };
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _client.PutAsync("/api/datetime", content);
+
+            Assert.AreEqual(System.Net.HttpStatusCode.InternalServerError, response.StatusCode);
+        }
     }
 }

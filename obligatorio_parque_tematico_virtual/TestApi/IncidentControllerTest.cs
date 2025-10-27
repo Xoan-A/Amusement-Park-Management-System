@@ -10,6 +10,7 @@ using BusinessLogic;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using Microsoft.Data.Sqlite;
+using Models.In;
 
 namespace ApiTests;
 
@@ -18,6 +19,7 @@ public class IncidentControllerTest
 {
     private WebApplicationFactory<Program> _factory = null!;
     private HttpClient _operatorClient = null!;
+    private HttpClient _adminClient = null!;
     private Mock<IAttractionLogic> _mockService = null!;
     private Guid _attractionId;
     private SqliteConnection _connection = null!;
@@ -70,6 +72,20 @@ public class IncidentControllerTest
         _operatorClient = _factory.CreateClient();
         _operatorClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", operatorToken);
+
+        Models.Out.UserResponse adminUser = new Models.Out.UserResponse
+        {
+            Id = Guid.NewGuid(),
+            Name = "Admin",
+            LastName = "User",
+            Email = "admin@example.com",
+            UserRoles = new List<string> { Role.ADMINISTRATOR }
+        };
+        string adminToken = tokenLogic.GenerateToken(adminUser);
+        _adminClient = _factory.CreateClient();
+        _adminClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
+
         _attractionId = Guid.NewGuid();
     }
 
@@ -77,6 +93,7 @@ public class IncidentControllerTest
     public void Cleanup()
     {
         _operatorClient?.Dispose();
+        _adminClient?.Dispose();
         _factory?.Dispose();
         _connection?.Close();
         _connection?.Dispose();
@@ -141,5 +158,25 @@ public class IncidentControllerTest
         _mockService.Setup(s => s.RemoveIncident(_attractionId, "Incidente")).ThrowsAsync(new KeyNotFoundException());
         HttpResponseMessage response = await _operatorClient.DeleteAsync($"/api/incidents/{_attractionId}?incident=Incidente");
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task AddIncident_AdminRole_ReturnsForbidden()
+    {
+        IncidentRequest request = new IncidentRequest { Incident = "Test Incident" };
+        string json = JsonSerializer.Serialize(request);
+        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        HttpResponseMessage response = await _adminClient.PutAsync($"/api/incidents/{_attractionId}", content);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task RemoveIncident_AdminRole_ReturnsForbidden()
+    {
+        HttpResponseMessage response = await _adminClient.DeleteAsync($"/api/incidents/{_attractionId}?incident=TestIncident");
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
     }
 }

@@ -31,6 +31,7 @@ namespace Api.Controllers
             LoginResponse response = new LoginResponse
             {
                 Token = token,
+                Id = user.Id,
                 Email = user.Email,
                 Roles = roles,
                 Name = $"{user.Name} {user.LastName}"

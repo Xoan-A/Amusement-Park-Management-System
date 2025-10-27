@@ -20,6 +20,7 @@ public class AttractionControllerTest
     private HttpClient _client = null!;
     private HttpClient _adminClient = null!;
     private HttpClient _operatorClient = null!;
+    private HttpClient _visitorClient = null!;
     private Mock<IAttractionLogic> _mockAttractionService = null!;
     private Mock<IUserLogic> _mockUserLogic = null!;
     private SqliteConnection _connection = null!;
@@ -94,6 +95,19 @@ public class AttractionControllerTest
         _operatorClient = _factory.CreateClient();
         _operatorClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", operatorToken);
+
+        UserResponse visitorUser = new UserResponse
+        {
+            Id = Guid.NewGuid(),
+            Name = "Visitor",
+            LastName = "User",
+            Email = "visitor@example.com",
+            UserRoles = new List<string> { Role.VISITOR }
+        };
+        string visitorToken = tokenService.GenerateToken(visitorUser);
+        _visitorClient = _factory.CreateClient();
+        _visitorClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", visitorToken);
     }
 
     [TestCleanup]
@@ -102,6 +116,7 @@ public class AttractionControllerTest
         _client?.Dispose();
         _adminClient?.Dispose();
         _operatorClient?.Dispose();
+        _visitorClient?.Dispose();
         _factory?.Dispose();
         _connection?.Close();
         _connection?.Dispose();
@@ -739,5 +754,111 @@ public class AttractionControllerTest
         Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
         _mockAttractionService.Verify(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitsRequest>()),
             Times.Never);
+    }
+
+    [TestMethod]
+    public async Task UpdateAttraction_OperatorRole_ReturnsForbidden()
+    {
+        Guid attractionId = Guid.NewGuid();
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "Updated Attraction",
+            Description = "Updated Description",
+            Type = "RollerCoaster",
+            MinAge = 10,
+            MaxCapacity = 100
+        };
+
+        string json = JsonSerializer.Serialize(request);
+        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        HttpResponseMessage response = await _operatorClient.PutAsync($"/api/attractions/{attractionId}", content);
+
+        Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task DeleteAttraction_OperatorRole_ReturnsForbidden()
+    {
+        Guid attractionId = Guid.NewGuid();
+
+        HttpResponseMessage response = await _operatorClient.DeleteAsync($"/api/attractions/{attractionId}");
+
+        Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task RegisterEntry_AdminRole_ReturnsForbidden()
+    {
+        Guid attractionId = Guid.NewGuid();
+        RegisterEntryRequest request = new RegisterEntryRequest
+        {
+            EnterDate = DateTime.Now,
+            UserId = Guid.NewGuid(),
+            Qr = Guid.NewGuid()
+        };
+
+        string json = JsonSerializer.Serialize(request);
+        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        HttpResponseMessage response = await _adminClient.PutAsync($"/api/attractions/entry/{attractionId}", content);
+
+        Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task RegisterExit_AdminRole_ReturnsForbidden()
+    {
+        Guid attractionId = Guid.NewGuid();
+        RegisterExitRequest request = new RegisterExitRequest
+        {
+            exitDate = DateTime.Now,
+            userId = Guid.NewGuid()
+        };
+
+        string json = JsonSerializer.Serialize(request);
+        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        HttpResponseMessage response = await _adminClient.PutAsync($"/api/attractions/exit/{attractionId}", content);
+
+        Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task CreateAttraction_VisitorRole_ReturnsForbidden()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "New Attraction",
+            Description = "Description",
+            Type = "RollerCoaster",
+            MinAge = 10,
+            MaxCapacity = 100
+        };
+
+        string json = JsonSerializer.Serialize(request);
+        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        HttpResponseMessage response = await _visitorClient.PostAsync("/api/attractions", content);
+
+        Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task GetAttractions_EmptyList_ReturnsEmptyResponse()
+    {
+        _mockAttractionService.Setup(s => s.GetAllAttractions())
+            .ReturnsAsync(new List<AttractionResponse>());
+
+        HttpResponseMessage response = await _adminClient.GetAsync("/api/attractions");
+
+        response.EnsureSuccessStatusCode();
+        string content = await response.Content.ReadAsStringAsync();
+        AllAttractionsResponse? result = JsonSerializer.Deserialize<AllAttractionsResponse>(content,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        Assert.IsNotNull(result);
+        Assert.IsNotNull(result.Attractions);
+        Assert.AreEqual(0, result.Attractions.Count);
     }
 }

@@ -52,7 +52,8 @@ namespace BusinessLogic
                 EventId = eventId
             };
 
-            return await _ticketRepository.AddAsync(newTicket);
+            Ticket addedTicket = await _ticketRepository.AddAsync(newTicket);
+            return await _ticketRepository.GetByIdAsync(addedTicket.Id);
         }
 
         public async Task<Ticket> GetTicketByIdAsync(Guid id)

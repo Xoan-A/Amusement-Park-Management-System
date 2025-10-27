@@ -1,0 +1,80 @@
+<app-navbar></app-navbar>
+
+<div class="container mt-4">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="mb-3">Events Management</h1>
+      <a routerLink="/admin/events/new" class="btn btn-primary">
+        Add New Event
+      </a>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-8">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search events..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="applyFilters()"
+      >
+    </div>
+    <div class="col-md-4">
+      <button class="btn btn-secondary w-100" (click)="searchTerm=''; applyFilters()">
+        Clear Search
+      </button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else if (filteredEvents.length === 0) {
+    <div class="alert alert-info">
+      No events found. @if (searchTerm) {
+        Try adjusting your search.
+      } @else {
+        Click "Add New Event" to create one.
+      }
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Capacity</th>
+            <th>Cost</th>
+            <th>Attractions</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (event of filteredEvents; track event.id) {
+            <tr>
+              <td>{{ event.name }}</td>
+              <td>{{ event.date | date:'short' }}</td>
+              <td>{{ event.hour }}:00</td>
+              <td>{{ event.currentCapacity }} / {{ event.maxCapacity }}</td>
+              <td>${{ event.cost }}</td>
+              <td>
+                <small>{{ event.attractions.length }} attraction(s)</small>
+              </td>
+              <td>
+                <button (click)="deleteEvent(event.id)" class="btn btn-sm btn-outline-danger">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

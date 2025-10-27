@@ -1,0 +1,17 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-loading-spinner',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <div class="loading-overlay">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  `,
+  styles: []
+})
+export class LoadingSpinnerComponent {}
