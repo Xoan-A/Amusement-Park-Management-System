@@ -22,6 +22,7 @@ namespace ApiTests
         private WebApplicationFactory<Program> _factory = null!;
         private HttpClient _client = null!;
         private HttpClient _adminClient = null!;
+        private HttpClient _operatorClient = null!;
         private Mock<IUserLogic> _mockUserLogic = null!;
         private SqliteConnection _connection = null!;
 
@@ -81,6 +82,22 @@ namespace ApiTests
             _adminClient = _factory.CreateClient();
             _adminClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
+
+            User operatorUser = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = "Operator",
+                LastName = "User",
+                Email = "operator@example.com"
+            };
+            operatorUser.UserRoles = new List<UserRole>
+            {
+                new UserRole { Role = new Role { Name = Role.OPERATOR } }
+            };
+            string operatorToken = tokenService.GenerateToken(operatorUser);
+            _operatorClient = _factory.CreateClient();
+            _operatorClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", operatorToken);
         }
 
         [TestCleanup]
@@ -88,6 +105,7 @@ namespace ApiTests
         {
             _client?.Dispose();
             _adminClient?.Dispose();
+            _operatorClient?.Dispose();
             _factory?.Dispose();
             _connection?.Close();
             _connection?.Dispose();
@@ -483,6 +501,20 @@ namespace ApiTests
             HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task AddRoleToUser_OperatorRole_ReturnsForbidden()
+        {
+            Guid userId = Guid.NewGuid();
+            AddRolesRequest request = new AddRolesRequest { Role = "Administrator" };
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _operatorClient.PutAsync($"/api/users/{userId}/roles", content);
+
+            Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
     }
 }
