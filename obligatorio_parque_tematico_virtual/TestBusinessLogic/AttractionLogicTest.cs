@@ -206,7 +206,8 @@ public class AttractionLogicTest
             MinAge = 10,
             MaxCapacity = 10,
         };
-        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(false);
+        Attraction existingAttraction = new Attraction { Id = Guid.NewGuid(), Name = "Duplicado" };
+        _mockAttractionRepository.Setup(r => r.GetByName(request.Name)).ReturnsAsync(existingAttraction);
 
         await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
             await _attractionLogic.CreateAttraction(request));
@@ -299,6 +300,9 @@ public class AttractionLogicTest
     [TestMethod]
     public async Task UpdateAttraction_ShouldThrowException_WhenNameIsNotUnique()
     {
+        Guid attractionId = Guid.NewGuid();
+        Guid differentAttractionId = Guid.NewGuid();
+
         AttractionRequest request = new AttractionRequest
         {
             Name = "Duplicado",
@@ -308,9 +312,15 @@ public class AttractionLogicTest
             MaxCapacity = 10,
             CurrentCapacity = 0
         };
-        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(false);
+
+        Attraction currentAttraction = new Attraction { Id = attractionId, Name = "Original" };
+        Attraction duplicateAttraction = new Attraction { Id = differentAttractionId, Name = "Duplicado" };
+
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(currentAttraction);
+        _mockAttractionRepository.Setup(r => r.GetByName(request.Name)).ReturnsAsync(duplicateAttraction);
+
         await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-            await _attractionLogic.UpdateAttraction(Guid.NewGuid(), request));
+            await _attractionLogic.UpdateAttraction(attractionId, request));
     }
 
     [TestMethod]

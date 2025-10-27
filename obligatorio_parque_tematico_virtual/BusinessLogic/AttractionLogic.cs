@@ -84,6 +84,10 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
     {
         await ValidateAttractionRequest(existingAttraction, true, id);
         Attraction attraction = await _attractionRepository.GetById(id);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
+        }
         attraction.Name = existingAttraction.Name;
         attraction.Description = existingAttraction.Description;
         attraction.Type = Enum.Parse<AttractionType>(existingAttraction.Type);
