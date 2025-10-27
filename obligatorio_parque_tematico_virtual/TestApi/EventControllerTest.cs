@@ -20,6 +20,7 @@ public class EventControllerTest
     private WebApplicationFactory<Program> _factory = null!;
     private HttpClient _client = null!;
     private HttpClient _adminClient = null!;
+    private HttpClient _operatorClient = null!;
     private Mock<IEventLogic> _mockEventService = null!;
 
     [TestInitialize]
@@ -74,6 +75,22 @@ public class EventControllerTest
         _adminClient = _factory.CreateClient();
         _adminClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
+
+        User operatorUser = new User
+        {
+            Id = Guid.NewGuid(),
+            Name = "Operator",
+            LastName = "User",
+            Email = "operator@example.com"
+        };
+        operatorUser.UserRoles = new List<UserRole>
+        {
+            new UserRole { Role = new Role { Name = Role.OPERATOR } }
+        };
+        string operatorToken = tokenService.GenerateToken(operatorUser);
+        _operatorClient = _factory.CreateClient();
+        _operatorClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", operatorToken);
     }
 
     [TestCleanup]
@@ -81,6 +98,7 @@ public class EventControllerTest
     {
         _client?.Dispose();
         _adminClient?.Dispose();
+        _operatorClient?.Dispose();
         _factory?.Dispose();
         _connection?.Close();
         _connection?.Dispose();
@@ -249,5 +267,36 @@ public class EventControllerTest
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         _mockEventService.Verify(service => service.DeleteEvent(eventId), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task CreateEvent_OperatorRole_ReturnsForbidden()
+    {
+        EventRequest request = new EventRequest
+        {
+            Name = "New Event",
+            Date = DateTime.Now.AddDays(7),
+            Hour = 14,
+            MaxCapacity = 500,
+            Cost = 100,
+            AttractionIds = new List<Guid>()
+        };
+
+        string json = JsonSerializer.Serialize(request);
+        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        HttpResponseMessage response = await _operatorClient.PostAsync("/api/events", content);
+
+        Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task DeleteEvent_OperatorRole_ReturnsForbidden()
+    {
+        Guid eventId = Guid.NewGuid();
+
+        HttpResponseMessage response = await _operatorClient.DeleteAsync($"/api/events/{eventId}");
+
+        Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
     }
 }
