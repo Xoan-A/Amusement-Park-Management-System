@@ -54,7 +54,7 @@ namespace BusinessLogic
 
             Ticket addedTicket = await _ticketRepository.AddAsync(newTicket);
             Ticket savedTicket = await _ticketRepository.GetByIdAsync(addedTicket.Id);
-            
+
             return MapToTicketResponse(savedTicket);
         }
 
@@ -65,6 +65,7 @@ namespace BusinessLogic
             {
                 throw new KeyNotFoundException($"Ticket with ID {id} not found");
             }
+
             return MapToTicketResponse(ticket);
         }
 
@@ -81,6 +82,7 @@ namespace BusinessLogic
             {
                 throw new KeyNotFoundException($"Ticket with QR code {qrCode} not found");
             }
+
             return MapToTicketResponse(ticket);
         }
 

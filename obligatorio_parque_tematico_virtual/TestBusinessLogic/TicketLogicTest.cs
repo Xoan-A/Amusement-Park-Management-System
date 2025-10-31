@@ -104,7 +104,7 @@ namespace TestBusinessLogic
             await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
                 async () => await _ticketLogic.PurchaseTicketAsync(request)
             );
-            
+
             _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
         }
 
@@ -136,7 +136,7 @@ namespace TestBusinessLogic
             await Assert.ThrowsExceptionAsync<ArgumentException>(
                 async () => await _ticketLogic.PurchaseTicketAsync(request)
             );
-            
+
             _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
         }
 
@@ -624,4 +624,3 @@ namespace TestBusinessLogic
         }
     }
 }
-

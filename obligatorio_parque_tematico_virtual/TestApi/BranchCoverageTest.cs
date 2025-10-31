@@ -124,7 +124,8 @@ namespace ApiTests
 
             HttpResponseMessage loginResponse = await client.PostAsync("/api/auth/login", loginContent);
             string loginBody = await loginResponse.Content.ReadAsStringAsync();
-            LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.Token);
 
@@ -146,7 +147,8 @@ namespace ApiTests
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            TicketResponse result = JsonSerializer.Deserialize<TicketResponse>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TicketResponse result = JsonSerializer.Deserialize<TicketResponse>(responseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(result);
             Assert.IsNull(result.VisitorName);
@@ -264,7 +266,8 @@ namespace ApiTests
 
             HttpResponseMessage loginResponse = await client.PostAsync("/api/auth/login", loginContent);
             string loginBody = await loginResponse.Content.ReadAsStringAsync();
-            LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.Token);
 
@@ -273,7 +276,8 @@ namespace ApiTests
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            TicketResponse result = JsonSerializer.Deserialize<TicketResponse>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TicketResponse result = JsonSerializer.Deserialize<TicketResponse>(responseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(result);
             Assert.IsNull(result.VisitorName);
@@ -392,7 +396,8 @@ namespace ApiTests
 
             HttpResponseMessage loginResponse = await client.PostAsync("/api/auth/login", loginContent);
             string loginBody = await loginResponse.Content.ReadAsStringAsync();
-            LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.Token);
 
@@ -401,7 +406,8 @@ namespace ApiTests
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            TicketResponse result = JsonSerializer.Deserialize<TicketResponse>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TicketResponse result = JsonSerializer.Deserialize<TicketResponse>(responseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(result);
             Assert.IsNull(result.VisitorName);
@@ -523,7 +529,8 @@ namespace ApiTests
 
             HttpResponseMessage loginResponse = await client.PostAsync("/api/auth/login", loginContent);
             string loginBody = await loginResponse.Content.ReadAsStringAsync();
-            LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.Token);
 
@@ -532,7 +539,8 @@ namespace ApiTests
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            List<TicketResponse> result = JsonSerializer.Deserialize<List<TicketResponse>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            List<TicketResponse> result = JsonSerializer.Deserialize<List<TicketResponse>>(responseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
