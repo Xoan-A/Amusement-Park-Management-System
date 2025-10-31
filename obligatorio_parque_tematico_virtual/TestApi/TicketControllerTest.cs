@@ -93,10 +93,12 @@ namespace TestApi
             HttpResponseMessage loginResponse = await _client.PostAsync("/api/auth/login", loginContent);
             loginResponse.EnsureSuccessStatusCode();
             String loginResponseBody = await loginResponse.Content.ReadAsStringAsync();
-            LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             HttpClient authenticatedClient = _factory.CreateClient();
-            authenticatedClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.Token);
+            authenticatedClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", loginResult.Token);
             return authenticatedClient;
         }
 
@@ -122,7 +124,8 @@ namespace TestApi
             registerResponse.EnsureSuccessStatusCode();
 
             String registerResponseBody = await registerResponse.Content.ReadAsStringAsync();
-            RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             HttpClient authenticatedClient = await CreateAuthenticatedClient("testuser@test.com", "password123");
 
@@ -144,7 +147,8 @@ namespace TestApi
             Assert.AreEqual(HttpStatusCode.Created, purchaseResponse.StatusCode);
 
             String purchaseResponseBody = await purchaseResponse.Content.ReadAsStringAsync();
-            TicketResponse ticketResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TicketResponse ticketResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(ticketResult);
             Assert.AreEqual(registerResult.Id, ticketResult.VisitorId);
@@ -186,7 +190,7 @@ namespace TestApi
 
             HttpResponseMessage response = await authenticatedClient.PostAsync("/api/tickets", content);
 
-            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [TestMethod]
@@ -211,7 +215,8 @@ namespace TestApi
             registerResponse.EnsureSuccessStatusCode();
 
             String registerResponseBody = await registerResponse.Content.ReadAsStringAsync();
-            RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             HttpClient authenticatedClient = await CreateAuthenticatedClient("testuser2@test.com", "password123");
 
@@ -255,7 +260,8 @@ namespace TestApi
             registerResponse.EnsureSuccessStatusCode();
 
             String registerResponseBody = await registerResponse.Content.ReadAsStringAsync();
-            RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             HttpClient authenticatedClient = await CreateAuthenticatedClient("testuser3@test.com", "password123");
 
@@ -276,14 +282,16 @@ namespace TestApi
             purchaseResponse.EnsureSuccessStatusCode();
 
             String purchaseResponseBody = await purchaseResponse.Content.ReadAsStringAsync();
-            TicketResponse purchaseResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TicketResponse purchaseResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             HttpResponseMessage getResponse = await authenticatedClient.GetAsync($"/api/tickets/{purchaseResult.Id}");
 
             Assert.AreEqual(HttpStatusCode.OK, getResponse.StatusCode);
 
             String getResponseBody = await getResponse.Content.ReadAsStringAsync();
-            TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(getResult);
             Assert.AreEqual(purchaseResult.Id, getResult.Id);
@@ -336,7 +344,8 @@ namespace TestApi
             registerResponse.EnsureSuccessStatusCode();
 
             String registerResponseBody = await registerResponse.Content.ReadAsStringAsync();
-            RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             HttpClient authenticatedClient = await CreateAuthenticatedClient("testuser4@test.com", "password123");
 
@@ -371,12 +380,14 @@ namespace TestApi
 
             await authenticatedClient.PostAsync("/api/tickets", purchaseContent2);
 
-            HttpResponseMessage getResponse = await authenticatedClient.GetAsync($"/api/tickets/visitor/{registerResult.Id}");
+            HttpResponseMessage getResponse =
+                await authenticatedClient.GetAsync($"/api/tickets/visitor/{registerResult.Id}");
 
             Assert.AreEqual(HttpStatusCode.OK, getResponse.StatusCode);
 
             String getResponseBody = await getResponse.Content.ReadAsStringAsync();
-            List<TicketResponse> tickets = JsonSerializer.Deserialize<List<TicketResponse>>(getResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            List<TicketResponse> tickets = JsonSerializer.Deserialize<List<TicketResponse>>(getResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(tickets);
             Assert.AreEqual(2, tickets.Count);
@@ -444,7 +455,8 @@ namespace TestApi
             registerResponse.EnsureSuccessStatusCode();
 
             String registerResponseBody = await registerResponse.Content.ReadAsStringAsync();
-            RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            RegisterResponse registerResult = JsonSerializer.Deserialize<RegisterResponse>(registerResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             HttpClient authenticatedClient = await CreateAuthenticatedClient("qrtest@test.com", "password123");
 
@@ -465,14 +477,17 @@ namespace TestApi
             purchaseResponse.EnsureSuccessStatusCode();
 
             String purchaseResponseBody = await purchaseResponse.Content.ReadAsStringAsync();
-            TicketResponse purchaseResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TicketResponse purchaseResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            HttpResponseMessage getResponse = await authenticatedClient.GetAsync($"/api/tickets/qr/{purchaseResult.QRCode}");
+            HttpResponseMessage getResponse =
+                await authenticatedClient.GetAsync($"/api/tickets/qr/{purchaseResult.QRCode}");
 
             Assert.AreEqual(HttpStatusCode.OK, getResponse.StatusCode);
 
             String getResponseBody = await getResponse.Content.ReadAsStringAsync();
-            TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(getResult);
             Assert.AreEqual(purchaseResult.Id, getResult.Id);
@@ -534,7 +549,8 @@ namespace TestApi
             visitorResponse.EnsureSuccessStatusCode();
 
             String visitorResponseBody = await visitorResponse.Content.ReadAsStringAsync();
-            RegisterResponse visitorResult = JsonSerializer.Deserialize<RegisterResponse>(visitorResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            RegisterResponse visitorResult = JsonSerializer.Deserialize<RegisterResponse>(visitorResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             HttpClient visitorClient = await CreateAuthenticatedClient("qrvisitor@test.com", "password123");
 
@@ -555,7 +571,8 @@ namespace TestApi
             purchaseResponse.EnsureSuccessStatusCode();
 
             String purchaseResponseBody = await purchaseResponse.Content.ReadAsStringAsync();
-            TicketResponse purchaseResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TicketResponse purchaseResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             using (IServiceScope scope = _factory.Services.CreateScope())
             {
@@ -592,7 +609,8 @@ namespace TestApi
             Assert.AreEqual(HttpStatusCode.OK, getResponse.StatusCode);
 
             String getResponseBody = await getResponse.Content.ReadAsStringAsync();
-            TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(getResult);
             Assert.AreEqual(purchaseResult.QRCode, getResult.QRCode);
@@ -620,7 +638,8 @@ namespace TestApi
             visitorResponse.EnsureSuccessStatusCode();
 
             String visitorResponseBody = await visitorResponse.Content.ReadAsStringAsync();
-            RegisterResponse visitorResult = JsonSerializer.Deserialize<RegisterResponse>(visitorResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            RegisterResponse visitorResult = JsonSerializer.Deserialize<RegisterResponse>(visitorResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             HttpClient visitorClient = await CreateAuthenticatedClient("qrvisitor2@test.com", "password123");
 
@@ -641,7 +660,8 @@ namespace TestApi
             purchaseResponse.EnsureSuccessStatusCode();
 
             String purchaseResponseBody = await purchaseResponse.Content.ReadAsStringAsync();
-            TicketResponse purchaseResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TicketResponse purchaseResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             using (IServiceScope scope = _factory.Services.CreateScope())
             {
@@ -678,7 +698,8 @@ namespace TestApi
             Assert.AreEqual(HttpStatusCode.OK, getResponse.StatusCode);
 
             String getResponseBody = await getResponse.Content.ReadAsStringAsync();
-            TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.IsNotNull(getResult);
             Assert.AreEqual(purchaseResult.QRCode, getResult.QRCode);
