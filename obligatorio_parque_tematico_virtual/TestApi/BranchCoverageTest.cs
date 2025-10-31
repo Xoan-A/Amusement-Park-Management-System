@@ -24,14 +24,15 @@ namespace ApiTests
             SqliteConnection connection = new SqliteConnection("DataSource=:memory:");
             connection.Open();
 
-            Ticket ticketWithNullVisitor = new Ticket
+            TicketResponse ticketWithNullVisitor = new TicketResponse
             {
                 Id = Guid.NewGuid(),
                 VisitorId = Guid.NewGuid(),
-                Visitor = null,
+                VisitorName = null,
+                VisitorLastName = null,
                 PurchaseDate = DateTime.Now,
                 VisitDate = DateTime.Now.AddDays(7),
-                Type = TicketType.General,
+                Type = (int)TicketType.General,
                 QRCode = Guid.NewGuid()
             };
 
@@ -163,14 +164,15 @@ namespace ApiTests
             SqliteConnection connection = new SqliteConnection("DataSource=:memory:");
             connection.Open();
 
-            Ticket ticketWithNullVisitor = new Ticket
+            TicketResponse ticketWithNullVisitor = new TicketResponse
             {
                 Id = Guid.NewGuid(),
                 VisitorId = Guid.NewGuid(),
-                Visitor = null,
+                VisitorName = null,
+                VisitorLastName = null,
                 PurchaseDate = DateTime.Now,
                 VisitDate = DateTime.Now.AddDays(7),
-                Type = TicketType.General,
+                Type = (int)TicketType.General,
                 QRCode = Guid.NewGuid()
             };
 
@@ -290,14 +292,15 @@ namespace ApiTests
             connection.Open();
 
             Guid qrCode = Guid.NewGuid();
-            Ticket ticketWithNullVisitor = new Ticket
+            TicketResponse ticketWithNullVisitor = new TicketResponse
             {
                 Id = Guid.NewGuid(),
                 VisitorId = Guid.NewGuid(),
-                Visitor = null,
+                VisitorName = null,
+                VisitorLastName = null,
                 PurchaseDate = DateTime.Now,
                 VisitDate = DateTime.Now.AddDays(7),
-                Type = TicketType.General,
+                Type = (int)TicketType.General,
                 QRCode = qrCode
             };
 
@@ -417,16 +420,17 @@ namespace ApiTests
             connection.Open();
 
             Guid visitorId = Guid.NewGuid();
-            List<Ticket> ticketsWithNullVisitor = new List<Ticket>
+            List<TicketResponse> ticketsWithNullVisitor = new List<TicketResponse>
             {
-                new Ticket
+                new TicketResponse
                 {
                     Id = Guid.NewGuid(),
                     VisitorId = visitorId,
-                    Visitor = null,
+                    VisitorName = null,
+                    VisitorLastName = null,
                     PurchaseDate = DateTime.Now,
                     VisitDate = DateTime.Now.AddDays(7),
-                    Type = TicketType.General,
+                    Type = (int)TicketType.General,
                     QRCode = Guid.NewGuid()
                 }
             };

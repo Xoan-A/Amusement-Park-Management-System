@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
 using Models.In;
 using Models.Out;
-using Domain;
 
 namespace Api.Controllers
 {
@@ -22,52 +21,26 @@ namespace Api.Controllers
         [Authorize(Roles = "Visitor")]
         public async Task<IActionResult> PurchaseTicket([FromBody] PurchaseTicketRequest request)
         {
-            Ticket ticket = await _ticketLogic.PurchaseTicketAsync(request);
+            TicketResponse response = await _ticketLogic.PurchaseTicketAsync(request);
 
-            if (ticket == null)
+            if (response == null)
             {
                 return BadRequest("Unable to purchase ticket. Please check visitor ID and visit date.");
             }
 
-            TicketResponse response = new TicketResponse
-            {
-                Id = ticket.Id,
-                VisitorId = ticket.VisitorId,
-                VisitorName = ticket.Visitor?.Name,
-                VisitorLastName = ticket.Visitor?.LastName,
-                PurchaseDate = ticket.PurchaseDate,
-                VisitDate = ticket.VisitDate,
-                Type = (int)ticket.Type,
-                QRCode = ticket.QRCode,
-                EventId = ticket.EventId
-            };
-
-            return CreatedAtAction(nameof(GetTicketById), new { id = ticket.Id }, response);
+            return CreatedAtAction(nameof(GetTicketById), new { id = response.Id }, response);
         }
 
         [HttpGet("qr/{qrCode}")]
         [Authorize(Roles = "Visitor, Operator, Administrator")]
         public async Task<IActionResult> GetTicketByQRCode(Guid qrCode)
         {
-            Ticket ticket = await _ticketLogic.GetTicketByQRCodeAsync(qrCode);
+            TicketResponse response = await _ticketLogic.GetTicketByQRCodeAsync(qrCode);
 
-            if (ticket == null)
+            if (response == null)
             {
                 return NotFound();
             }
-
-            TicketResponse response = new TicketResponse
-            {
-                Id = ticket.Id,
-                VisitorId = ticket.VisitorId,
-                VisitorName = ticket.Visitor?.Name,
-                VisitorLastName = ticket.Visitor?.LastName,
-                PurchaseDate = ticket.PurchaseDate,
-                VisitDate = ticket.VisitDate,
-                Type = (int)ticket.Type,
-                QRCode = ticket.QRCode,
-                EventId = ticket.EventId
-            };
 
             return Ok(response);
         }
@@ -76,25 +49,12 @@ namespace Api.Controllers
         [Authorize(Roles = "Visitor, Operator, Administrator")]
         public async Task<IActionResult> GetTicketById(Guid id)
         {
-            Ticket ticket = await _ticketLogic.GetTicketByIdAsync(id);
+            TicketResponse response = await _ticketLogic.GetTicketByIdAsync(id);
 
-            if (ticket == null)
+            if (response == null)
             {
                 return NotFound();
             }
-
-            TicketResponse response = new TicketResponse
-            {
-                Id = ticket.Id,
-                VisitorId = ticket.VisitorId,
-                VisitorName = ticket.Visitor?.Name,
-                VisitorLastName = ticket.Visitor?.LastName,
-                PurchaseDate = ticket.PurchaseDate,
-                VisitDate = ticket.VisitDate,
-                Type = (int)ticket.Type,
-                QRCode = ticket.QRCode,
-                EventId = ticket.EventId
-            };
 
             return Ok(response);
         }
@@ -103,20 +63,7 @@ namespace Api.Controllers
         [Authorize(Roles = "Visitor, Operator, Administrator")]
         public async Task<IActionResult> GetVisitorTickets(Guid visitorId)
         {
-            IEnumerable<Ticket> tickets = await _ticketLogic.GetVisitorTicketsAsync(visitorId);
-
-            List<TicketResponse> responses = tickets.Select(ticket => new TicketResponse
-            {
-                Id = ticket.Id,
-                VisitorId = ticket.VisitorId,
-                VisitorName = ticket.Visitor?.Name,
-                VisitorLastName = ticket.Visitor?.LastName,
-                PurchaseDate = ticket.PurchaseDate,
-                VisitDate = ticket.VisitDate,
-                Type = (int)ticket.Type,
-                QRCode = ticket.QRCode,
-                EventId = ticket.EventId
-            }).ToList();
+            IEnumerable<TicketResponse> responses = await _ticketLogic.GetVisitorTicketsAsync(visitorId);
 
             return Ok(responses);
         }

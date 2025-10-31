@@ -3,6 +3,7 @@ using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using Models.In;
+using Models.Out;
 using Moq;
 
 namespace TestBusinessLogic
@@ -75,12 +76,12 @@ namespace TestBusinessLogic
                 TicketType = (int)TicketType.General
             };
 
-            Ticket result = await _ticketLogic.PurchaseTicketAsync(request);
+            TicketResponse result = await _ticketLogic.PurchaseTicketAsync(request);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(visitorId, result.VisitorId);
             Assert.AreEqual(visitDate, result.VisitDate);
-            Assert.AreEqual(TicketType.General, result.Type);
+            Assert.AreEqual((int)TicketType.General, result.Type);
             Assert.AreNotEqual(Guid.Empty, result.QRCode);
             _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Once);
         }
@@ -100,7 +101,7 @@ namespace TestBusinessLogic
                 TicketType = (int)TicketType.General
             };
 
-            Ticket result = await _ticketLogic.PurchaseTicketAsync(request);
+            TicketResponse result = await _ticketLogic.PurchaseTicketAsync(request);
 
             Assert.IsNull(result);
             _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
@@ -131,7 +132,7 @@ namespace TestBusinessLogic
                 TicketType = (int)TicketType.General
             };
 
-            Ticket result = await _ticketLogic.PurchaseTicketAsync(request);
+            TicketResponse result = await _ticketLogic.PurchaseTicketAsync(request);
 
             Assert.IsNull(result);
             _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
@@ -187,11 +188,10 @@ namespace TestBusinessLogic
                 EventId = eventId
             };
 
-            Ticket result =
-                await _ticketLogic.PurchaseTicketAsync(request);
+            TicketResponse result = await _ticketLogic.PurchaseTicketAsync(request);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(TicketType.EventSpecial, result.Type);
+            Assert.AreEqual((int)TicketType.EventSpecial, result.Type);
             Assert.AreEqual(eventId, result.EventId);
         }
 
@@ -208,7 +208,7 @@ namespace TestBusinessLogic
 
             _mockTicketRepository.Setup(t => t.GetByIdAsync(ticketId)).ReturnsAsync(expectedTicket);
 
-            Ticket result = await _ticketLogic.GetTicketByIdAsync(ticketId);
+            TicketResponse result = await _ticketLogic.GetTicketByIdAsync(ticketId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(ticketId, result.Id);
@@ -227,7 +227,7 @@ namespace TestBusinessLogic
 
             _mockTicketRepository.Setup(t => t.GetByVisitorIdAsync(visitorId)).ReturnsAsync(expectedTickets);
 
-            IEnumerable<Ticket> result = await _ticketLogic.GetVisitorTicketsAsync(visitorId);
+            IEnumerable<TicketResponse> result = await _ticketLogic.GetVisitorTicketsAsync(visitorId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count());
@@ -248,7 +248,7 @@ namespace TestBusinessLogic
 
             _mockTicketRepository.Setup(t => t.GetByQRCodeAsync(qrCode)).ReturnsAsync(expectedTicket);
 
-            Ticket result = await _ticketLogic.GetTicketByQRCodeAsync(qrCode);
+            TicketResponse result = await _ticketLogic.GetTicketByQRCodeAsync(qrCode);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(qrCode, result.QRCode);

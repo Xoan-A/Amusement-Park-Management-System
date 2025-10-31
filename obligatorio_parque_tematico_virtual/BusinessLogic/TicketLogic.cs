@@ -2,6 +2,7 @@ using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using Models.In;
+using Models.Out;
 
 namespace BusinessLogic
 {
@@ -22,7 +23,7 @@ namespace BusinessLogic
             _eventRepository = eventRepository;
         }
 
-        public async Task<Ticket> PurchaseTicketAsync(PurchaseTicketRequest request)
+        public async Task<TicketResponse> PurchaseTicketAsync(PurchaseTicketRequest request)
         {
             Guid visitorId = request.VisitorId;
             DateTime visitDate = request.VisitDate;
@@ -53,22 +54,27 @@ namespace BusinessLogic
             };
 
             Ticket addedTicket = await _ticketRepository.AddAsync(newTicket);
-            return await _ticketRepository.GetByIdAsync(addedTicket.Id);
+            Ticket savedTicket = await _ticketRepository.GetByIdAsync(addedTicket.Id);
+            
+            return MapToTicketResponse(savedTicket);
         }
 
-        public async Task<Ticket> GetTicketByIdAsync(Guid id)
+        public async Task<TicketResponse> GetTicketByIdAsync(Guid id)
         {
-            return await _ticketRepository.GetByIdAsync(id);
+            Ticket ticket = await _ticketRepository.GetByIdAsync(id);
+            return ticket == null ? null : MapToTicketResponse(ticket);
         }
 
-        public async Task<IEnumerable<Ticket>> GetVisitorTicketsAsync(Guid visitorId)
+        public async Task<IEnumerable<TicketResponse>> GetVisitorTicketsAsync(Guid visitorId)
         {
-            return await _ticketRepository.GetByVisitorIdAsync(visitorId);
+            IEnumerable<Ticket> tickets = await _ticketRepository.GetByVisitorIdAsync(visitorId);
+            return tickets.Select(MapToTicketResponse);
         }
 
-        public async Task<Ticket> GetTicketByQRCodeAsync(Guid qrCode)
+        public async Task<TicketResponse> GetTicketByQRCodeAsync(Guid qrCode)
         {
-            return await _ticketRepository.GetByQRCodeAsync(qrCode);
+            Ticket ticket = await _ticketRepository.GetByQRCodeAsync(qrCode);
+            return ticket == null ? null : MapToTicketResponse(ticket);
         }
 
         public async Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, Guid? eventId)
@@ -81,12 +87,12 @@ namespace BusinessLogic
             Ticket? ticket;
             if (qr != null)
             {
-                ticket = await GetTicketByQRCodeAsync(qr.Value);
+                ticket = await _ticketRepository.GetByQRCodeAsync(qr.Value);
                 isValid = ticket != null && ticket.VisitDate.Date == enterDate.Date && ticket.EventId == eventId;
             }
             else
             {
-                IEnumerable<Ticket> tickets = await GetVisitorTicketsAsync(nfc!.Value);
+                IEnumerable<Ticket> tickets = await _ticketRepository.GetByVisitorIdAsync(nfc!.Value);
                 ticket = tickets.FirstOrDefault(t => t.VisitDate.Date == enterDate.Date && t.EventId == eventId);
                 isValid = ticket != null;
             }
@@ -100,6 +106,22 @@ namespace BusinessLogic
             }
 
             return isValid;
+        }
+
+        private TicketResponse MapToTicketResponse(Ticket ticket)
+        {
+            return new TicketResponse
+            {
+                Id = ticket.Id,
+                VisitorId = ticket.VisitorId,
+                VisitorName = ticket.Visitor?.Name,
+                VisitorLastName = ticket.Visitor?.LastName,
+                PurchaseDate = ticket.PurchaseDate,
+                VisitDate = ticket.VisitDate,
+                Type = (int)ticket.Type,
+                QRCode = ticket.QRCode,
+                EventId = ticket.EventId
+            };
         }
     }
 }
