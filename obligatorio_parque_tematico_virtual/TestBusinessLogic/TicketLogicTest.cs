@@ -101,9 +101,10 @@ namespace TestBusinessLogic
                 TicketType = (int)TicketType.General
             };
 
-            TicketResponse result = await _ticketLogic.PurchaseTicketAsync(request);
-
-            Assert.IsNull(result);
+            await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
+                async () => await _ticketLogic.PurchaseTicketAsync(request)
+            );
+            
             _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
         }
 
@@ -132,9 +133,10 @@ namespace TestBusinessLogic
                 TicketType = (int)TicketType.General
             };
 
-            TicketResponse result = await _ticketLogic.PurchaseTicketAsync(request);
-
-            Assert.IsNull(result);
+            await Assert.ThrowsExceptionAsync<ArgumentException>(
+                async () => await _ticketLogic.PurchaseTicketAsync(request)
+            );
+            
             _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
         }
 
@@ -622,3 +624,4 @@ namespace TestBusinessLogic
         }
     }
 }
+

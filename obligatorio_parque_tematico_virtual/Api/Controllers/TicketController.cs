@@ -22,12 +22,6 @@ namespace Api.Controllers
         public async Task<IActionResult> PurchaseTicket([FromBody] PurchaseTicketRequest request)
         {
             TicketResponse response = await _ticketLogic.PurchaseTicketAsync(request);
-
-            if (response == null)
-            {
-                return BadRequest("Unable to purchase ticket. Please check visitor ID and visit date.");
-            }
-
             return CreatedAtAction(nameof(GetTicketById), new { id = response.Id }, response);
         }
 
@@ -36,12 +30,6 @@ namespace Api.Controllers
         public async Task<IActionResult> GetTicketByQRCode(Guid qrCode)
         {
             TicketResponse response = await _ticketLogic.GetTicketByQRCodeAsync(qrCode);
-
-            if (response == null)
-            {
-                return NotFound();
-            }
-
             return Ok(response);
         }
 
@@ -50,12 +38,6 @@ namespace Api.Controllers
         public async Task<IActionResult> GetTicketById(Guid id)
         {
             TicketResponse response = await _ticketLogic.GetTicketByIdAsync(id);
-
-            if (response == null)
-            {
-                return NotFound();
-            }
-
             return Ok(response);
         }
 

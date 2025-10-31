@@ -186,7 +186,7 @@ namespace TestApi
 
             HttpResponseMessage response = await authenticatedClient.PostAsync("/api/tickets", content);
 
-            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [TestMethod]

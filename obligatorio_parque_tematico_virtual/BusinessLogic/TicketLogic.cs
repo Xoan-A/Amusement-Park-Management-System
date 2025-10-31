@@ -28,19 +28,18 @@ namespace BusinessLogic
             Guid visitorId = request.VisitorId;
             DateTime visitDate = request.VisitDate;
             TicketType ticketType = (TicketType)request.TicketType;
-            ;
             Guid? eventId = request.EventId;
 
             User visitor = await _userRepository.GetById(visitorId);
             if (visitor == null)
             {
-                return null;
+                throw new KeyNotFoundException($"Visitor with ID {visitorId} not found");
             }
 
             DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
             if (visitDate.Date < currentDateTime.Date)
             {
-                return null;
+                throw new ArgumentException("Visit date cannot be in the past");
             }
 
             Ticket newTicket = new Ticket
@@ -62,7 +61,11 @@ namespace BusinessLogic
         public async Task<TicketResponse> GetTicketByIdAsync(Guid id)
         {
             Ticket ticket = await _ticketRepository.GetByIdAsync(id);
-            return ticket == null ? null : MapToTicketResponse(ticket);
+            if (ticket == null)
+            {
+                throw new KeyNotFoundException($"Ticket with ID {id} not found");
+            }
+            return MapToTicketResponse(ticket);
         }
 
         public async Task<IEnumerable<TicketResponse>> GetVisitorTicketsAsync(Guid visitorId)
@@ -74,7 +77,11 @@ namespace BusinessLogic
         public async Task<TicketResponse> GetTicketByQRCodeAsync(Guid qrCode)
         {
             Ticket ticket = await _ticketRepository.GetByQRCodeAsync(qrCode);
-            return ticket == null ? null : MapToTicketResponse(ticket);
+            if (ticket == null)
+            {
+                throw new KeyNotFoundException($"Ticket with QR code {qrCode} not found");
+            }
+            return MapToTicketResponse(ticket);
         }
 
         public async Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, Guid? eventId)
