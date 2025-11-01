@@ -42,5 +42,6 @@ public static class ServiceFactory
         services.AddScoped<IRedemptionHistoryRepository, RedemptionHistoryRepository>();
         services.AddScoped<IMaintenanceScheduleRepository, MaintenanceScheduleRepository>();
         services.AddScoped<IMaintenanceRecordRepository, MaintenanceRecordRepository>();
+        services.AddScoped<IScoreHistoryRepository, ScoreHistoryRepository>();
     }
 }
