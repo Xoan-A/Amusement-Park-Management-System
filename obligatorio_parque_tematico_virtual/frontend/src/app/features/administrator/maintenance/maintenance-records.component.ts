@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { MaintenanceRecordResponse, AttractionResponse, AllAttractionsResponse } from '../../../core/models/responses';
@@ -8,8 +9,9 @@ import { MaintenanceRecordResponse, AttractionResponse, AllAttractionsResponse }
 @Component({
   selector: 'app-maintenance-records',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   template: `
+    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h2 class="mb-4">Maintenance History</h2>
 

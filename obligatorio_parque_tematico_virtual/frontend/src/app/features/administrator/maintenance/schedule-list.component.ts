@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { MaintenanceScheduleResponse, AttractionResponse, AllAttractionsResponse } from '../../../core/models/responses';
@@ -10,8 +11,9 @@ import { MaintenanceStatus } from '../../../core/models/enums';
 @Component({
   selector: 'app-schedule-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   template: `
+    <app-navbar></app-navbar>
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Maintenance Schedules</h2>

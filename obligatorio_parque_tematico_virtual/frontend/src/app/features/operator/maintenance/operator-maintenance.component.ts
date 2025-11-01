@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -9,8 +10,9 @@ import { MaintenanceScheduleResponse, AttractionResponse, AllAttractionsResponse
 @Component({
   selector: 'app-operator-maintenance',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NavbarComponent],
   template: `
+    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h2 class="mb-4">Record Maintenance Work</h2>
 

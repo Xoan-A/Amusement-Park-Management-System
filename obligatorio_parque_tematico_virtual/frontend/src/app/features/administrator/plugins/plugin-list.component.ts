@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { PluginService } from '../../../core/services/plugin.service';
 import { StrategyService } from '../../../core/services/strategy.service';
 import { PluginResponse, StrategyResponse } from '../../../core/models/responses';
@@ -8,8 +9,9 @@ import { PluginResponse, StrategyResponse } from '../../../core/models/responses
 @Component({
   selector: 'app-plugin-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NavbarComponent],
   template: `
+    <app-navbar></app-navbar>
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Available Scoring Strategy Plugins</h2>
