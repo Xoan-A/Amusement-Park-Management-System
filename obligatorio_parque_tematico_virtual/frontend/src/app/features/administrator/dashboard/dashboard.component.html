@@ -15,7 +15,7 @@
     </div>
   } @else {
     <div class="row g-4">
-      <div class="col-md-4">
+      <div class="col-md-3">
         <div class="card text-center">
           <div class="card-body">
             <h5 class="card-title">Total Attractions</h5>
@@ -25,7 +25,7 @@
         </div>
       </div>
 
-      <div class="col-md-4">
+      <div class="col-md-3">
         <div class="card text-center">
           <div class="card-body">
             <h5 class="card-title">Total Events</h5>
@@ -35,12 +35,26 @@
         </div>
       </div>
 
-      <div class="col-md-4">
+      <div class="col-md-3">
         <div class="card text-center">
           <div class="card-body">
             <h5 class="card-title">Current Strategy</h5>
             <p class="display-6 text-info">{{ currentStrategy || 'N/A' }}</p>
             <a routerLink="/admin/strategy" class="btn btn-info btn-sm">Manage Strategy</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card text-center" [class.border-danger]="overdueMaintenanceCount > 0">
+          <div class="card-body">
+            <h5 class="card-title">Overdue Maintenance</h5>
+            <p class="display-4" [class.text-danger]="overdueMaintenanceCount > 0" [class.text-muted]="overdueMaintenanceCount === 0">
+              {{ overdueMaintenanceCount }}
+            </p>
+            <a routerLink="/admin/maintenance/schedules" class="btn btn-sm" [class.btn-danger]="overdueMaintenanceCount > 0" [class.btn-outline-secondary]="overdueMaintenanceCount === 0">
+              View Schedules
+            </a>
           </div>
         </div>
       </div>
@@ -59,6 +73,9 @@
               </a>
               <a routerLink="/admin/events/new" class="btn btn-outline-success">
                 Create New Event
+              </a>
+              <a routerLink="/admin/maintenance/schedules/create" class="btn btn-outline-warning">
+                Schedule Maintenance
               </a>
               <a routerLink="/admin/users" class="btn btn-outline-secondary">
                 Manage Users
@@ -80,6 +97,12 @@
               </a>
               <a routerLink="/admin/strategy" class="btn btn-outline-warning">
                 View Top 10 Visitors
+              </a>
+              <a routerLink="/admin/score-history" class="btn btn-outline-secondary">
+                View All Score History
+              </a>
+              <a routerLink="/admin/plugins" class="btn btn-outline-dark">
+                Manage Plugins
               </a>
             </div>
           </div>
