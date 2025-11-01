@@ -4,7 +4,8 @@ import { RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { TicketService } from '../../../core/services/ticket.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { TicketResponse } from '../../../core/models';
+import { ScoreHistoryService } from '../../../core/services/score-history.service';
+import { TicketResponse, ScoreHistoryResponse } from '../../../core/models';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,7 +17,7 @@ import { TicketResponse } from '../../../core/models';
       <h1 class="mb-4">Visitor Dashboard</h1>
 
       <div class="row g-4 mb-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="card text-center">
             <div class="card-body">
               <h5 class="card-title">My Tickets</h5>
@@ -25,7 +26,16 @@ import { TicketResponse } from '../../../core/models';
             </div>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
+          <div class="card text-center border-success">
+            <div class="card-body">
+              <h5 class="card-title">My Total Score</h5>
+              <p class="display-4 text-success">{{ totalScore }}</p>
+              <a routerLink="/visitor/score-history" class="btn btn-success btn-sm">View History</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
           <div class="card text-center">
             <div class="card-body">
               <h5 class="card-title">Browse</h5>
@@ -37,7 +47,7 @@ import { TicketResponse } from '../../../core/models';
             </div>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="card text-center">
             <div class="card-body">
               <h5 class="card-title">Quick Purchase</h5>
@@ -48,8 +58,41 @@ import { TicketResponse } from '../../../core/models';
         </div>
       </div>
 
-      <div class="row">
-        <div class="col-12">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Recent Score Activity</h5>
+            </div>
+            <div class="card-body">
+              @if (recentScores.length === 0) {
+                <p class="text-muted">No score activity yet. Start visiting attractions to earn points!</p>
+                <a routerLink="/visitor/attractions" class="btn btn-primary">Browse Attractions</a>
+              } @else {
+                <div class="list-group">
+                  @for (score of recentScores; track score.id) {
+                    <div class="list-group-item">
+                      <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div>
+                          <span class="badge" [class.bg-success]="score.points > 0" [class.bg-danger]="score.points < 0">
+                            {{ score.points > 0 ? '+' + score.points : score.points }}
+                          </span>
+                          <small class="ms-2">{{ score.description }}</small>
+                        </div>
+                        <small class="text-muted">{{ score.createdAt | date:'short' }}</small>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <div class="mt-2">
+                  <a routerLink="/visitor/score-history" class="btn btn-sm btn-outline-primary">View Full History</a>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
           <div class="card">
             <div class="card-header">
               <h5 class="mb-0">My Recent Tickets</h5>
@@ -60,32 +103,29 @@ import { TicketResponse } from '../../../core/models';
                 <a routerLink="/visitor/tickets/purchase" class="btn btn-primary">Purchase Your First Ticket</a>
               } @else {
                 <div class="table-responsive">
-                  <table class="table table-striped">
+                  <table class="table table-sm">
                     <thead>
                       <tr>
-                        <th>Purchase Date</th>
                         <th>Visit Date</th>
                         <th>Type</th>
-                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       @for (ticket of tickets.slice(0, 5); track ticket.id) {
                         <tr>
-                          <td>{{ ticket.purchaseDate | date:'short' }}</td>
                           <td>{{ ticket.visitDate | date:'short' }}</td>
                           <td>
                             <span class="badge" [class.bg-primary]="ticket.type === 0" [class.bg-success]="ticket.type === 1">
                               {{ ticket.type === 0 ? 'General' : 'Event Special' }}
                             </span>
                           </td>
-                          <td>
-                            <a routerLink="/visitor/tickets" class="btn btn-sm btn-outline-primary">View QR</a>
-                          </td>
                         </tr>
                       }
                     </tbody>
                   </table>
+                </div>
+                <div class="mt-2">
+                  <a routerLink="/visitor/tickets" class="btn btn-sm btn-outline-primary">View All Tickets</a>
                 </div>
               }
             </div>
@@ -98,10 +138,13 @@ import { TicketResponse } from '../../../core/models';
 })
 export class DashboardComponent implements OnInit {
   tickets: TicketResponse[] = [];
+  recentScores: ScoreHistoryResponse[] = [];
+  totalScore = 0;
 
   constructor(
     private ticketService: TicketService,
-    private authService: AuthService
+    private authService: AuthService,
+    private scoreHistoryService: ScoreHistoryService
   ) {}
 
   ngOnInit(): void {
@@ -109,6 +152,7 @@ export class DashboardComponent implements OnInit {
     if (userId) {
       this.loadTickets(userId);
     }
+    this.loadScoreHistory();
   }
 
   loadTickets(visitorId: string): void {
@@ -118,6 +162,23 @@ export class DashboardComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading tickets', error);
+      }
+    });
+  }
+
+  loadScoreHistory(): void {
+    this.scoreHistoryService.getMyScoreHistory().subscribe({
+      next: (history) => {
+        // Sort by date descending and take the 5 most recent
+        this.recentScores = history
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 5);
+
+        // Calculate total score
+        this.totalScore = history.reduce((sum, record) => sum + record.points, 0);
+      },
+      error: (error) => {
+        console.error('Error loading score history', error);
       }
     });
   }
