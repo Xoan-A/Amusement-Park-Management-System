@@ -132,8 +132,8 @@ export class PluginListComponent implements OnInit {
   }
 
   loadCurrentStrategy() {
-    this.strategyService.getCurrentStrategy().subscribe({
-      next: (strategy) => {
+    this.strategyService.getCurrent().subscribe({
+      next: (strategy: StrategyResponse) => {
         this.currentStrategy = strategy;
       },
       error: () => {

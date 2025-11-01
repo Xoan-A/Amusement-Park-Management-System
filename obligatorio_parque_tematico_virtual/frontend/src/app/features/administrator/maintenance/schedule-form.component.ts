@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { AttractionService } from '../../../core/services/attraction.service';
-import { AttractionResponse } from '../../../core/models/responses';
+import { AttractionResponse, AllAttractionsResponse } from '../../../core/models/responses';
 import { MaintenanceType } from '../../../core/models/enums';
 
 @Component({
@@ -155,8 +155,8 @@ export class ScheduleFormComponent implements OnInit {
   }
 
   loadAttractions() {
-    this.attractionService.getAllAttractions().subscribe({
-      next: (response) => {
+    this.attractionService.getAll().subscribe({
+      next: (response: AllAttractionsResponse) => {
         this.attractions = response.attractions;
       },
       error: () => {

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { AttractionService } from '../../../core/services/attraction.service';
-import { MaintenanceScheduleResponse, AttractionResponse } from '../../../core/models/responses';
+import { MaintenanceScheduleResponse, AttractionResponse, AllAttractionsResponse } from '../../../core/models/responses';
 import { MaintenanceStatus } from '../../../core/models/enums';
 
 @Component({
@@ -190,8 +190,8 @@ export class ScheduleListComponent implements OnInit {
   }
 
   loadAttractions() {
-    this.attractionService.getAllAttractions().subscribe({
-      next: (response) => {
+    this.attractionService.getAll().subscribe({
+      next: (response: AllAttractionsResponse) => {
         this.attractions = response.attractions;
       },
       error: () => {

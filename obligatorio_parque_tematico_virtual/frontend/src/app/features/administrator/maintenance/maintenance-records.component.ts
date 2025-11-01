@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { AttractionService } from '../../../core/services/attraction.service';
-import { MaintenanceRecordResponse, AttractionResponse } from '../../../core/models/responses';
+import { MaintenanceRecordResponse, AttractionResponse, AllAttractionsResponse } from '../../../core/models/responses';
 
 @Component({
   selector: 'app-maintenance-records',
@@ -157,8 +157,8 @@ export class MaintenanceRecordsComponent implements OnInit {
   }
 
   loadAttractions() {
-    this.attractionService.getAllAttractions().subscribe({
-      next: (response) => {
+    this.attractionService.getAll().subscribe({
+      next: (response: AllAttractionsResponse) => {
         this.attractions = response.attractions;
       },
       error: () => {

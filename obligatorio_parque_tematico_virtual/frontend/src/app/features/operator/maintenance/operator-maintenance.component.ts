@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { MaintenanceScheduleResponse, AttractionResponse } from '../../../core/models/responses';
+import { MaintenanceScheduleResponse, AttractionResponse, AllAttractionsResponse } from '../../../core/models/responses';
 
 @Component({
   selector: 'app-operator-maintenance',
@@ -67,7 +67,7 @@ import { MaintenanceScheduleResponse, AttractionResponse } from '../../../core/m
         <div class="card-body">
           @if (selectedSchedule) {
             <div class="alert alert-info mb-3">
-              <strong>Scheduled Maintenance:</strong> {{ selected Schedule.attractionName }} - {{ selectedSchedule.description }}
+              <strong>Scheduled Maintenance:</strong> {{ selectedSchedule.attractionName }} - {{ selectedSchedule.description }}
               <button type="button" class="btn-close float-end" (click)="clearSelection()"></button>
             </div>
           }
@@ -252,8 +252,8 @@ export class OperatorMaintenanceComponent implements OnInit {
   }
 
   loadAttractions() {
-    this.attractionService.getAllAttractions().subscribe({
-      next: (response) => {
+    this.attractionService.getAll().subscribe({
+      next: (response: AllAttractionsResponse) => {
         this.attractions = response.attractions;
       },
       error: () => {
