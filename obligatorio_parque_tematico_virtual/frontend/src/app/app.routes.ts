@@ -65,6 +65,26 @@ export const routes: Routes = [
       {
         path: 'rewards/edit/:id',
         loadComponent: () => import('./features/administrator/rewards/reward-form.component').then(m => m.RewardFormComponent)
+      },
+      {
+        path: 'maintenance/schedules',
+        loadComponent: () => import('./features/administrator/maintenance/schedule-list.component').then(m => m.ScheduleListComponent)
+      },
+      {
+        path: 'maintenance/schedules/create',
+        loadComponent: () => import('./features/administrator/maintenance/schedule-form.component').then(m => m.ScheduleFormComponent)
+      },
+      {
+        path: 'maintenance/records',
+        loadComponent: () => import('./features/administrator/maintenance/maintenance-records.component').then(m => m.MaintenanceRecordsComponent)
+      },
+      {
+        path: 'score-history',
+        loadComponent: () => import('./features/administrator/score-history/all-score-history.component').then(m => m.AllScoreHistoryComponent)
+      },
+      {
+        path: 'plugins',
+        loadComponent: () => import('./features/administrator/plugins/plugin-list.component').then(m => m.PluginListComponent)
       }
     ]
   },
@@ -84,6 +104,10 @@ export const routes: Routes = [
       {
         path: 'incidents',
         loadComponent: () => import('./features/operator/incidents/incidents.component').then(m => m.IncidentsComponent)
+      },
+      {
+        path: 'maintenance',
+        loadComponent: () => import('./features/operator/maintenance/operator-maintenance.component').then(m => m.OperatorMaintenanceComponent)
       }
     ]
   },
@@ -123,6 +147,10 @@ export const routes: Routes = [
       {
         path: 'my-redemptions',
         loadComponent: () => import('./features/visitor/rewards/my-redemptions.component').then(m => m.MyRedemptionsComponent)
+      },
+      {
+        path: 'score-history',
+        loadComponent: () => import('./features/visitor/score-history/score-history.component').then(m => m.ScoreHistoryComponent)
       }
     ]
   },

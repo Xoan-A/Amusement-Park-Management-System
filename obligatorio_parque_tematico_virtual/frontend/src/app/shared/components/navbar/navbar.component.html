@@ -34,6 +34,15 @@
           <li class="nav-item">
             <a class="nav-link" routerLink="/admin/strategy" routerLinkActive="active">Strategy</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/maintenance/schedules" routerLinkActive="active">Maintenance</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/score-history" routerLinkActive="active">Score History</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/plugins" routerLinkActive="active">Plugins</a>
+          </li>
         }
 
         @if (isOperator) {
@@ -45,6 +54,9 @@
           </li>
           <li class="nav-item">
             <a class="nav-link" routerLink="/operator/incidents" routerLinkActive="active">Incidents</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/operator/maintenance" routerLinkActive="active">Maintenance</a>
           </li>
         }
 
@@ -63,6 +75,9 @@
           </li>
           <li class="nav-item">
             <a class="nav-link" routerLink="/visitor/profile" routerLinkActive="active">Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/visitor/score-history" routerLinkActive="active">Score History</a>
           </li>
         }
       </ul>
