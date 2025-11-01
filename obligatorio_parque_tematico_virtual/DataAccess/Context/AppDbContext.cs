@@ -19,6 +19,7 @@ namespace DataAccess.Context
         public virtual DbSet<RedemptionHistory> RedemptionHistories { get; set; }
         public virtual DbSet<MaintenanceSchedule> MaintenanceSchedules { get; set; }
         public virtual DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
+        public virtual DbSet<ScoreHistory> ScoreHistories { get; set; }
 
         public AppDbContext()
         {
@@ -185,6 +186,12 @@ namespace DataAccess.Context
                     N = null,
                 }
             );
+
+            modelBuilder.Entity<ScoreHistory>()
+                .HasOne(sh => sh.Visitor)
+                .WithMany()
+                .HasForeignKey(sh => sh.VisitorId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
         }
