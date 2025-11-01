@@ -53,6 +53,18 @@ export const routes: Routes = [
       {
         path: 'strategy',
         loadComponent: () => import('./features/administrator/strategy/strategy.component').then(m => m.StrategyComponent)
+      },
+      {
+        path: 'rewards',
+        loadComponent: () => import('./features/administrator/rewards/rewards-list.component').then(m => m.RewardsListComponent)
+      },
+      {
+        path: 'rewards/create',
+        loadComponent: () => import('./features/administrator/rewards/reward-form.component').then(m => m.RewardFormComponent)
+      },
+      {
+        path: 'rewards/edit/:id',
+        loadComponent: () => import('./features/administrator/rewards/reward-form.component').then(m => m.RewardFormComponent)
       }
     ]
   },
@@ -103,6 +115,14 @@ export const routes: Routes = [
       {
         path: 'profile',
         loadComponent: () => import('./features/visitor/profile/profile.component').then(m => m.ProfileComponent)
+      },
+      {
+        path: 'rewards',
+        loadComponent: () => import('./features/visitor/rewards/browse-rewards.component').then(m => m.BrowseRewardsComponent)
+      },
+      {
+        path: 'my-redemptions',
+        loadComponent: () => import('./features/visitor/rewards/my-redemptions.component').then(m => m.MyRedemptionsComponent)
       }
     ]
   },
