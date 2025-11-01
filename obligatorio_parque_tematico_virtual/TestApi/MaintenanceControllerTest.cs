@@ -463,7 +463,7 @@ public class MaintenanceControllerTest
             .ReturnsAsync(records);
 
         // Act
-        var response = await _adminClient.GetAsync($"/api/maintenance/records/history/{attractionId}?dateFrom={dateFrom:O}&dateTo={dateTo:O}");
+        var response = await _adminClient.GetAsync($"/api/maintenance/records/history/{attractionId}?dateFrom={dateFrom:yyyy-MM-dd}&dateTo={dateTo:yyyy-MM-dd}");
 
         // Assert
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);

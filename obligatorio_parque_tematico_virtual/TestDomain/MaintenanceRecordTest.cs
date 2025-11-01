@@ -68,7 +68,8 @@ namespace TestDomain
             };
 
             // Assert
-            Assert.AreEqual(500, record.Description.Length);}
+            Assert.AreEqual(500, record.Description.Length);
+        }
 
         [TestMethod]
         public void SetNotes_EmptyString_IsAllowed()

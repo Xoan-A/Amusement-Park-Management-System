@@ -330,7 +330,7 @@ public class RedemptionControllerTest
             .Returns(history);
 
         // Act
-        var response = await _visitorClient.GetAsync($"/api/redemptions/my-history?dateFrom={dateFrom:O}&dateTo={dateTo:O}");
+        var response = await _visitorClient.GetAsync($"/api/redemptions/my-history?dateFrom={dateFrom:yyyy-MM-dd}&dateTo={dateTo:yyyy-MM-dd}");
 
         // Assert
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
