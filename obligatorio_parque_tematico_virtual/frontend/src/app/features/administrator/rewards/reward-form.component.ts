@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Observable } from 'rxjs';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { RewardService } from '../../../core/services/reward.service';
 import { MembershipLevel } from '../../../core/models';
+import { CreateRewardResponse, RewardResponse } from '../../../core/models/responses';
 
 @Component({
   selector: 'app-reward-form',
@@ -196,7 +198,7 @@ export class RewardFormComponent implements OnInit {
 
     const rewardData = this.rewardForm.value;
 
-    const operation = this.isEditMode && this.rewardId
+    const operation: Observable<CreateRewardResponse | RewardResponse> = this.isEditMode && this.rewardId
       ? this.rewardService.update(this.rewardId, rewardData)
       : this.rewardService.create(rewardData);
 
@@ -204,7 +206,7 @@ export class RewardFormComponent implements OnInit {
       next: () => {
         this.router.navigate(['/admin/rewards']);
       },
-      error: (error) => {
+      error: (error: any) => {
         this.errorMessage = error.error?.message || `Failed to ${this.isEditMode ? 'update' : 'create'} reward`;
         this.saving = false;
       }
