@@ -1,4 +1,4 @@
-import { AttractionType, MembershipLevel, TicketType } from './enums';
+import { AttractionType, MembershipLevel, TicketType, MaintenanceType } from './enums';
 
 export interface LoginRequest {
   email: string;
@@ -101,4 +101,25 @@ export interface RewardRequest {
 
 export interface RedeemRewardRequest {
   rewardId: string;
+}
+
+export interface MaintenanceScheduleRequest {
+  attractionId: string;
+  scheduledDate: string;
+  maintenanceType: MaintenanceType;
+  description: string;
+}
+
+export interface MaintenanceRecordRequest {
+  attractionId: string;
+  maintenanceScheduleId?: string;
+  performedDate: string;
+  maintenanceType: MaintenanceType;
+  description: string;
+  durationMinutes: number;
+  notes?: string;
+}
+
+export interface UpdateStatusRequest {
+  status: string;
 }

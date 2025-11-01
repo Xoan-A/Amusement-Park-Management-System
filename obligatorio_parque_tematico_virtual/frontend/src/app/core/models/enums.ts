@@ -23,3 +23,26 @@ export const Roles = {
 } as const;
 
 export type UserRole = typeof Roles[keyof typeof Roles];
+
+export enum MaintenanceStatus {
+  Pending = 'Pending',
+  InProgress = 'InProgress',
+  Completed = 'Completed',
+  Cancelled = 'Cancelled'
+}
+
+export enum MaintenanceType {
+  Inspection = 'Inspection',
+  Cleaning = 'Cleaning',
+  Repair = 'Repair',
+  SafetyCheck = 'SafetyCheck'
+}
+
+export enum ScoreOrigin {
+  AttractionVisit = 'AttractionVisit',
+  EventParticipation = 'EventParticipation',
+  SpecialMission = 'SpecialMission',
+  Redemption = 'Redemption',
+  AdminAdjustment = 'AdminAdjustment',
+  Other = 'Other'
+}
