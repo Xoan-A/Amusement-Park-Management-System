@@ -18,6 +18,7 @@ public class ScoreHistoryControllerTest
     private HttpClient _visitorClient = null!;
     private Mock<IScoreHistoryRepository> _mockScoreHistoryRepository = null!;
     private SqliteConnection _connection = null!;
+    private Guid _visitorUserId;
 
     [TestInitialize]
     public void Setup()
@@ -73,9 +74,10 @@ public class ScoreHistoryControllerTest
         _adminClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
 
+        _visitorUserId = Guid.NewGuid();
         UserResponse visitorUser = new UserResponse
         {
-            Id = Guid.NewGuid(),
+            Id = _visitorUserId,
             Name = "Visitor",
             LastName = "User",
             Email = "visitor@example.com",
@@ -101,13 +103,12 @@ public class ScoreHistoryControllerTest
     public async Task GetMyScoreHistory_AsVisitor_ReturnsOk()
     {
         // Arrange
-        var visitorId = Guid.Parse(_visitorClient.DefaultRequestHeaders.Authorization?.Parameter ?? "");
         var history = new List<ScoreHistory>
         {
             new ScoreHistory
             {
                 Id = Guid.NewGuid(),
-                VisitorId = visitorId,
+                VisitorId = _visitorUserId,
                 Points = 100,
                 Origin = ScoreOrigin.AttractionVisit,
                 StrategyName = "PerAttraction",
@@ -116,7 +117,7 @@ public class ScoreHistoryControllerTest
             }
         };
 
-        _mockScoreHistoryRepository.Setup(r => r.GetByVisitor(It.IsAny<Guid>())).Returns(history);
+        _mockScoreHistoryRepository.Setup(r => r.GetByVisitor(_visitorUserId)).Returns(history);
 
         // Act
         var response = await _visitorClient.GetAsync("/api/score-history/my-history");
