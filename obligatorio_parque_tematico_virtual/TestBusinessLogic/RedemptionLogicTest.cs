@@ -53,10 +53,10 @@ namespace TestBusinessLogic
                 RequiredMembershipLevel = MembershipLevel.Premium
             };
 
-            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
             _mockRewardRepository.Setup(r => r.GetById(reward.Id)).Returns(reward);
             _mockRedemptionHistoryRepository.Setup(r => r.Create(It.IsAny<RedemptionHistory>()));
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockRewardRepository.Setup(r => r.Update(It.IsAny<Reward>()));
 
             // Act
@@ -83,7 +83,7 @@ namespace TestBusinessLogic
             var visitorId = Guid.NewGuid();
             var rewardId = Guid.NewGuid();
 
-            _mockUserRepository.Setup(r => r.GetById(visitorId)).Returns((User?)null);
+            _mockUserRepository.Setup(r => r.GetById(visitorId)).ReturnsAsync((User?)null);
 
             // Act & Assert
             _redemptionLogic.RedeemReward(visitorId, rewardId);
@@ -106,7 +106,7 @@ namespace TestBusinessLogic
 
             var rewardId = Guid.NewGuid();
 
-            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
             _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns((Reward?)null);
 
             // Act & Assert
@@ -139,7 +139,7 @@ namespace TestBusinessLogic
                 RequiredMembershipLevel = MembershipLevel.Premium
             };
 
-            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
             _mockRewardRepository.Setup(r => r.GetById(reward.Id)).Returns(reward);
 
             // Act & Assert
@@ -172,7 +172,7 @@ namespace TestBusinessLogic
                 RequiredMembershipLevel = MembershipLevel.Premium
             };
 
-            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
             _mockRewardRepository.Setup(r => r.GetById(reward.Id)).Returns(reward);
 
             // Act & Assert
@@ -205,7 +205,7 @@ namespace TestBusinessLogic
                 RequiredMembershipLevel = MembershipLevel.Premium // Requires Premium
             };
 
-            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
             _mockRewardRepository.Setup(r => r.GetById(reward.Id)).Returns(reward);
 
             // Act & Assert
@@ -237,10 +237,10 @@ namespace TestBusinessLogic
                 RequiredMembershipLevel = null // No membership required
             };
 
-            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
             _mockRewardRepository.Setup(r => r.GetById(reward.Id)).Returns(reward);
             _mockRedemptionHistoryRepository.Setup(r => r.Create(It.IsAny<RedemptionHistory>()));
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockRewardRepository.Setup(r => r.Update(It.IsAny<Reward>()));
 
             // Act
@@ -276,10 +276,10 @@ namespace TestBusinessLogic
                 RequiredMembershipLevel = MembershipLevel.Premium
             };
 
-            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).Returns(visitor);
+            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
             _mockRewardRepository.Setup(r => r.GetById(reward.Id)).Returns(reward);
             _mockRedemptionHistoryRepository.Setup(r => r.Create(It.IsAny<RedemptionHistory>()));
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockRewardRepository.Setup(r => r.Update(It.IsAny<Reward>()));
 
             // Act

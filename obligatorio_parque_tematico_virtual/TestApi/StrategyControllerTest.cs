@@ -133,7 +133,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task GetStrategy_WhenNoStrategySet_ShouldReturnInternalServerError()
+        public async Task GetStrategy_WhenNoStrategySet_ShouldReturnBadRequest()
         {
             _mockActiveStrategy.Setup(x => x.GetStrategy())
                 .Throws(new InvalidOperationException("Strategy not set"));
@@ -141,7 +141,7 @@ namespace ApiTests
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/strategy");
             HttpResponseMessage response = await _adminClient.SendAsync(requestMessage);
 
-            Assert.AreEqual(HttpStatusCode.InternalServerError, response.StatusCode);
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [TestMethod]
