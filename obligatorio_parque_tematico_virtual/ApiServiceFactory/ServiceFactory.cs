@@ -23,6 +23,7 @@ public static class ServiceFactory
         services.AddScoped<IAttractionLogic, AttractionLogic>();
         services.AddScoped<IAttractionLogicEntity, AttractionLogic>();
         services.AddScoped<IEventLogic, EventLogic>();
+        services.AddScoped<IRewardLogic, RewardLogic>();
 
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>(options =>
@@ -35,5 +36,7 @@ public static class ServiceFactory
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IDateTimeRepository, DateTimeRepository>();
         services.AddScoped<IDateTimeLogic, DateTimeLogic>();
+        services.AddScoped<IRewardRepository, RewardRepository>();
+        services.AddScoped<IRedemptionHistoryRepository, RedemptionHistoryRepository>();
     }
 }
