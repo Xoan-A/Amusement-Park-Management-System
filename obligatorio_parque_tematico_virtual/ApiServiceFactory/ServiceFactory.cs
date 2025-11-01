@@ -24,6 +24,7 @@ public static class ServiceFactory
         services.AddScoped<IAttractionLogicEntity, AttractionLogic>();
         services.AddScoped<IEventLogic, EventLogic>();
         services.AddScoped<IRewardLogic, RewardLogic>();
+        services.AddScoped<IRedemptionLogic, RedemptionLogic>();
 
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>(options =>
