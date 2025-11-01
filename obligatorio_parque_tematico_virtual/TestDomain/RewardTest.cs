@@ -1,5 +1,4 @@
 using Domain;
-using Domain.Enums;
 
 namespace TestDomain
 {

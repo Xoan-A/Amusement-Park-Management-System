@@ -15,6 +15,7 @@ namespace DataAccess.Context
         public virtual DbSet<Report> Reports { get; set; }
         public virtual DbSet<StrategyConfiguration> StrategyConfigurations { get; set; }
         public virtual DbSet<DateTimeConfiguration> DateTimeConfigurations { get; set; }
+        public virtual DbSet<Reward> Rewards { get; set; }
 
         public AppDbContext()
         {
@@ -90,6 +91,10 @@ namespace DataAccess.Context
 
             modelBuilder.Entity<Event>()
                 .HasIndex(e => e.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<Reward>()
+                .HasIndex(r => r.Name)
                 .IsUnique();
 
             modelBuilder.Entity<EventAttraction>()
