@@ -16,6 +16,7 @@ namespace DataAccess.Context
         public virtual DbSet<StrategyConfiguration> StrategyConfigurations { get; set; }
         public virtual DbSet<DateTimeConfiguration> DateTimeConfigurations { get; set; }
         public virtual DbSet<Reward> Rewards { get; set; }
+        public virtual DbSet<RedemptionHistory> RedemptionHistories { get; set; }
 
         public AppDbContext()
         {
@@ -96,6 +97,18 @@ namespace DataAccess.Context
             modelBuilder.Entity<Reward>()
                 .HasIndex(r => r.Name)
                 .IsUnique();
+
+            modelBuilder.Entity<RedemptionHistory>()
+                .HasOne(rh => rh.Visitor)
+                .WithMany()
+                .HasForeignKey(rh => rh.VisitorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RedemptionHistory>()
+                .HasOne(rh => rh.Reward)
+                .WithMany()
+                .HasForeignKey(rh => rh.RewardId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<EventAttraction>()
                 .HasKey(ea => new { ea.EventId, ea.AttractionId });
