@@ -719,8 +719,16 @@ public class AttractionControllerTest
             CurrentCapacity = attraction2.CurrentCapacity,
             IsActive = attraction2.IsActive
         };
-        expectedResponse.AttractionsVisits.Add((attractionRes1, 3));
-        expectedResponse.AttractionsVisits.Add((attractionRes2, 2));
+        expectedResponse.AttractionsVisits.Add(new AttractionVisitDetail 
+        { 
+            Attraction = attractionRes1, 
+            VisitCount = 3 
+        });
+        expectedResponse.AttractionsVisits.Add(new AttractionVisitDetail 
+        { 
+            Attraction = attractionRes2, 
+            VisitCount = 2 
+        });
 
         _mockAttractionService.Setup(s => s.GetAllAttractionsVisits(It.IsAny<AttractionsVisitsRequest>()))
             .ReturnsAsync(expectedResponse);
