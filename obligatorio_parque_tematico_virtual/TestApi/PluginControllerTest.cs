@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Domain;
-using BusinessLogic.Plugins;
+using IBusinessLogic;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using Microsoft.Data.Sqlite;
@@ -16,14 +16,13 @@ public class PluginControllerTest
 {
     private WebApplicationFactory<Program> _factory = null!;
     private HttpClient _adminClient = null!;
-    private Mock<PluginLoader> _mockPluginLoader = null!;
+    private Mock<IPluginLoader> _mockPluginLoader = null!;
     private SqliteConnection _connection = null!;
 
     [TestInitialize]
     public void Setup()
     {
-        string testPluginsPath = Path.Combine(Path.GetTempPath(), "TestPlugins");
-        _mockPluginLoader = new Mock<PluginLoader>(testPluginsPath);
+        _mockPluginLoader = new Mock<IPluginLoader>();
 
         _connection = new SqliteConnection("DataSource=:memory:");
         _connection.Open();

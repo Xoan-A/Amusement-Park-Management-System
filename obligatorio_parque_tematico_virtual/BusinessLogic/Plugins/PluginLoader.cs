@@ -1,10 +1,11 @@
 using System.Reflection;
 using IBusinessLogic.Strategy;
+using IBusinessLogic;
 using Domain;
 
 namespace BusinessLogic.Plugins;
 
-public class PluginLoader
+public class PluginLoader : IPluginLoader
 {
     private readonly string _pluginsPath;
     private readonly Dictionary<string, PluginInfo> _availablePlugins;

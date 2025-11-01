@@ -27,6 +27,10 @@ public static class ServiceFactory
         services.AddScoped<IRedemptionLogic, RedemptionLogic>();
         services.AddScoped<IMaintenanceLogic, MaintenanceLogic>();
 
+        // Plugin system - singleton with plugins directory path
+        string pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+        services.AddSingleton<IPluginLoader>(new BusinessLogic.Plugins.PluginLoader(pluginsPath));
+
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
