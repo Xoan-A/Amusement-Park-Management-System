@@ -1,14 +1,14 @@
-using Domain;
 using Models.In;
+using Models.Out;
 
 namespace IBusinessLogic
 {
     public interface ITicketLogic
     {
-        Task<Ticket> PurchaseTicketAsync(PurchaseTicketRequest request);
-        Task<Ticket> GetTicketByIdAsync(Guid id);
-        Task<IEnumerable<Ticket>> GetVisitorTicketsAsync(Guid visitorId);
-        Task<Ticket> GetTicketByQRCodeAsync(Guid qrCode);
+        Task<TicketResponse> PurchaseTicketAsync(PurchaseTicketRequest request);
+        Task<TicketResponse> GetTicketByIdAsync(Guid id);
+        Task<IEnumerable<TicketResponse>> GetVisitorTicketsAsync(Guid visitorId);
+        Task<TicketResponse> GetTicketByQRCodeAsync(Guid qrCode);
         Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, Guid? eventId);
     }
 }
