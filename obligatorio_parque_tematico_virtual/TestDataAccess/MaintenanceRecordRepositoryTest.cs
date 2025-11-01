@@ -433,7 +433,7 @@ namespace TestDataAccess
                 Id = Guid.NewGuid(),
                 Name = "Test",
                 LastName = "Operator",
-                Email = "operator@test.com",
+                Email = $"operator-{Guid.NewGuid()}@test.com",
                 Password = "hashedpassword",
                 BirthDate = new DateTime(1990, 1, 1)
             };

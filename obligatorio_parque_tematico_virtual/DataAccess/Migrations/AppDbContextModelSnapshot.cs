@@ -124,6 +124,86 @@ namespace DataAccess.Migrations
                     b.ToTable("EventAttraction");
                 });
 
+            modelBuilder.Entity("Domain.MaintenanceRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttractionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("time");
+
+                    b.Property<Guid?>("MaintenanceScheduleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MaintenanceType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PerformedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("PerformedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttractionId");
+
+                    b.HasIndex("MaintenanceScheduleId");
+
+                    b.HasIndex("PerformedBy");
+
+                    b.ToTable("MaintenanceRecords");
+                });
+
+            modelBuilder.Entity("Domain.MaintenanceSchedule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttractionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MaintenanceType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ScheduledDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttractionId");
+
+                    b.ToTable("MaintenanceSchedules");
+                });
+
             modelBuilder.Entity("Domain.RedemptionHistory", b =>
                 {
                     b.Property<Guid>("Id")
@@ -244,6 +324,42 @@ namespace DataAccess.Migrations
                             Id = 3,
                             Name = "Visitor"
                         });
+                });
+
+            modelBuilder.Entity("Domain.ScoreHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Origin")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("RelatedEntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("StrategyName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("VisitorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VisitorId");
+
+                    b.ToTable("ScoreHistories");
                 });
 
             modelBuilder.Entity("Domain.StrategyConfiguration", b =>
@@ -435,6 +551,43 @@ namespace DataAccess.Migrations
                     b.Navigation("Event");
                 });
 
+            modelBuilder.Entity("Domain.MaintenanceRecord", b =>
+                {
+                    b.HasOne("Domain.Attraction", "Attraction")
+                        .WithMany()
+                        .HasForeignKey("AttractionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.MaintenanceSchedule", "MaintenanceSchedule")
+                        .WithMany()
+                        .HasForeignKey("MaintenanceScheduleId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Domain.User", "Operator")
+                        .WithMany()
+                        .HasForeignKey("PerformedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Attraction");
+
+                    b.Navigation("MaintenanceSchedule");
+
+                    b.Navigation("Operator");
+                });
+
+            modelBuilder.Entity("Domain.MaintenanceSchedule", b =>
+                {
+                    b.HasOne("Domain.Attraction", "Attraction")
+                        .WithMany()
+                        .HasForeignKey("AttractionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Attraction");
+                });
+
             modelBuilder.Entity("Domain.RedemptionHistory", b =>
                 {
                     b.HasOne("Domain.Reward", "Reward")
@@ -471,6 +624,17 @@ namespace DataAccess.Migrations
                     b.Navigation("Attraction");
 
                     b.Navigation("VisitorReport");
+                });
+
+            modelBuilder.Entity("Domain.ScoreHistory", b =>
+                {
+                    b.HasOne("Domain.User", "Visitor")
+                        .WithMany()
+                        .HasForeignKey("VisitorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Visitor");
                 });
 
             modelBuilder.Entity("Domain.Ticket", b =>
