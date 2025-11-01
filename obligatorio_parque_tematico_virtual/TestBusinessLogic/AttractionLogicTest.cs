@@ -608,15 +608,13 @@ public class AttractionLogicTest
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.AttractionsVisits.Count);
 
-        (AttractionResponse, int) attraction1Result = result.AttractionsVisits.FirstOrDefault(r => r.Item1.Id == attraction1Id);
-        Assert.IsNotNull(attraction1Result.Item1);
-        Assert.AreEqual("Montaña Rusa", attraction1Result.Item1.Name);
-        Assert.AreEqual(3, attraction1Result.Item2);
+        AttractionVisitDetail attraction1Result = result.AttractionsVisits.FirstOrDefault(r => r.Attraction.Id == attraction1Id);
+        Assert.AreEqual("Montaña Rusa", attraction1Result.Attraction.Name);
+        Assert.AreEqual(3, attraction1Result.VisitCount);
 
-        (AttractionResponse, int) attraction2Result = result.AttractionsVisits.FirstOrDefault(r => r.Item1.Id == attraction2Id);
-        Assert.IsNotNull(attraction2Result.Item1);
-        Assert.AreEqual("Simulador", attraction2Result.Item1.Name);
-        Assert.AreEqual(2, attraction2Result.Item2);
+        AttractionVisitDetail attraction2Result = result.AttractionsVisits.FirstOrDefault(r => r.Attraction.Id == attraction2Id);
+        Assert.AreEqual("Simulador", attraction2Result.Attraction.Name);
+        Assert.AreEqual(2, attraction2Result.VisitCount);
 
         _mockReportRepository.Verify(r => r.GetAllReports(), Times.Once);
     }
