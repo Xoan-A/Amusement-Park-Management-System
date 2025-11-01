@@ -117,3 +117,36 @@ export interface AttractionVisitDetail {
   totalVisits: number;
   averageStayMinutes: number;
 }
+
+export interface RewardResponse {
+  id: string;
+  name: string;
+  description: string;
+  pointsCost: number;
+  availableQuantity: number;
+  requiredMembershipLevel?: MembershipLevel;
+  isAvailable: boolean;
+}
+
+export interface AllRewardsResponse {
+  rewards: RewardResponse[];
+}
+
+export interface CreateRewardResponse {
+  id: string;
+  message: string;
+}
+
+export interface RedemptionHistoryResponse {
+  id: string;
+  visitorId: string;
+  rewardId: string;
+  redeemedAt: string;
+  pointsSpent: number;
+  rewardName?: string;
+  visitorName?: string;
+}
+
+export interface AllRedemptionsResponse {
+  redemptions: RedemptionHistoryResponse[];
+}

@@ -90,3 +90,15 @@ export interface SetDateTimeRequest {
 export interface StrategyRequest {
   strategyName: string;
 }
+
+export interface RewardRequest {
+  name: string;
+  description: string;
+  pointsCost: number;
+  availableQuantity: number;
+  requiredMembershipLevel?: MembershipLevel;
+}
+
+export interface RedeemRewardRequest {
+  rewardId: string;
+}
