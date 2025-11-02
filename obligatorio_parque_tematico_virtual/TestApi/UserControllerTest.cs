@@ -572,7 +572,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task ModifyUser_WithTokenWithoutSubClaim_PassesNullToLogic()
+        public async Task ModifyUser_WithTokenWithoutSubClaim_PassesEmptyStringToLogic()
         {
             var securityKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890"));
@@ -620,7 +620,7 @@ namespace ApiTests
             HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), null, It.IsAny<ModifyUserRequest>()), Times.Once);
+            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), string.Empty, It.IsAny<ModifyUserRequest>()), Times.Once);
         }
 
         [TestMethod]
