@@ -640,5 +640,47 @@ namespace TestDataAccess
             Assert.IsTrue(visitorReports.Any(vr => vr.Date.Date == date1.Date));
             Assert.IsTrue(visitorReports.Any(vr => vr.Date.Date == date2.Date));
         }
+
+        [TestMethod]
+        public async Task Update_ShouldUpdateDetachedUser()
+        {
+            User user = new User
+            {
+                Name = "Detached",
+                LastName = "User",
+                Email = "detached@test.com",
+                Password = "password",
+                BirthDate = new DateTime(1995, 3, 10),
+                Score = 25
+            };
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            Guid userId = user.Id;
+
+            _context.Entry(user).State = EntityState.Detached;
+
+            Assert.AreEqual(EntityState.Detached, _context.Entry(user).State);
+
+            User detachedUser = new User
+            {
+                Id = userId,
+                Name = "Updated Detached",
+                LastName = "Updated User",
+                Email = "detached@test.com",
+                Password = "newpassword",
+                BirthDate = new DateTime(1995, 3, 10),
+                Score = 100
+            };
+
+            Assert.AreEqual(EntityState.Detached, _context.Entry(detachedUser).State);
+
+            await _userRepository.Update(detachedUser);
+
+            User? updatedUser = _context.Users.FirstOrDefault(u => u.Id == userId);
+            Assert.AreEqual("Updated Detached", updatedUser.Name);
+            Assert.AreEqual("newpassword", updatedUser.Password);
+            Assert.AreEqual(100, updatedUser.Score);
+        }
     }
 }
