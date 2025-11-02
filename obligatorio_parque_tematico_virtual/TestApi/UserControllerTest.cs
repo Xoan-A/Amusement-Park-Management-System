@@ -446,7 +446,11 @@ namespace ApiTests
             Guid userId = Guid.NewGuid();
             UserResponse user = new UserResponse
             {
-                Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>()
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@example.com",
+                UserRoles = new List<string>()
             };
             string token = tokenService.GenerateToken(user);
             HttpClient authedClient = _factory.CreateClient();
@@ -489,7 +493,11 @@ namespace ApiTests
             Guid userId = Guid.NewGuid();
             UserResponse user = new UserResponse
             {
-                Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>()
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@example.com",
+                UserRoles = new List<string>()
             };
             string token = tokenService.GenerateToken(user);
             HttpClient authedClient = _factory.CreateClient();
@@ -532,7 +540,11 @@ namespace ApiTests
             Guid userId = Guid.NewGuid();
             UserResponse user = new UserResponse
             {
-                Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>()
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@example.com",
+                UserRoles = new List<string>()
             };
             string token = tokenService.GenerateToken(user);
             HttpClient authedClient = _factory.CreateClient();
