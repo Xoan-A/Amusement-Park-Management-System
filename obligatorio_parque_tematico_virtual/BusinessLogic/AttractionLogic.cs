@@ -170,7 +170,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         }
 
         List<Report> reports = await _reportRepository.GetAllReports();
-        List<Report> filteredReports = reports.Where(r => r.EnterDate >= startDate && r.EnterDate <= endDate).ToList();
+        List<Report> filteredReports = reports.Where(r => r.EnterDate.Date >= startDate.Date && r.EnterDate.Date <= endDate.Date).ToList();
 
         AttractionsVisitResponse attractionsVisits = new AttractionsVisitResponse();
         System.Collections.Generic.IEnumerable<System.Linq.IGrouping<Guid, Report>> groupedReports = filteredReports.GroupBy(r => r.AttractionId);
@@ -189,7 +189,11 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
                 CurrentCapacity = attraction.CurrentCapacity,
                 IsActive = attraction.IsActive
             };
-            attractionsVisits.AttractionsVisits.Add((attractionRes, visitCount));
+            attractionsVisits.AttractionsVisits.Add(new AttractionVisitDetail
+            {
+                Attraction = attractionRes,
+                VisitCount = visitCount
+            });
         }
 
         return attractionsVisits;

@@ -1431,7 +1431,12 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "a@b.com",
+                Password = "p"
+            };
 
             await _userLogic.ModifyUser(userId, null, request);
         }
@@ -1443,7 +1448,12 @@ namespace TestBusinessLogic
             Guid userId = Guid.NewGuid();
             string actorSub = Guid.NewGuid().ToString();
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "a@b.com",
+                Password = "p"
+            };
 
             await _userLogic.ModifyUser(userId, actorSub, request);
         }
@@ -1455,7 +1465,12 @@ namespace TestBusinessLogic
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "a@b.com",
+                Password = "p"
+            };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync((User)null);
 
@@ -1470,7 +1485,12 @@ namespace TestBusinessLogic
             string actorSub = userId.ToString();
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "A", LastName = "B", Email = "new@example.com", Password = "p" };
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "new@example.com",
+                Password = "p"
+            };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
             _mockUserRepository.Setup(r => r.IsEmailUnique("new@example.com")).ReturnsAsync(false);
@@ -1486,7 +1506,12 @@ namespace TestBusinessLogic
             string actorSub = userId.ToString();
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "", LastName = "B", Email = "new@example.com", Password = "p" };
+            {
+                Name = "",
+                LastName = "B",
+                Email = "new@example.com",
+                Password = "p"
+            };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1501,7 +1526,12 @@ namespace TestBusinessLogic
             string actorSub = userId.ToString();
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "A", LastName = "", Email = "new@example.com", Password = "p" };
+            {
+                Name = "A",
+                LastName = "",
+                Email = "new@example.com",
+                Password = "p"
+            };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1516,7 +1546,12 @@ namespace TestBusinessLogic
             string actorSub = userId.ToString();
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "A", LastName = "B", Email = "", Password = "p" };
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "",
+                Password = "p"
+            };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1531,7 +1566,12 @@ namespace TestBusinessLogic
             string actorSub = userId.ToString();
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "A", LastName = "B", Email = "x@y.com", Password = "" };
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "x@y.com",
+                Password = ""
+            };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1546,7 +1586,13 @@ namespace TestBusinessLogic
             string actorSub = userId.ToString();
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
             ModifyUserRequest request = new ModifyUserRequest
-            { Name = "A", LastName = "B", Email = "x@y.com", Password = "p", BirthDate = DateTime.Now.AddDays(1) };
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "x@y.com",
+                Password = "p",
+                BirthDate = DateTime.Now.AddDays(1)
+            };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
 
@@ -1792,6 +1838,54 @@ namespace TestBusinessLogic
             // Assert
             Assert.AreEqual(originalBirthDate, originalUser.BirthDate, "BirthDate should not change when null is provided");
             Assert.AreEqual("Jane", originalUser.Name);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(UnauthorizedException))]
+        public async Task ModifyUser_WhenActorSubIsEmptyString_ThrowsUnauthorized()
+        {
+            Guid userId = Guid.NewGuid();
+            ModifyUserRequest request = new ModifyUserRequest
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "a@b.com",
+                Password = "p"
+            };
+
+            await _userLogic.ModifyUser(userId, "", request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(UnauthorizedException))]
+        public async Task ModifyUser_WhenActorSubIsWhitespace_ThrowsUnauthorized()
+        {
+            Guid userId = Guid.NewGuid();
+            ModifyUserRequest request = new ModifyUserRequest
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "a@b.com",
+                Password = "p"
+            };
+
+            await _userLogic.ModifyUser(userId, "   ", request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(UnauthorizedException))]
+        public async Task ModifyUser_WhenActorSubIsInvalidGuid_ThrowsUnauthorized()
+        {
+            Guid userId = Guid.NewGuid();
+            ModifyUserRequest request = new ModifyUserRequest
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "a@b.com",
+                Password = "p"
+            };
+
+            await _userLogic.ModifyUser(userId, "not-a-valid-guid", request);
         }
     }
 }

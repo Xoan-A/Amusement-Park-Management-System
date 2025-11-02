@@ -16,6 +16,8 @@ public class ReportRepository : IReportRepository
 
     public async Task<List<Report>> GetAllReports()
     {
-        return await _context.Reports.ToListAsync();
+        return await _context.Reports
+            .Include(r => r.Attraction)
+            .Include(r => r.VisitorReport).ToListAsync();
     }
 }
