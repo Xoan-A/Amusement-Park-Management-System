@@ -1552,5 +1552,47 @@ namespace TestBusinessLogic
 
             await _userLogic.ModifyUser(userId, actorSub, request);
         }
+
+        [TestMethod]
+        public async Task GetUserResponseById_ShouldReturnUserResponse_WhenUserExists()
+        {
+            Guid userId = Guid.NewGuid();
+            User expectedUser = new User
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com",
+                BirthDate = new DateTime(1990, 5, 15),
+                MembershipLevel = MembershipLevel.Premium,
+                Score = 100
+            };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(expectedUser);
+
+            UserResponse result = await _userLogic.GetUserResponseById(userId);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(userId, result.Id);
+            Assert.AreEqual("John", result.Name);
+            Assert.AreEqual("Doe", result.LastName);
+            Assert.AreEqual("john@test.com", result.Email);
+            Assert.AreEqual(new DateTime(1990, 5, 15), result.BirthDate);
+            Assert.AreEqual((int)MembershipLevel.Premium, result.MembershipLevel);
+            Assert.AreEqual(100, result.Score);
+
+            _mockUserRepository.Verify(r => r.GetByIdWithRoles(userId), Times.Once);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(KeyNotFoundException))]
+        public async Task GetUserResponseById_ShouldThrowKeyNotFoundException_WhenUserNotFound()
+        {
+            Guid userId = Guid.NewGuid();
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync((User)null);
+
+            await _userLogic.GetUserResponseById(userId);
+        }
     }
 }
