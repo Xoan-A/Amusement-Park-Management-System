@@ -525,5 +525,57 @@ namespace ApiTests
 
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
         }
+
+        [TestMethod]
+        public async Task ModifyUser_WithMissingSubClaim_PassesNullActorSubClaim()
+        {
+            // Arrange - Create token without Sub claim
+            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
+            var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+            {
+                Subject = new System.Security.Claims.ClaimsIdentity(new[]
+                {
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Administrator")
+                    // Missing Sub claim
+                }),
+                Expires = System.DateTime.UtcNow.AddHours(1),
+                Issuer = "ParqueTematico",
+                Audience = "ParqueTematico",
+                SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+                    new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
+                    Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            var client = _factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
+
+            Guid userId = Guid.NewGuid();
+            ModifyUserRequest request = new ModifyUserRequest { Name = "Updated Name" };
+            UserResponse expectedResponse = new UserResponse
+            {
+                Id = userId,
+                Name = "Updated Name",
+                LastName = "Test",
+                Email = "test@test.com",
+                UserRoles = new List<string> { "Administrator" }
+            };
+
+            _mockUserLogic.Setup(l => l.ModifyUser(userId, null, It.IsAny<ModifyUserRequest>()))
+                .ReturnsAsync(expectedResponse);
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            HttpResponseMessage response = await client.PutAsync($"/api/users/{userId}", content);
+
+            // Assert - Should pass null as actorSubClaim when Sub claim is missing
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            _mockUserLogic.Verify(l => l.ModifyUser(userId, null, It.IsAny<ModifyUserRequest>()), Times.Once);
+        }
     }
 }
