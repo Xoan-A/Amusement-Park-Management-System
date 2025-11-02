@@ -224,4 +224,41 @@ public class ScoreHistoryControllerTest
         // Assert
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    [TestMethod]
+    public async Task GetMyScoreHistory_WithMissingNameIdentifierClaim_UsesEmptyGuid()
+    {
+        // Arrange - Create token without NameIdentifier claim
+        var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+        var key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
+        var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+        {
+            Subject = new System.Security.Claims.ClaimsIdentity(new[]
+            {
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Visitor")
+                // Missing NameIdentifier claim
+            }),
+            Expires = System.DateTime.UtcNow.AddHours(1),
+            Issuer = "ParqueTematico",
+            Audience = "ParqueTematico",
+            SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+                new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
+                Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
+        };
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        var tokenString = tokenHandler.WriteToken(token);
+
+        var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
+
+        _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(Guid.Empty))
+            .Returns(new List<ScoreHistoryModelOut>());
+
+        // Act
+        var response = await client.GetAsync("/api/score-history/my-history");
+
+        // Assert - Should use Guid.Empty when NameIdentifier is missing and return OK
+        Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
+    }
 }
