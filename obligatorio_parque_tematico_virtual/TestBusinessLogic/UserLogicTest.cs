@@ -1600,6 +1600,247 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
+        public async Task GetUserResponseById_ShouldReturnUserResponse_WhenUserExists()
+        {
+            Guid userId = Guid.NewGuid();
+            User expectedUser = new User
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com",
+                BirthDate = new DateTime(1990, 5, 15),
+                MembershipLevel = MembershipLevel.Premium,
+                Score = 100
+            };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(expectedUser);
+
+            UserResponse result = await _userLogic.GetUserResponseById(userId);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(userId, result.Id);
+            Assert.AreEqual("John", result.Name);
+            Assert.AreEqual("Doe", result.LastName);
+            Assert.AreEqual("john@test.com", result.Email);
+            Assert.AreEqual(new DateTime(1990, 5, 15), result.BirthDate);
+            Assert.AreEqual((int)MembershipLevel.Premium, result.MembershipLevel);
+            Assert.AreEqual(100, result.Score);
+
+            _mockUserRepository.Verify(r => r.GetByIdWithRoles(userId), Times.Once);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(KeyNotFoundException))]
+        public async Task GetUserResponseById_ShouldThrowKeyNotFoundException_WhenUserNotFound()
+        {
+            Guid userId = Guid.NewGuid();
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync((User)null);
+
+            await _userLogic.GetUserResponseById(userId);
+        }
+
+        [TestMethod]
+        public async Task RegisterVisitor_WhenVisitorRoleNotFound_CreatesVisitorWithoutRole()
+        {
+            // Arrange
+            string name = "John";
+            string lastName = "Doe";
+            string email = "john.doe@test.com";
+            string password = "password123";
+            string hashedPassword = "hashedPassword123";
+            DateTime birthDate = new DateTime(1990, 5, 15);
+
+            _mockUserRepository.Setup(r => r.IsEmailUnique(email)).ReturnsAsync(true);
+            _mockPasswordService.Setup(p => p.HashPassword(password)).Returns(hashedPassword);
+            _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns((Role)null);
+
+            User createdUser = null;
+            _mockUserRepository.Setup(r => r.Create(It.IsAny<User>()))
+                .Callback<User>(u => createdUser = u)
+                .ReturnsAsync((User u) => u);
+
+            RegisterVisitorRequest request = new RegisterVisitorRequest
+            {
+                Name = name,
+                LastName = lastName,
+                Email = email,
+                Password = password,
+                BirthDate = birthDate
+            };
+
+            // Act
+            UserResponse result = await _userLogic.RegisterVisitor(request);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(createdUser);
+            Assert.AreEqual(0, createdUser.UserRoles.Count, "User should have no roles when visitor role is not found");
+
+            _mockRoleRepository.Verify(r => r.GetByName(Role.VISITOR), Times.Once);
+            _mockUserRepository.Verify(r => r.Create(It.IsAny<User>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task CreateUser_WhenRolesIsNull_CreatesUserWithoutRoles()
+        {
+            // Arrange
+            var request = new CreateUserRequest
+            {
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com",
+                Password = "password123",
+                Roles = null
+            };
+
+            _mockUserRepository.Setup(r => r.IsEmailUnique(request.Email)).ReturnsAsync(true);
+            _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
+
+            User createdUser = null;
+            _mockUserRepository.Setup(r => r.Create(It.IsAny<User>()))
+                .Callback<User>(u => createdUser = u)
+                .ReturnsAsync((User u) => u);
+
+            // Act
+            await _userLogic.CreateUser(request);
+
+            // Assert
+            Assert.IsNotNull(createdUser);
+            Assert.AreEqual(0, createdUser.UserRoles.Count);
+        }
+
+        [TestMethod]
+        public async Task CreateUser_WhenRoleNotFoundInDatabase_SkipsNonexistentRole()
+        {
+            // Arrange
+            var request = new CreateUserRequest
+            {
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com",
+                Password = "password123",
+                Roles = new List<string> { "Admin", "NonExistent" }
+            };
+
+            _mockUserRepository.Setup(r => r.IsEmailUnique(request.Email)).ReturnsAsync(true);
+            _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
+
+            var adminRole = new Role { Id = 1, Name = "Admin" };
+            _mockRoleRepository.Setup(r => r.GetByName("Admin")).Returns(adminRole);
+            _mockRoleRepository.Setup(r => r.GetByName("NonExistent")).Returns((Role)null);
+
+            User createdUser = null;
+            _mockUserRepository.Setup(r => r.Create(It.IsAny<User>()))
+                .Callback<User>(u => createdUser = u)
+                .ReturnsAsync((User u) => u);
+
+            // Act
+            await _userLogic.CreateUser(request);
+
+            // Assert
+            Assert.IsNotNull(createdUser);
+            Assert.AreEqual(1, createdUser.UserRoles.Count);
+            Assert.AreEqual("Admin", createdUser.UserRoles.First().Role.Name);
+        }
+
+        [TestMethod]
+        public async Task RegisterExit_WhenCapacityIsZero_DoesNotDecreaseCapacity()
+        {
+            // Arrange
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Test Attraction",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 1  // Start with 1 so entry works
+            };
+
+            User visitor = new User
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com",
+                VisitorReports = new List<VisitorReport>()
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+
+            RegisterEntryRequest entryRequest = new RegisterEntryRequest
+            {
+                UserId = userId,
+                EnterDate = enterDate,
+                Qr = qrCode,
+                NFC = null,
+                EventId = null
+            };
+
+            RegisterExitRequest exitRequest = new RegisterExitRequest
+            {
+                userId = userId,
+                exitDate = exitDate
+            };
+
+            // Act
+            await _userLogic.RegisterEntry(attractionId, entryRequest);
+            attraction.CurrentCapacity = 0;  // Manually set to 0 before exit to test the branch
+            await _userLogic.RegisterExit(attractionId, exitRequest);
+
+            // Assert
+            Assert.AreEqual(0, attraction.CurrentCapacity, "Capacity should remain at zero and not go negative");
+        }
+
+        [TestMethod]
+        public async Task ModifyUser_WhenBirthDateNotProvided_DoesNotUpdateBirthDate()
+        {
+            // Arrange
+            Guid userId = Guid.NewGuid();
+            string actorSubClaim = userId.ToString();
+            DateTime originalBirthDate = new DateTime(1990, 5, 15);
+
+            var originalUser = new User
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com",
+                Password = "hashed",
+                BirthDate = originalBirthDate
+            };
+
+            var request = new ModifyUserRequest
+            {
+                Name = "Jane",
+                LastName = "Doe",
+                Email = "john@test.com",
+                Password = "newPassword123",
+                BirthDate = null  // Not provided
+            };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+            _mockUserRepository.Setup(r => r.IsEmailUnique(request.Email)).ReturnsAsync(true);
+            _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("newHashedPassword");
+
+            // Act
+            await _userLogic.ModifyUser(userId, actorSubClaim, request);
+
+            // Assert
+            Assert.AreEqual(originalBirthDate, originalUser.BirthDate, "BirthDate should not change when null is provided");
+            Assert.AreEqual("Jane", originalUser.Name);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(UnauthorizedException))]
         public async Task ModifyUser_WhenActorSubIsEmptyString_ThrowsUnauthorized()
         {

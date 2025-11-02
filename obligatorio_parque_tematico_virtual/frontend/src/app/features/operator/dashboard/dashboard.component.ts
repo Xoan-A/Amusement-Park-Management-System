@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../core/services/attraction.service';
+import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { AttractionResponse } from '../../../core/models';
 
 @Component({
@@ -15,7 +16,7 @@ import { AttractionResponse } from '../../../core/models';
       <h1 class="mb-4">Operator Dashboard</h1>
 
       <div class="row g-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="card text-center">
             <div class="card-body">
               <h5 class="card-title">Total Attractions</h5>
@@ -23,7 +24,7 @@ import { AttractionResponse } from '../../../core/models';
             </div>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="card text-center">
             <div class="card-body">
               <h5 class="card-title">Active Attractions</h5>
@@ -31,11 +32,24 @@ import { AttractionResponse } from '../../../core/models';
             </div>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="card text-center">
             <div class="card-body">
               <h5 class="card-title">Inactive Attractions</h5>
               <p class="display-4 text-danger">{{ getInactiveCount() }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center" [class.border-warning]="pendingMaintenanceCount > 0">
+            <div class="card-body">
+              <h5 class="card-title">Pending Maintenance</h5>
+              <p class="display-4" [class.text-warning]="pendingMaintenanceCount > 0" [class.text-muted]="pendingMaintenanceCount === 0">
+                {{ pendingMaintenanceCount }}
+              </p>
+              <a routerLink="/operator/maintenance" class="btn btn-sm" [class.btn-warning]="pendingMaintenanceCount > 0" [class.btn-outline-secondary]="pendingMaintenanceCount === 0">
+                Record Work
+              </a>
             </div>
           </div>
         </div>
@@ -51,6 +65,7 @@ import { AttractionResponse } from '../../../core/models';
               <div class="d-flex gap-2">
                 <a routerLink="/operator/entry-exit" class="btn btn-primary">Manage Entry/Exit</a>
                 <a routerLink="/operator/incidents" class="btn btn-warning">Manage Incidents</a>
+                <a routerLink="/operator/maintenance" class="btn btn-info">Record Maintenance</a>
               </div>
             </div>
           </div>
@@ -111,12 +126,20 @@ import { AttractionResponse } from '../../../core/models';
 })
 export class DashboardComponent implements OnInit {
   attractions: AttractionResponse[] = [];
+  pendingMaintenanceCount = 0;
 
-  constructor(private attractionService: AttractionService) {}
+  constructor(
+    private attractionService: AttractionService,
+    private maintenanceService: MaintenanceService
+  ) {}
 
   ngOnInit(): void {
     this.loadAttractions();
-    setInterval(() => this.loadAttractions(), 30000); // Auto-refresh every 30s
+    this.loadPendingMaintenance();
+    setInterval(() => {
+      this.loadAttractions();
+      this.loadPendingMaintenance();
+    }, 30000); // Auto-refresh every 30s
   }
 
   loadAttractions(): void {
@@ -125,6 +148,15 @@ export class DashboardComponent implements OnInit {
         this.attractions = response.attractions || [];
       },
       error: (error) => console.error('Error loading attractions', error)
+    });
+  }
+
+  loadPendingMaintenance(): void {
+    this.maintenanceService.getAllSchedules({ status: 'Pending' }).subscribe({
+      next: (schedules) => {
+        this.pendingMaintenanceCount = schedules.length;
+      },
+      error: (error) => console.error('Error loading pending maintenance', error)
     });
   }
 

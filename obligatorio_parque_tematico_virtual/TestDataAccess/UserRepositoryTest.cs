@@ -642,13 +642,52 @@ namespace TestDataAccess
         }
 
         [TestMethod]
+        public async Task Update_WithDetachedEntity_AttachesAndSaves()
+        {
+            // Arrange: Create and save a user
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = "Detached",
+                LastName = "User",
+                Email = "detached@test.com",
+                Password = "hashedpassword",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 100
+            };
+
+            await _userRepository.Create(user);
+            _context.ChangeTracker.Clear(); // Detach all entities
+
+            // Act: Create a detached user instance with same ID but different score
+            var detachedUser = new User
+            {
+                Id = user.Id,
+                Name = "Detached",
+                LastName = "User",
+                Email = "detached@test.com",
+                Password = "hashedpassword",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 200 // Changed score
+            };
+
+            // This should trigger the detached entity path in Update method
+            await _userRepository.Update(detachedUser);
+
+            // Assert: Verify the update was saved
+            var updatedUser = await _userRepository.GetById(user.Id);
+            Assert.IsNotNull(updatedUser);
+            Assert.AreEqual(200, updatedUser.Score);
+        }
+
+        [TestMethod]
         public async Task Update_ShouldUpdateDetachedUser()
         {
             User user = new User
             {
                 Name = "Detached",
                 LastName = "User",
-                Email = "detached@test.com",
+                Email = "detached2@test.com",
                 Password = "password",
                 BirthDate = new DateTime(1995, 3, 10),
                 Score = 25
@@ -667,7 +706,7 @@ namespace TestDataAccess
                 Id = userId,
                 Name = "Updated Detached",
                 LastName = "Updated User",
-                Email = "detached@test.com",
+                Email = "detached2@test.com",
                 Password = "newpassword",
                 BirthDate = new DateTime(1995, 3, 10),
                 Score = 100

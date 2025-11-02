@@ -23,6 +23,14 @@ public static class ServiceFactory
         services.AddScoped<IAttractionLogic, AttractionLogic>();
         services.AddScoped<IAttractionLogicEntity, AttractionLogic>();
         services.AddScoped<IEventLogic, EventLogic>();
+        services.AddScoped<IRewardLogic, RewardLogic>();
+        services.AddScoped<IRedemptionLogic, RedemptionLogic>();
+        services.AddScoped<IMaintenanceLogic, MaintenanceLogic>();
+        services.AddScoped<IScoreHistoryLogic, ScoreHistoryLogic>();
+
+        // Plugin system - singleton with plugins directory path
+        string pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+        services.AddSingleton<IPluginLoader>(new BusinessLogic.Plugins.PluginLoader(pluginsPath));
 
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>(options =>
@@ -35,5 +43,10 @@ public static class ServiceFactory
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IDateTimeRepository, DateTimeRepository>();
         services.AddScoped<IDateTimeLogic, DateTimeLogic>();
+        services.AddScoped<IRewardRepository, RewardRepository>();
+        services.AddScoped<IRedemptionHistoryRepository, RedemptionHistoryRepository>();
+        services.AddScoped<IMaintenanceScheduleRepository, MaintenanceScheduleRepository>();
+        services.AddScoped<IMaintenanceRecordRepository, MaintenanceRecordRepository>();
+        services.AddScoped<IScoreHistoryRepository, ScoreHistoryRepository>();
     }
 }

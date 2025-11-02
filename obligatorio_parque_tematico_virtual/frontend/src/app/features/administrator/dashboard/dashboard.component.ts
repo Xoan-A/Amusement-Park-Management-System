@@ -5,6 +5,7 @@ import { NavbarComponent } from '../../../shared/components/navbar/navbar.compon
 import { AttractionService } from '../../../core/services/attraction.service';
 import { EventService } from '../../../core/services/event.service';
 import { StrategyService } from '../../../core/services/strategy.service';
+import { MaintenanceService } from '../../../core/services/maintenance.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,12 +18,14 @@ export class DashboardComponent implements OnInit {
   totalAttractions = 0;
   totalEvents = 0;
   currentStrategy = '';
+  overdueMaintenanceCount = 0;
   loading = true;
 
   constructor(
     private attractionService: AttractionService,
     private eventService: EventService,
-    private strategyService: StrategyService
+    private strategyService: StrategyService,
+    private maintenanceService: MaintenanceService
   ) {}
 
   ngOnInit(): void {
@@ -55,6 +58,13 @@ export class DashboardComponent implements OnInit {
         console.error('Error loading strategy', error);
         this.loading = false;
       }
+    });
+
+    this.maintenanceService.getOverdueSchedules().subscribe({
+      next: (schedules) => {
+        this.overdueMaintenanceCount = schedules.length;
+      },
+      error: (error) => console.error('Error loading overdue maintenance', error)
     });
   }
 }

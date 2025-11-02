@@ -1,4 +1,4 @@
-import { AttractionType, MembershipLevel, TicketType } from './enums';
+import { AttractionType, MembershipLevel, TicketType, MaintenanceStatus, MaintenanceType, ScoreOrigin } from './enums';
 
 export interface LoginResponse {
   token: string;
@@ -116,4 +116,82 @@ export interface AttractionVisitDetail {
   attractionName: string;
   totalVisits: number;
   averageStayMinutes: number;
+}
+
+export interface RewardResponse {
+  id: string;
+  name: string;
+  description: string;
+  pointsCost: number;
+  availableQuantity: number;
+  requiredMembershipLevel?: MembershipLevel;
+  isAvailable: boolean;
+}
+
+export interface AllRewardsResponse {
+  rewards: RewardResponse[];
+}
+
+export interface CreateRewardResponse {
+  id: string;
+  message: string;
+}
+
+export interface RedemptionHistoryResponse {
+  id: string;
+  visitorId: string;
+  rewardId: string;
+  redeemedAt: string;
+  pointsSpent: number;
+  rewardName?: string;
+  visitorName?: string;
+}
+
+export interface AllRedemptionsResponse {
+  redemptions: RedemptionHistoryResponse[];
+}
+
+export interface MaintenanceScheduleResponse {
+  id: string;
+  attractionId: string;
+  attractionName: string;
+  scheduledDate: string;
+  maintenanceType: MaintenanceType;
+  description: string;
+  status: MaintenanceStatus;
+  createdAt: string;
+  createdBy?: string;
+}
+
+export interface MaintenanceRecordResponse {
+  id: string;
+  maintenanceScheduleId?: string;
+  attractionId: string;
+  attractionName: string;
+  performedDate: string;
+  performedBy: string;
+  performedByName: string;
+  maintenanceType: MaintenanceType;
+  description: string;
+  durationMinutes: number;
+  notes?: string;
+}
+
+export interface ScoreHistoryResponse {
+  id: string;
+  createdAt: string;
+  points: number;
+  origin: ScoreOrigin;
+  strategyName: string;
+  description: string;
+  relatedEntityId?: string;
+  visitorId?: string;
+  visitorName?: string;
+}
+
+export interface PluginResponse {
+  name: string;
+  description: string;
+  author: string;
+  version: string;
 }
