@@ -1594,5 +1594,46 @@ namespace TestBusinessLogic
 
             await _userLogic.GetUserResponseById(userId);
         }
+
+        [TestMethod]
+        public async Task RegisterVisitor_WhenVisitorRoleNotFound_CreatesVisitorWithoutRole()
+        {
+            // Arrange
+            string name = "John";
+            string lastName = "Doe";
+            string email = "john.doe@test.com";
+            string password = "password123";
+            string hashedPassword = "hashedPassword123";
+            DateTime birthDate = new DateTime(1990, 5, 15);
+
+            _mockUserRepository.Setup(r => r.IsEmailUnique(email)).ReturnsAsync(true);
+            _mockPasswordService.Setup(p => p.HashPassword(password)).Returns(hashedPassword);
+            _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns((Role)null);
+
+            User createdUser = null;
+            _mockUserRepository.Setup(r => r.Create(It.IsAny<User>()))
+                .Callback<User>(u => createdUser = u)
+                .ReturnsAsync((User u) => u);
+
+            RegisterVisitorRequest request = new RegisterVisitorRequest
+            {
+                Name = name,
+                LastName = lastName,
+                Email = email,
+                Password = password,
+                BirthDate = birthDate
+            };
+
+            // Act
+            UserResponse result = await _userLogic.RegisterVisitor(request);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(createdUser);
+            Assert.AreEqual(0, createdUser.UserRoles.Count, "User should have no roles when visitor role is not found");
+
+            _mockRoleRepository.Verify(r => r.GetByName(Role.VISITOR), Times.Once);
+            _mockUserRepository.Verify(r => r.Create(It.IsAny<User>()), Times.Once);
+        }
     }
 }
