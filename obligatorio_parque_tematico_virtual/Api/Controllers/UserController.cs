@@ -52,7 +52,7 @@ public class UserController : ControllerBase
     [Authorize]
     public async Task<IActionResult> ModifyUser(Guid userId, [FromBody] ModifyUserRequest request)
     {
-        string? actorSubClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        string actorSubClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? string.Empty;
         UserResponse updated = await _userLogic.ModifyUser(userId, actorSubClaim, request);
         return Ok(updated);
     }
