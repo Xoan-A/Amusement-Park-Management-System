@@ -1552,5 +1552,38 @@ namespace TestBusinessLogic
 
             await _userLogic.ModifyUser(userId, actorSub, request);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(UnauthorizedException))]
+        public async Task ModifyUser_WhenActorSubIsEmptyString_ThrowsUnauthorized()
+        {
+            Guid userId = Guid.NewGuid();
+            ModifyUserRequest request = new ModifyUserRequest
+            { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+
+            await _userLogic.ModifyUser(userId, "", request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(UnauthorizedException))]
+        public async Task ModifyUser_WhenActorSubIsWhitespace_ThrowsUnauthorized()
+        {
+            Guid userId = Guid.NewGuid();
+            ModifyUserRequest request = new ModifyUserRequest
+            { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+
+            await _userLogic.ModifyUser(userId, "   ", request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(UnauthorizedException))]
+        public async Task ModifyUser_WhenActorSubIsInvalidGuid_ThrowsUnauthorized()
+        {
+            Guid userId = Guid.NewGuid();
+            ModifyUserRequest request = new ModifyUserRequest
+            { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+
+            await _userLogic.ModifyUser(userId, "not-a-valid-guid", request);
+        }
     }
 }
