@@ -149,8 +149,14 @@ public class PluginLoaderIntegrationTest
 
     private void CopyExamplePluginDll(string targetDir)
     {
-        // Find ExamplePlugin.dll - try different paths
+        // Find ExamplePlugin.dll - try different paths (Release first for CI, then Debug for local)
         string[] possiblePaths = {
+            // Release configuration (used by CI/CD)
+            "../../../../ExamplePlugin/bin/Release/net8.0/ExamplePlugin.dll",
+            "../../../ExamplePlugin/bin/Release/net8.0/ExamplePlugin.dll",
+            "../../ExamplePlugin/bin/Release/net8.0/ExamplePlugin.dll",
+            "../ExamplePlugin/bin/Release/net8.0/ExamplePlugin.dll",
+            // Debug configuration (local development)
             "../../../../ExamplePlugin/bin/Debug/net8.0/ExamplePlugin.dll",
             "../../../ExamplePlugin/bin/Debug/net8.0/ExamplePlugin.dll",
             "../../ExamplePlugin/bin/Debug/net8.0/ExamplePlugin.dll",
