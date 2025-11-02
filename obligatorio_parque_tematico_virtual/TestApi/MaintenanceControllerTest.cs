@@ -617,5 +617,93 @@ public class MaintenanceControllerTest
         Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
     }
 
+    [TestMethod]
+    public async Task CreateSchedule_WithMissingNameIdentifierClaim_UsesEmptyGuid()
+    {
+        // Arrange
+        var request = new MaintenanceScheduleRequest
+        {
+            AttractionId = Guid.NewGuid(),
+            ScheduledDate = DateTime.UtcNow.AddDays(1),
+            MaintenanceType = "Inspection",
+            Description = "Test"
+        };
+
+        // Create a token without NameIdentifier claim
+        var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+        var key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
+        var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+        {
+            Subject = new System.Security.Claims.ClaimsIdentity(new[]
+            {
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Administrator")
+                // Missing NameIdentifier claim
+            }),
+            Expires = DateTime.UtcNow.AddHours(1),
+            SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+                new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
+                Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
+        };
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        var tokenString = tokenHandler.WriteToken(token);
+
+        var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
+
+        var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+
+        // Act
+        var response = await client.PostAsync("/api/maintenance/schedules", content);
+
+        // Assert - Should still succeed with Guid.Empty
+        // The code uses ?? Guid.Empty.ToString() as fallback
+        Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.Created || response.StatusCode == System.Net.HttpStatusCode.OK);
+    }
+
+    [TestMethod]
+    public async Task RecordMaintenance_WithMissingNameIdentifierClaim_UsesEmptyGuid()
+    {
+        // Arrange
+        var request = new MaintenanceRecordRequest
+        {
+            AttractionId = Guid.NewGuid(),
+            MaintenanceScheduleId = null,
+            MaintenanceType = "Inspection",
+            Description = "Test",
+            Duration = TimeSpan.FromHours(1)
+        };
+
+        // Create a token without NameIdentifier claim
+        var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+        var key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
+        var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+        {
+            Subject = new System.Security.Claims.ClaimsIdentity(new[]
+            {
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Operator")
+                // Missing NameIdentifier claim
+            }),
+            Expires = DateTime.UtcNow.AddHours(1),
+            SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+                new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
+                Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
+        };
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        var tokenString = tokenHandler.WriteToken(token);
+
+        var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
+
+        var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+
+        // Act
+        var response = await client.PostAsync("/api/maintenance/records", content);
+
+        // Assert - Should still succeed with Guid.Empty
+        Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.Created || response.StatusCode == System.Net.HttpStatusCode.OK);
+    }
+
     #endregion
 }
