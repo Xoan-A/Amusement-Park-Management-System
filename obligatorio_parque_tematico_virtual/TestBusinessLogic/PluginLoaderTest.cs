@@ -111,4 +111,44 @@ public class PluginLoaderTest
         // Assert
         Assert.AreEqual(firstLoad.Count, secondLoad.Count);
     }
+
+    [TestMethod]
+    public void CreateStrategyInstance_WithNonExistentPlugin_ThrowsKeyNotFoundException()
+    {
+        // Arrange
+        _pluginLoader.LoadPlugins(); // Empty plugins
+
+        // Act & Assert
+        Assert.ThrowsException<KeyNotFoundException>(() =>
+        {
+            _pluginLoader.CreateStrategyInstance("NonExistentPlugin");
+        });
+    }
+
+    [TestMethod]
+    public void GetPluginByName_WithNonExistentPlugin_ReturnsNull()
+    {
+        // Arrange
+        _pluginLoader.LoadPlugins(); // Empty plugins
+
+        // Act
+        var result = _pluginLoader.GetPluginByName("NonExistentPlugin");
+
+        // Assert
+        Assert.IsNull(result);
+    }
+
+    [TestMethod]
+    public void GetAvailablePluginNames_AfterLoadingPlugins_ReturnsPluginNames()
+    {
+        // Arrange
+        _pluginLoader.LoadPlugins();
+
+        // Act
+        var pluginNames = _pluginLoader.GetAvailablePluginNames();
+
+        // Assert
+        Assert.IsNotNull(pluginNames);
+        Assert.AreEqual(0, pluginNames.Count); // Empty directory
+    }
 }
