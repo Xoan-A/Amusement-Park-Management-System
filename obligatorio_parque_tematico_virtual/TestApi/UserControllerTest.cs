@@ -513,5 +513,17 @@ namespace ApiTests
 
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
+
+        [TestMethod]
+        public async Task GetUserById_UserNotFound_ReturnsNotFound()
+        {
+            Guid userId = Guid.NewGuid();
+            _mockUserLogic.Setup(l => l.GetUserResponseById(userId))
+                .ThrowsAsync(new KeyNotFoundException("User not found"));
+
+            HttpResponseMessage response = await _adminClient.GetAsync($"/api/users/{userId}");
+
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+        }
     }
 }
