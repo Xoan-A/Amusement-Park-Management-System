@@ -4,10 +4,18 @@
     <DataCollectors>
       <DataCollector friendlyName="XPlat Code Coverage">
         <Configuration>
+          <Format>cobertura</Format>
           <ExcludeByFile>
-            <Exclude>**/Migrations/**/*.cs</Exclude>
+            <!-- Exclude all migration files -->
+            <Exclude>**/DataAccess/Migrations/*.cs</Exclude>
+            <Exclude>**/DataAccess/Migrations/*.Designer.cs</Exclude>
             <Exclude>**/*ModelSnapshot.cs</Exclude>
           </ExcludeByFile>
+          <ExcludeByAttribute>
+            <!-- Exclude code with these attributes -->
+            <Exclude>System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute</Exclude>
+            <Exclude>System.CodeDom.Compiler.GeneratedCodeAttribute</Exclude>
+          </ExcludeByAttribute>
         </Configuration>
       </DataCollector>
     </DataCollectors>
