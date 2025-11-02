@@ -574,5 +574,28 @@ namespace TestBusinessLogic
 
             Assert.ThrowsException<ArgumentException>(() => new ActiveStrategy(_mockRepo.Object));
         }
+
+        [TestMethod]
+        public async Task CalculateScore_WithRealActiveStrategy_DelegatesToUnderlyingStrategy()
+        {
+            // Arrange - Use REAL ActiveStrategy (not mocked)
+            SetupMocks();
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+
+            await activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "PerAttraction"
+            });
+
+            User user = new User { Name = "Test" };
+            Attraction attraction = new Attraction { Type = AttractionType.RollerCoaster };
+            StrategyRequest request = new StrategyRequest();
+
+            // Act - Call the real CalculateScore method
+            int score = activeStrategy.CalculateScore(user, attraction, request);
+
+            // Assert - Verify delegation worked (PerAttraction with RollerCoaster gives 2 points)
+            Assert.AreEqual(2, score);
+        }
     }
 }
