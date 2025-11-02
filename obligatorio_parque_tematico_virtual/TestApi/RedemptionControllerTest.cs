@@ -335,4 +335,75 @@ public class RedemptionControllerTest
         // Assert
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
     }
+
+    [TestMethod]
+    public async Task GetVisitorRedemptionHistory_VisitorNotFound_ReturnsNotFound()
+    {
+        // Arrange
+        var visitorId = Guid.NewGuid();
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId))
+            .Throws(new KeyNotFoundException("Visitor not found"));
+
+        // Act
+        var response = await _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task GetMyRedemptionHistoryWithDateRange_InvalidDateRange_ReturnsBadRequest()
+    {
+        // Arrange
+        var dateFrom = DateTime.Now;
+        var dateTo = DateTime.Now.AddDays(-7);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistoryWithDateRange(_visitorUserId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Throws(new ArgumentException("Invalid date range"));
+
+        // Act
+        var response = await _visitorClient.GetAsync($"/api/redemptions/my-history?dateFrom={dateFrom:yyyy-MM-dd}&dateTo={dateTo:yyyy-MM-dd}");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task RedeemReward_RewardNotAvailable_ReturnsBadRequest()
+    {
+        // Arrange
+        var rewardId = Guid.NewGuid();
+        _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId))
+            .Throws(new ArgumentException("Reward is not available"));
+
+        var redeemRequest = new RedeemRewardModelIn
+        {
+            RewardId = rewardId
+        };
+
+        var json = JsonSerializer.Serialize(redeemRequest);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        // Act
+        var response = await _visitorClient.PostAsync("/api/redemptions/redeem", content);
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task GetVisitorRedemptionHistoryWithDateRange_InvalidDateRange_ReturnsBadRequest()
+    {
+        // Arrange
+        var visitorId = Guid.NewGuid();
+        var dateFrom = DateTime.Now;
+        var dateTo = DateTime.Now.AddDays(-7);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistoryWithDateRange(visitorId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Throws(new ArgumentException("Invalid date range"));
+
+        // Act
+        var response = await _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history?dateFrom={dateFrom:yyyy-MM-dd}&dateTo={dateTo:yyyy-MM-dd}");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+    }
 }
