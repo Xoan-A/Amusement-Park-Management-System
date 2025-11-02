@@ -640,5 +640,44 @@ namespace TestDataAccess
             Assert.IsTrue(visitorReports.Any(vr => vr.Date.Date == date1.Date));
             Assert.IsTrue(visitorReports.Any(vr => vr.Date.Date == date2.Date));
         }
+
+        [TestMethod]
+        public async Task Update_WithDetachedEntity_AttachesAndSaves()
+        {
+            // Arrange: Create and save a user
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = "Detached",
+                LastName = "User",
+                Email = "detached@test.com",
+                Password = "hashedpassword",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 100
+            };
+
+            await _userRepository.Create(user);
+            _context.ChangeTracker.Clear(); // Detach all entities
+
+            // Act: Create a detached user instance with same ID but different score
+            var detachedUser = new User
+            {
+                Id = user.Id,
+                Name = "Detached",
+                LastName = "User",
+                Email = "detached@test.com",
+                Password = "hashedpassword",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 200 // Changed score
+            };
+
+            // This should trigger the detached entity path in Update method
+            await _userRepository.Update(detachedUser);
+
+            // Assert: Verify the update was saved
+            var updatedUser = await _userRepository.GetById(user.Id);
+            Assert.IsNotNull(updatedUser);
+            Assert.AreEqual(200, updatedUser.Score);
+        }
     }
 }
