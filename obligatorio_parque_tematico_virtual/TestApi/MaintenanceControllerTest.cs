@@ -524,4 +524,98 @@ public class MaintenanceControllerTest
     }
 
     #endregion
+
+    #region Error Path Tests
+
+    [TestMethod]
+    public async Task CreateSchedule_WithInvalidData_ReturnsBadRequest()
+    {
+        // Arrange
+        var request = new MaintenanceScheduleRequest
+        {
+            AttractionId = Guid.NewGuid(),
+            ScheduledDate = DateTime.Now.AddDays(7),
+            MaintenanceType = "Inspection",
+            Description = "Test"
+        };
+
+        _mockMaintenanceLogic.Setup(m => m.CreateSchedule(It.IsAny<MaintenanceScheduleRequest>(), It.IsAny<Guid>()))
+            .ThrowsAsync(new ArgumentException("Invalid schedule data"));
+
+        var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+
+        // Act
+        var response = await _adminClient.PostAsync("/api/maintenance/schedules", content);
+
+        // Assert
+        Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task GetScheduleById_NonExistentSchedule_ReturnsNotFound()
+    {
+        // Arrange
+        var scheduleId = Guid.NewGuid();
+        _mockMaintenanceLogic.Setup(m => m.GetScheduleById(scheduleId))
+            .ThrowsAsync(new KeyNotFoundException("Schedule not found"));
+
+        // Act
+        var response = await _adminClient.GetAsync($"/api/maintenance/schedules/{scheduleId}");
+
+        // Assert
+        Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task RecordMaintenance_WithInvalidData_ReturnsBadRequest()
+    {
+        // Arrange
+        var request = new MaintenanceRecordRequest
+        {
+            AttractionId = Guid.NewGuid(),
+            PerformedDate = DateTime.Now,
+            MaintenanceType = "Inspection",
+            Description = "Test",
+            Duration = TimeSpan.FromHours(1)
+        };
+
+        _mockMaintenanceLogic.Setup(m => m.RecordMaintenance(It.IsAny<MaintenanceRecordRequest>(), It.IsAny<Guid>()))
+            .ThrowsAsync(new ArgumentException("Invalid maintenance record"));
+
+        var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+
+        // Act
+        var response = await _operatorClient.PostAsync("/api/maintenance/records", content);
+
+        // Assert
+        Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task CompleteMaintenance_NonExistentSchedule_ReturnsNotFound()
+    {
+        // Arrange
+        var scheduleId = Guid.NewGuid();
+        var request = new MaintenanceRecordRequest
+        {
+            AttractionId = Guid.NewGuid(),
+            PerformedDate = DateTime.Now,
+            MaintenanceType = "Inspection",
+            Description = "Test",
+            Duration = TimeSpan.FromHours(1)
+        };
+
+        _mockMaintenanceLogic.Setup(m => m.CompleteMaintenance(scheduleId, It.IsAny<MaintenanceRecordRequest>(), It.IsAny<Guid>()))
+            .ThrowsAsync(new KeyNotFoundException("Schedule not found"));
+
+        var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+
+        // Act
+        var response = await _operatorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", content);
+
+        // Assert
+        Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    #endregion
 }
