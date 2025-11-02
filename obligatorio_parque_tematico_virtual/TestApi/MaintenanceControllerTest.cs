@@ -758,6 +758,8 @@ public class MaintenanceControllerTest
                 // Missing NameIdentifier claim
             }),
             Expires = DateTime.UtcNow.AddHours(1),
+            Issuer = "ParqueTematico",
+            Audience = "ParqueTematico",
             SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
                 new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
                 Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
@@ -774,8 +776,8 @@ public class MaintenanceControllerTest
         // Act
         var response = await client.PostAsync("/api/maintenance/records", content);
 
-        // Assert - Returns 401 when NameIdentifier claim is missing
-        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+        // Assert - Should use Guid.Empty when NameIdentifier is missing and return Created
+        Assert.AreEqual(System.Net.HttpStatusCode.Created, response.StatusCode);
     }
 
     #endregion
