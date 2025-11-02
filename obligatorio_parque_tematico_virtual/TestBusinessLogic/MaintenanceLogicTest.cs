@@ -597,5 +597,68 @@ public class MaintenanceLogicTest
         };
     }
 
+    [TestMethod]
+    public async Task CreateSchedule_WithInvalidMaintenanceType_ThrowsArgumentException()
+    {
+        // Arrange
+        Guid attractionId = Guid.NewGuid();
+        Attraction attraction = new Attraction
+        {
+            Id = attractionId,
+            Name = "Test Attraction",
+            Description = "Test",
+            Type = AttractionType.RollerCoaster,
+            MaxCapacity = 100
+        };
+
+        MaintenanceScheduleRequest request = new MaintenanceScheduleRequest
+        {
+            AttractionId = attractionId,
+            ScheduledDate = DateTime.UtcNow.AddDays(5),
+            MaintenanceType = "InvalidTypeValue",  // Invalid enum value
+            Description = "Test maintenance"
+        };
+
+        Guid userId = Guid.NewGuid();
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+
+        // Act & Assert
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _maintenanceLogic.CreateSchedule(request, userId),
+            "Should throw ArgumentException for invalid MaintenanceType");
+    }
+
+    [TestMethod]
+    public async Task RecordMaintenance_WithInvalidMaintenanceType_ThrowsArgumentException()
+    {
+        // Arrange
+        Guid attractionId = Guid.NewGuid();
+        Attraction attraction = new Attraction
+        {
+            Id = attractionId,
+            Name = "Test Attraction",
+            Description = "Test",
+            Type = AttractionType.RollerCoaster,
+            MaxCapacity = 100
+        };
+
+        MaintenanceRecordRequest request = new MaintenanceRecordRequest
+        {
+            AttractionId = attractionId,
+            MaintenanceScheduleId = null,
+            MaintenanceType = "BadEnumValue",  // Invalid enum value
+            Description = "Test record",
+            Duration = TimeSpan.FromHours(1)
+        };
+
+        Guid userId = Guid.NewGuid();
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+
+        // Act & Assert
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _maintenanceLogic.RecordMaintenance(request, userId),
+            "Should throw ArgumentException for invalid MaintenanceType");
+    }
+
     #endregion
 }

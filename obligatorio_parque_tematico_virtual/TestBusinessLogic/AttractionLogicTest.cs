@@ -636,4 +636,42 @@ public class AttractionLogicTest
         await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
             await _attractionLogic.GetAllAttractionsVisits(request));
     }
+
+    [TestMethod]
+    public async Task UpdateAttraction_WithNullCurrentCapacity_PreservesExistingCapacity()
+    {
+        // Arrange
+        Guid attractionId = Guid.NewGuid();
+        int existingCapacity = 50;
+
+        Attraction existingAttraction = new Attraction
+        {
+            Id = attractionId,
+            Name = "Roller Coaster",
+            Description = "Fast ride",
+            Type = AttractionType.RollerCoaster,
+            MaxCapacity = 100,
+            CurrentCapacity = existingCapacity
+        };
+
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "Updated Coaster",
+            Description = "Updated description",
+            Type = "RollerCoaster",
+            MaxCapacity = 100,
+            CurrentCapacity = null  // Null to test the ?? operator
+        };
+
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(existingAttraction);
+        _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
+
+        // Act
+        await _attractionLogic.UpdateAttraction(attractionId, request);
+
+        // Assert
+        Assert.AreEqual(existingCapacity, existingAttraction.CurrentCapacity, "CurrentCapacity should preserve existing value when request has null");
+        Assert.AreEqual("Updated Coaster", existingAttraction.Name);
+        _mockAttractionRepository.Verify(r => r.Update(existingAttraction), Times.Once);
+    }
 }

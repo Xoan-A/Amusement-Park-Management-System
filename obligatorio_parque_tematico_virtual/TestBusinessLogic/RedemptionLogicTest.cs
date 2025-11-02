@@ -344,5 +344,42 @@ namespace TestBusinessLogic
             Assert.AreEqual(1, result.Count);
             _mockRedemptionHistoryRepository.Verify(r => r.GetByVisitorIdWithDateRange(visitorId, dateFrom, dateTo), Times.Once);
         }
+
+        [TestMethod]
+        public void RedeemReward_WhenVisitorMembershipLevelIsNull_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            Guid visitorId = Guid.NewGuid();
+            Guid rewardId = Guid.NewGuid();
+
+            User visitor = new User
+            {
+                Id = visitorId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com",
+                Password = "pass",
+                Score = 1000,
+                MembershipLevel = null  // Null to test the specification branch
+            };
+
+            Reward reward = new Reward
+            {
+                Id = rewardId,
+                Name = "Premium Reward",
+                Description = "Exclusive item",
+                PointsCost = 500,
+                AvailableQuantity = 10,
+                RequiredMembershipLevel = MembershipLevel.Premium
+            };
+
+            _mockUserRepository.Setup(r => r.GetById(visitorId)).ReturnsAsync(visitor);
+            _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns(reward);
+
+            // Act & Assert
+            Assert.ThrowsException<InvalidOperationException>(
+                () => _redemptionLogic.RedeemReward(visitorId, rewardId),
+                "Should throw InvalidOperationException when visitor MembershipLevel is null and reward requires membership");
+        }
     }
 }
