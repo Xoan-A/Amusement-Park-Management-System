@@ -151,4 +151,19 @@ public class PluginLoaderTest
         Assert.IsNotNull(pluginNames);
         Assert.AreEqual(0, pluginNames.Count); // Empty directory
     }
+
+    [TestMethod]
+    public void LoadPlugins_WithCorruptDll_SkipsInvalidAssembly()
+    {
+        // Arrange - Create a corrupt DLL file (text file with .dll extension)
+        string corruptDllPath = Path.Combine(_testPluginsPath, "corrupt.dll");
+        File.WriteAllText(corruptDllPath, "This is not a valid assembly");
+
+        // Act
+        var plugins = _pluginLoader.LoadPlugins();
+
+        // Assert - Should skip the corrupt file and return empty list
+        Assert.IsNotNull(plugins);
+        Assert.AreEqual(0, plugins.Count);
+    }
 }
