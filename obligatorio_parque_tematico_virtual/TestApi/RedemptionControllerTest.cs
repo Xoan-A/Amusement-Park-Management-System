@@ -406,4 +406,74 @@ public class RedemptionControllerTest
         // Assert
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    [TestMethod]
+    public async Task GetMyRedemptionHistory_WithOnlyDateFrom_ReturnsAllHistory()
+    {
+        // Arrange
+        var dateFrom = DateTime.Now.AddDays(-7);
+        var expectedHistory = new List<RedemptionHistoryModelOut>();
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(It.IsAny<Guid>())).Returns(expectedHistory);
+
+        // Act
+        var response = await _visitorClient.GetAsync($"/api/redemptions/my-history?dateFrom={dateFrom:yyyy-MM-dd}");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        _mockRedemptionLogic.Verify(s => s.GetRedemptionHistory(It.IsAny<Guid>()), Times.Once);
+        _mockRedemptionLogic.Verify(s => s.GetRedemptionHistoryWithDateRange(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task GetMyRedemptionHistory_WithOnlyDateTo_ReturnsAllHistory()
+    {
+        // Arrange
+        var dateTo = DateTime.Now;
+        var expectedHistory = new List<RedemptionHistoryModelOut>();
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(It.IsAny<Guid>())).Returns(expectedHistory);
+
+        // Act
+        var response = await _visitorClient.GetAsync($"/api/redemptions/my-history?dateTo={dateTo:yyyy-MM-dd}");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        _mockRedemptionLogic.Verify(s => s.GetRedemptionHistory(It.IsAny<Guid>()), Times.Once);
+        _mockRedemptionLogic.Verify(s => s.GetRedemptionHistoryWithDateRange(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task GetVisitorRedemptionHistory_WithOnlyDateFrom_ReturnsAllHistory()
+    {
+        // Arrange
+        var visitorId = Guid.NewGuid();
+        var dateFrom = DateTime.Now.AddDays(-7);
+        var expectedHistory = new List<RedemptionHistoryModelOut>();
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).Returns(expectedHistory);
+
+        // Act
+        var response = await _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history?dateFrom={dateFrom:yyyy-MM-dd}");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        _mockRedemptionLogic.Verify(s => s.GetRedemptionHistory(visitorId), Times.Once);
+        _mockRedemptionLogic.Verify(s => s.GetRedemptionHistoryWithDateRange(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task GetVisitorRedemptionHistory_WithOnlyDateTo_ReturnsAllHistory()
+    {
+        // Arrange
+        var visitorId = Guid.NewGuid();
+        var dateTo = DateTime.Now;
+        var expectedHistory = new List<RedemptionHistoryModelOut>();
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).Returns(expectedHistory);
+
+        // Act
+        var response = await _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history?dateTo={dateTo:yyyy-MM-dd}");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        _mockRedemptionLogic.Verify(s => s.GetRedemptionHistory(visitorId), Times.Once);
+        _mockRedemptionLogic.Verify(s => s.GetRedemptionHistoryWithDateRange(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Never);
+    }
 }
