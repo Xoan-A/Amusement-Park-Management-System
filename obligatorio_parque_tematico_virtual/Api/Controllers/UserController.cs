@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Models.In;
 using Models.Out;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Api.Controllers;
 
@@ -52,7 +53,7 @@ public class UserController : ControllerBase
     [Authorize]
     public async Task<IActionResult> ModifyUser(Guid userId, [FromBody] ModifyUserRequest request)
     {
-        string actorSubClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? string.Empty;
+        string actorSubClaim = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? string.Empty;
         UserResponse updated = await _userLogic.ModifyUser(userId, actorSubClaim, request);
         return Ok(updated);
     }
