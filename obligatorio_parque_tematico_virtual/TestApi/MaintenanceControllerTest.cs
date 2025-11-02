@@ -467,6 +467,36 @@ public class MaintenanceControllerTest
     }
 
     [TestMethod]
+    public async Task GetRecordsByOperator_AsAdministrator_ReturnsOk()
+    {
+        // Arrange
+        var operatorId = Guid.NewGuid();
+        var records = new List<MaintenanceRecordResponse>
+        {
+            new MaintenanceRecordResponse
+            {
+                Id = Guid.NewGuid(),
+                AttractionId = Guid.NewGuid(),
+                AttractionName = "Roller Coaster",
+                PerformedBy = operatorId,
+                PerformedByName = "John Operator",
+                MaintenanceType = "Inspection",
+                Description = "Completed inspection",
+                PerformedDate = DateTime.UtcNow,
+                Duration = TimeSpan.FromHours(2),
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+        _mockMaintenanceLogic.Setup(m => m.GetRecordsByOperator(operatorId)).ReturnsAsync(records);
+
+        // Act
+        var response = await _adminClient.GetAsync($"/api/maintenance/records/operator/{operatorId}");
+
+        // Assert
+        Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [TestMethod]
     public async Task GetUnscheduledMaintenance_ReturnsOk()
     {
         // Arrange
