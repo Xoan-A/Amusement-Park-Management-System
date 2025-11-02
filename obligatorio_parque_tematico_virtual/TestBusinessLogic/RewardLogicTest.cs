@@ -1,6 +1,8 @@
 using BusinessLogic;
 using Domain;
 using IDataAccess;
+using Models.In;
+using Models.Out;
 using Moq;
 
 namespace TestBusinessLogic
@@ -22,7 +24,7 @@ namespace TestBusinessLogic
         public void CreateReward_ValidReward_Success()
         {
             // Arrange
-            var reward = new Reward
+            var rewardModelIn = new RewardModelIn
             {
                 Name = "VIP Access",
                 Description = "Get VIP access for a day",
@@ -31,11 +33,11 @@ namespace TestBusinessLogic
                 RequiredMembershipLevel = MembershipLevel.Premium
             };
 
-            _mockRewardRepository.Setup(r => r.GetByName(reward.Name)).Returns((Reward?)null);
+            _mockRewardRepository.Setup(r => r.GetByName(rewardModelIn.Name)).Returns((Reward?)null);
             _mockRewardRepository.Setup(r => r.Create(It.IsAny<Reward>()));
 
             // Act
-            var createdReward = _rewardLogic.CreateReward(reward);
+            var createdReward = _rewardLogic.CreateReward(rewardModelIn);
 
             // Assert
             Assert.IsNotNull(createdReward);
@@ -57,7 +59,7 @@ namespace TestBusinessLogic
                 AvailableQuantity = 5
             };
 
-            var newReward = new Reward
+            var newRewardModelIn = new RewardModelIn
             {
                 Name = "Existing Reward",
                 Description = "Duplicate name",
@@ -65,10 +67,10 @@ namespace TestBusinessLogic
                 AvailableQuantity = 10
             };
 
-            _mockRewardRepository.Setup(r => r.GetByName(newReward.Name)).Returns(existingReward);
+            _mockRewardRepository.Setup(r => r.GetByName(newRewardModelIn.Name)).Returns(existingReward);
 
             // Act & Assert
-            _rewardLogic.CreateReward(newReward);
+            _rewardLogic.CreateReward(newRewardModelIn);
         }
 
         [TestMethod]
@@ -165,9 +167,8 @@ namespace TestBusinessLogic
                 AvailableQuantity = 10
             };
 
-            var updatedReward = new Reward
+            var updatedRewardModelIn = new RewardModelIn
             {
-                Id = rewardId,
                 Name = "Updated Name",
                 Description = "Updated description",
                 PointsCost = 150,
@@ -179,7 +180,7 @@ namespace TestBusinessLogic
             _mockRewardRepository.Setup(r => r.Update(It.IsAny<Reward>()));
 
             // Act
-            var result = _rewardLogic.UpdateReward(rewardId, updatedReward);
+            var result = _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
 
             // Assert
             Assert.IsNotNull(result);
@@ -194,7 +195,7 @@ namespace TestBusinessLogic
         {
             // Arrange
             var rewardId = Guid.NewGuid();
-            var updatedReward = new Reward
+            var updatedRewardModelIn = new RewardModelIn
             {
                 Name = "Updated Name",
                 Description = "Updated description",
@@ -205,7 +206,7 @@ namespace TestBusinessLogic
             _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns((Reward?)null);
 
             // Act & Assert
-            _rewardLogic.UpdateReward(rewardId, updatedReward);
+            _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
         }
 
         [TestMethod]
@@ -232,9 +233,8 @@ namespace TestBusinessLogic
                 AvailableQuantity = 5
             };
 
-            var updatedReward = new Reward
+            var updatedRewardModelIn = new RewardModelIn
             {
-                Id = rewardId,
                 Name = "Another Reward", // Trying to use another reward's name
                 Description = "Updated description",
                 PointsCost = 150,
@@ -245,7 +245,7 @@ namespace TestBusinessLogic
             _mockRewardRepository.Setup(r => r.GetByName("Another Reward")).Returns(anotherReward);
 
             // Act & Assert
-            _rewardLogic.UpdateReward(rewardId, updatedReward);
+            _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
         }
 
         [TestMethod]
@@ -262,9 +262,8 @@ namespace TestBusinessLogic
                 AvailableQuantity = 10
             };
 
-            var updatedReward = new Reward
+            var updatedRewardModelIn = new RewardModelIn
             {
-                Id = rewardId,
                 Name = "Same Name", // Keeping the same name
                 Description = "Updated description",
                 PointsCost = 150,
@@ -276,7 +275,7 @@ namespace TestBusinessLogic
             _mockRewardRepository.Setup(r => r.Update(It.IsAny<Reward>()));
 
             // Act
-            var result = _rewardLogic.UpdateReward(rewardId, updatedReward);
+            var result = _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
 
             // Assert
             Assert.IsNotNull(result);

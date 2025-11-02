@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using BusinessLogic.Plugins;
 using IBusinessLogic.Strategy;
+using Models.Out;
 using System.Reflection;
 
 namespace BusinessLogic.Tests;

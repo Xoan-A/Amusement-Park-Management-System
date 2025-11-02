@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using IDataAccess;
-using Domain;
+using IBusinessLogic;
 using System.Security.Claims;
 
 namespace Api.Controllers;
@@ -10,11 +9,11 @@ namespace Api.Controllers;
 [Route("api/score-history")]
 public class ScoreHistoryController : ControllerBase
 {
-    private readonly IScoreHistoryRepository _scoreHistoryRepository;
+    private readonly IScoreHistoryLogic _scoreHistoryLogic;
 
-    public ScoreHistoryController(IScoreHistoryRepository scoreHistoryRepository)
+    public ScoreHistoryController(IScoreHistoryLogic scoreHistoryLogic)
     {
-        _scoreHistoryRepository = scoreHistoryRepository;
+        _scoreHistoryLogic = scoreHistoryLogic;
     }
 
     [HttpGet("my-history")]
@@ -22,63 +21,23 @@ public class ScoreHistoryController : ControllerBase
     public IActionResult GetMyScoreHistory()
     {
         var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
-        var history = _scoreHistoryRepository.GetByVisitor(userId);
-
-        return Ok(history.Select(h => new
-        {
-            h.Id,
-            h.CreatedAt,
-            h.Points,
-            Origin = h.Origin.ToString(),
-            h.StrategyName,
-            h.Description,
-            h.RelatedEntityId
-        }));
+        var history = _scoreHistoryLogic.GetMyScoreHistory(userId);
+        return Ok(history);
     }
 
     [HttpGet("visitor/{visitorId}")]
     [Authorize(Roles = "Administrator")]
     public IActionResult GetVisitorHistory(Guid visitorId, [FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo)
     {
-        List<ScoreHistory> history;
-
-        if (dateFrom.HasValue && dateTo.HasValue)
-        {
-            history = _scoreHistoryRepository.GetByVisitorAndDateRange(visitorId, dateFrom.Value, dateTo.Value);
-        }
-        else
-        {
-            history = _scoreHistoryRepository.GetByVisitor(visitorId);
-        }
-
-        return Ok(history.Select(h => new
-        {
-            h.Id,
-            h.CreatedAt,
-            h.Points,
-            Origin = h.Origin.ToString(),
-            h.StrategyName,
-            h.Description,
-            h.RelatedEntityId
-        }));
+        var history = _scoreHistoryLogic.GetVisitorScoreHistory(visitorId, dateFrom, dateTo);
+        return Ok(history);
     }
 
     [HttpGet]
     [Authorize(Roles = "Administrator")]
     public IActionResult GetAllHistory()
     {
-        var history = _scoreHistoryRepository.GetAll();
-
-        return Ok(history.Select(h => new
-        {
-            h.Id,
-            h.VisitorId,
-            VisitorName = h.Visitor != null ? $"{h.Visitor.Name} {h.Visitor.LastName}" : "Unknown",
-            h.CreatedAt,
-            h.Points,
-            Origin = h.Origin.ToString(),
-            h.StrategyName,
-            h.Description
-        }));
+        var history = _scoreHistoryLogic.GetAllScoreHistory();
+        return Ok(history);
     }
 }

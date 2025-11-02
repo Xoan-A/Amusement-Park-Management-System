@@ -1,12 +1,12 @@
-using Domain;
 using IBusinessLogic.Strategy;
+using Models.Out;
 
 namespace IBusinessLogic;
 
 public interface IPluginLoader
 {
-    List<PluginInfo> LoadPlugins();
-    PluginInfo? GetPluginByName(string name);
+    List<PluginInfoResponse> LoadPlugins();
+    PluginInfoResponse? GetPluginByName(string name);
     IConcreteStrategy CreateStrategyInstance(string name);
     List<string> GetAvailablePluginNames();
 }

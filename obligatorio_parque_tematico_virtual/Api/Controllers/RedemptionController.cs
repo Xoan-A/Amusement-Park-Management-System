@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
 using Microsoft.AspNetCore.Authorization;
 using Models.In;
-using Models.Out;
-using Domain;
 using System.Security.Claims;
 
 namespace Api.Controllers;
@@ -24,11 +22,8 @@ public class RedemptionController : ControllerBase
     public IActionResult RedeemReward([FromBody] RedeemRewardModelIn redeemRequest)
     {
         Guid visitorId = GetCurrentUserId();
-        RedemptionHistory redemption = _redemptionLogic.RedeemReward(visitorId, redeemRequest.RewardId);
-
-        RedemptionHistoryModelOut response = MapToModelOut(redemption);
-
-        return CreatedAtAction(nameof(GetMyRedemptionHistory), null, response);
+        var redemption = _redemptionLogic.RedeemReward(visitorId, redeemRequest.RewardId);
+        return CreatedAtAction(nameof(GetMyRedemptionHistory), null, redemption);
     }
 
     [HttpGet("my-history")]
@@ -37,40 +32,22 @@ public class RedemptionController : ControllerBase
     {
         Guid visitorId = GetCurrentUserId();
 
-        List<RedemptionHistory> history;
+        var history = dateFrom.HasValue && dateTo.HasValue
+            ? _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom.Value, dateTo.Value)
+            : _redemptionLogic.GetRedemptionHistory(visitorId);
 
-        if (dateFrom.HasValue && dateTo.HasValue)
-        {
-            history = _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom.Value, dateTo.Value);
-        }
-        else
-        {
-            history = _redemptionLogic.GetRedemptionHistory(visitorId);
-        }
-
-        List<RedemptionHistoryModelOut> response = history.Select(h => MapToModelOut(h)).ToList();
-
-        return Ok(response);
+        return Ok(history);
     }
 
     [HttpGet("visitor/{visitorId}/history")]
     [Authorize(Roles = "Administrator")]
     public IActionResult GetVisitorRedemptionHistory(Guid visitorId, [FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo)
     {
-        List<RedemptionHistory> history;
+        var history = dateFrom.HasValue && dateTo.HasValue
+            ? _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom.Value, dateTo.Value)
+            : _redemptionLogic.GetRedemptionHistory(visitorId);
 
-        if (dateFrom.HasValue && dateTo.HasValue)
-        {
-            history = _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom.Value, dateTo.Value);
-        }
-        else
-        {
-            history = _redemptionLogic.GetRedemptionHistory(visitorId);
-        }
-
-        List<RedemptionHistoryModelOut> response = history.Select(h => MapToModelOut(h)).ToList();
-
-        return Ok(response);
+        return Ok(history);
     }
 
     private Guid GetCurrentUserId()
@@ -81,19 +58,5 @@ public class RedemptionController : ControllerBase
             throw new UnauthorizedAccessException("User ID not found in token");
         }
         return Guid.Parse(userIdClaim);
-    }
-
-    private RedemptionHistoryModelOut MapToModelOut(RedemptionHistory redemption)
-    {
-        return new RedemptionHistoryModelOut
-        {
-            Id = redemption.Id,
-            VisitorId = redemption.VisitorId,
-            RewardId = redemption.RewardId,
-            RedeemedAt = redemption.RedeemedAt,
-            PointsSpent = redemption.PointsSpent,
-            RewardName = redemption.Reward?.Name,
-            VisitorName = redemption.Visitor != null ? $"{redemption.Visitor.Name} {redemption.Visitor.LastName}" : null
-        };
     }
 }

@@ -87,9 +87,9 @@ public class PluginControllerTest
     public async Task GetAvailablePlugins_AsAdministrator_ReturnsOk()
     {
         // Arrange
-        var plugins = new List<PluginInfo>
+        var plugins = new List<PluginInfoResponse>
         {
-            new PluginInfo
+            new PluginInfoResponse
             {
                 Name = "PuntuacionPorHora",
                 Description = "Test plugin",
@@ -111,7 +111,7 @@ public class PluginControllerTest
     public async Task GetPluginByName_AsAdministrator_ReturnsOk()
     {
         // Arrange
-        var plugin = new PluginInfo
+        var plugin = new PluginInfoResponse
         {
             Name = "PuntuacionPorHora",
             Description = "Test plugin",
@@ -132,7 +132,7 @@ public class PluginControllerTest
     public async Task GetPluginByName_NonExistent_ReturnsNotFound()
     {
         // Arrange
-        _mockPluginLoader.Setup(p => p.GetPluginByName("NonExistent")).Returns((PluginInfo?)null);
+        _mockPluginLoader.Setup(p => p.GetPluginByName("NonExistent")).Returns((PluginInfoResponse?)null);
 
         // Act
         var response = await _adminClient.GetAsync("/api/plugins/NonExistent");

@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
 using Microsoft.AspNetCore.Authorization;
 using Models.In;
-using Models.Out;
-using Domain;
 
 namespace Api.Controllers;
 
@@ -22,56 +20,32 @@ public class RewardController : ControllerBase
     [Authorize]
     public IActionResult GetAllRewards()
     {
-        List<Reward> rewards = _rewardLogic.GetAllRewards();
-        List<RewardModelOut> response = rewards.Select(r => MapToModelOut(r)).ToList();
-        return Ok(response);
+        var rewards = _rewardLogic.GetAllRewards();
+        return Ok(rewards);
     }
 
     [HttpGet("{id}")]
     [Authorize]
     public IActionResult GetRewardById(Guid id)
     {
-        Reward reward = _rewardLogic.GetRewardById(id);
-        RewardModelOut response = MapToModelOut(reward);
-        return Ok(response);
+        var reward = _rewardLogic.GetRewardById(id);
+        return Ok(reward);
     }
 
     [HttpPost]
     [Authorize(Roles = "Administrator")]
     public IActionResult CreateReward([FromBody] RewardModelIn rewardModelIn)
     {
-        Reward reward = new Reward
-        {
-            Name = rewardModelIn.Name,
-            Description = rewardModelIn.Description,
-            PointsCost = rewardModelIn.PointsCost,
-            AvailableQuantity = rewardModelIn.AvailableQuantity,
-            RequiredMembershipLevel = rewardModelIn.RequiredMembershipLevel
-        };
-
-        Reward createdReward = _rewardLogic.CreateReward(reward);
-        RewardModelOut response = MapToModelOut(createdReward);
-
-        return CreatedAtAction(nameof(GetRewardById), new { id = createdReward.Id }, response);
+        var createdReward = _rewardLogic.CreateReward(rewardModelIn);
+        return CreatedAtAction(nameof(GetRewardById), new { id = createdReward.Id }, createdReward);
     }
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Administrator")]
     public IActionResult UpdateReward(Guid id, [FromBody] RewardModelIn rewardModelIn)
     {
-        Reward reward = new Reward
-        {
-            Name = rewardModelIn.Name,
-            Description = rewardModelIn.Description,
-            PointsCost = rewardModelIn.PointsCost,
-            AvailableQuantity = rewardModelIn.AvailableQuantity,
-            RequiredMembershipLevel = rewardModelIn.RequiredMembershipLevel
-        };
-
-        Reward updatedReward = _rewardLogic.UpdateReward(id, reward);
-        RewardModelOut response = MapToModelOut(updatedReward);
-
-        return Ok(response);
+        var updatedReward = _rewardLogic.UpdateReward(id, rewardModelIn);
+        return Ok(updatedReward);
     }
 
     [HttpDelete("{id}")]
@@ -86,22 +60,7 @@ public class RewardController : ControllerBase
     [Authorize]
     public IActionResult GetAvailableRewards()
     {
-        List<Reward> rewards = _rewardLogic.GetAvailableRewards();
-        List<RewardModelOut> response = rewards.Select(r => MapToModelOut(r)).ToList();
-        return Ok(response);
-    }
-
-    private RewardModelOut MapToModelOut(Reward reward)
-    {
-        return new RewardModelOut
-        {
-            Id = reward.Id,
-            Name = reward.Name,
-            Description = reward.Description,
-            PointsCost = reward.PointsCost,
-            AvailableQuantity = reward.AvailableQuantity,
-            RequiredMembershipLevel = reward.RequiredMembershipLevel,
-            IsAvailable = reward.IsAvailable()
-        };
+        var rewards = _rewardLogic.GetAvailableRewards();
+        return Ok(rewards);
     }
 }

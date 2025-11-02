@@ -2,6 +2,7 @@ using System.Reflection;
 using IBusinessLogic.Strategy;
 using IBusinessLogic;
 using Domain;
+using Models.Out;
 
 namespace BusinessLogic.Plugins;
 
@@ -17,13 +18,13 @@ public class PluginLoader : IPluginLoader
         LoadPlugins();
     }
 
-    public List<PluginInfo> LoadPlugins()
+    public List<PluginInfoResponse> LoadPlugins()
     {
         _availablePlugins.Clear();
 
         if (!Directory.Exists(_pluginsPath))
         {
-            return new List<PluginInfo>();
+            return new List<PluginInfoResponse>();
         }
 
         string[] dllFiles = Directory.GetFiles(_pluginsPath, "*.dll");
@@ -42,7 +43,7 @@ public class PluginLoader : IPluginLoader
             }
         }
 
-        return _availablePlugins.Values.ToList();
+        return _availablePlugins.Values.Select(MapToResponse).ToList();
     }
 
     private void DiscoverPlugins(Assembly assembly, string assemblyPath)
@@ -89,9 +90,10 @@ public class PluginLoader : IPluginLoader
         }
     }
 
-    public PluginInfo? GetPluginByName(string name)
+    public PluginInfoResponse? GetPluginByName(string name)
     {
-        return _availablePlugins.GetValueOrDefault(name);
+        var pluginInfo = _availablePlugins.GetValueOrDefault(name);
+        return pluginInfo != null ? MapToResponse(pluginInfo) : null;
     }
 
     public IConcreteStrategy CreateStrategyInstance(string name)
@@ -121,6 +123,17 @@ public class PluginLoader : IPluginLoader
     public List<string> GetAvailablePluginNames()
     {
         return _availablePlugins.Keys.ToList();
+    }
+
+    private PluginInfoResponse MapToResponse(PluginInfo pluginInfo)
+    {
+        return new PluginInfoResponse
+        {
+            Name = pluginInfo.Name,
+            Description = pluginInfo.Description,
+            Author = pluginInfo.Author,
+            Version = pluginInfo.Version
+        };
     }
 }
 

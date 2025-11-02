@@ -111,7 +111,7 @@ public class RedemptionControllerTest
     {
         // Arrange
         var rewardId = Guid.NewGuid();
-        var redemption = new RedemptionHistory
+        var redemption = new RedemptionHistoryModelOut
         {
             Id = Guid.NewGuid(),
             VisitorId = _visitorUserId,
@@ -227,9 +227,9 @@ public class RedemptionControllerTest
     public async Task GetMyRedemptionHistory_AsVisitor_ReturnsOk()
     {
         // Arrange
-        var history = new List<RedemptionHistory>
+        var history = new List<RedemptionHistoryModelOut>
         {
-            new RedemptionHistory
+            new RedemptionHistoryModelOut
             {
                 Id = Guid.NewGuid(),
                 VisitorId = _visitorUserId,
@@ -237,7 +237,7 @@ public class RedemptionControllerTest
                 RedeemedAt = DateTime.Now.AddDays(-5),
                 PointsSpent = 500
             },
-            new RedemptionHistory
+            new RedemptionHistoryModelOut
             {
                 Id = Guid.NewGuid(),
                 VisitorId = _visitorUserId,
@@ -274,9 +274,9 @@ public class RedemptionControllerTest
     {
         // Arrange
         var visitorId = Guid.NewGuid();
-        var history = new List<RedemptionHistory>
+        var history = new List<RedemptionHistoryModelOut>
         {
-            new RedemptionHistory
+            new RedemptionHistoryModelOut
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitorId,
@@ -314,9 +314,9 @@ public class RedemptionControllerTest
         // Arrange
         var dateFrom = DateTime.Now.AddDays(-7);
         var dateTo = DateTime.Now;
-        var history = new List<RedemptionHistory>
+        var history = new List<RedemptionHistoryModelOut>
         {
-            new RedemptionHistory
+            new RedemptionHistoryModelOut
             {
                 Id = Guid.NewGuid(),
                 VisitorId = _visitorUserId,

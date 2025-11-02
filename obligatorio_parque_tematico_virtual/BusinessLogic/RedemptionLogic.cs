@@ -2,6 +2,7 @@ using BusinessLogic.Specifications;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
+using Models.Out;
 
 namespace BusinessLogic
 {
@@ -21,7 +22,7 @@ namespace BusinessLogic
             _redemptionHistoryRepository = redemptionHistoryRepository;
         }
 
-        public RedemptionHistory RedeemReward(Guid visitorId, Guid rewardId)
+        public RedemptionHistoryModelOut RedeemReward(Guid visitorId, Guid rewardId)
         {
             var visitor = _userRepository.GetById(visitorId).Result;
             if (visitor == null)
@@ -53,17 +54,19 @@ namespace BusinessLogic
             _userRepository.Update(visitor).Wait();
             _rewardRepository.Update(reward);
 
-            return redemption;
+            return MapToModelOut(redemption, visitor.Name, reward.Name);
         }
 
-        public List<RedemptionHistory> GetRedemptionHistory(Guid visitorId)
+        public List<RedemptionHistoryModelOut> GetRedemptionHistory(Guid visitorId)
         {
-            return _redemptionHistoryRepository.GetByVisitorId(visitorId);
+            var redemptions = _redemptionHistoryRepository.GetByVisitorId(visitorId);
+            return MapToModelOutList(redemptions);
         }
 
-        public List<RedemptionHistory> GetRedemptionHistoryWithDateRange(Guid visitorId, DateTime dateFrom, DateTime dateTo)
+        public List<RedemptionHistoryModelOut> GetRedemptionHistoryWithDateRange(Guid visitorId, DateTime dateFrom, DateTime dateTo)
         {
-            return _redemptionHistoryRepository.GetByVisitorIdWithDateRange(visitorId, dateFrom, dateTo);
+            var redemptions = _redemptionHistoryRepository.GetByVisitorIdWithDateRange(visitorId, dateFrom, dateTo);
+            return MapToModelOutList(redemptions);
         }
 
         private void ValidateRedemptionEligibility(User visitor, Reward reward)
@@ -88,6 +91,34 @@ namespace BusinessLogic
             {
                 throw new InvalidOperationException($"Reward '{reward.Name}' is not available (out of stock)");
             }
+        }
+
+        private List<RedemptionHistoryModelOut> MapToModelOutList(List<RedemptionHistory> redemptions)
+        {
+            return redemptions.Select(r => new RedemptionHistoryModelOut
+            {
+                Id = r.Id,
+                VisitorId = r.VisitorId,
+                RewardId = r.RewardId,
+                RedeemedAt = r.RedeemedAt,
+                PointsSpent = r.PointsSpent,
+                RewardName = r.Reward?.Name,
+                VisitorName = r.Visitor?.Name
+            }).ToList();
+        }
+
+        private RedemptionHistoryModelOut MapToModelOut(RedemptionHistory redemption, string? visitorName, string? rewardName)
+        {
+            return new RedemptionHistoryModelOut
+            {
+                Id = redemption.Id,
+                VisitorId = redemption.VisitorId,
+                RewardId = redemption.RewardId,
+                RedeemedAt = redemption.RedeemedAt,
+                PointsSpent = redemption.PointsSpent,
+                RewardName = rewardName,
+                VisitorName = visitorName
+            };
         }
     }
 }

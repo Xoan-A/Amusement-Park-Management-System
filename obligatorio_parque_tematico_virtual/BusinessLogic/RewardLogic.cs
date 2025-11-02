@@ -1,6 +1,8 @@
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
+using Models.In;
+using Models.Out;
 
 namespace BusinessLogic
 {
@@ -13,31 +15,41 @@ namespace BusinessLogic
             _rewardRepository = rewardRepository;
         }
 
-        public Reward CreateReward(Reward reward)
+        public RewardModelOut CreateReward(RewardModelIn rewardIn)
         {
-            if (reward == null)
+            if (rewardIn == null)
             {
-                throw new ArgumentNullException(nameof(reward));
+                throw new ArgumentNullException(nameof(rewardIn));
             }
 
-            var existingReward = _rewardRepository.GetByName(reward.Name);
+            var existingReward = _rewardRepository.GetByName(rewardIn.Name);
             if (existingReward != null)
             {
-                throw new ArgumentException($"A reward with the name '{reward.Name}' already exists");
+                throw new ArgumentException($"A reward with the name '{rewardIn.Name}' already exists");
             }
 
-            reward.Id = Guid.NewGuid();
+            var reward = new Reward
+            {
+                Id = Guid.NewGuid(),
+                Name = rewardIn.Name,
+                Description = rewardIn.Description,
+                PointsCost = rewardIn.PointsCost,
+                AvailableQuantity = rewardIn.AvailableQuantity,
+                RequiredMembershipLevel = rewardIn.RequiredMembershipLevel
+            };
+
             _rewardRepository.Create(reward);
 
-            return reward;
+            return MapToModelOut(reward);
         }
 
-        public List<Reward> GetAllRewards()
+        public List<RewardModelOut> GetAllRewards()
         {
-            return _rewardRepository.GetAll();
+            var rewards = _rewardRepository.GetAll();
+            return rewards.Select(MapToModelOut).ToList();
         }
 
-        public Reward GetRewardById(Guid id)
+        public RewardModelOut GetRewardById(Guid id)
         {
             var reward = _rewardRepository.GetById(id);
             if (reward == null)
@@ -45,10 +57,10 @@ namespace BusinessLogic
                 throw new KeyNotFoundException($"Reward with ID '{id}' not found");
             }
 
-            return reward;
+            return MapToModelOut(reward);
         }
 
-        public Reward UpdateReward(Guid id, Reward reward)
+        public RewardModelOut UpdateReward(Guid id, RewardModelIn rewardIn)
         {
             var existingReward = _rewardRepository.GetById(id);
             if (existingReward == null)
@@ -56,21 +68,21 @@ namespace BusinessLogic
                 throw new KeyNotFoundException($"Reward with ID '{id}' not found");
             }
 
-            var rewardWithSameName = _rewardRepository.GetByName(reward.Name);
+            var rewardWithSameName = _rewardRepository.GetByName(rewardIn.Name);
             if (rewardWithSameName != null && rewardWithSameName.Id != id)
             {
-                throw new ArgumentException($"A reward with the name '{reward.Name}' already exists");
+                throw new ArgumentException($"A reward with the name '{rewardIn.Name}' already exists");
             }
 
-            existingReward.Name = reward.Name;
-            existingReward.Description = reward.Description;
-            existingReward.PointsCost = reward.PointsCost;
-            existingReward.AvailableQuantity = reward.AvailableQuantity;
-            existingReward.RequiredMembershipLevel = reward.RequiredMembershipLevel;
+            existingReward.Name = rewardIn.Name;
+            existingReward.Description = rewardIn.Description;
+            existingReward.PointsCost = rewardIn.PointsCost;
+            existingReward.AvailableQuantity = rewardIn.AvailableQuantity;
+            existingReward.RequiredMembershipLevel = rewardIn.RequiredMembershipLevel;
 
             _rewardRepository.Update(existingReward);
 
-            return existingReward;
+            return MapToModelOut(existingReward);
         }
 
         public void DeleteReward(Guid id)
@@ -84,14 +96,30 @@ namespace BusinessLogic
             _rewardRepository.Delete(id);
         }
 
-        public List<Reward> GetAvailableRewards()
+        public List<RewardModelOut> GetAvailableRewards()
         {
-            return _rewardRepository.GetAvailableRewards();
+            var rewards = _rewardRepository.GetAvailableRewards();
+            return rewards.Select(MapToModelOut).ToList();
         }
 
-        public List<Reward> GetRewardsByMembershipLevel(MembershipLevel? level)
+        public List<RewardModelOut> GetRewardsByMembershipLevel(MembershipLevel? level)
         {
-            return _rewardRepository.GetRewardsByMembershipLevel(level);
+            var rewards = _rewardRepository.GetRewardsByMembershipLevel(level);
+            return rewards.Select(MapToModelOut).ToList();
+        }
+
+        private RewardModelOut MapToModelOut(Reward reward)
+        {
+            return new RewardModelOut
+            {
+                Id = reward.Id,
+                Name = reward.Name,
+                Description = reward.Description,
+                PointsCost = reward.PointsCost,
+                AvailableQuantity = reward.AvailableQuantity,
+                RequiredMembershipLevel = reward.RequiredMembershipLevel,
+                IsAvailable = reward.IsAvailable()
+            };
         }
     }
 }

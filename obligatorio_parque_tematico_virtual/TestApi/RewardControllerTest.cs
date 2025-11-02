@@ -108,23 +108,25 @@ public class RewardControllerTest
     public async Task GetAllRewards_AsAdmin_ReturnsOk()
     {
         // Arrange
-        var rewards = new List<Reward>
+        var rewards = new List<RewardModelOut>
         {
-            new Reward
+            new RewardModelOut
             {
                 Id = Guid.NewGuid(),
                 Name = "Reward 1",
                 Description = "Description 1",
                 PointsCost = 100,
-                AvailableQuantity = 10
+                AvailableQuantity = 10,
+                IsAvailable = true
             },
-            new Reward
+            new RewardModelOut
             {
                 Id = Guid.NewGuid(),
                 Name = "Reward 2",
                 Description = "Description 2",
                 PointsCost = 200,
-                AvailableQuantity = 5
+                AvailableQuantity = 5,
+                IsAvailable = true
             }
         };
 
@@ -144,15 +146,16 @@ public class RewardControllerTest
     public async Task GetAllRewards_AsVisitor_ReturnsOk()
     {
         // Arrange
-        var rewards = new List<Reward>
+        var rewards = new List<RewardModelOut>
         {
-            new Reward
+            new RewardModelOut
             {
                 Id = Guid.NewGuid(),
                 Name = "Reward 1",
                 Description = "Description 1",
                 PointsCost = 100,
-                AvailableQuantity = 10
+                AvailableQuantity = 10,
+                IsAvailable = true
             }
         };
 
@@ -170,13 +173,14 @@ public class RewardControllerTest
     {
         // Arrange
         var rewardId = Guid.NewGuid();
-        var reward = new Reward
+        var reward = new RewardModelOut
         {
             Id = rewardId,
             Name = "Test Reward",
             Description = "Test description",
             PointsCost = 300,
-            AvailableQuantity = 7
+            AvailableQuantity = 7,
+            IsAvailable = true
         };
 
         _mockRewardLogic.Setup(s => s.GetRewardById(rewardId)).Returns(reward);
@@ -218,17 +222,18 @@ public class RewardControllerTest
             RequiredMembershipLevel = MembershipLevel.Premium
         };
 
-        var createdReward = new Reward
+        var createdReward = new RewardModelOut
         {
             Id = Guid.NewGuid(),
             Name = rewardModelIn.Name,
             Description = rewardModelIn.Description,
             PointsCost = rewardModelIn.PointsCost,
             AvailableQuantity = rewardModelIn.AvailableQuantity,
-            RequiredMembershipLevel = rewardModelIn.RequiredMembershipLevel
+            RequiredMembershipLevel = rewardModelIn.RequiredMembershipLevel,
+            IsAvailable = true
         };
 
-        _mockRewardLogic.Setup(s => s.CreateReward(It.IsAny<Reward>())).Returns(createdReward);
+        _mockRewardLogic.Setup(s => s.CreateReward(It.IsAny<RewardModelIn>())).Returns(createdReward);
 
         var json = JsonSerializer.Serialize(rewardModelIn);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -297,7 +302,7 @@ public class RewardControllerTest
             AvailableQuantity = 10
         };
 
-        _mockRewardLogic.Setup(s => s.CreateReward(It.IsAny<Reward>()))
+        _mockRewardLogic.Setup(s => s.CreateReward(It.IsAny<RewardModelIn>()))
             .Throws(new ArgumentException("A reward with this name already exists"));
 
         var json = JsonSerializer.Serialize(rewardModelIn);
@@ -324,17 +329,18 @@ public class RewardControllerTest
             RequiredMembershipLevel = MembershipLevel.VIP
         };
 
-        var updatedReward = new Reward
+        var updatedReward = new RewardModelOut
         {
             Id = rewardId,
             Name = rewardModelIn.Name,
             Description = rewardModelIn.Description,
             PointsCost = rewardModelIn.PointsCost,
             AvailableQuantity = rewardModelIn.AvailableQuantity,
-            RequiredMembershipLevel = rewardModelIn.RequiredMembershipLevel
+            RequiredMembershipLevel = rewardModelIn.RequiredMembershipLevel,
+            IsAvailable = true
         };
 
-        _mockRewardLogic.Setup(s => s.UpdateReward(rewardId, It.IsAny<Reward>())).Returns(updatedReward);
+        _mockRewardLogic.Setup(s => s.UpdateReward(rewardId, It.IsAny<RewardModelIn>())).Returns(updatedReward);
 
         var json = JsonSerializer.Serialize(rewardModelIn);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -382,7 +388,7 @@ public class RewardControllerTest
             AvailableQuantity = 8
         };
 
-        _mockRewardLogic.Setup(s => s.UpdateReward(rewardId, It.IsAny<Reward>()))
+        _mockRewardLogic.Setup(s => s.UpdateReward(rewardId, It.IsAny<RewardModelIn>()))
             .Throws(new KeyNotFoundException("Reward not found"));
 
         var json = JsonSerializer.Serialize(rewardModelIn);
@@ -441,23 +447,25 @@ public class RewardControllerTest
     public async Task GetAvailableRewards_ReturnsOnlyAvailable()
     {
         // Arrange
-        var availableRewards = new List<Reward>
+        var availableRewards = new List<RewardModelOut>
         {
-            new Reward
+            new RewardModelOut
             {
                 Id = Guid.NewGuid(),
                 Name = "Available 1",
                 Description = "Has stock",
                 PointsCost = 100,
-                AvailableQuantity = 5
+                AvailableQuantity = 5,
+                IsAvailable = true
             },
-            new Reward
+            new RewardModelOut
             {
                 Id = Guid.NewGuid(),
                 Name = "Available 2",
                 Description = "Has stock",
                 PointsCost = 200,
-                AvailableQuantity = 3
+                AvailableQuantity = 3,
+                IsAvailable = true
             }
         };
 
