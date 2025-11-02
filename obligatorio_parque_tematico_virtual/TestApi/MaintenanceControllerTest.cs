@@ -267,6 +267,36 @@ public class MaintenanceControllerTest
     }
 
     [TestMethod]
+    public async Task GetSchedulesByAttraction_AsAdministrator_ReturnsOk()
+    {
+        // Arrange
+        var attractionId = Guid.NewGuid();
+        var schedules = new List<MaintenanceScheduleResponse>
+        {
+            new MaintenanceScheduleResponse
+            {
+                Id = Guid.NewGuid(),
+                AttractionId = attractionId,
+                AttractionName = "Roller Coaster",
+                ScheduledDate = DateTime.Now.AddDays(3),
+                MaintenanceType = "Inspection",
+                Description = "Routine inspection",
+                Status = "Pending",
+                CreatedAt = DateTime.UtcNow,
+                IsOverdue = false
+            }
+        };
+
+        _mockMaintenanceLogic.Setup(m => m.GetSchedulesByAttraction(attractionId)).ReturnsAsync(schedules);
+
+        // Act
+        var response = await _adminClient.GetAsync($"/api/maintenance/schedules/attraction/{attractionId}");
+
+        // Assert
+        Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [TestMethod]
     public async Task UpdateScheduleStatus_AsAdministrator_ReturnsOk()
     {
         // Arrange
