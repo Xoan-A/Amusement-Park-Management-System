@@ -303,7 +303,11 @@ namespace ApiTests
             Guid userId = Guid.NewGuid();
             UserResponse user = new UserResponse
             {
-                Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>()
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@example.com",
+                UserRoles = new List<string>()
             };
             string token = tokenService.GenerateToken(user);
             HttpClient authedClient = _factory.CreateClient();
@@ -361,7 +365,12 @@ namespace ApiTests
         {
             Guid userId = Guid.NewGuid();
             ModifyUserRequest request = new ModifyUserRequest
-                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "a@b.com",
+                Password = "p"
+            };
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -388,7 +397,10 @@ namespace ApiTests
             Guid routeUserId = Guid.NewGuid();
             UserResponse tokenUser = new UserResponse
             {
-                Id = Guid.NewGuid(), Name = "Other", LastName = "User", Email = "o@u.com",
+                Id = Guid.NewGuid(),
+                Name = "Other",
+                LastName = "User",
+                Email = "o@u.com",
                 UserRoles = new List<string>()
             };
             string token = tokenService.GenerateToken(tokenUser);
@@ -397,7 +409,12 @@ namespace ApiTests
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             ModifyUserRequest request = new ModifyUserRequest
-                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "a@b.com",
+                Password = "p"
+            };
 
             _mockUserLogic
                 .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
@@ -437,7 +454,12 @@ namespace ApiTests
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             ModifyUserRequest request = new ModifyUserRequest
-                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "a@b.com",
+                Password = "p"
+            };
 
             _mockUserLogic
                 .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
@@ -475,7 +497,12 @@ namespace ApiTests
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             ModifyUserRequest request = new ModifyUserRequest
-                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "a@b.com",
+                Password = "p"
+            };
 
             _mockUserLogic
                 .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
@@ -513,7 +540,12 @@ namespace ApiTests
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             ModifyUserRequest request = new ModifyUserRequest
-                { Name = "", LastName = "B", Email = "a@b.com", Password = "p" };
+            {
+                Name = "",
+                LastName = "B",
+                Email = "a@b.com",
+                Password = "p"
+            };
 
             _mockUserLogic
                 .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
@@ -559,7 +591,12 @@ namespace ApiTests
 
             Guid userId = Guid.NewGuid();
             ModifyUserRequest request = new ModifyUserRequest
-                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            {
+                Name = "A",
+                LastName = "B",
+                Email = "a@b.com",
+                Password = "p"
+            };
 
             _mockUserLogic
                 .Setup(l => l.ModifyUser(It.IsAny<Guid>(), null, It.IsAny<ModifyUserRequest>()))
