@@ -59,4 +59,56 @@ public class PluginLoaderTest
             _pluginLoader.CreateStrategyInstance("NonExistent");
         });
     }
+
+    [TestMethod]
+    public void LoadPlugins_NonExistentDirectory_ReturnsEmptyList()
+    {
+        // Arrange
+        string nonExistentPath = Path.Combine(Path.GetTempPath(), "NonExistentPlugins" + Guid.NewGuid());
+        var loader = new PluginLoader(nonExistentPath);
+
+        // Act
+        var plugins = loader.LoadPlugins();
+
+        // Assert
+        Assert.IsNotNull(plugins);
+        Assert.AreEqual(0, plugins.Count);
+    }
+
+    [TestMethod]
+    public void GetAvailablePluginNames_EmptyDirectory_ReturnsEmptyList()
+    {
+        // Act
+        var pluginNames = _pluginLoader.GetAvailablePluginNames();
+
+        // Assert
+        Assert.IsNotNull(pluginNames);
+        Assert.AreEqual(0, pluginNames.Count);
+    }
+
+    [TestMethod]
+    public void LoadPlugins_DirectoryWithNonDllFiles_ReturnsEmptyList()
+    {
+        // Arrange
+        string txtFile = Path.Combine(_testPluginsPath, "notaplugin.txt");
+        File.WriteAllText(txtFile, "This is not a DLL");
+
+        // Act
+        var plugins = _pluginLoader.LoadPlugins();
+
+        // Assert
+        Assert.IsNotNull(plugins);
+        Assert.AreEqual(0, plugins.Count);
+    }
+
+    [TestMethod]
+    public void LoadPlugins_CalledMultipleTimes_ClearsAndReloads()
+    {
+        // Act
+        var firstLoad = _pluginLoader.LoadPlugins();
+        var secondLoad = _pluginLoader.LoadPlugins();
+
+        // Assert
+        Assert.AreEqual(firstLoad.Count, secondLoad.Count);
+    }
 }
