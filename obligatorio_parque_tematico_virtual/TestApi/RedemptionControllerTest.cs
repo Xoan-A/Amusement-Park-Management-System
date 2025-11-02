@@ -505,8 +505,7 @@ public class RedemptionControllerTest
         // Act
         var response = await client.GetAsync("/api/redemptions/my-history");
 
-        // Assert - Should return 500 because UnauthorizedAccessException is thrown
-        // (Exception filter maps it to 500, not 401)
-        Assert.AreEqual(HttpStatusCode.InternalServerError, response.StatusCode);
+        // Assert - Returns 401 when NameIdentifier claim is missing
+        Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }

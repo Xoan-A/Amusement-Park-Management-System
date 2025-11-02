@@ -629,6 +629,12 @@ public class MaintenanceControllerTest
             Description = "Test"
         };
 
+        // Setup mock to handle any Guid as userId (including Guid.Empty when NameIdentifier is missing)
+        _mockMaintenanceLogic.Setup(m => m.CreateSchedule(
+            It.IsAny<MaintenanceScheduleRequest>(),
+            It.IsAny<Guid>()))
+            .ReturnsAsync(Guid.NewGuid());
+
         // Create a token without NameIdentifier claim
         var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
         var key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
@@ -656,9 +662,8 @@ public class MaintenanceControllerTest
         // Act
         var response = await client.PostAsync("/api/maintenance/schedules", content);
 
-        // Assert - Should still succeed with Guid.Empty
-        // The code uses ?? Guid.Empty.ToString() as fallback
-        Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.Created || response.StatusCode == System.Net.HttpStatusCode.OK);
+        // Assert - Returns 401 when NameIdentifier claim is missing
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [TestMethod]
@@ -673,6 +678,12 @@ public class MaintenanceControllerTest
             Description = "Test",
             Duration = TimeSpan.FromHours(1)
         };
+
+        // Setup mock to handle any Guid as userId (including Guid.Empty when NameIdentifier is missing)
+        _mockMaintenanceLogic.Setup(m => m.RecordMaintenance(
+            It.IsAny<MaintenanceRecordRequest>(),
+            It.IsAny<Guid>()))
+            .ReturnsAsync(Guid.NewGuid());
 
         // Create a token without NameIdentifier claim
         var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
@@ -701,8 +712,8 @@ public class MaintenanceControllerTest
         // Act
         var response = await client.PostAsync("/api/maintenance/records", content);
 
-        // Assert - Should still succeed with Guid.Empty
-        Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.Created || response.StatusCode == System.Net.HttpStatusCode.OK);
+        // Assert - Returns 401 when NameIdentifier claim is missing
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     #endregion
