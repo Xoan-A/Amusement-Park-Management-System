@@ -240,5 +240,85 @@ namespace TestBusinessLogic
 
             _mockRepository.Verify(r => r.GetAll(), Times.Once);
         }
+
+        [TestMethod]
+        public void GetVisitorScoreHistory_WithOnlyDateFrom_ReturnsAll()
+        {
+            // Arrange
+            var dateFrom = DateTime.UtcNow.AddDays(-7);
+            var histories = new List<ScoreHistory>
+            {
+                new ScoreHistory
+                {
+                    Id = Guid.NewGuid(),
+                    VisitorId = _visitorId,
+                    Visitor = new User
+                    {
+                        Id = _visitorId,
+                        Name = "Test",
+                        LastName = "User",
+                        Email = "test@test.com",
+                        Password = "pass",
+                        BirthDate = DateTime.Now.AddYears(-25)
+                    },
+                    Points = 60,
+                    Origin = ScoreOrigin.AttractionVisit,
+                    Description = "Test entry",
+                    StrategyName = "PerAttraction",
+                    CreatedAt = DateTime.UtcNow
+                }
+            };
+
+            _mockRepository.Setup(r => r.GetByVisitor(_visitorId)).Returns(histories);
+
+            // Act
+            var result = _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, dateFrom, null);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+            _mockRepository.Verify(r => r.GetByVisitor(_visitorId), Times.Once);
+            _mockRepository.Verify(r => r.GetByVisitorAndDateRange(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void GetVisitorScoreHistory_WithOnlyDateTo_ReturnsAll()
+        {
+            // Arrange
+            var dateTo = DateTime.UtcNow;
+            var histories = new List<ScoreHistory>
+            {
+                new ScoreHistory
+                {
+                    Id = Guid.NewGuid(),
+                    VisitorId = _visitorId,
+                    Visitor = new User
+                    {
+                        Id = _visitorId,
+                        Name = "Test",
+                        LastName = "User",
+                        Email = "test@test.com",
+                        Password = "pass",
+                        BirthDate = DateTime.Now.AddYears(-25)
+                    },
+                    Points = 45,
+                    Origin = ScoreOrigin.EventParticipation,
+                    Description = "Test entry",
+                    StrategyName = "PerEvent",
+                    CreatedAt = DateTime.UtcNow
+                }
+            };
+
+            _mockRepository.Setup(r => r.GetByVisitor(_visitorId)).Returns(histories);
+
+            // Act
+            var result = _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, null, dateTo);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+            _mockRepository.Verify(r => r.GetByVisitor(_visitorId), Times.Once);
+            _mockRepository.Verify(r => r.GetByVisitorAndDateRange(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Never);
+        }
     }
 }
