@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -6,6 +8,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataAccess.Migrations
 {
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
+
     public partial class AddRewardEntity : Migration
     {
         /// <inheritdoc />
