@@ -38,8 +38,8 @@ namespace ApiTests
             {
                 builder.ConfigureServices(services =>
                 {
-                    ServiceDescriptor? descriptor = services.SingleOrDefault(
-                        d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                    ServiceDescriptor? descriptor =
+                        services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
                     if (descriptor != null)
                     {
                         services.Remove(descriptor);
@@ -60,13 +60,14 @@ namespace ApiTests
 
             _client = _factory.CreateClient();
 
-            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
-            {
-                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
-                Issuer = "ParqueTematico",
-                Audience = "ParqueTematico",
-                ExpirationHours = 1
-            });
+            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
+                Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+                {
+                    SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+                    Issuer = "ParqueTematico",
+                    Audience = "ParqueTematico",
+                    ExpirationHours = 1
+                });
             TokenLogic tokenService = new TokenLogic(jwtSettings);
 
             UserResponse adminUser = new UserResponse
@@ -289,17 +290,21 @@ namespace ApiTests
         [TestMethod]
         public async Task ModifyUser_WithAuthenticatedUser_ReturnsOk()
         {
-            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
-            {
-                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
-                Issuer = "ParqueTematico",
-                Audience = "ParqueTematico",
-                ExpirationHours = 1
-            });
+            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
+                Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+                {
+                    SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+                    Issuer = "ParqueTematico",
+                    Audience = "ParqueTematico",
+                    ExpirationHours = 1
+                });
             TokenLogic tokenService = new TokenLogic(jwtSettings);
 
             Guid userId = Guid.NewGuid();
-            UserResponse user = new UserResponse { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>() };
+            UserResponse user = new UserResponse
+            {
+                Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>()
+            };
             string token = tokenService.GenerateToken(user);
             HttpClient authedClient = _factory.CreateClient();
             authedClient.DefaultRequestHeaders.Authorization =
@@ -355,7 +360,8 @@ namespace ApiTests
         public async Task ModifyUser_WithoutAuthentication_ReturnsUnauthorized()
         {
             Guid userId = Guid.NewGuid();
-            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            ModifyUserRequest request = new ModifyUserRequest
+                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -369,23 +375,29 @@ namespace ApiTests
         [TestMethod]
         public async Task ModifyUser_WithDifferentUserToken_ReturnsForbidden()
         {
-            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
-            {
-                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
-                Issuer = "ParqueTematico",
-                Audience = "ParqueTematico",
-                ExpirationHours = 1
-            });
+            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
+                Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+                {
+                    SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+                    Issuer = "ParqueTematico",
+                    Audience = "ParqueTematico",
+                    ExpirationHours = 1
+                });
             TokenLogic tokenService = new TokenLogic(jwtSettings);
 
             Guid routeUserId = Guid.NewGuid();
-            UserResponse tokenUser = new UserResponse { Id = Guid.NewGuid(), Name = "Other", LastName = "User", Email = "o@u.com", UserRoles = new List<string>() };
+            UserResponse tokenUser = new UserResponse
+            {
+                Id = Guid.NewGuid(), Name = "Other", LastName = "User", Email = "o@u.com",
+                UserRoles = new List<string>()
+            };
             string token = tokenService.GenerateToken(tokenUser);
             HttpClient authedClient = _factory.CreateClient();
             authedClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            ModifyUserRequest request = new ModifyUserRequest
+                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
 
             _mockUserLogic
                 .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
@@ -404,23 +416,28 @@ namespace ApiTests
         [TestMethod]
         public async Task ModifyUser_WhenLogicThrowsUnauthorized_Returns401()
         {
-            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
-            {
-                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
-                Issuer = "ParqueTematico",
-                Audience = "ParqueTematico",
-                ExpirationHours = 1
-            });
+            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
+                Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+                {
+                    SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+                    Issuer = "ParqueTematico",
+                    Audience = "ParqueTematico",
+                    ExpirationHours = 1
+                });
             TokenLogic tokenService = new TokenLogic(jwtSettings);
 
             Guid userId = Guid.NewGuid();
-            UserResponse user = new UserResponse { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>() };
+            UserResponse user = new UserResponse
+            {
+                Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>()
+            };
             string token = tokenService.GenerateToken(user);
             HttpClient authedClient = _factory.CreateClient();
             authedClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            ModifyUserRequest request = new ModifyUserRequest
+                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
 
             _mockUserLogic
                 .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
@@ -437,23 +454,28 @@ namespace ApiTests
         [TestMethod]
         public async Task ModifyUser_WhenLogicThrowsNotFound_Returns404()
         {
-            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
-            {
-                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
-                Issuer = "ParqueTematico",
-                Audience = "ParqueTematico",
-                ExpirationHours = 1
-            });
+            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
+                Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+                {
+                    SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+                    Issuer = "ParqueTematico",
+                    Audience = "ParqueTematico",
+                    ExpirationHours = 1
+                });
             TokenLogic tokenService = new TokenLogic(jwtSettings);
 
             Guid userId = Guid.NewGuid();
-            UserResponse user = new UserResponse { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>() };
+            UserResponse user = new UserResponse
+            {
+                Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>()
+            };
             string token = tokenService.GenerateToken(user);
             HttpClient authedClient = _factory.CreateClient();
             authedClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            ModifyUserRequest request = new ModifyUserRequest
+                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
 
             _mockUserLogic
                 .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
@@ -470,23 +492,28 @@ namespace ApiTests
         [TestMethod]
         public async Task ModifyUser_WhenLogicThrowsArgument_Returns400()
         {
-            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
-            {
-                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
-                Issuer = "ParqueTematico",
-                Audience = "ParqueTematico",
-                ExpirationHours = 1
-            });
+            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
+                Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+                {
+                    SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+                    Issuer = "ParqueTematico",
+                    Audience = "ParqueTematico",
+                    ExpirationHours = 1
+                });
             TokenLogic tokenService = new TokenLogic(jwtSettings);
 
             Guid userId = Guid.NewGuid();
-            UserResponse user = new UserResponse { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>() };
+            UserResponse user = new UserResponse
+            {
+                Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com", UserRoles = new List<string>()
+            };
             string token = tokenService.GenerateToken(user);
             HttpClient authedClient = _factory.CreateClient();
             authedClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            ModifyUserRequest request = new ModifyUserRequest { Name = "", LastName = "B", Email = "a@b.com", Password = "p" };
+            ModifyUserRequest request = new ModifyUserRequest
+                { Name = "", LastName = "B", Email = "a@b.com", Password = "p" };
 
             _mockUserLogic
                 .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
@@ -510,8 +537,10 @@ namespace ApiTests
 
             var claims = new[]
             {
-                new System.Security.Claims.Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email, "test@example.com"),
-                new System.Security.Claims.Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new System.Security.Claims.Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email,
+                    "test@example.com"),
+                new System.Security.Claims.Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti,
+                    Guid.NewGuid().ToString())
             };
 
             var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
@@ -529,7 +558,8 @@ namespace ApiTests
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
 
             Guid userId = Guid.NewGuid();
-            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+            ModifyUserRequest request = new ModifyUserRequest
+                { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
 
             _mockUserLogic
                 .Setup(l => l.ModifyUser(It.IsAny<Guid>(), null, It.IsAny<ModifyUserRequest>()))
