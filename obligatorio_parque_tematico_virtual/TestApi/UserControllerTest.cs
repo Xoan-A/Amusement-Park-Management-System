@@ -611,7 +611,7 @@ namespace ApiTests
             };
 
             _mockUserLogic
-                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), null, It.IsAny<ModifyUserRequest>()))
+                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), string.Empty, It.IsAny<ModifyUserRequest>()))
                 .ThrowsAsync(new UnauthorizedException("Invalid token: missing user identifier"));
 
             string json = JsonSerializer.Serialize(request);
