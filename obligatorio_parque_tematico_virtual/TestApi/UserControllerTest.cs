@@ -501,6 +501,50 @@ namespace ApiTests
         }
 
         [TestMethod]
+        public async Task ModifyUser_WithTokenWithoutSubClaim_PassesNullToLogic()
+        {
+            var securityKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890"));
+            var credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+                securityKey, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new System.Security.Claims.Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email, "test@example.com"),
+                new System.Security.Claims.Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
+                issuer: "ParqueTematico",
+                audience: "ParqueTematico",
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: credentials
+            );
+
+            string tokenString = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().WriteToken(token);
+
+            HttpClient authedClient = _factory.CreateClient();
+            authedClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
+
+            Guid userId = Guid.NewGuid();
+            ModifyUserRequest request = new ModifyUserRequest { Name = "A", LastName = "B", Email = "a@b.com", Password = "p" };
+
+            _mockUserLogic
+                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), null, It.IsAny<ModifyUserRequest>()))
+                .ThrowsAsync(new UnauthorizedException("Invalid token: missing user identifier"));
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
+
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), null, It.IsAny<ModifyUserRequest>()), Times.Once);
+        }
+
+        [TestMethod]
         public async Task AddRoleToUser_OperatorRole_ReturnsForbidden()
         {
             Guid userId = Guid.NewGuid();
