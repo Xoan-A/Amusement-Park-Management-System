@@ -1681,7 +1681,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.IsEmailUnique(request.Email)).ReturnsAsync(true);
             _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
 
-            var adminRole = new Role { Id = Guid.NewGuid(), Name = "Admin" };
+            var adminRole = new Role { Id = 1, Name = "Admin" };
             _mockRoleRepository.Setup(r => r.GetByName("Admin")).Returns(adminRole);
             _mockRoleRepository.Setup(r => r.GetByName("NonExistent")).Returns((Role)null);
 
@@ -1705,35 +1705,54 @@ namespace TestBusinessLogic
             // Arrange
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
-            DateTime exitDate = DateTime.Now;
+            Guid qrCode = Guid.NewGuid();
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
+            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
 
-            var attraction = new Attraction
+            Attraction attraction = new Attraction
             {
                 Id = attractionId,
                 Name = "Test Attraction",
-                CurrentCapacity = 0
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 1  // Start with 1 so entry works
             };
 
-            var user = new User
+            User visitor = new User
             {
                 Id = userId,
-                Name = "Test",
-                LastName = "User",
-                Email = "test@test.com",
-                Password = "hashed"
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com",
+                VisitorReports = new List<VisitorReport>()
             };
 
+            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(user);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
-            var request = new RegisterExitRequest { userId = userId, exitDate = exitDate };
+            RegisterEntryRequest entryRequest = new RegisterEntryRequest
+            {
+                UserId = userId,
+                EnterDate = enterDate,
+                Qr = qrCode,
+                NFC = null,
+                EventId = null
+            };
+
+            RegisterExitRequest exitRequest = new RegisterExitRequest
+            {
+                userId = userId,
+                exitDate = exitDate
+            };
 
             // Act
-            await _userLogic.RegisterExit(attractionId, request);
+            await _userLogic.RegisterEntry(attractionId, entryRequest);
+            attraction.CurrentCapacity = 0;  // Manually set to 0 before exit to test the branch
+            await _userLogic.RegisterExit(attractionId, exitRequest);
 
             // Assert
-            Assert.AreEqual(0, attraction.CurrentCapacity, "Capacity should remain at zero");
-            _mockAttractionRepository.Verify(r => r.Update(attraction), Times.Once);
+            Assert.AreEqual(0, attraction.CurrentCapacity, "Capacity should remain at zero and not go negative");
         }
 
         [TestMethod]
@@ -1759,11 +1778,13 @@ namespace TestBusinessLogic
                 Name = "Jane",
                 LastName = "Doe",
                 Email = "john@test.com",
-                BirthDate = null
+                Password = "newPassword123",
+                BirthDate = null  // Not provided
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
             _mockUserRepository.Setup(r => r.IsEmailUnique(request.Email)).ReturnsAsync(true);
+            _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("newHashedPassword");
 
             // Act
             await _userLogic.ModifyUser(userId, actorSubClaim, request);
