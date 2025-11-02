@@ -492,5 +492,87 @@ namespace TestBusinessLogic
 
             Assert.ThrowsException<ArgumentException>(() => strategy.CalculateScore(user, attraction, request));
         }
+
+        [TestMethod]
+        public async Task ActiveStrategy_SetStrategy_WithPerEvent_ShouldPersistToDatabase()
+        {
+            SetupMocks();
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+
+            await activeStrategy.SetStrategy(new SetStrategyRequest
+            {
+                StrategyName = "PerEvent",
+            });
+
+            Assert.IsNotNull(_storedConfig);
+            Assert.AreEqual("PerEvent", _storedConfig.StrategyName);
+            _mockRepo.Verify(x => x.Update(It.IsAny<StrategyConfiguration>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task ActiveStrategy_LoadStrategyFromDatabase_ShouldLoadPerEvent()
+        {
+            _storedConfig = new StrategyConfiguration
+            {
+                Id = 1,
+                StrategyName = "PerEvent",
+                N = null
+            };
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+
+            IConcreteStrategy result = await activeStrategy.GetStrategy();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("PerEvent", result.Name);
+        }
+
+        [TestMethod]
+        public async Task ActiveStrategy_LoadStrategyFromDatabase_ShouldLoadComboWithN()
+        {
+            _storedConfig = new StrategyConfiguration
+            {
+                Id = 1,
+                StrategyName = "Combo",
+                N = 50
+            };
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+
+            IConcreteStrategy result = await activeStrategy.GetStrategy();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("Combo", result.Name);
+            Assert.IsInstanceOfType(result, typeof(Combo));
+            Assert.AreEqual(50, ((Combo)result).N);
+        }
+
+        [TestMethod]
+        public async Task ActiveStrategy_LoadStrategyFromDatabase_ShouldDefaultToPerAttraction_WhenInvalidStrategy()
+        {
+            _storedConfig = new StrategyConfiguration
+            {
+                Id = 1,
+                StrategyName = "InvalidStrategyName",
+                N = null
+            };
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+
+            IConcreteStrategy result = await activeStrategy.GetStrategy();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("PerAttraction", result.Name);
+        }
+
+        [TestMethod]
+        public void ActiveStrategy_LoadStrategyFromDatabase_ShouldThrow_WhenComboNIsNull()
+        {
+            _storedConfig = new StrategyConfiguration
+            {
+                Id = 1,
+                StrategyName = "Combo",
+                N = null
+            };
+
+            Assert.ThrowsException<ArgumentException>(() => new ActiveStrategy(_mockRepo.Object));
+        }
     }
 }
