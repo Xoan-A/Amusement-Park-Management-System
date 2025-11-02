@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Domain;
-using IDataAccess;
+using IBusinessLogic;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using Microsoft.Data.Sqlite;
@@ -16,14 +16,14 @@ public class ScoreHistoryControllerTest
     private WebApplicationFactory<Program> _factory = null!;
     private HttpClient _adminClient = null!;
     private HttpClient _visitorClient = null!;
-    private Mock<IScoreHistoryRepository> _mockScoreHistoryRepository = null!;
+    private Mock<IScoreHistoryLogic> _mockScoreHistoryLogic = null!;
     private SqliteConnection _connection = null!;
     private Guid _visitorUserId;
 
     [TestInitialize]
     public void Setup()
     {
-        _mockScoreHistoryRepository = new Mock<IScoreHistoryRepository>();
+        _mockScoreHistoryLogic = new Mock<IScoreHistoryLogic>();
 
         _connection = new SqliteConnection("DataSource=:memory:");
         _connection.Open();
@@ -42,7 +42,7 @@ public class ScoreHistoryControllerTest
                 services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlite(_connection));
 
-                services.AddSingleton(_mockScoreHistoryRepository.Object);
+                services.AddSingleton(_mockScoreHistoryLogic.Object);
             });
         });
 
@@ -103,21 +103,21 @@ public class ScoreHistoryControllerTest
     public async Task GetMyScoreHistory_AsVisitor_ReturnsOk()
     {
         // Arrange
-        var history = new List<ScoreHistory>
+        var history = new List<ScoreHistoryModelOut>
         {
-            new ScoreHistory
+            new ScoreHistoryModelOut
             {
                 Id = Guid.NewGuid(),
                 VisitorId = _visitorUserId,
                 Points = 100,
-                Origin = ScoreOrigin.AttractionVisit,
+                Origin = "AttractionVisit",
                 StrategyName = "PerAttraction",
                 Description = "Visited Roller Coaster",
                 CreatedAt = DateTime.UtcNow
             }
         };
 
-        _mockScoreHistoryRepository.Setup(r => r.GetByVisitor(_visitorUserId)).Returns(history);
+        _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(_visitorUserId)).Returns(history);
 
         // Act
         var response = await _visitorClient.GetAsync("/api/score-history/my-history");
@@ -131,21 +131,21 @@ public class ScoreHistoryControllerTest
     {
         // Arrange
         var visitorId = Guid.NewGuid();
-        var history = new List<ScoreHistory>
+        var history = new List<ScoreHistoryModelOut>
         {
-            new ScoreHistory
+            new ScoreHistoryModelOut
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitorId,
                 Points = 50,
-                Origin = ScoreOrigin.EventParticipation,
+                Origin = "EventParticipation",
                 StrategyName = "PerEvent",
                 Description = "Participated in event",
                 CreatedAt = DateTime.UtcNow
             }
         };
 
-        _mockScoreHistoryRepository.Setup(r => r.GetByVisitor(visitorId)).Returns(history);
+        _mockScoreHistoryLogic.Setup(l => l.GetVisitorScoreHistory(visitorId, null, null)).Returns(history);
 
         // Act
         var response = await _adminClient.GetAsync($"/api/score-history/visitor/{visitorId}");
@@ -158,27 +158,70 @@ public class ScoreHistoryControllerTest
     public async Task GetAllHistory_AsAdministrator_ReturnsOk()
     {
         // Arrange
-        var history = new List<ScoreHistory>
+        var history = new List<ScoreHistoryModelOut>
         {
-            new ScoreHistory
+            new ScoreHistoryModelOut
             {
                 Id = Guid.NewGuid(),
                 VisitorId = Guid.NewGuid(),
-                Visitor = new User { Name = "John", LastName = "Doe", Email = "john@test.com", Password = "pwd", BirthDate = DateTime.Now },
+                VisitorName = "John Doe",
                 Points = 100,
-                Origin = ScoreOrigin.AttractionVisit,
+                Origin = "AttractionVisit",
                 StrategyName = "PerAttraction",
                 Description = "Test",
                 CreatedAt = DateTime.UtcNow
             }
         };
 
-        _mockScoreHistoryRepository.Setup(r => r.GetAll()).Returns(history);
+        _mockScoreHistoryLogic.Setup(l => l.GetAllScoreHistory()).Returns(history);
 
         // Act
         var response = await _adminClient.GetAsync("/api/score-history");
 
         // Assert
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task GetMyScoreHistory_WithBusinessLogicException_ReturnsBadRequest()
+    {
+        // Arrange
+        _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(_visitorUserId))
+            .Throws(new ArgumentException("Invalid visitor"));
+
+        // Act
+        var response = await _visitorClient.GetAsync("/api/score-history/my-history");
+
+        // Assert
+        Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task GetVisitorHistory_VisitorNotFound_ReturnsNotFound()
+    {
+        // Arrange
+        var visitorId = Guid.NewGuid();
+        _mockScoreHistoryLogic.Setup(l => l.GetVisitorScoreHistory(visitorId, null, null))
+            .Throws(new KeyNotFoundException("Visitor not found"));
+
+        // Act
+        var response = await _adminClient.GetAsync($"/api/score-history/visitor/{visitorId}");
+
+        // Assert
+        Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task GetAllHistory_WithInvalidDateRange_ReturnsBadRequest()
+    {
+        // Arrange
+        _mockScoreHistoryLogic.Setup(l => l.GetAllScoreHistory())
+            .Throws(new ArgumentException("Invalid data"));
+
+        // Act
+        var response = await _adminClient.GetAsync("/api/score-history");
+
+        // Assert
+        Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }
 }
