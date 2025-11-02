@@ -82,5 +82,16 @@ namespace TestBusinessLogic
             Assert.IsNotNull(hashedPassword);
             Assert.IsTrue(isValid);
         }
+
+        [TestMethod]
+        public void VerifyPassword_ShouldReturnFalse_WhenHashIsMalformed()
+        {
+            string plainPassword = "password";
+            string malformedHash = "this_is_not_a_valid_bcrypt_hash";
+
+            bool result = _passwordLogic.VerifyPassword(plainPassword, malformedHash);
+
+            Assert.IsFalse(result);
+        }
     }
 }
