@@ -10,12 +10,12 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Id = Guid.NewGuid(),
-            AttractionId = Guid.NewGuid(),
-            ScheduledDate = DateTime.Now.AddDays(7),
-            MaintenanceType = MaintenanceType.Inspection,
-            Description = "Monthly safety inspection",
-            Status = MaintenanceStatus.Pending
+                Id = Guid.NewGuid(),
+                AttractionId = Guid.NewGuid(),
+                ScheduledDate = DateTime.Now.AddDays(7),
+                MaintenanceType = MaintenanceType.Inspection,
+                Description = "Monthly safety inspection",
+                Status = MaintenanceStatus.Pending
             };
 
             Assert.IsNotNull(schedule);
@@ -29,7 +29,7 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Description = ""
+                Description = ""
             };
         }
 
@@ -39,7 +39,7 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Description = "   "
+                Description = "   "
             };
         }
 
@@ -49,7 +49,7 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Description = new string('a', 501)
+                Description = new string('a', 501)
             };
         }
 
@@ -58,7 +58,7 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Description = new string('a', 500)
+                Description = new string('a', 500)
             };
 
             Assert.AreEqual(500, schedule.Description.Length);
@@ -69,8 +69,8 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            ScheduledDate = DateTime.Now.AddDays(-1),
-            Description = "Test"
+                ScheduledDate = DateTime.Now.AddDays(-1),
+                Description = "Test"
             };
 
             Assert.IsTrue(schedule.ScheduledDate < DateTime.Now);
@@ -83,8 +83,8 @@ namespace TestDomain
 
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            ScheduledDate = futureDate,
-            Description = "Test"
+                ScheduledDate = futureDate,
+                Description = "Test"
             };
 
             Assert.AreEqual(futureDate.Date, schedule.ScheduledDate.Date);
@@ -95,8 +95,8 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Status = MaintenanceStatus.Pending,
-            Description = "Test"
+                Status = MaintenanceStatus.Pending,
+                Description = "Test"
             };
 
             schedule.Status = MaintenanceStatus.InProgress;
@@ -109,8 +109,8 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Status = MaintenanceStatus.InProgress,
-            Description = "Test"
+                Status = MaintenanceStatus.InProgress,
+                Description = "Test"
             };
 
             schedule.Status = MaintenanceStatus.Completed;
@@ -123,8 +123,8 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Status = MaintenanceStatus.Pending,
-            Description = "Test"
+                Status = MaintenanceStatus.Pending,
+                Description = "Test"
             };
 
             schedule.Status = MaintenanceStatus.Cancelled;
@@ -157,8 +157,8 @@ namespace TestDomain
 
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Description = "Test",
-            ScheduledDate = DateTime.Now
+                Description = "Test",
+                ScheduledDate = DateTime.Now
             };
             DateTime afterCreate = DateTime.UtcNow;
 
@@ -173,9 +173,9 @@ namespace TestDomain
 
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            AttractionId = attractionId,
-            Description = "Test",
-            ScheduledDate = DateTime.Now
+                AttractionId = attractionId,
+                Description = "Test",
+                ScheduledDate = DateTime.Now
             };
 
             Assert.AreEqual(attractionId, schedule.AttractionId);
@@ -186,9 +186,9 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            ScheduledDate = DateTime.Now.AddDays(-1),
-            Status = MaintenanceStatus.Pending,
-            Description = "Test"
+                ScheduledDate = DateTime.Now.AddDays(-1),
+                Status = MaintenanceStatus.Pending,
+                Description = "Test"
             };
 
             bool isOverdue = schedule.IsOverdue();
@@ -201,9 +201,9 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            ScheduledDate = DateTime.Now.AddDays(7),
-            Status = MaintenanceStatus.Pending,
-            Description = "Test"
+                ScheduledDate = DateTime.Now.AddDays(7),
+                Status = MaintenanceStatus.Pending,
+                Description = "Test"
             };
 
             bool isOverdue = schedule.IsOverdue();
@@ -216,9 +216,9 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            ScheduledDate = DateTime.Now.AddDays(-1),
-            Status = MaintenanceStatus.Completed,
-            Description = "Test"
+                ScheduledDate = DateTime.Now.AddDays(-1),
+                Status = MaintenanceStatus.Completed,
+                Description = "Test"
             };
 
             bool isOverdue = schedule.IsOverdue();
@@ -231,9 +231,9 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            ScheduledDate = DateTime.Now.AddDays(-1),
-            Status = MaintenanceStatus.Cancelled,
-            Description = "Test"
+                ScheduledDate = DateTime.Now.AddDays(-1),
+                Status = MaintenanceStatus.Cancelled,
+                Description = "Test"
             };
 
             bool isOverdue = schedule.IsOverdue();
@@ -246,8 +246,8 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Status = MaintenanceStatus.Pending,
-            Description = "Test"
+                Status = MaintenanceStatus.Pending,
+                Description = "Test"
             };
 
             bool canComplete = schedule.CanComplete();
@@ -260,8 +260,8 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Status = MaintenanceStatus.InProgress,
-            Description = "Test"
+                Status = MaintenanceStatus.InProgress,
+                Description = "Test"
             };
 
             bool canComplete = schedule.CanComplete();
@@ -274,8 +274,8 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Status = MaintenanceStatus.Completed,
-            Description = "Test"
+                Status = MaintenanceStatus.Completed,
+                Description = "Test"
             };
 
             bool canComplete = schedule.CanComplete();
@@ -288,8 +288,8 @@ namespace TestDomain
         {
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-            Status = MaintenanceStatus.Cancelled,
-            Description = "Test"
+                Status = MaintenanceStatus.Cancelled,
+                Description = "Test"
             };
 
             bool canComplete = schedule.CanComplete();
