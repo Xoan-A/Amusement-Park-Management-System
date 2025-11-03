@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using IBusinessLogic;
 using System.Security.Claims;
+using Models.Out;
 
 namespace Api.Controllers;
 
@@ -20,8 +21,8 @@ public class ScoreHistoryController : ControllerBase
     [Authorize(Roles = "Visitor")]
     public IActionResult GetMyScoreHistory()
     {
-        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
-        var history = _scoreHistoryLogic.GetMyScoreHistory(userId);
+        Guid userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
+        List<ScoreHistoryModelOut> history = _scoreHistoryLogic.GetMyScoreHistory(userId);
         return Ok(history);
     }
 
@@ -29,7 +30,7 @@ public class ScoreHistoryController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public IActionResult GetVisitorHistory(Guid visitorId, [FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo)
     {
-        var history = _scoreHistoryLogic.GetVisitorScoreHistory(visitorId, dateFrom, dateTo);
+        List<ScoreHistoryModelOut> history = _scoreHistoryLogic.GetVisitorScoreHistory(visitorId, dateFrom, dateTo);
         return Ok(history);
     }
 
@@ -37,7 +38,7 @@ public class ScoreHistoryController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public IActionResult GetAllHistory()
     {
-        var history = _scoreHistoryLogic.GetAllScoreHistory();
+        List<ScoreHistoryModelOut> history = _scoreHistoryLogic.GetAllScoreHistory();
         return Ok(history);
     }
 }

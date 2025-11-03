@@ -3,6 +3,8 @@ using IBusinessLogic;
 using Microsoft.AspNetCore.Authorization;
 using Models.In;
 using System.Security.Claims;
+using Domain;
+using Models.Out;
 
 namespace Api.Controllers;
 
@@ -22,7 +24,7 @@ public class RedemptionController : ControllerBase
     public IActionResult RedeemReward([FromBody] RedeemRewardModelIn redeemRequest)
     {
         Guid visitorId = GetCurrentUserId();
-        var redemption = _redemptionLogic.RedeemReward(visitorId, redeemRequest.RewardId);
+        RedemptionHistoryModelOut redemption = _redemptionLogic.RedeemReward(visitorId, redeemRequest.RewardId);
         return CreatedAtAction(nameof(GetMyRedemptionHistory), null, redemption);
     }
 
@@ -32,7 +34,7 @@ public class RedemptionController : ControllerBase
     {
         Guid visitorId = GetCurrentUserId();
 
-        var history = dateFrom.HasValue && dateTo.HasValue
+        List<RedemptionHistoryModelOut> history = dateFrom.HasValue && dateTo.HasValue
             ? _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom.Value, dateTo.Value)
             : _redemptionLogic.GetRedemptionHistory(visitorId);
 
@@ -41,9 +43,10 @@ public class RedemptionController : ControllerBase
 
     [HttpGet("visitor/{visitorId}/history")]
     [Authorize(Roles = "Administrator")]
-    public IActionResult GetVisitorRedemptionHistory(Guid visitorId, [FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo)
+    public IActionResult GetVisitorRedemptionHistory(Guid visitorId, [FromQuery] DateTime? dateFrom,
+        [FromQuery] DateTime? dateTo)
     {
-        var history = dateFrom.HasValue && dateTo.HasValue
+        List<RedemptionHistoryModelOut> history = dateFrom.HasValue && dateTo.HasValue
             ? _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom.Value, dateTo.Value)
             : _redemptionLogic.GetRedemptionHistory(visitorId);
 
@@ -57,6 +60,7 @@ public class RedemptionController : ControllerBase
         {
             throw new UnauthorizedAccessException("User ID not found in token");
         }
+
         return Guid.Parse(userIdClaim);
     }
 }

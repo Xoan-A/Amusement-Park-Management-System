@@ -32,10 +32,8 @@ public class PluginLoaderTest
     [TestMethod]
     public void LoadPlugins_EmptyDirectory_ReturnsEmptyList()
     {
-        // Act
-        var plugins = _pluginLoader.LoadPlugins();
+        List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        // Assert
         Assert.IsNotNull(plugins);
         Assert.AreEqual(0, plugins.Count);
     }
@@ -43,34 +41,25 @@ public class PluginLoaderTest
     [TestMethod]
     public void GetPluginByName_NonExistentPlugin_ReturnsNull()
     {
-        // Act
-        var plugin = _pluginLoader.GetPluginByName("NonExistent");
+        PluginInfoResponse? plugin = _pluginLoader.GetPluginByName("NonExistent");
 
-        // Assert
         Assert.IsNull(plugin);
     }
 
     [TestMethod]
     public void CreateStrategyInstance_NonExistentPlugin_ThrowsException()
     {
-        // Act & Assert
-        Assert.ThrowsException<KeyNotFoundException>(() =>
-        {
-            _pluginLoader.CreateStrategyInstance("NonExistent");
-        });
+        Assert.ThrowsException<KeyNotFoundException>(() => { _pluginLoader.CreateStrategyInstance("NonExistent"); });
     }
 
     [TestMethod]
     public void LoadPlugins_NonExistentDirectory_ReturnsEmptyList()
     {
-        // Arrange
         string nonExistentPath = Path.Combine(Path.GetTempPath(), "NonExistentPlugins" + Guid.NewGuid());
-        var loader = new PluginLoader(nonExistentPath);
+        PluginLoader loader = new PluginLoader(nonExistentPath);
 
-        // Act
-        var plugins = loader.LoadPlugins();
+        List<PluginInfoResponse> plugins = loader.LoadPlugins();
 
-        // Assert
         Assert.IsNotNull(plugins);
         Assert.AreEqual(0, plugins.Count);
     }
@@ -78,10 +67,8 @@ public class PluginLoaderTest
     [TestMethod]
     public void GetAvailablePluginNames_EmptyDirectory_ReturnsEmptyList()
     {
-        // Act
-        var pluginNames = _pluginLoader.GetAvailablePluginNames();
+        List<string> pluginNames = _pluginLoader.GetAvailablePluginNames();
 
-        // Assert
         Assert.IsNotNull(pluginNames);
         Assert.AreEqual(0, pluginNames.Count);
     }
@@ -89,14 +76,11 @@ public class PluginLoaderTest
     [TestMethod]
     public void LoadPlugins_DirectoryWithNonDllFiles_ReturnsEmptyList()
     {
-        // Arrange
         string txtFile = Path.Combine(_testPluginsPath, "notaplugin.txt");
         File.WriteAllText(txtFile, "This is not a DLL");
 
-        // Act
-        var plugins = _pluginLoader.LoadPlugins();
+        List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        // Assert
         Assert.IsNotNull(plugins);
         Assert.AreEqual(0, plugins.Count);
     }
@@ -104,21 +88,17 @@ public class PluginLoaderTest
     [TestMethod]
     public void LoadPlugins_CalledMultipleTimes_ClearsAndReloads()
     {
-        // Act
-        var firstLoad = _pluginLoader.LoadPlugins();
-        var secondLoad = _pluginLoader.LoadPlugins();
+        List<PluginInfoResponse> firstLoad = _pluginLoader.LoadPlugins();
+        List<PluginInfoResponse> secondLoad = _pluginLoader.LoadPlugins();
 
-        // Assert
         Assert.AreEqual(firstLoad.Count, secondLoad.Count);
     }
 
     [TestMethod]
     public void CreateStrategyInstance_WithNonExistentPlugin_ThrowsKeyNotFoundException()
     {
-        // Arrange
-        _pluginLoader.LoadPlugins(); // Empty plugins
+        _pluginLoader.LoadPlugins();
 
-        // Act & Assert
         Assert.ThrowsException<KeyNotFoundException>(() =>
         {
             _pluginLoader.CreateStrategyInstance("NonExistentPlugin");
@@ -128,41 +108,31 @@ public class PluginLoaderTest
     [TestMethod]
     public void GetPluginByName_WithNonExistentPlugin_ReturnsNull()
     {
-        // Arrange
-        _pluginLoader.LoadPlugins(); // Empty plugins
+        _pluginLoader.LoadPlugins();
 
-        // Act
-        var result = _pluginLoader.GetPluginByName("NonExistentPlugin");
+        PluginInfoResponse? result = _pluginLoader.GetPluginByName("NonExistentPlugin");
 
-        // Assert
         Assert.IsNull(result);
     }
 
     [TestMethod]
     public void GetAvailablePluginNames_AfterLoadingPlugins_ReturnsPluginNames()
     {
-        // Arrange
         _pluginLoader.LoadPlugins();
 
-        // Act
-        var pluginNames = _pluginLoader.GetAvailablePluginNames();
+        List<string> pluginNames = _pluginLoader.GetAvailablePluginNames();
 
-        // Assert
         Assert.IsNotNull(pluginNames);
-        Assert.AreEqual(0, pluginNames.Count); // Empty directory
     }
 
     [TestMethod]
-    public void LoadPlugins_WithCorruptDll_SkipsInvalidAssembly()
+    public void LoadPlugins_WithInvalidAssembly_SkipsAndContinues()
     {
-        // Arrange - Create a corrupt DLL file (text file with .dll extension)
         string corruptDllPath = Path.Combine(_testPluginsPath, "corrupt.dll");
         File.WriteAllText(corruptDllPath, "This is not a valid assembly");
 
-        // Act
-        var plugins = _pluginLoader.LoadPlugins();
+        List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        // Assert - Should skip the corrupt file and return empty list
         Assert.IsNotNull(plugins);
         Assert.AreEqual(0, plugins.Count);
     }

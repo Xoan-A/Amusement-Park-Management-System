@@ -608,11 +608,13 @@ public class AttractionLogicTest
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.AttractionsVisits.Count);
 
-        AttractionVisitDetail attraction1Result = result.AttractionsVisits.FirstOrDefault(r => r.Attraction.Id == attraction1Id);
+        AttractionVisitDetail attraction1Result =
+            result.AttractionsVisits.FirstOrDefault(r => r.Attraction.Id == attraction1Id);
         Assert.AreEqual("Montaña Rusa", attraction1Result.Attraction.Name);
         Assert.AreEqual(3, attraction1Result.VisitCount);
 
-        AttractionVisitDetail attraction2Result = result.AttractionsVisits.FirstOrDefault(r => r.Attraction.Id == attraction2Id);
+        AttractionVisitDetail attraction2Result =
+            result.AttractionsVisits.FirstOrDefault(r => r.Attraction.Id == attraction2Id);
         Assert.AreEqual("Simulador", attraction2Result.Attraction.Name);
         Assert.AreEqual(2, attraction2Result.VisitCount);
 
@@ -638,7 +640,6 @@ public class AttractionLogicTest
     [TestMethod]
     public async Task UpdateAttraction_WithNullCurrentCapacity_PreservesExistingCapacity()
     {
-        // Arrange
         Guid attractionId = Guid.NewGuid();
         int existingCapacity = 50;
 
@@ -658,17 +659,16 @@ public class AttractionLogicTest
             Description = "Updated description",
             Type = "RollerCoaster",
             MaxCapacity = 100,
-            CurrentCapacity = null  // Null to test the ?? operator
+            CurrentCapacity = null
         };
 
         _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(existingAttraction);
         _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
-        // Act
         await _attractionLogic.UpdateAttraction(attractionId, request);
 
-        // Assert
-        Assert.AreEqual(existingCapacity, existingAttraction.CurrentCapacity, "CurrentCapacity should preserve existing value when request has null");
+        Assert.AreEqual(existingCapacity, existingAttraction.CurrentCapacity,
+            "CurrentCapacity should preserve existing value when request has null");
         Assert.AreEqual("Updated Coaster", existingAttraction.Name);
         _mockAttractionRepository.Verify(r => r.Update(existingAttraction), Times.Once);
     }

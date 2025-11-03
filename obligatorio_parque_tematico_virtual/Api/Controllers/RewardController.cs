@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
 using Microsoft.AspNetCore.Authorization;
 using Models.In;
+using Models.Out;
 
 namespace Api.Controllers;
 
@@ -20,7 +21,7 @@ public class RewardController : ControllerBase
     [Authorize]
     public IActionResult GetAllRewards()
     {
-        var rewards = _rewardLogic.GetAllRewards();
+        List<RewardModelOut> rewards = _rewardLogic.GetAllRewards();
         return Ok(rewards);
     }
 
@@ -28,7 +29,7 @@ public class RewardController : ControllerBase
     [Authorize]
     public IActionResult GetRewardById(Guid id)
     {
-        var reward = _rewardLogic.GetRewardById(id);
+        RewardModelOut reward = _rewardLogic.GetRewardById(id);
         return Ok(reward);
     }
 
@@ -36,7 +37,7 @@ public class RewardController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public IActionResult CreateReward([FromBody] RewardModelIn rewardModelIn)
     {
-        var createdReward = _rewardLogic.CreateReward(rewardModelIn);
+        RewardModelOut createdReward = _rewardLogic.CreateReward(rewardModelIn);
         return CreatedAtAction(nameof(GetRewardById), new { id = createdReward.Id }, createdReward);
     }
 
@@ -44,7 +45,7 @@ public class RewardController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public IActionResult UpdateReward(Guid id, [FromBody] RewardModelIn rewardModelIn)
     {
-        var updatedReward = _rewardLogic.UpdateReward(id, rewardModelIn);
+        RewardModelOut updatedReward = _rewardLogic.UpdateReward(id, rewardModelIn);
         return Ok(updatedReward);
     }
 
@@ -60,7 +61,7 @@ public class RewardController : ControllerBase
     [Authorize]
     public IActionResult GetAvailableRewards()
     {
-        var rewards = _rewardLogic.GetAvailableRewards();
+        List<RewardModelOut> rewards = _rewardLogic.GetAvailableRewards();
         return Ok(rewards);
     }
 }

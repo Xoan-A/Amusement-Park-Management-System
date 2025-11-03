@@ -23,8 +23,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void CreateReward_ValidReward_Success()
         {
-            // Arrange
-            var rewardModelIn = new RewardModelIn
+            RewardModelIn rewardModelIn = new RewardModelIn
             {
                 Name = "VIP Access",
                 Description = "Get VIP access for a day",
@@ -36,10 +35,8 @@ namespace TestBusinessLogic
             _mockRewardRepository.Setup(r => r.GetByName(rewardModelIn.Name)).Returns((Reward?)null);
             _mockRewardRepository.Setup(r => r.Create(It.IsAny<Reward>()));
 
-            // Act
-            var createdReward = _rewardLogic.CreateReward(rewardModelIn);
+            RewardModelOut createdReward = _rewardLogic.CreateReward(rewardModelIn);
 
-            // Assert
             Assert.IsNotNull(createdReward);
             Assert.AreNotEqual(Guid.Empty, createdReward.Id);
             _mockRewardRepository.Verify(r => r.Create(It.IsAny<Reward>()), Times.Once);
@@ -49,8 +46,7 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(ArgumentException))]
         public void CreateReward_DuplicateName_ThrowsException()
         {
-            // Arrange
-            var existingReward = new Reward
+            Reward existingReward = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Existing Reward",
@@ -59,7 +55,7 @@ namespace TestBusinessLogic
                 AvailableQuantity = 5
             };
 
-            var newRewardModelIn = new RewardModelIn
+            RewardModelIn newRewardModelIn = new RewardModelIn
             {
                 Name = "Existing Reward",
                 Description = "Duplicate name",
@@ -69,7 +65,6 @@ namespace TestBusinessLogic
 
             _mockRewardRepository.Setup(r => r.GetByName(newRewardModelIn.Name)).Returns(existingReward);
 
-            // Act & Assert
             _rewardLogic.CreateReward(newRewardModelIn);
         }
 
@@ -77,15 +72,13 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(ArgumentNullException))]
         public void CreateReward_NullReward_ThrowsException()
         {
-            // Act & Assert
             _rewardLogic.CreateReward(null);
         }
 
         [TestMethod]
         public void GetAllRewards_ReturnsAllRewards()
         {
-            // Arrange
-            var rewards = new List<Reward>
+            List<Reward> rewards = new List<Reward>
             {
                 new Reward
                 {
@@ -107,10 +100,8 @@ namespace TestBusinessLogic
 
             _mockRewardRepository.Setup(r => r.GetAll()).Returns(rewards);
 
-            // Act
-            var result = _rewardLogic.GetAllRewards();
+            List<RewardModelOut> result = _rewardLogic.GetAllRewards();
 
-            // Assert
             Assert.AreEqual(2, result.Count);
             _mockRewardRepository.Verify(r => r.GetAll(), Times.Once);
         }
@@ -118,9 +109,8 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GetRewardById_ExistingReward_ReturnsReward()
         {
-            // Arrange
-            var rewardId = Guid.NewGuid();
-            var reward = new Reward
+            Guid rewardId = Guid.NewGuid();
+            Reward reward = new Reward
             {
                 Id = rewardId,
                 Name = "Test Reward",
@@ -131,10 +121,8 @@ namespace TestBusinessLogic
 
             _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns(reward);
 
-            // Act
-            var result = _rewardLogic.GetRewardById(rewardId);
+            RewardModelOut result = _rewardLogic.GetRewardById(rewardId);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(rewardId, result.Id);
             Assert.AreEqual("Test Reward", result.Name);
@@ -145,20 +133,17 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(KeyNotFoundException))]
         public void GetRewardById_NonExistingReward_ThrowsException()
         {
-            // Arrange
-            var rewardId = Guid.NewGuid();
+            Guid rewardId = Guid.NewGuid();
             _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns((Reward?)null);
 
-            // Act & Assert
             _rewardLogic.GetRewardById(rewardId);
         }
 
         [TestMethod]
         public void UpdateReward_ValidReward_Success()
         {
-            // Arrange
-            var rewardId = Guid.NewGuid();
-            var existingReward = new Reward
+            Guid rewardId = Guid.NewGuid();
+            Reward existingReward = new Reward
             {
                 Id = rewardId,
                 Name = "Original Name",
@@ -167,7 +152,7 @@ namespace TestBusinessLogic
                 AvailableQuantity = 10
             };
 
-            var updatedRewardModelIn = new RewardModelIn
+            RewardModelIn updatedRewardModelIn = new RewardModelIn
             {
                 Name = "Updated Name",
                 Description = "Updated description",
@@ -179,10 +164,8 @@ namespace TestBusinessLogic
             _mockRewardRepository.Setup(r => r.GetByName("Updated Name")).Returns((Reward?)null);
             _mockRewardRepository.Setup(r => r.Update(It.IsAny<Reward>()));
 
-            // Act
-            var result = _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
+            RewardModelOut result = _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual("Updated Name", result.Name);
             Assert.AreEqual(150, result.PointsCost);
@@ -193,9 +176,8 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(KeyNotFoundException))]
         public void UpdateReward_NonExistingReward_ThrowsException()
         {
-            // Arrange
-            var rewardId = Guid.NewGuid();
-            var updatedRewardModelIn = new RewardModelIn
+            Guid rewardId = Guid.NewGuid();
+            RewardModelIn updatedRewardModelIn = new RewardModelIn
             {
                 Name = "Updated Name",
                 Description = "Updated description",
@@ -205,7 +187,6 @@ namespace TestBusinessLogic
 
             _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns((Reward?)null);
 
-            // Act & Assert
             _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
         }
 
@@ -213,9 +194,8 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(ArgumentException))]
         public void UpdateReward_DuplicateName_ThrowsException()
         {
-            // Arrange
-            var rewardId = Guid.NewGuid();
-            var existingReward = new Reward
+            Guid rewardId = Guid.NewGuid();
+            Reward existingReward = new Reward
             {
                 Id = rewardId,
                 Name = "Original Name",
@@ -224,7 +204,7 @@ namespace TestBusinessLogic
                 AvailableQuantity = 10
             };
 
-            var anotherReward = new Reward
+            Reward anotherReward = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Another Reward",
@@ -233,9 +213,9 @@ namespace TestBusinessLogic
                 AvailableQuantity = 5
             };
 
-            var updatedRewardModelIn = new RewardModelIn
+            RewardModelIn updatedRewardModelIn = new RewardModelIn
             {
-                Name = "Another Reward", // Trying to use another reward's name
+                Name = "Another Reward",
                 Description = "Updated description",
                 PointsCost = 150,
                 AvailableQuantity = 8
@@ -244,16 +224,14 @@ namespace TestBusinessLogic
             _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns(existingReward);
             _mockRewardRepository.Setup(r => r.GetByName("Another Reward")).Returns(anotherReward);
 
-            // Act & Assert
             _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
         }
 
         [TestMethod]
         public void UpdateReward_SameName_Success()
         {
-            // Arrange
-            var rewardId = Guid.NewGuid();
-            var existingReward = new Reward
+            Guid rewardId = Guid.NewGuid();
+            Reward existingReward = new Reward
             {
                 Id = rewardId,
                 Name = "Same Name",
@@ -262,9 +240,9 @@ namespace TestBusinessLogic
                 AvailableQuantity = 10
             };
 
-            var updatedRewardModelIn = new RewardModelIn
+            RewardModelIn updatedRewardModelIn = new RewardModelIn
             {
-                Name = "Same Name", // Keeping the same name
+                Name = "Same Name",
                 Description = "Updated description",
                 PointsCost = 150,
                 AvailableQuantity = 8
@@ -274,10 +252,8 @@ namespace TestBusinessLogic
             _mockRewardRepository.Setup(r => r.GetByName("Same Name")).Returns(existingReward);
             _mockRewardRepository.Setup(r => r.Update(It.IsAny<Reward>()));
 
-            // Act
-            var result = _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
+            RewardModelOut result = _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual("Same Name", result.Name);
             _mockRewardRepository.Verify(r => r.Update(It.IsAny<Reward>()), Times.Once);
@@ -286,9 +262,8 @@ namespace TestBusinessLogic
         [TestMethod]
         public void DeleteReward_ExistingReward_Success()
         {
-            // Arrange
-            var rewardId = Guid.NewGuid();
-            var reward = new Reward
+            Guid rewardId = Guid.NewGuid();
+            Reward reward = new Reward
             {
                 Id = rewardId,
                 Name = "To Delete",
@@ -300,10 +275,8 @@ namespace TestBusinessLogic
             _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns(reward);
             _mockRewardRepository.Setup(r => r.Delete(rewardId));
 
-            // Act
             _rewardLogic.DeleteReward(rewardId);
 
-            // Assert
             _mockRewardRepository.Verify(r => r.Delete(rewardId), Times.Once);
         }
 
@@ -311,19 +284,16 @@ namespace TestBusinessLogic
         [ExpectedException(typeof(KeyNotFoundException))]
         public void DeleteReward_NonExistingReward_ThrowsException()
         {
-            // Arrange
-            var rewardId = Guid.NewGuid();
+            Guid rewardId = Guid.NewGuid();
             _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns((Reward?)null);
 
-            // Act & Assert
             _rewardLogic.DeleteReward(rewardId);
         }
 
         [TestMethod]
         public void GetAvailableRewards_ReturnsOnlyAvailable()
         {
-            // Arrange
-            var availableRewards = new List<Reward>
+            List<Reward> availableRewards = new List<Reward>
             {
                 new Reward
                 {
@@ -345,10 +315,8 @@ namespace TestBusinessLogic
 
             _mockRewardRepository.Setup(r => r.GetAvailableRewards()).Returns(availableRewards);
 
-            // Act
-            var result = _rewardLogic.GetAvailableRewards();
+            List<RewardModelOut> result = _rewardLogic.GetAvailableRewards();
 
-            // Assert
             Assert.AreEqual(2, result.Count);
             Assert.IsTrue(result.All(r => r.AvailableQuantity > 0));
             _mockRewardRepository.Verify(r => r.GetAvailableRewards(), Times.Once);
@@ -357,8 +325,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void GetRewardsByMembershipLevel_FiltersCorrectly()
         {
-            // Arrange
-            var premiumRewards = new List<Reward>
+            List<Reward> premiumRewards = new List<Reward>
             {
                 new Reward
                 {
@@ -374,10 +341,8 @@ namespace TestBusinessLogic
             _mockRewardRepository.Setup(r => r.GetRewardsByMembershipLevel(MembershipLevel.Premium))
                 .Returns(premiumRewards);
 
-            // Act
-            var result = _rewardLogic.GetRewardsByMembershipLevel(MembershipLevel.Premium);
+            List<RewardModelOut> result = _rewardLogic.GetRewardsByMembershipLevel(MembershipLevel.Premium);
 
-            // Assert
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(MembershipLevel.Premium, result[0].RequiredMembershipLevel);
             _mockRewardRepository.Verify(r => r.GetRewardsByMembershipLevel(MembershipLevel.Premium), Times.Once);

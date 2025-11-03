@@ -19,7 +19,7 @@ namespace TestDataAccess
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 
-            var options = new DbContextOptionsBuilder<AppDbContext>()
+            DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseSqlite(_connection)
                 .Options;
 
@@ -39,8 +39,7 @@ namespace TestDataAccess
         [TestMethod]
         public void Create_ValidReward_Success()
         {
-            // Arrange
-            var reward = new Reward
+            Reward reward = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "VIP Access",
@@ -50,12 +49,10 @@ namespace TestDataAccess
                 RequiredMembershipLevel = MembershipLevel.Premium
             };
 
-            // Act
             _repository.Create(reward);
             _context.SaveChanges();
 
-            // Assert
-            var retrieved = _context.Rewards.Find(reward.Id);
+            Reward? retrieved = _context.Rewards.Find(reward.Id);
             Assert.IsNotNull(retrieved);
             Assert.AreEqual("VIP Access", retrieved.Name);
             Assert.AreEqual(500, retrieved.PointsCost);
@@ -64,8 +61,7 @@ namespace TestDataAccess
         [TestMethod]
         public void GetAll_ReturnsAllRewards()
         {
-            // Arrange
-            var reward1 = new Reward
+            Reward reward1 = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Reward 1",
@@ -74,7 +70,7 @@ namespace TestDataAccess
                 AvailableQuantity = 10
             };
 
-            var reward2 = new Reward
+            Reward reward2 = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Reward 2",
@@ -87,18 +83,15 @@ namespace TestDataAccess
             _context.Rewards.Add(reward2);
             _context.SaveChanges();
 
-            // Act
-            var rewards = _repository.GetAll();
+            List<Reward> rewards = _repository.GetAll();
 
-            // Assert
             Assert.AreEqual(2, rewards.Count);
         }
 
         [TestMethod]
         public void GetById_ExistingReward_ReturnsReward()
         {
-            // Arrange
-            var reward = new Reward
+            Reward reward = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Test Reward",
@@ -110,10 +103,8 @@ namespace TestDataAccess
             _context.Rewards.Add(reward);
             _context.SaveChanges();
 
-            // Act
-            var retrieved = _repository.GetById(reward.Id);
+            Reward? retrieved = _repository.GetById(reward.Id);
 
-            // Assert
             Assert.IsNotNull(retrieved);
             Assert.AreEqual(reward.Id, retrieved.Id);
             Assert.AreEqual("Test Reward", retrieved.Name);
@@ -122,18 +113,15 @@ namespace TestDataAccess
         [TestMethod]
         public void GetById_NonExistingReward_ReturnsNull()
         {
-            // Act
-            var retrieved = _repository.GetById(Guid.NewGuid());
+            Reward? retrieved = _repository.GetById(Guid.NewGuid());
 
-            // Assert
             Assert.IsNull(retrieved);
         }
 
         [TestMethod]
         public void Update_ExistingReward_Success()
         {
-            // Arrange
-            var reward = new Reward
+            Reward reward = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Original Name",
@@ -145,14 +133,12 @@ namespace TestDataAccess
             _context.Rewards.Add(reward);
             _context.SaveChanges();
 
-            // Act
             reward.Name = "Updated Name";
             reward.PointsCost = 150;
             _repository.Update(reward);
             _context.SaveChanges();
 
-            // Assert
-            var updated = _context.Rewards.Find(reward.Id);
+            Reward? updated = _context.Rewards.Find(reward.Id);
             Assert.AreEqual("Updated Name", updated.Name);
             Assert.AreEqual(150, updated.PointsCost);
         }
@@ -160,8 +146,7 @@ namespace TestDataAccess
         [TestMethod]
         public void Delete_ExistingReward_Success()
         {
-            // Arrange
-            var reward = new Reward
+            Reward reward = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "To Delete",
@@ -173,20 +158,17 @@ namespace TestDataAccess
             _context.Rewards.Add(reward);
             _context.SaveChanges();
 
-            // Act
             _repository.Delete(reward.Id);
             _context.SaveChanges();
 
-            // Assert
-            var deleted = _context.Rewards.Find(reward.Id);
+            Reward? deleted = _context.Rewards.Find(reward.Id);
             Assert.IsNull(deleted);
         }
 
         [TestMethod]
         public void GetAvailableRewards_ReturnsOnlyRewardsWithQuantity()
         {
-            // Arrange
-            var availableReward1 = new Reward
+            Reward availableReward1 = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Available 1",
@@ -195,7 +177,7 @@ namespace TestDataAccess
                 AvailableQuantity = 5
             };
 
-            var availableReward2 = new Reward
+            Reward availableReward2 = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Available 2",
@@ -204,7 +186,7 @@ namespace TestDataAccess
                 AvailableQuantity = 3
             };
 
-            var unavailableReward = new Reward
+            Reward unavailableReward = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Unavailable",
@@ -216,10 +198,8 @@ namespace TestDataAccess
             _context.Rewards.AddRange(availableReward1, availableReward2, unavailableReward);
             _context.SaveChanges();
 
-            // Act
-            var availableRewards = _repository.GetAvailableRewards();
+            List<Reward> availableRewards = _repository.GetAvailableRewards();
 
-            // Assert
             Assert.AreEqual(2, availableRewards.Count);
             Assert.IsTrue(availableRewards.All(r => r.AvailableQuantity > 0));
         }
@@ -227,8 +207,7 @@ namespace TestDataAccess
         [TestMethod]
         public void GetRewardsByMembershipLevel_NoRequirement_ReturnsAll()
         {
-            // Arrange
-            var reward1 = new Reward
+            Reward reward1 = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "No Requirement",
@@ -238,7 +217,7 @@ namespace TestDataAccess
                 RequiredMembershipLevel = null
             };
 
-            var reward2 = new Reward
+            Reward reward2 = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Premium Required",
@@ -251,10 +230,8 @@ namespace TestDataAccess
             _context.Rewards.AddRange(reward1, reward2);
             _context.SaveChanges();
 
-            // Act
-            var rewards = _repository.GetRewardsByMembershipLevel(null);
+            List<Reward> rewards = _repository.GetRewardsByMembershipLevel(null);
 
-            // Assert
             Assert.AreEqual(1, rewards.Count);
             Assert.AreEqual("No Requirement", rewards[0].Name);
         }
@@ -262,8 +239,7 @@ namespace TestDataAccess
         [TestMethod]
         public void GetRewardsByMembershipLevel_SpecificLevel_ReturnsMatching()
         {
-            // Arrange
-            var standardReward = new Reward
+            Reward standardReward = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Standard",
@@ -273,7 +249,7 @@ namespace TestDataAccess
                 RequiredMembershipLevel = MembershipLevel.Standard
             };
 
-            var premiumReward = new Reward
+            Reward premiumReward = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Premium",
@@ -283,7 +259,7 @@ namespace TestDataAccess
                 RequiredMembershipLevel = MembershipLevel.Premium
             };
 
-            var vipReward = new Reward
+            Reward vipReward = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "VIP",
@@ -296,10 +272,8 @@ namespace TestDataAccess
             _context.Rewards.AddRange(standardReward, premiumReward, vipReward);
             _context.SaveChanges();
 
-            // Act
-            var premiumRewards = _repository.GetRewardsByMembershipLevel(MembershipLevel.Premium);
+            List<Reward> premiumRewards = _repository.GetRewardsByMembershipLevel(MembershipLevel.Premium);
 
-            // Assert
             Assert.AreEqual(1, premiumRewards.Count);
             Assert.AreEqual("Premium", premiumRewards[0].Name);
         }
@@ -307,8 +281,7 @@ namespace TestDataAccess
         [TestMethod]
         public void GetByName_ExistingName_ReturnsReward()
         {
-            // Arrange
-            var reward = new Reward
+            Reward reward = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = "Unique Name",
@@ -320,10 +293,8 @@ namespace TestDataAccess
             _context.Rewards.Add(reward);
             _context.SaveChanges();
 
-            // Act
-            var retrieved = _repository.GetByName("Unique Name");
+            Reward? retrieved = _repository.GetByName("Unique Name");
 
-            // Assert
             Assert.IsNotNull(retrieved);
             Assert.AreEqual("Unique Name", retrieved.Name);
         }
@@ -331,10 +302,8 @@ namespace TestDataAccess
         [TestMethod]
         public void GetByName_NonExistingName_ReturnsNull()
         {
-            // Act
-            var retrieved = _repository.GetByName("Non Existing");
+            Reward? retrieved = _repository.GetByName("Non Existing");
 
-            // Assert
             Assert.IsNull(retrieved);
         }
     }

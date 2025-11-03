@@ -104,15 +104,16 @@ namespace DataAccess.Repositories
                 .ToList();
         }
 
-        public List<MaintenanceRecord> GetByAttractionIdAndDateRange(Guid attractionId, DateTime dateFrom, DateTime dateTo)
+        public List<MaintenanceRecord> GetByAttractionIdAndDateRange(Guid attractionId, DateTime dateFrom,
+            DateTime dateTo)
         {
             return _context.MaintenanceRecords
                 .Include(r => r.Attraction)
                 .Include(r => r.MaintenanceSchedule)
                 .Include(r => r.Operator)
                 .Where(r => r.AttractionId == attractionId &&
-                           r.PerformedDate >= dateFrom &&
-                           r.PerformedDate <= dateTo)
+                            r.PerformedDate >= dateFrom &&
+                            r.PerformedDate <= dateTo)
                 .OrderByDescending(r => r.PerformedDate)
                 .ToList();
         }
@@ -125,7 +126,7 @@ namespace DataAccess.Repositories
 
         public void Delete(Guid id)
         {
-            var record = _context.MaintenanceRecords.Find(id);
+            MaintenanceRecord? record = _context.MaintenanceRecords.Find(id);
             if (record != null)
             {
                 _context.MaintenanceRecords.Remove(record);

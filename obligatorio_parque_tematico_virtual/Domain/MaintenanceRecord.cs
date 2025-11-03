@@ -62,7 +62,6 @@ namespace Domain
 
         public DateTime CreatedAt { get; set; }
 
-        // Navigation properties
         public virtual MaintenanceSchedule? MaintenanceSchedule { get; set; }
         public virtual Attraction? Attraction { get; set; }
         public virtual User? Operator { get; set; }

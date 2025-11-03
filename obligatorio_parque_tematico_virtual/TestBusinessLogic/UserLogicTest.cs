@@ -1644,7 +1644,6 @@ namespace TestBusinessLogic
         [TestMethod]
         public async Task RegisterVisitor_WhenVisitorRoleNotFound_CreatesVisitorWithoutRole()
         {
-            // Arrange
             string name = "John";
             string lastName = "Doe";
             string email = "john.doe@test.com";
@@ -1670,10 +1669,8 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            // Act
             UserResponse result = await _userLogic.RegisterVisitor(request);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsNotNull(createdUser);
             Assert.AreEqual(0, createdUser.UserRoles.Count, "User should have no roles when visitor role is not found");
@@ -1685,8 +1682,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public async Task CreateUser_WhenRolesIsNull_CreatesUserWithoutRoles()
         {
-            // Arrange
-            var request = new CreateUserRequest
+            CreateUserRequest request = new CreateUserRequest
             {
                 Name = "John",
                 LastName = "Doe",
@@ -1703,10 +1699,8 @@ namespace TestBusinessLogic
                 .Callback<User>(u => createdUser = u)
                 .ReturnsAsync((User u) => u);
 
-            // Act
             await _userLogic.CreateUser(request);
 
-            // Assert
             Assert.IsNotNull(createdUser);
             Assert.AreEqual(0, createdUser.UserRoles.Count);
         }
@@ -1714,8 +1708,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public async Task CreateUser_WhenRoleNotFoundInDatabase_SkipsNonexistentRole()
         {
-            // Arrange
-            var request = new CreateUserRequest
+            CreateUserRequest request = new CreateUserRequest
             {
                 Name = "John",
                 LastName = "Doe",
@@ -1727,7 +1720,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.IsEmailUnique(request.Email)).ReturnsAsync(true);
             _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
 
-            var adminRole = new Role { Id = 1, Name = "Admin" };
+            Role adminRole = new Role { Id = 1, Name = "Admin" };
             _mockRoleRepository.Setup(r => r.GetByName("Admin")).Returns(adminRole);
             _mockRoleRepository.Setup(r => r.GetByName("NonExistent")).Returns((Role)null);
 
@@ -1736,10 +1729,8 @@ namespace TestBusinessLogic
                 .Callback<User>(u => createdUser = u)
                 .ReturnsAsync((User u) => u);
 
-            // Act
             await _userLogic.CreateUser(request);
 
-            // Assert
             Assert.IsNotNull(createdUser);
             Assert.AreEqual(1, createdUser.UserRoles.Count);
             Assert.AreEqual("Admin", createdUser.UserRoles.First().Role.Name);
@@ -1748,7 +1739,6 @@ namespace TestBusinessLogic
         [TestMethod]
         public async Task RegisterExit_WhenCapacityIsZero_DoesNotDecreaseCapacity()
         {
-            // Arrange
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
             Guid qrCode = Guid.NewGuid();
@@ -1761,7 +1751,7 @@ namespace TestBusinessLogic
                 Name = "Test Attraction",
                 Type = AttractionType.RollerCoaster,
                 MaxCapacity = 10,
-                CurrentCapacity = 1  // Start with 1 so entry works
+                CurrentCapacity = 1
             };
 
             User visitor = new User
@@ -1792,24 +1782,21 @@ namespace TestBusinessLogic
                 exitDate = exitDate
             };
 
-            // Act
             await _userLogic.RegisterEntry(attractionId, entryRequest);
-            attraction.CurrentCapacity = 0;  // Manually set to 0 before exit to test the branch
+            attraction.CurrentCapacity = 0;
             await _userLogic.RegisterExit(attractionId, exitRequest);
 
-            // Assert
             Assert.AreEqual(0, attraction.CurrentCapacity, "Capacity should remain at zero and not go negative");
         }
 
         [TestMethod]
         public async Task ModifyUser_WhenBirthDateNotProvided_DoesNotUpdateBirthDate()
         {
-            // Arrange
             Guid userId = Guid.NewGuid();
             string actorSubClaim = userId.ToString();
             DateTime originalBirthDate = new DateTime(1990, 5, 15);
 
-            var originalUser = new User
+            User originalUser = new User
             {
                 Id = userId,
                 Name = "John",
@@ -1819,24 +1806,23 @@ namespace TestBusinessLogic
                 BirthDate = originalBirthDate
             };
 
-            var request = new ModifyUserRequest
+            ModifyUserRequest request = new ModifyUserRequest
             {
                 Name = "Jane",
                 LastName = "Doe",
                 Email = "john@test.com",
                 Password = "newPassword123",
-                BirthDate = null  // Not provided
+                BirthDate = null
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
             _mockUserRepository.Setup(r => r.IsEmailUnique(request.Email)).ReturnsAsync(true);
             _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("newHashedPassword");
 
-            // Act
             await _userLogic.ModifyUser(userId, actorSubClaim, request);
 
-            // Assert
-            Assert.AreEqual(originalBirthDate, originalUser.BirthDate, "BirthDate should not change when null is provided");
+            Assert.AreEqual(originalBirthDate, originalUser.BirthDate,
+                "BirthDate should not change when null is provided");
             Assert.AreEqual("Jane", originalUser.Name);
         }
 

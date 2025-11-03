@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using IBusinessLogic;
+using Models.Out;
 
 namespace Api.Controllers;
 
@@ -19,14 +20,14 @@ public class PluginController : ControllerBase
     [HttpGet]
     public IActionResult GetAvailablePlugins()
     {
-        var plugins = _pluginLoader.LoadPlugins();
+        List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
         return Ok(plugins);
     }
 
     [HttpGet("{name}")]
     public IActionResult GetPluginByName(string name)
     {
-        var plugin = _pluginLoader.GetPluginByName(name);
+        PluginInfoResponse plugin = _pluginLoader.GetPluginByName(name);
 
         if (plugin == null)
         {

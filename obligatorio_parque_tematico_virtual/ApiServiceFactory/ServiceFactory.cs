@@ -28,7 +28,6 @@ public static class ServiceFactory
         services.AddScoped<IMaintenanceLogic, MaintenanceLogic>();
         services.AddScoped<IScoreHistoryLogic, ScoreHistoryLogic>();
 
-        // Plugin system - singleton with plugins directory path
         string pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
         services.AddSingleton<IPluginLoader>(new BusinessLogic.Plugins.PluginLoader(pluginsPath));
 

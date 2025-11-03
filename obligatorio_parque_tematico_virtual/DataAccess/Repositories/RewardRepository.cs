@@ -35,7 +35,7 @@ namespace DataAccess.Repositories
 
         public void Delete(Guid id)
         {
-            var reward = GetById(id);
+            Reward? reward = GetById(id);
             if (reward != null)
             {
                 _context.Rewards.Remove(reward);

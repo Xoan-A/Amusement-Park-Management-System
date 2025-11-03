@@ -51,13 +51,14 @@ public class PluginControllerTest
             context.Database.EnsureCreated();
         }
 
-        Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
-        {
-            SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
-            Issuer = "ParqueTematico",
-            Audience = "ParqueTematico",
-            ExpirationHours = 1
-        });
+        Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
+            Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+            {
+                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+                Issuer = "ParqueTematico",
+                Audience = "ParqueTematico",
+                ExpirationHours = 1
+            });
         BusinessLogic.TokenLogic tokenService = new BusinessLogic.TokenLogic(jwtSettings);
 
         UserResponse adminUser = new UserResponse
@@ -86,8 +87,7 @@ public class PluginControllerTest
     [TestMethod]
     public async Task GetAvailablePlugins_AsAdministrator_ReturnsOk()
     {
-        // Arrange
-        var plugins = new List<PluginInfoResponse>
+        List<PluginInfoResponse> plugins = new List<PluginInfoResponse>
         {
             new PluginInfoResponse
             {
@@ -100,18 +100,15 @@ public class PluginControllerTest
 
         _mockPluginLoader.Setup(p => p.LoadPlugins()).Returns(plugins);
 
-        // Act
-        var response = await _adminClient.GetAsync("/api/plugins");
+        HttpResponseMessage response = await _adminClient.GetAsync("/api/plugins");
 
-        // Assert
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
     public async Task GetPluginByName_AsAdministrator_ReturnsOk()
     {
-        // Arrange
-        var plugin = new PluginInfoResponse
+        PluginInfoResponse plugin = new PluginInfoResponse
         {
             Name = "PuntuacionPorHora",
             Description = "Test plugin",
@@ -121,23 +118,18 @@ public class PluginControllerTest
 
         _mockPluginLoader.Setup(p => p.GetPluginByName("PuntuacionPorHora")).Returns(plugin);
 
-        // Act
-        var response = await _adminClient.GetAsync("/api/plugins/PuntuacionPorHora");
+        HttpResponseMessage response = await _adminClient.GetAsync("/api/plugins/PuntuacionPorHora");
 
-        // Assert
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
     public async Task GetPluginByName_NonExistent_ReturnsNotFound()
     {
-        // Arrange
         _mockPluginLoader.Setup(p => p.GetPluginByName("NonExistent")).Returns((PluginInfoResponse?)null);
 
-        // Act
-        var response = await _adminClient.GetAsync("/api/plugins/NonExistent");
+        HttpResponseMessage response = await _adminClient.GetAsync("/api/plugins/NonExistent");
 
-        // Assert
         Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
     }
 }

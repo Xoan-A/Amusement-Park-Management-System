@@ -6,6 +6,7 @@ namespace Domain
         private string _description;
         private int _pointsCost;
         private int _availableQuantity;
+        public MembershipLevel? RequiredMembershipLevel { get; set; }
 
         public Guid Id { get; set; }
 
@@ -18,10 +19,12 @@ namespace Domain
                 {
                     throw new ArgumentException("Name is required");
                 }
+
                 if (value.Length > 100)
                 {
                     throw new ArgumentException("Name cannot exceed 100 characters");
                 }
+
                 _name = value;
             }
         }
@@ -35,10 +38,12 @@ namespace Domain
                 {
                     throw new ArgumentException("Description is required");
                 }
+
                 if (value.Length > 500)
                 {
                     throw new ArgumentException("Description cannot exceed 500 characters");
                 }
+
                 _description = value;
             }
         }
@@ -52,6 +57,7 @@ namespace Domain
                 {
                     throw new ArgumentException("Points cost must be greater than zero");
                 }
+
                 _pointsCost = value;
             }
         }
@@ -65,11 +71,10 @@ namespace Domain
                 {
                     throw new ArgumentException("Available quantity cannot be negative");
                 }
+
                 _availableQuantity = value;
             }
         }
-
-        public MembershipLevel? RequiredMembershipLevel { get; set; }
 
         public void DecrementQuantity()
         {
@@ -77,6 +82,7 @@ namespace Domain
             {
                 throw new InvalidOperationException("Cannot decrement quantity when it is already zero");
             }
+
             _availableQuantity--;
         }
 

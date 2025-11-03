@@ -16,7 +16,7 @@ namespace BusinessLogic
 
         public List<ScoreHistoryModelOut> GetMyScoreHistory(Guid visitorId)
         {
-            var histories = _scoreHistoryRepository.GetByVisitor(visitorId);
+            List<ScoreHistory> histories = _scoreHistoryRepository.GetByVisitor(visitorId);
             return MapToModelOut(histories);
         }
 
@@ -24,17 +24,18 @@ namespace BusinessLogic
         {
             if (dateFrom.HasValue && dateTo.HasValue)
             {
-                var histories = _scoreHistoryRepository.GetByVisitorAndDateRange(visitorId, dateFrom.Value, dateTo.Value);
+                List<ScoreHistory> histories =
+                    _scoreHistoryRepository.GetByVisitorAndDateRange(visitorId, dateFrom.Value, dateTo.Value);
                 return MapToModelOut(histories);
             }
 
-            var allHistories = _scoreHistoryRepository.GetByVisitor(visitorId);
+            List<ScoreHistory> allHistories = _scoreHistoryRepository.GetByVisitor(visitorId);
             return MapToModelOut(allHistories);
         }
 
         public List<ScoreHistoryModelOut> GetAllScoreHistory()
         {
-            var histories = _scoreHistoryRepository.GetAll();
+            List<ScoreHistory> histories = _scoreHistoryRepository.GetAll();
             return MapToModelOut(histories);
         }
 

@@ -26,7 +26,6 @@ public class PluginLoaderIntegrationTest
             }
             catch
             {
-                // Ignore cleanup errors
             }
         }
     }
@@ -34,14 +33,11 @@ public class PluginLoaderIntegrationTest
     [TestMethod]
     public void LoadPlugins_WithValidPluginDll_DiscoversPluginSuccessfully()
     {
-        // Arrange
         CopyExamplePluginDll(_tempPluginDirectory!);
-        var pluginLoader = new PluginLoader(_tempPluginDirectory!);
+        PluginLoader pluginLoader = new PluginLoader(_tempPluginDirectory!);
 
-        // Act
-        var plugins = pluginLoader.LoadPlugins();
+        List<PluginInfoResponse> plugins = pluginLoader.LoadPlugins();
 
-        // Assert
         Assert.AreEqual(1, plugins.Count);
         Assert.AreEqual("PuntuacionPorHora", plugins[0].Name);
         Assert.IsNotNull(plugins[0].Description);
@@ -53,15 +49,12 @@ public class PluginLoaderIntegrationTest
     [TestMethod]
     public void GetPluginByName_WithLoadedPlugin_ReturnsPluginInfo()
     {
-        // Arrange
         CopyExamplePluginDll(_tempPluginDirectory!);
-        var pluginLoader = new PluginLoader(_tempPluginDirectory!);
+        PluginLoader pluginLoader = new PluginLoader(_tempPluginDirectory!);
         pluginLoader.LoadPlugins();
 
-        // Act
-        var plugin = pluginLoader.GetPluginByName("PuntuacionPorHora");
+        PluginInfoResponse? plugin = pluginLoader.GetPluginByName("PuntuacionPorHora");
 
-        // Assert
         Assert.IsNotNull(plugin);
         Assert.AreEqual("PuntuacionPorHora", plugin.Name);
         Assert.IsTrue(plugin.Description.Contains("hour"));
@@ -71,15 +64,12 @@ public class PluginLoaderIntegrationTest
     [TestMethod]
     public void CreateStrategyInstance_WithLoadedPlugin_CreatesValidStrategy()
     {
-        // Arrange
         CopyExamplePluginDll(_tempPluginDirectory!);
-        var pluginLoader = new PluginLoader(_tempPluginDirectory!);
+        PluginLoader pluginLoader = new PluginLoader(_tempPluginDirectory!);
         pluginLoader.LoadPlugins();
 
-        // Act
-        var strategy = pluginLoader.CreateStrategyInstance("PuntuacionPorHora");
+        IConcreteStrategy strategy = pluginLoader.CreateStrategyInstance("PuntuacionPorHora");
 
-        // Assert
         Assert.IsNotNull(strategy);
         Assert.IsInstanceOfType(strategy, typeof(IConcreteStrategy));
         Assert.AreEqual("PuntuacionPorHora", strategy.Name);
@@ -88,16 +78,13 @@ public class PluginLoaderIntegrationTest
     [TestMethod]
     public void DiscoverPlugins_ReadsPluginDescriptionAttribute()
     {
-        // Arrange
         CopyExamplePluginDll(_tempPluginDirectory!);
-        var pluginLoader = new PluginLoader(_tempPluginDirectory!);
+        PluginLoader pluginLoader = new PluginLoader(_tempPluginDirectory!);
 
-        // Act
-        var plugins = pluginLoader.LoadPlugins();
+        List<PluginInfoResponse> plugins = pluginLoader.LoadPlugins();
 
-        // Assert - Tests PluginDescriptionAttribute coverage
         Assert.IsTrue(plugins.Any());
-        var plugin = plugins.First();
+        PluginInfoResponse plugin = plugins.First();
         Assert.IsNotNull(plugin.Description);
         Assert.IsTrue(plugin.Description.Length > 0);
         Assert.IsTrue(plugin.Description.Contains("hour") || plugin.Description.Contains("peak"));
@@ -106,16 +93,13 @@ public class PluginLoaderIntegrationTest
     [TestMethod]
     public void DiscoverPlugins_ReadsPluginAuthorAttribute()
     {
-        // Arrange
         CopyExamplePluginDll(_tempPluginDirectory!);
-        var pluginLoader = new PluginLoader(_tempPluginDirectory!);
+        PluginLoader pluginLoader = new PluginLoader(_tempPluginDirectory!);
 
-        // Act
-        var plugins = pluginLoader.LoadPlugins();
+        List<PluginInfoResponse> plugins = pluginLoader.LoadPlugins();
 
-        // Assert - Tests PluginAuthorAttribute coverage
         Assert.IsTrue(plugins.Any());
-        var plugin = plugins.First();
+        PluginInfoResponse plugin = plugins.First();
         Assert.IsNotNull(plugin.Author);
         Assert.AreEqual("Theme Park Team", plugin.Author);
     }
@@ -123,14 +107,11 @@ public class PluginLoaderIntegrationTest
     [TestMethod]
     public void MapToResponse_ConvertsPluginInfoToResponse()
     {
-        // Arrange
         CopyExamplePluginDll(_tempPluginDirectory!);
-        var pluginLoader = new PluginLoader(_tempPluginDirectory!);
+        PluginLoader pluginLoader = new PluginLoader(_tempPluginDirectory!);
 
-        // Act - LoadPlugins internally uses MapToResponse
         List<PluginInfoResponse> plugins = pluginLoader.LoadPlugins();
 
-        // Assert - Tests MapToResponse coverage
         Assert.IsTrue(plugins.Any());
         PluginInfoResponse plugin = plugins.First();
         Assert.IsInstanceOfType(plugin, typeof(PluginInfoResponse));
@@ -149,8 +130,8 @@ public class PluginLoaderIntegrationTest
 
     private void CopyExamplePluginDll(string targetDir)
     {
-        // Find ExamplePlugin.dll - try different paths (Release first for CI, then Debug for local)
-        string[] possiblePaths = {
+        string[] possiblePaths =
+        {
             // Release configuration (used by CI/CD)
             "../../../../ExamplePlugin/bin/Release/net8.0/ExamplePlugin.dll",
             "../../../ExamplePlugin/bin/Release/net8.0/ExamplePlugin.dll",
@@ -164,9 +145,9 @@ public class PluginLoaderIntegrationTest
         };
 
         string? sourceDll = null;
-        foreach (var path in possiblePaths)
+        foreach (String path in possiblePaths)
         {
-            var fullPath = Path.GetFullPath(path);
+            String fullPath = Path.GetFullPath(path);
             if (File.Exists(fullPath))
             {
                 sourceDll = fullPath;

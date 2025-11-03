@@ -34,12 +34,11 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task CreateSchedule_ValidRequest_ReturnsScheduleId()
     {
-        // Arrange
-        var attractionId = Guid.NewGuid();
-        var createdBy = Guid.NewGuid();
-        var attraction = CreateTestAttraction(attractionId);
+        Guid attractionId = Guid.NewGuid();
+        Guid createdBy = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(attractionId);
 
-        var request = new MaintenanceScheduleRequest
+        MaintenanceScheduleRequest request = new MaintenanceScheduleRequest
         {
             AttractionId = attractionId,
             ScheduledDate = DateTime.Now.AddDays(7),
@@ -50,10 +49,8 @@ public class MaintenanceLogicTest
         _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
         _mockScheduleRepository.Setup(r => r.Create(It.IsAny<MaintenanceSchedule>()));
 
-        // Act
-        var result = await _maintenanceLogic.CreateSchedule(request, createdBy);
+        Guid result = await _maintenanceLogic.CreateSchedule(request, createdBy);
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreNotEqual(Guid.Empty, result);
         _mockScheduleRepository.Verify(r => r.Create(It.IsAny<MaintenanceSchedule>()), Times.Once);
@@ -62,8 +59,7 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task CreateSchedule_NonExistentAttraction_ThrowsKeyNotFoundException()
     {
-        // Arrange
-        var request = new MaintenanceScheduleRequest
+        MaintenanceScheduleRequest request = new MaintenanceScheduleRequest
         {
             AttractionId = Guid.NewGuid(),
             ScheduledDate = DateTime.Now.AddDays(7),
@@ -73,7 +69,6 @@ public class MaintenanceLogicTest
 
         _mockAttractionRepository.Setup(r => r.GetById(It.IsAny<Guid>())).ReturnsAsync((Attraction)null);
 
-        // Act & Assert
         await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
             () => _maintenanceLogic.CreateSchedule(request, Guid.NewGuid())
         );
@@ -82,17 +77,14 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetScheduleById_ExistingSchedule_ReturnsScheduleResponse()
     {
-        // Arrange
-        var scheduleId = Guid.NewGuid();
-        var attraction = CreateTestAttraction(Guid.NewGuid());
-        var schedule = CreateTestSchedule(scheduleId, attraction.Id, attraction);
+        Guid scheduleId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        MaintenanceSchedule schedule = CreateTestSchedule(scheduleId, attraction.Id, attraction);
 
         _mockScheduleRepository.Setup(r => r.GetById(scheduleId)).Returns(schedule);
 
-        // Act
-        var result = await _maintenanceLogic.GetScheduleById(scheduleId);
+        MaintenanceScheduleResponse result = await _maintenanceLogic.GetScheduleById(scheduleId);
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(scheduleId, result.Id);
         Assert.AreEqual(attraction.Name, result.AttractionName);
@@ -102,10 +94,8 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetScheduleById_NonExistentSchedule_ThrowsKeyNotFoundException()
     {
-        // Arrange
         _mockScheduleRepository.Setup(r => r.GetById(It.IsAny<Guid>())).Returns((MaintenanceSchedule)null);
 
-        // Act & Assert
         await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
             () => _maintenanceLogic.GetScheduleById(Guid.NewGuid())
         );
@@ -114,9 +104,8 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetAllSchedules_ReturnsListOfSchedules()
     {
-        // Arrange
-        var attraction = CreateTestAttraction(Guid.NewGuid());
-        var schedules = new List<MaintenanceSchedule>
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        List<MaintenanceSchedule> schedules = new List<MaintenanceSchedule>
         {
             CreateTestSchedule(Guid.NewGuid(), attraction.Id, attraction),
             CreateTestSchedule(Guid.NewGuid(), attraction.Id, attraction)
@@ -124,10 +113,8 @@ public class MaintenanceLogicTest
 
         _mockScheduleRepository.Setup(r => r.GetAll()).Returns(schedules);
 
-        // Act
-        var result = await _maintenanceLogic.GetAllSchedules();
+        List<MaintenanceScheduleResponse> result = await _maintenanceLogic.GetAllSchedules();
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Count);
         _mockScheduleRepository.Verify(r => r.GetAll(), Times.Once);
@@ -136,10 +123,9 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetSchedulesByAttraction_ReturnsFilteredSchedules()
     {
-        // Arrange
-        var attractionId = Guid.NewGuid();
-        var attraction = CreateTestAttraction(attractionId);
-        var schedules = new List<MaintenanceSchedule>
+        Guid attractionId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(attractionId);
+        List<MaintenanceSchedule> schedules = new List<MaintenanceSchedule>
         {
             CreateTestSchedule(Guid.NewGuid(), attractionId, attraction),
             CreateTestSchedule(Guid.NewGuid(), attractionId, attraction)
@@ -147,10 +133,8 @@ public class MaintenanceLogicTest
 
         _mockScheduleRepository.Setup(r => r.GetByAttractionId(attractionId)).Returns(schedules);
 
-        // Act
-        var result = await _maintenanceLogic.GetSchedulesByAttraction(attractionId);
+        List<MaintenanceScheduleResponse> result = await _maintenanceLogic.GetSchedulesByAttraction(attractionId);
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Count);
         Assert.IsTrue(result.All(s => s.AttractionId == attractionId));
@@ -159,19 +143,16 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetOverdueSchedules_ReturnsOverdueSchedules()
     {
-        // Arrange
-        var attraction = CreateTestAttraction(Guid.NewGuid());
-        var overdueSchedule = CreateTestSchedule(Guid.NewGuid(), attraction.Id, attraction);
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        MaintenanceSchedule overdueSchedule = CreateTestSchedule(Guid.NewGuid(), attraction.Id, attraction);
         overdueSchedule.ScheduledDate = DateTime.Now.AddDays(-1);
         overdueSchedule.Status = MaintenanceStatus.Pending;
 
-        var schedules = new List<MaintenanceSchedule> { overdueSchedule };
+        List<MaintenanceSchedule> schedules = new List<MaintenanceSchedule> { overdueSchedule };
         _mockScheduleRepository.Setup(r => r.GetOverdueSchedules()).Returns(schedules);
 
-        // Act
-        var result = await _maintenanceLogic.GetOverdueSchedules();
+        List<MaintenanceScheduleResponse> result = await _maintenanceLogic.GetOverdueSchedules();
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Count);
         Assert.IsTrue(result[0].IsOverdue);
@@ -180,18 +161,15 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetUpcomingSchedules_ReturnsUpcomingSchedules()
     {
-        // Arrange
-        var attraction = CreateTestAttraction(Guid.NewGuid());
-        var upcomingSchedule = CreateTestSchedule(Guid.NewGuid(), attraction.Id, attraction);
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        MaintenanceSchedule upcomingSchedule = CreateTestSchedule(Guid.NewGuid(), attraction.Id, attraction);
         upcomingSchedule.ScheduledDate = DateTime.Now.AddDays(3);
 
-        var schedules = new List<MaintenanceSchedule> { upcomingSchedule };
+        List<MaintenanceSchedule> schedules = new List<MaintenanceSchedule> { upcomingSchedule };
         _mockScheduleRepository.Setup(r => r.GetUpcomingSchedules(7)).Returns(schedules);
 
-        // Act
-        var result = await _maintenanceLogic.GetUpcomingSchedules(7);
+        List<MaintenanceScheduleResponse> result = await _maintenanceLogic.GetUpcomingSchedules(7);
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Count);
     }
@@ -199,18 +177,15 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task UpdateScheduleStatus_ValidScheduleAndStatus_UpdatesSuccessfully()
     {
-        // Arrange
-        var scheduleId = Guid.NewGuid();
-        var attraction = CreateTestAttraction(Guid.NewGuid());
-        var schedule = CreateTestSchedule(scheduleId, attraction.Id, attraction);
+        Guid scheduleId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        MaintenanceSchedule schedule = CreateTestSchedule(scheduleId, attraction.Id, attraction);
 
         _mockScheduleRepository.Setup(r => r.GetById(scheduleId)).Returns(schedule);
         _mockScheduleRepository.Setup(r => r.Update(It.IsAny<MaintenanceSchedule>()));
 
-        // Act
         await _maintenanceLogic.UpdateScheduleStatus(scheduleId, "Completed");
 
-        // Assert
         _mockScheduleRepository.Verify(r => r.Update(It.Is<MaintenanceSchedule>(
             s => s.Id == scheduleId && s.Status == MaintenanceStatus.Completed
         )), Times.Once);
@@ -219,14 +194,12 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task UpdateScheduleStatus_InvalidStatus_ThrowsArgumentException()
     {
-        // Arrange
-        var scheduleId = Guid.NewGuid();
-        var attraction = CreateTestAttraction(Guid.NewGuid());
-        var schedule = CreateTestSchedule(scheduleId, attraction.Id, attraction);
+        Guid scheduleId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        MaintenanceSchedule schedule = CreateTestSchedule(scheduleId, attraction.Id, attraction);
 
         _mockScheduleRepository.Setup(r => r.GetById(scheduleId)).Returns(schedule);
 
-        // Act & Assert
         await Assert.ThrowsExceptionAsync<ArgumentException>(
             () => _maintenanceLogic.UpdateScheduleStatus(scheduleId, "InvalidStatus")
         );
@@ -235,14 +208,11 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task DeleteSchedule_ExistingSchedule_DeletesSuccessfully()
     {
-        // Arrange
-        var scheduleId = Guid.NewGuid();
+        Guid scheduleId = Guid.NewGuid();
         _mockScheduleRepository.Setup(r => r.Delete(scheduleId));
 
-        // Act
         await _maintenanceLogic.DeleteSchedule(scheduleId);
 
-        // Assert
         _mockScheduleRepository.Verify(r => r.Delete(scheduleId), Times.Once);
     }
 
@@ -253,12 +223,11 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task RecordMaintenance_ValidRequest_ReturnsRecordId()
     {
-        // Arrange
-        var attractionId = Guid.NewGuid();
-        var performedBy = Guid.NewGuid();
-        var attraction = CreateTestAttraction(attractionId);
+        Guid attractionId = Guid.NewGuid();
+        Guid performedBy = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(attractionId);
 
-        var request = new MaintenanceRecordRequest
+        MaintenanceRecordRequest request = new MaintenanceRecordRequest
         {
             AttractionId = attractionId,
             PerformedDate = DateTime.Now,
@@ -270,10 +239,8 @@ public class MaintenanceLogicTest
         _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
         _mockRecordRepository.Setup(r => r.Create(It.IsAny<MaintenanceRecord>()));
 
-        // Act
-        var result = await _maintenanceLogic.RecordMaintenance(request, performedBy);
+        Guid result = await _maintenanceLogic.RecordMaintenance(request, performedBy);
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreNotEqual(Guid.Empty, result);
         _mockRecordRepository.Verify(r => r.Create(It.IsAny<MaintenanceRecord>()), Times.Once);
@@ -282,8 +249,7 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task RecordMaintenance_NonExistentAttraction_ThrowsKeyNotFoundException()
     {
-        // Arrange
-        var request = new MaintenanceRecordRequest
+        MaintenanceRecordRequest request = new MaintenanceRecordRequest
         {
             AttractionId = Guid.NewGuid(),
             PerformedDate = DateTime.Now,
@@ -294,7 +260,6 @@ public class MaintenanceLogicTest
 
         _mockAttractionRepository.Setup(r => r.GetById(It.IsAny<Guid>())).ReturnsAsync((Attraction)null);
 
-        // Act & Assert
         await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
             () => _maintenanceLogic.RecordMaintenance(request, Guid.NewGuid())
         );
@@ -303,18 +268,15 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetRecordById_ExistingRecord_ReturnsRecordResponse()
     {
-        // Arrange
-        var recordId = Guid.NewGuid();
-        var attraction = CreateTestAttraction(Guid.NewGuid());
-        var operatorUser = CreateTestUser();
-        var record = CreateTestRecord(recordId, attraction.Id, attraction, operatorUser.Id, operatorUser);
+        Guid recordId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        User operatorUser = CreateTestUser();
+        MaintenanceRecord record = CreateTestRecord(recordId, attraction.Id, attraction, operatorUser.Id, operatorUser);
 
         _mockRecordRepository.Setup(r => r.GetById(recordId)).Returns(record);
 
-        // Act
-        var result = await _maintenanceLogic.GetRecordById(recordId);
+        MaintenanceRecordResponse result = await _maintenanceLogic.GetRecordById(recordId);
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(recordId, result.Id);
         Assert.AreEqual(attraction.Name, result.AttractionName);
@@ -323,10 +285,8 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetRecordById_NonExistentRecord_ThrowsKeyNotFoundException()
     {
-        // Arrange
         _mockRecordRepository.Setup(r => r.GetById(It.IsAny<Guid>())).Returns((MaintenanceRecord)null);
 
-        // Act & Assert
         await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
             () => _maintenanceLogic.GetRecordById(Guid.NewGuid())
         );
@@ -335,10 +295,9 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetAllRecords_ReturnsListOfRecords()
     {
-        // Arrange
-        var attraction = CreateTestAttraction(Guid.NewGuid());
-        var operatorUser = CreateTestUser();
-        var records = new List<MaintenanceRecord>
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        User operatorUser = CreateTestUser();
+        List<MaintenanceRecord> records = new List<MaintenanceRecord>
         {
             CreateTestRecord(Guid.NewGuid(), attraction.Id, attraction, operatorUser.Id, operatorUser),
             CreateTestRecord(Guid.NewGuid(), attraction.Id, attraction, operatorUser.Id, operatorUser)
@@ -346,10 +305,8 @@ public class MaintenanceLogicTest
 
         _mockRecordRepository.Setup(r => r.GetAll()).Returns(records);
 
-        // Act
-        var result = await _maintenanceLogic.GetAllRecords();
+        List<MaintenanceRecordResponse> result = await _maintenanceLogic.GetAllRecords();
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Count);
     }
@@ -357,21 +314,18 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetRecordsByAttraction_ReturnsFilteredRecords()
     {
-        // Arrange
-        var attractionId = Guid.NewGuid();
-        var attraction = CreateTestAttraction(attractionId);
-        var operatorUser = CreateTestUser();
-        var records = new List<MaintenanceRecord>
+        Guid attractionId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(attractionId);
+        User operatorUser = CreateTestUser();
+        List<MaintenanceRecord> records = new List<MaintenanceRecord>
         {
             CreateTestRecord(Guid.NewGuid(), attractionId, attraction, operatorUser.Id, operatorUser)
         };
 
         _mockRecordRepository.Setup(r => r.GetByAttractionId(attractionId)).Returns(records);
 
-        // Act
-        var result = await _maintenanceLogic.GetRecordsByAttraction(attractionId);
+        List<MaintenanceRecordResponse> result = await _maintenanceLogic.GetRecordsByAttraction(attractionId);
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Count);
         Assert.AreEqual(attractionId, result[0].AttractionId);
@@ -380,21 +334,18 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetRecordsByOperator_ReturnsFilteredRecords()
     {
-        // Arrange
-        var operatorId = Guid.NewGuid();
-        var attraction = CreateTestAttraction(Guid.NewGuid());
-        var operatorUser = CreateTestUser();
-        var records = new List<MaintenanceRecord>
+        Guid operatorId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        User operatorUser = CreateTestUser();
+        List<MaintenanceRecord> records = new List<MaintenanceRecord>
         {
             CreateTestRecord(Guid.NewGuid(), attraction.Id, attraction, operatorId, operatorUser)
         };
 
         _mockRecordRepository.Setup(r => r.GetByOperator(operatorId)).Returns(records);
 
-        // Act
-        var result = await _maintenanceLogic.GetRecordsByOperator(operatorId);
+        List<MaintenanceRecordResponse> result = await _maintenanceLogic.GetRecordsByOperator(operatorId);
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Count);
         Assert.AreEqual(operatorId, result[0].PerformedBy);
@@ -403,18 +354,16 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetUnscheduledMaintenance_ReturnsUnscheduledRecords()
     {
-        // Arrange
-        var attraction = CreateTestAttraction(Guid.NewGuid());
-        var operatorUser = CreateTestUser();
-        var record = CreateTestRecord(Guid.NewGuid(), attraction.Id, attraction, operatorUser.Id, operatorUser);
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        User operatorUser = CreateTestUser();
+        MaintenanceRecord record =
+            CreateTestRecord(Guid.NewGuid(), attraction.Id, attraction, operatorUser.Id, operatorUser);
         record.MaintenanceScheduleId = null;
 
         _mockRecordRepository.Setup(r => r.GetUnscheduledMaintenance()).Returns(new List<MaintenanceRecord> { record });
 
-        // Act
-        var result = await _maintenanceLogic.GetUnscheduledMaintenance();
+        List<MaintenanceRecordResponse> result = await _maintenanceLogic.GetUnscheduledMaintenance();
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Count);
         Assert.IsNull(result[0].MaintenanceScheduleId);
@@ -423,13 +372,12 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task GetMaintenanceHistory_ReturnsRecordsInDateRange()
     {
-        // Arrange
-        var attractionId = Guid.NewGuid();
-        var dateFrom = DateTime.Now.AddDays(-30);
-        var dateTo = DateTime.Now;
-        var attraction = CreateTestAttraction(attractionId);
-        var operatorUser = CreateTestUser();
-        var records = new List<MaintenanceRecord>
+        Guid attractionId = Guid.NewGuid();
+        DateTime dateFrom = DateTime.Now.AddDays(-30);
+        DateTime dateTo = DateTime.Now;
+        Attraction attraction = CreateTestAttraction(attractionId);
+        User operatorUser = CreateTestUser();
+        List<MaintenanceRecord> records = new List<MaintenanceRecord>
         {
             CreateTestRecord(Guid.NewGuid(), attractionId, attraction, operatorUser.Id, operatorUser)
         };
@@ -437,10 +385,9 @@ public class MaintenanceLogicTest
         _mockRecordRepository.Setup(r => r.GetByAttractionIdAndDateRange(attractionId, dateFrom, dateTo))
             .Returns(records);
 
-        // Act
-        var result = await _maintenanceLogic.GetMaintenanceHistory(attractionId, dateFrom, dateTo);
+        List<MaintenanceRecordResponse> result =
+            await _maintenanceLogic.GetMaintenanceHistory(attractionId, dateFrom, dateTo);
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Count);
     }
@@ -452,15 +399,14 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task CompleteMaintenance_ValidScheduleAndRequest_CompletesAndCreatesRecord()
     {
-        // Arrange
-        var scheduleId = Guid.NewGuid();
-        var attractionId = Guid.NewGuid();
-        var performedBy = Guid.NewGuid();
-        var attraction = CreateTestAttraction(attractionId);
-        var schedule = CreateTestSchedule(scheduleId, attractionId, attraction);
+        Guid scheduleId = Guid.NewGuid();
+        Guid attractionId = Guid.NewGuid();
+        Guid performedBy = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(attractionId);
+        MaintenanceSchedule schedule = CreateTestSchedule(scheduleId, attractionId, attraction);
         schedule.Status = MaintenanceStatus.Pending;
 
-        var request = new MaintenanceRecordRequest
+        MaintenanceRecordRequest request = new MaintenanceRecordRequest
         {
             MaintenanceScheduleId = scheduleId,
             AttractionId = attractionId,
@@ -475,10 +421,8 @@ public class MaintenanceLogicTest
         _mockScheduleRepository.Setup(r => r.Update(It.IsAny<MaintenanceSchedule>()));
         _mockRecordRepository.Setup(r => r.Create(It.IsAny<MaintenanceRecord>()));
 
-        // Act
-        var result = await _maintenanceLogic.CompleteMaintenance(scheduleId, request, performedBy);
+        Guid result = await _maintenanceLogic.CompleteMaintenance(scheduleId, request, performedBy);
 
-        // Assert
         Assert.IsNotNull(result);
         Assert.AreNotEqual(Guid.Empty, result);
         _mockScheduleRepository.Verify(r => r.Update(It.Is<MaintenanceSchedule>(
@@ -490,8 +434,7 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task CompleteMaintenance_NonExistentSchedule_ThrowsKeyNotFoundException()
     {
-        // Arrange
-        var request = new MaintenanceRecordRequest
+        MaintenanceRecordRequest request = new MaintenanceRecordRequest
         {
             AttractionId = Guid.NewGuid(),
             PerformedDate = DateTime.Now,
@@ -502,7 +445,6 @@ public class MaintenanceLogicTest
 
         _mockScheduleRepository.Setup(r => r.GetById(It.IsAny<Guid>())).Returns((MaintenanceSchedule)null);
 
-        // Act & Assert
         await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
             () => _maintenanceLogic.CompleteMaintenance(Guid.NewGuid(), request, Guid.NewGuid())
         );
@@ -511,13 +453,12 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task CompleteMaintenance_AlreadyCompletedSchedule_ThrowsArgumentException()
     {
-        // Arrange
-        var scheduleId = Guid.NewGuid();
-        var attraction = CreateTestAttraction(Guid.NewGuid());
-        var schedule = CreateTestSchedule(scheduleId, attraction.Id, attraction);
+        Guid scheduleId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        MaintenanceSchedule schedule = CreateTestSchedule(scheduleId, attraction.Id, attraction);
         schedule.Status = MaintenanceStatus.Completed;
 
-        var request = new MaintenanceRecordRequest
+        MaintenanceRecordRequest request = new MaintenanceRecordRequest
         {
             AttractionId = attraction.Id,
             PerformedDate = DateTime.Now,
@@ -528,7 +469,6 @@ public class MaintenanceLogicTest
 
         _mockScheduleRepository.Setup(r => r.GetById(scheduleId)).Returns(schedule);
 
-        // Act & Assert
         await Assert.ThrowsExceptionAsync<ArgumentException>(
             () => _maintenanceLogic.CompleteMaintenance(scheduleId, request, Guid.NewGuid())
         );
@@ -580,7 +520,8 @@ public class MaintenanceLogicTest
         };
     }
 
-    private MaintenanceRecord CreateTestRecord(Guid id, Guid attractionId, Attraction attraction, Guid performedBy, User operatorUser)
+    private MaintenanceRecord CreateTestRecord(Guid id, Guid attractionId, Attraction attraction, Guid performedBy,
+        User operatorUser)
     {
         return new MaintenanceRecord
         {
@@ -600,7 +541,6 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task CreateSchedule_WithInvalidMaintenanceType_ThrowsArgumentException()
     {
-        // Arrange
         Guid attractionId = Guid.NewGuid();
         Attraction attraction = new Attraction
         {
@@ -615,14 +555,13 @@ public class MaintenanceLogicTest
         {
             AttractionId = attractionId,
             ScheduledDate = DateTime.UtcNow.AddDays(5),
-            MaintenanceType = "InvalidTypeValue",  // Invalid enum value
+            MaintenanceType = "InvalidTypeValue",
             Description = "Test maintenance"
         };
 
         Guid userId = Guid.NewGuid();
         _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
 
-        // Act & Assert
         await Assert.ThrowsExceptionAsync<ArgumentException>(
             async () => await _maintenanceLogic.CreateSchedule(request, userId),
             "Should throw ArgumentException for invalid MaintenanceType");
@@ -631,7 +570,6 @@ public class MaintenanceLogicTest
     [TestMethod]
     public async Task RecordMaintenance_WithInvalidMaintenanceType_ThrowsArgumentException()
     {
-        // Arrange
         Guid attractionId = Guid.NewGuid();
         Attraction attraction = new Attraction
         {
@@ -646,7 +584,7 @@ public class MaintenanceLogicTest
         {
             AttractionId = attractionId,
             MaintenanceScheduleId = null,
-            MaintenanceType = "BadEnumValue",  // Invalid enum value
+            MaintenanceType = "BadEnumValue",
             Description = "Test record",
             Duration = TimeSpan.FromHours(1)
         };
@@ -654,7 +592,6 @@ public class MaintenanceLogicTest
         Guid userId = Guid.NewGuid();
         _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
 
-        // Act & Assert
         await Assert.ThrowsExceptionAsync<ArgumentException>(
             async () => await _maintenanceLogic.RecordMaintenance(request, userId),
             "Should throw ArgumentException for invalid MaintenanceType");
