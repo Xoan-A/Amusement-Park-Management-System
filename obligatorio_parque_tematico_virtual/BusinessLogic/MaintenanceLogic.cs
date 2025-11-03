@@ -26,18 +26,18 @@ public class MaintenanceLogic : IMaintenanceLogic
 
     public async Task<Guid> CreateSchedule(MaintenanceScheduleRequest request, Guid createdBy)
     {
-        var attraction = await _attractionRepository.GetById(request.AttractionId);
+        Attraction attraction = await _attractionRepository.GetById(request.AttractionId);
         if (attraction == null)
         {
             throw new KeyNotFoundException($"Attraction with id {request.AttractionId} not found");
         }
 
-        if (!Enum.TryParse<MaintenanceType>(request.MaintenanceType, out var maintenanceType))
+        if (!Enum.TryParse<MaintenanceType>(request.MaintenanceType, out MaintenanceType maintenanceType))
         {
             throw new ArgumentException($"Invalid maintenance type: {request.MaintenanceType}");
         }
 
-        var schedule = new MaintenanceSchedule
+        MaintenanceSchedule schedule = new MaintenanceSchedule
         {
             Id = Guid.NewGuid(),
             AttractionId = request.AttractionId,
@@ -55,7 +55,7 @@ public class MaintenanceLogic : IMaintenanceLogic
 
     public async Task<MaintenanceScheduleResponse> GetScheduleById(Guid id)
     {
-        var schedule = _scheduleRepository.GetById(id);
+        MaintenanceSchedule schedule = _scheduleRepository.GetById(id);
         if (schedule == null)
         {
             throw new KeyNotFoundException($"Schedule with id {id} not found");
@@ -66,37 +66,37 @@ public class MaintenanceLogic : IMaintenanceLogic
 
     public async Task<List<MaintenanceScheduleResponse>> GetAllSchedules()
     {
-        var schedules = _scheduleRepository.GetAll();
+        List<MaintenanceSchedule> schedules = _scheduleRepository.GetAll();
         return await Task.FromResult(schedules.Select(MapToScheduleResponse).ToList());
     }
 
     public async Task<List<MaintenanceScheduleResponse>> GetSchedulesByAttraction(Guid attractionId)
     {
-        var schedules = _scheduleRepository.GetByAttractionId(attractionId);
+        List<MaintenanceSchedule> schedules = _scheduleRepository.GetByAttractionId(attractionId);
         return await Task.FromResult(schedules.Select(MapToScheduleResponse).ToList());
     }
 
     public async Task<List<MaintenanceScheduleResponse>> GetOverdueSchedules()
     {
-        var schedules = _scheduleRepository.GetOverdueSchedules();
+        List<MaintenanceSchedule> schedules = _scheduleRepository.GetOverdueSchedules();
         return await Task.FromResult(schedules.Select(MapToScheduleResponse).ToList());
     }
 
     public async Task<List<MaintenanceScheduleResponse>> GetUpcomingSchedules(int daysAhead)
     {
-        var schedules = _scheduleRepository.GetUpcomingSchedules(daysAhead);
+        List<MaintenanceSchedule> schedules = _scheduleRepository.GetUpcomingSchedules(daysAhead);
         return await Task.FromResult(schedules.Select(MapToScheduleResponse).ToList());
     }
 
     public async Task UpdateScheduleStatus(Guid id, string status)
     {
-        var schedule = _scheduleRepository.GetById(id);
+        MaintenanceSchedule schedule = _scheduleRepository.GetById(id);
         if (schedule == null)
         {
             throw new KeyNotFoundException($"Schedule with id {id} not found");
         }
 
-        if (!Enum.TryParse<MaintenanceStatus>(status, out var maintenanceStatus))
+        if (!Enum.TryParse<MaintenanceStatus>(status, out MaintenanceStatus maintenanceStatus))
         {
             throw new ArgumentException($"Invalid status: {status}");
         }
@@ -118,7 +118,7 @@ public class MaintenanceLogic : IMaintenanceLogic
 
     public async Task<Guid> RecordMaintenance(MaintenanceRecordRequest request, Guid performedBy)
     {
-        var attraction = await _attractionRepository.GetById(request.AttractionId);
+        Attraction attraction = await _attractionRepository.GetById(request.AttractionId);
         if (attraction == null)
         {
             throw new KeyNotFoundException($"Attraction with id {request.AttractionId} not found");
@@ -126,19 +126,19 @@ public class MaintenanceLogic : IMaintenanceLogic
 
         if (request.MaintenanceScheduleId.HasValue)
         {
-            var schedule = _scheduleRepository.GetById(request.MaintenanceScheduleId.Value);
+            MaintenanceSchedule schedule = _scheduleRepository.GetById(request.MaintenanceScheduleId.Value);
             if (schedule == null)
             {
                 throw new KeyNotFoundException($"Schedule with id {request.MaintenanceScheduleId} not found");
             }
         }
 
-        if (!Enum.TryParse<MaintenanceType>(request.MaintenanceType, out var maintenanceType))
+        if (!Enum.TryParse<MaintenanceType>(request.MaintenanceType, out MaintenanceType maintenanceType))
         {
             throw new ArgumentException($"Invalid maintenance type: {request.MaintenanceType}");
         }
 
-        var record = new MaintenanceRecord
+        MaintenanceRecord record = new MaintenanceRecord
         {
             Id = Guid.NewGuid(),
             MaintenanceScheduleId = request.MaintenanceScheduleId,
@@ -158,7 +158,7 @@ public class MaintenanceLogic : IMaintenanceLogic
 
     public async Task<MaintenanceRecordResponse> GetRecordById(Guid id)
     {
-        var record = _recordRepository.GetById(id);
+        MaintenanceRecord record = _recordRepository.GetById(id);
         if (record == null)
         {
             throw new KeyNotFoundException($"Record with id {id} not found");
@@ -169,31 +169,33 @@ public class MaintenanceLogic : IMaintenanceLogic
 
     public async Task<List<MaintenanceRecordResponse>> GetAllRecords()
     {
-        var records = _recordRepository.GetAll();
+        List<MaintenanceRecord> records = _recordRepository.GetAll();
         return await Task.FromResult(records.Select(MapToRecordResponse).ToList());
     }
 
     public async Task<List<MaintenanceRecordResponse>> GetRecordsByAttraction(Guid attractionId)
     {
-        var records = _recordRepository.GetByAttractionId(attractionId);
+        List<MaintenanceRecord> records = _recordRepository.GetByAttractionId(attractionId);
         return await Task.FromResult(records.Select(MapToRecordResponse).ToList());
     }
 
     public async Task<List<MaintenanceRecordResponse>> GetRecordsByOperator(Guid operatorId)
     {
-        var records = _recordRepository.GetByOperator(operatorId);
+        List<MaintenanceRecord> records = _recordRepository.GetByOperator(operatorId);
         return await Task.FromResult(records.Select(MapToRecordResponse).ToList());
     }
 
     public async Task<List<MaintenanceRecordResponse>> GetUnscheduledMaintenance()
     {
-        var records = _recordRepository.GetUnscheduledMaintenance();
+        List<MaintenanceRecord> records = _recordRepository.GetUnscheduledMaintenance();
         return await Task.FromResult(records.Select(MapToRecordResponse).ToList());
     }
 
-    public async Task<List<MaintenanceRecordResponse>> GetMaintenanceHistory(Guid attractionId, DateTime dateFrom, DateTime dateTo)
+    public async Task<List<MaintenanceRecordResponse>> GetMaintenanceHistory(Guid attractionId, DateTime dateFrom,
+        DateTime dateTo)
     {
-        var records = _recordRepository.GetByAttractionIdAndDateRange(attractionId, dateFrom, dateTo);
+        List<MaintenanceRecord> records =
+            _recordRepository.GetByAttractionIdAndDateRange(attractionId, dateFrom, dateTo);
         return await Task.FromResult(records.Select(MapToRecordResponse).ToList());
     }
 
@@ -201,9 +203,10 @@ public class MaintenanceLogic : IMaintenanceLogic
 
     #region Business Operations
 
-    public async Task<Guid> CompleteMaintenance(Guid scheduleId, MaintenanceRecordRequest recordRequest, Guid performedBy)
+    public async Task<Guid> CompleteMaintenance(Guid scheduleId, MaintenanceRecordRequest recordRequest,
+        Guid performedBy)
     {
-        var schedule = _scheduleRepository.GetById(scheduleId);
+        MaintenanceSchedule schedule = _scheduleRepository.GetById(scheduleId);
         if (schedule == null)
         {
             throw new KeyNotFoundException($"Schedule with id {scheduleId} not found");
@@ -211,23 +214,22 @@ public class MaintenanceLogic : IMaintenanceLogic
 
         if (!schedule.CanComplete())
         {
-            throw new ArgumentException($"Schedule with id {scheduleId} cannot be completed (status: {schedule.Status})");
+            throw new ArgumentException(
+                $"Schedule with id {scheduleId} cannot be completed (status: {schedule.Status})");
         }
 
-        var attraction = await _attractionRepository.GetById(schedule.AttractionId);
+        Attraction attraction = await _attractionRepository.GetById(schedule.AttractionId);
         if (attraction == null)
         {
             throw new KeyNotFoundException($"Attraction with id {schedule.AttractionId} not found");
         }
 
-        // Update schedule status
         schedule.Status = MaintenanceStatus.Completed;
         _scheduleRepository.Update(schedule);
 
-        // Create maintenance record
         recordRequest.MaintenanceScheduleId = scheduleId;
         recordRequest.AttractionId = schedule.AttractionId;
-        var recordId = await RecordMaintenance(recordRequest, performedBy);
+        Guid recordId = await RecordMaintenance(recordRequest, performedBy);
 
         return recordId;
     }
@@ -262,7 +264,8 @@ public class MaintenanceLogic : IMaintenanceLogic
             AttractionName = record.Attraction?.Name ?? "Unknown",
             PerformedDate = record.PerformedDate,
             PerformedBy = record.PerformedBy,
-            PerformedByName = record.Operator != null ? $"{record.Operator.Name} {record.Operator.LastName}" : "Unknown",
+            PerformedByName =
+                record.Operator != null ? $"{record.Operator.Name} {record.Operator.LastName}" : "Unknown",
             MaintenanceType = record.MaintenanceType.ToString(),
             Description = record.Description,
             Notes = record.Notes,

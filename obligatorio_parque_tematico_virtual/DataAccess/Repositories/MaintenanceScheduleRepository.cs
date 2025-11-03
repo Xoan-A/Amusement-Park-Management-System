@@ -55,11 +55,11 @@ namespace DataAccess.Repositories
 
         public List<MaintenanceSchedule> GetOverdueSchedules()
         {
-            var now = DateTime.Now;
+            DateTime now = DateTime.Now;
             return _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
                 .Where(s => s.ScheduledDate < now &&
-                           (s.Status == MaintenanceStatus.Pending || s.Status == MaintenanceStatus.InProgress))
+                            (s.Status == MaintenanceStatus.Pending || s.Status == MaintenanceStatus.InProgress))
                 .OrderBy(s => s.ScheduledDate)
                 .ToList();
         }
@@ -75,25 +75,26 @@ namespace DataAccess.Repositories
 
         public List<MaintenanceSchedule> GetUpcomingSchedules(int daysAhead)
         {
-            var now = DateTime.Now;
-            var futureDate = now.AddDays(daysAhead);
+            DateTime now = DateTime.Now;
+            DateTime futureDate = now.AddDays(daysAhead);
 
             return _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
                 .Where(s => s.ScheduledDate >= now &&
-                           s.ScheduledDate <= futureDate &&
-                           s.Status == MaintenanceStatus.Pending)
+                            s.ScheduledDate <= futureDate &&
+                            s.Status == MaintenanceStatus.Pending)
                 .OrderBy(s => s.ScheduledDate)
                 .ToList();
         }
 
-        public List<MaintenanceSchedule> GetByAttractionIdAndDateRange(Guid attractionId, DateTime dateFrom, DateTime dateTo)
+        public List<MaintenanceSchedule> GetByAttractionIdAndDateRange(Guid attractionId, DateTime dateFrom,
+            DateTime dateTo)
         {
             return _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
                 .Where(s => s.AttractionId == attractionId &&
-                           s.ScheduledDate >= dateFrom &&
-                           s.ScheduledDate <= dateTo)
+                            s.ScheduledDate >= dateFrom &&
+                            s.ScheduledDate <= dateTo)
                 .OrderBy(s => s.ScheduledDate)
                 .ToList();
         }
@@ -106,7 +107,7 @@ namespace DataAccess.Repositories
 
         public void Delete(Guid id)
         {
-            var schedule = _context.MaintenanceSchedules.Find(id);
+            MaintenanceSchedule schedule = _context.MaintenanceSchedules.Find(id);
             if (schedule != null)
             {
                 _context.MaintenanceSchedules.Remove(schedule);

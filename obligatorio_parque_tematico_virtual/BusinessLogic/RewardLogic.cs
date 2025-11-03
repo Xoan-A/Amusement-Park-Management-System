@@ -22,13 +22,13 @@ namespace BusinessLogic
                 throw new ArgumentNullException(nameof(rewardIn));
             }
 
-            var existingReward = _rewardRepository.GetByName(rewardIn.Name);
+            Reward? existingReward = _rewardRepository.GetByName(rewardIn.Name);
             if (existingReward != null)
             {
                 throw new ArgumentException($"A reward with the name '{rewardIn.Name}' already exists");
             }
 
-            var reward = new Reward
+            Reward reward = new Reward
             {
                 Id = Guid.NewGuid(),
                 Name = rewardIn.Name,
@@ -45,13 +45,13 @@ namespace BusinessLogic
 
         public List<RewardModelOut> GetAllRewards()
         {
-            var rewards = _rewardRepository.GetAll();
+            List<Reward> rewards = _rewardRepository.GetAll();
             return rewards.Select(MapToModelOut).ToList();
         }
 
         public RewardModelOut GetRewardById(Guid id)
         {
-            var reward = _rewardRepository.GetById(id);
+            Reward? reward = _rewardRepository.GetById(id);
             if (reward == null)
             {
                 throw new KeyNotFoundException($"Reward with ID '{id}' not found");
@@ -62,13 +62,13 @@ namespace BusinessLogic
 
         public RewardModelOut UpdateReward(Guid id, RewardModelIn rewardIn)
         {
-            var existingReward = _rewardRepository.GetById(id);
+            Reward existingReward = _rewardRepository.GetById(id);
             if (existingReward == null)
             {
                 throw new KeyNotFoundException($"Reward with ID '{id}' not found");
             }
 
-            var rewardWithSameName = _rewardRepository.GetByName(rewardIn.Name);
+            Reward rewardWithSameName = _rewardRepository.GetByName(rewardIn.Name);
             if (rewardWithSameName != null && rewardWithSameName.Id != id)
             {
                 throw new ArgumentException($"A reward with the name '{rewardIn.Name}' already exists");
@@ -87,7 +87,7 @@ namespace BusinessLogic
 
         public void DeleteReward(Guid id)
         {
-            var reward = _rewardRepository.GetById(id);
+            Reward? reward = _rewardRepository.GetById(id);
             if (reward == null)
             {
                 throw new KeyNotFoundException($"Reward with ID '{id}' not found");
@@ -98,13 +98,13 @@ namespace BusinessLogic
 
         public List<RewardModelOut> GetAvailableRewards()
         {
-            var rewards = _rewardRepository.GetAvailableRewards();
+            List<Reward> rewards = _rewardRepository.GetAvailableRewards();
             return rewards.Select(MapToModelOut).ToList();
         }
 
         public List<RewardModelOut> GetRewardsByMembershipLevel(MembershipLevel? level)
         {
-            var rewards = _rewardRepository.GetRewardsByMembershipLevel(level);
+            List<Reward> rewards = _rewardRepository.GetRewardsByMembershipLevel(level);
             return rewards.Select(MapToModelOut).ToList();
         }
 

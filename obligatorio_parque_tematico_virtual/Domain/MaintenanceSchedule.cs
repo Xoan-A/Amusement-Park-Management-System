@@ -32,7 +32,6 @@ namespace Domain
         public DateTime CreatedAt { get; set; }
         public Guid? CreatedBy { get; set; }
 
-        // Navigation properties
         public virtual Attraction? Attraction { get; set; }
 
         public MaintenanceSchedule()

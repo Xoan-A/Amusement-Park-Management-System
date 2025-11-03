@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using IBusinessLogic;
@@ -13,6 +15,7 @@ using Microsoft.Data.Sqlite;
 using Domain;
 using BusinessLogic;
 using Domain.Exceptions;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ApiTests
 {
@@ -574,20 +577,20 @@ namespace ApiTests
         [TestMethod]
         public async Task ModifyUser_WithTokenWithoutSubClaim_PassesEmptyStringToLogic()
         {
-            var securityKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+            SymmetricSecurityKey securityKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890"));
-            var credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+            SigningCredentials credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
                 securityKey, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
-            {
+            Claim[] claims =
+            [
                 new System.Security.Claims.Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email,
                     "test@example.com"),
                 new System.Security.Claims.Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti,
                     Guid.NewGuid().ToString())
-            };
+            ];
 
-            var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
+            JwtSecurityToken token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
                 issuer: "ParqueTematico",
                 audience: "ParqueTematico",
                 claims: claims,
@@ -620,18 +623,19 @@ namespace ApiTests
             HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), string.Empty, It.IsAny<ModifyUserRequest>()), Times.Once);
+            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), string.Empty, It.IsAny<ModifyUserRequest>()),
+                Times.Once);
         }
 
         [TestMethod]
         public async Task ModifyUser_WithTokenWithNullSubClaimValue_PassesEmptyStringToLogic()
         {
-            var securityKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+            SymmetricSecurityKey securityKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890"));
-            var credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+            SigningCredentials credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
                 securityKey, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            Claim[] claims = new[]
             {
                 new System.Security.Claims.Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email,
                     "test@example.com"),
@@ -641,7 +645,7 @@ namespace ApiTests
                     string.Empty)
             };
 
-            var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
+            JwtSecurityToken token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
                 issuer: "ParqueTematico",
                 audience: "ParqueTematico",
                 claims: claims,
@@ -674,7 +678,8 @@ namespace ApiTests
             HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), string.Empty, It.IsAny<ModifyUserRequest>()), Times.Once);
+            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), string.Empty, It.IsAny<ModifyUserRequest>()),
+                Times.Once);
         }
 
         [TestMethod]
@@ -706,15 +711,13 @@ namespace ApiTests
         [TestMethod]
         public async Task ModifyUser_WithMissingSubClaim_PassesNullActorSubClaim()
         {
-            // Arrange - Create token without Sub claim
-            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-            var key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
-            var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+            JwtSecurityTokenHandler tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            byte[] key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
+            SecurityTokenDescriptor tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
             {
                 Subject = new System.Security.Claims.ClaimsIdentity(new[]
                 {
                     new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Administrator")
-                    // Missing Sub claim
                 }),
                 Expires = System.DateTime.UtcNow.AddHours(1),
                 Issuer = "ParqueTematico",
@@ -723,10 +726,10 @@ namespace ApiTests
                     new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
                     Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
             };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+            string tokenString = tokenHandler.WriteToken(token);
 
-            var client = _factory.CreateClient();
+            HttpClient client = _factory.CreateClient();
             client.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
 
@@ -747,10 +750,8 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            // Act
             HttpResponseMessage response = await client.PutAsync($"/api/users/{userId}", content);
 
-            // Assert - Should pass string.Empty as actorSubClaim when Sub claim is missing
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             _mockUserLogic.Verify(l => l.ModifyUser(userId, string.Empty, It.IsAny<ModifyUserRequest>()), Times.Once);
         }

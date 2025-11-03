@@ -550,7 +550,6 @@ namespace TestDataAccess
         [TestMethod]
         public async Task Update_ShouldInsertNewReportsWhenUserHasVisitorReports()
         {
-            // Arrange: Create and save User
             User user = new User
             {
                 Name = "Visitor",
@@ -562,7 +561,6 @@ namespace TestDataAccess
             };
             _context.Users.Add(user);
 
-            // Create and save Attraction
             Attraction attraction = new Attraction
             {
                 Name = "Test Attraction",
@@ -575,14 +573,12 @@ namespace TestDataAccess
             _context.Attractions.Add(attraction);
             _context.SaveChanges();
 
-            // Act: Load user (now tracked), call RegisterEntry, then Update
             User? trackedUser = await _userRepository.GetById(user.Id);
             trackedUser.RegisterEntry(attraction, DateTime.Now);
             trackedUser.Score = 10;
 
             await _userRepository.Update(trackedUser);
 
-            // Assert: Verify Report and VisitorReport were inserted
             List<Report> reports = _context.Reports.ToList();
             List<VisitorReport> visitorReports = _context.VisitorReports.ToList();
 
@@ -595,7 +591,6 @@ namespace TestDataAccess
         [TestMethod]
         public async Task Update_ShouldInsertMultipleVisitorReportsForDifferentDates()
         {
-            // Arrange: Create and save User
             User user = new User
             {
                 Name = "Visitor",
@@ -607,7 +602,6 @@ namespace TestDataAccess
             };
             _context.Users.Add(user);
 
-            // Create and save Attraction
             Attraction attraction = new Attraction
             {
                 Name = "Multi Day Attraction",
@@ -620,7 +614,6 @@ namespace TestDataAccess
             _context.Attractions.Add(attraction);
             _context.SaveChanges();
 
-            // Act: Load user, register entries on two different dates
             User? trackedUser = await _userRepository.GetById(user.Id);
             DateTime date1 = new DateTime(2025, 10, 1, 10, 0, 0);
             DateTime date2 = new DateTime(2025, 10, 2, 14, 0, 0);
@@ -631,7 +624,6 @@ namespace TestDataAccess
 
             await _userRepository.Update(trackedUser);
 
-            // Assert: Verify both VisitorReports and Reports were inserted
             List<Report> reports = _context.Reports.ToList();
             List<VisitorReport> visitorReports = _context.VisitorReports.ToList();
 
@@ -644,8 +636,7 @@ namespace TestDataAccess
         [TestMethod]
         public async Task Update_WithDetachedEntity_AttachesAndSaves()
         {
-            // Arrange: Create and save a user
-            var user = new User
+            User user = new User
             {
                 Id = Guid.NewGuid(),
                 Name = "Detached",
@@ -657,10 +648,9 @@ namespace TestDataAccess
             };
 
             await _userRepository.Create(user);
-            _context.ChangeTracker.Clear(); // Detach all entities
+            _context.ChangeTracker.Clear();
 
-            // Act: Create a detached user instance with same ID but different score
-            var detachedUser = new User
+            User detachedUser = new User
             {
                 Id = user.Id,
                 Name = "Detached",
@@ -668,14 +658,12 @@ namespace TestDataAccess
                 Email = "detached@test.com",
                 Password = "hashedpassword",
                 BirthDate = new DateTime(1990, 1, 1),
-                Score = 200 // Changed score
+                Score = 200
             };
 
-            // This should trigger the detached entity path in Update method
             await _userRepository.Update(detachedUser);
 
-            // Assert: Verify the update was saved
-            var updatedUser = await _userRepository.GetById(user.Id);
+            User updatedUser = await _userRepository.GetById(user.Id);
             Assert.IsNotNull(updatedUser);
             Assert.AreEqual(200, updatedUser.Score);
         }

@@ -19,7 +19,7 @@ namespace TestDataAccess
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 
-            var options = new DbContextOptionsBuilder<AppDbContext>()
+            DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseSqlite(_connection)
                 .Options;
 
@@ -39,14 +39,13 @@ namespace TestDataAccess
         [TestMethod]
         public void Create_ValidRedemptionHistory_Success()
         {
-            // Arrange
-            var visitor = CreateTestVisitor();
-            var reward = CreateTestReward();
+            User visitor = CreateTestVisitor();
+            Reward reward = CreateTestReward();
             _context.Users.Add(visitor);
             _context.Rewards.Add(reward);
             _context.SaveChanges();
 
-            var redemption = new RedemptionHistory
+            RedemptionHistory redemption = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor.Id,
@@ -55,12 +54,10 @@ namespace TestDataAccess
                 PointsSpent = 500
             };
 
-            // Act
             _repository.Create(redemption);
             _context.SaveChanges();
 
-            // Assert
-            var retrieved = _context.RedemptionHistories.Find(redemption.Id);
+            RedemptionHistory? retrieved = _context.RedemptionHistories.Find(redemption.Id);
             Assert.IsNotNull(retrieved);
             Assert.AreEqual(visitor.Id, retrieved.VisitorId);
             Assert.AreEqual(reward.Id, retrieved.RewardId);
@@ -70,17 +67,16 @@ namespace TestDataAccess
         [TestMethod]
         public void GetByVisitorId_ExistingRedemptions_ReturnsAll()
         {
-            // Arrange
-            var visitor1 = CreateTestVisitor();
-            var visitor2 = CreateTestVisitor();
-            var reward1 = CreateTestReward("Reward 1");
-            var reward2 = CreateTestReward("Reward 2");
+            User visitor1 = CreateTestVisitor();
+            User visitor2 = CreateTestVisitor();
+            Reward reward1 = CreateTestReward("Reward 1");
+            Reward reward2 = CreateTestReward("Reward 2");
 
             _context.Users.AddRange(visitor1, visitor2);
             _context.Rewards.AddRange(reward1, reward2);
             _context.SaveChanges();
 
-            var redemption1 = new RedemptionHistory
+            RedemptionHistory redemption1 = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor1.Id,
@@ -89,7 +85,7 @@ namespace TestDataAccess
                 PointsSpent = 100
             };
 
-            var redemption2 = new RedemptionHistory
+            RedemptionHistory redemption2 = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor1.Id,
@@ -98,7 +94,7 @@ namespace TestDataAccess
                 PointsSpent = 200
             };
 
-            var redemption3 = new RedemptionHistory
+            RedemptionHistory redemption3 = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor2.Id,
@@ -110,10 +106,8 @@ namespace TestDataAccess
             _context.RedemptionHistories.AddRange(redemption1, redemption2, redemption3);
             _context.SaveChanges();
 
-            // Act
-            var visitor1Redemptions = _repository.GetByVisitorId(visitor1.Id);
+            List<RedemptionHistory> visitor1Redemptions = _repository.GetByVisitorId(visitor1.Id);
 
-            // Assert
             Assert.AreEqual(2, visitor1Redemptions.Count);
             Assert.IsTrue(visitor1Redemptions.All(r => r.VisitorId == visitor1.Id));
         }
@@ -121,30 +115,26 @@ namespace TestDataAccess
         [TestMethod]
         public void GetByVisitorId_NoRedemptions_ReturnsEmptyList()
         {
-            // Arrange
-            var visitor = CreateTestVisitor();
+            User visitor = CreateTestVisitor();
             _context.Users.Add(visitor);
             _context.SaveChanges();
 
-            // Act
-            var redemptions = _repository.GetByVisitorId(visitor.Id);
+            List<RedemptionHistory> redemptions = _repository.GetByVisitorId(visitor.Id);
 
-            // Assert
             Assert.AreEqual(0, redemptions.Count);
         }
 
         [TestMethod]
         public void GetByVisitorId_IncludesNavigationProperties_Success()
         {
-            // Arrange
-            var visitor = CreateTestVisitor();
-            var reward = CreateTestReward();
+            User visitor = CreateTestVisitor();
+            Reward reward = CreateTestReward();
 
             _context.Users.Add(visitor);
             _context.Rewards.Add(reward);
             _context.SaveChanges();
 
-            var redemption = new RedemptionHistory
+            RedemptionHistory redemption = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor.Id,
@@ -156,10 +146,8 @@ namespace TestDataAccess
             _context.RedemptionHistories.Add(redemption);
             _context.SaveChanges();
 
-            // Act
-            var redemptions = _repository.GetByVisitorId(visitor.Id);
+            List<RedemptionHistory> redemptions = _repository.GetByVisitorId(visitor.Id);
 
-            // Assert
             Assert.AreEqual(1, redemptions.Count);
             Assert.IsNotNull(redemptions[0].Visitor);
             Assert.IsNotNull(redemptions[0].Reward);
@@ -170,15 +158,14 @@ namespace TestDataAccess
         [TestMethod]
         public void GetByVisitorIdWithDateRange_FiltersCorrectly()
         {
-            // Arrange
-            var visitor = CreateTestVisitor();
-            var reward = CreateTestReward();
+            User visitor = CreateTestVisitor();
+            Reward reward = CreateTestReward();
 
             _context.Users.Add(visitor);
             _context.Rewards.Add(reward);
             _context.SaveChanges();
 
-            var oldRedemption = new RedemptionHistory
+            RedemptionHistory oldRedemption = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor.Id,
@@ -187,7 +174,7 @@ namespace TestDataAccess
                 PointsSpent = 100
             };
 
-            var recentRedemption = new RedemptionHistory
+            RedemptionHistory recentRedemption = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor.Id,
@@ -196,7 +183,7 @@ namespace TestDataAccess
                 PointsSpent = 200
             };
 
-            var veryRecentRedemption = new RedemptionHistory
+            RedemptionHistory veryRecentRedemption = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor.Id,
@@ -208,12 +195,11 @@ namespace TestDataAccess
             _context.RedemptionHistories.AddRange(oldRedemption, recentRedemption, veryRecentRedemption);
             _context.SaveChanges();
 
-            // Act
-            var dateFrom = DateTime.Now.AddDays(-5);
-            var dateTo = DateTime.Now.AddDays(1);
-            var filteredRedemptions = _repository.GetByVisitorIdWithDateRange(visitor.Id, dateFrom, dateTo);
+            DateTime dateFrom = DateTime.Now.AddDays(-5);
+            DateTime dateTo = DateTime.Now.AddDays(1);
+            List<RedemptionHistory> filteredRedemptions =
+                _repository.GetByVisitorIdWithDateRange(visitor.Id, dateFrom, dateTo);
 
-            // Assert
             Assert.AreEqual(2, filteredRedemptions.Count);
             Assert.IsFalse(filteredRedemptions.Any(r => r.RedeemedAt < dateFrom));
             Assert.IsFalse(filteredRedemptions.Any(r => r.RedeemedAt > dateTo));
@@ -222,15 +208,14 @@ namespace TestDataAccess
         [TestMethod]
         public void GetByVisitorIdWithDateRange_OrderedByDateDescending()
         {
-            // Arrange
-            var visitor = CreateTestVisitor();
-            var reward = CreateTestReward();
+            User visitor = CreateTestVisitor();
+            Reward reward = CreateTestReward();
 
             _context.Users.Add(visitor);
             _context.Rewards.Add(reward);
             _context.SaveChanges();
 
-            var redemption1 = new RedemptionHistory
+            RedemptionHistory redemption1 = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor.Id,
@@ -239,7 +224,7 @@ namespace TestDataAccess
                 PointsSpent = 100
             };
 
-            var redemption2 = new RedemptionHistory
+            RedemptionHistory redemption2 = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor.Id,
@@ -248,7 +233,7 @@ namespace TestDataAccess
                 PointsSpent = 200
             };
 
-            var redemption3 = new RedemptionHistory
+            RedemptionHistory redemption3 = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor.Id,
@@ -260,14 +245,12 @@ namespace TestDataAccess
             _context.RedemptionHistories.AddRange(redemption1, redemption2, redemption3);
             _context.SaveChanges();
 
-            // Act
-            var redemptions = _repository.GetByVisitorIdWithDateRange(
+            List<RedemptionHistory> redemptions = _repository.GetByVisitorIdWithDateRange(
                 visitor.Id,
                 DateTime.Now.AddDays(-10),
                 DateTime.Now
             );
 
-            // Assert
             Assert.AreEqual(3, redemptions.Count);
             Assert.IsTrue(redemptions[0].RedeemedAt > redemptions[1].RedeemedAt);
             Assert.IsTrue(redemptions[1].RedeemedAt > redemptions[2].RedeemedAt);
@@ -276,16 +259,15 @@ namespace TestDataAccess
         [TestMethod]
         public void GetAll_ReturnsAllRedemptions()
         {
-            // Arrange
-            var visitor1 = CreateTestVisitor();
-            var visitor2 = CreateTestVisitor();
-            var reward = CreateTestReward();
+            User visitor1 = CreateTestVisitor();
+            User visitor2 = CreateTestVisitor();
+            Reward reward = CreateTestReward();
 
             _context.Users.AddRange(visitor1, visitor2);
             _context.Rewards.Add(reward);
             _context.SaveChanges();
 
-            var redemption1 = new RedemptionHistory
+            RedemptionHistory redemption1 = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor1.Id,
@@ -294,7 +276,7 @@ namespace TestDataAccess
                 PointsSpent = 100
             };
 
-            var redemption2 = new RedemptionHistory
+            RedemptionHistory redemption2 = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor2.Id,
@@ -306,10 +288,8 @@ namespace TestDataAccess
             _context.RedemptionHistories.AddRange(redemption1, redemption2);
             _context.SaveChanges();
 
-            // Act
-            var allRedemptions = _repository.GetAll();
+            List<RedemptionHistory> allRedemptions = _repository.GetAll();
 
-            // Assert
             Assert.AreEqual(2, allRedemptions.Count);
         }
 

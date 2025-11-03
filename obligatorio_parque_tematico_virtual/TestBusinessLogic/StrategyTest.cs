@@ -578,7 +578,6 @@ namespace TestBusinessLogic
         [TestMethod]
         public async Task CalculateScore_WithRealActiveStrategy_DelegatesToUnderlyingStrategy()
         {
-            // Arrange - Use REAL ActiveStrategy (not mocked)
             SetupMocks();
             ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
 
@@ -591,10 +590,8 @@ namespace TestBusinessLogic
             Attraction attraction = new Attraction { Type = AttractionType.RollerCoaster };
             StrategyRequest request = new StrategyRequest();
 
-            // Act - Call the real CalculateScore method
             int score = activeStrategy.CalculateScore(user, attraction, request);
 
-            // Assert - Verify delegation worked (PerAttraction with RollerCoaster gives 2 points)
             Assert.AreEqual(2, score);
         }
     }

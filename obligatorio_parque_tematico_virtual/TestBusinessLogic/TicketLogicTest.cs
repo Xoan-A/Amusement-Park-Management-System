@@ -635,7 +635,7 @@ namespace TestBusinessLogic
                 Id = Guid.NewGuid(),
                 QRCode = qrCode,
                 VisitDate = visitDate,
-                EventId = null,  // No event associated
+                EventId = null,
                 Type = TicketType.General
             };
 
@@ -645,7 +645,8 @@ namespace TestBusinessLogic
 
             Assert.IsTrue(result, "Ticket should be valid when no event is associated");
             _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(qrCode), Times.Once);
-            _mockEventRepository.Verify(e => e.GetById(It.IsAny<Guid>()), Times.Never, "Event repository should not be called when ticket has no event");
+            _mockEventRepository.Verify(e => e.GetById(It.IsAny<Guid>()), Times.Never,
+                "Event repository should not be called when ticket has no event");
         }
 
         [TestMethod]
@@ -654,7 +655,7 @@ namespace TestBusinessLogic
             Guid eventId = Guid.NewGuid();
             Guid qrCode = Guid.NewGuid();
             DateTime eventDateStart = new DateTime(2025, 1, 15, 10, 0, 0);
-            DateTime enterDate = new DateTime(2025, 1, 15, 9, 0, 0);  // Before event start
+            DateTime enterDate = new DateTime(2025, 1, 15, 9, 0, 0);
 
             Ticket ticket = new Ticket
             {

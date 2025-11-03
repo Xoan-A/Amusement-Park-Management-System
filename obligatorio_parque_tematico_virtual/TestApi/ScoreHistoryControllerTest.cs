@@ -52,13 +52,14 @@ public class ScoreHistoryControllerTest
             context.Database.EnsureCreated();
         }
 
-        Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
-        {
-            SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
-            Issuer = "ParqueTematico",
-            Audience = "ParqueTematico",
-            ExpirationHours = 1
-        });
+        Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
+            Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+            {
+                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+                Issuer = "ParqueTematico",
+                Audience = "ParqueTematico",
+                ExpirationHours = 1
+            });
         BusinessLogic.TokenLogic tokenService = new BusinessLogic.TokenLogic(jwtSettings);
 
         UserResponse adminUser = new UserResponse
@@ -102,8 +103,7 @@ public class ScoreHistoryControllerTest
     [TestMethod]
     public async Task GetMyScoreHistory_AsVisitor_ReturnsOk()
     {
-        // Arrange
-        var history = new List<ScoreHistoryModelOut>
+        List<ScoreHistoryModelOut> history = new List<ScoreHistoryModelOut>
         {
             new ScoreHistoryModelOut
             {
@@ -119,19 +119,16 @@ public class ScoreHistoryControllerTest
 
         _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(_visitorUserId)).Returns(history);
 
-        // Act
-        var response = await _visitorClient.GetAsync("/api/score-history/my-history");
+        HttpResponseMessage response = await _visitorClient.GetAsync("/api/score-history/my-history");
 
-        // Assert
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
     public async Task GetVisitorHistory_AsAdministrator_ReturnsOk()
     {
-        // Arrange
-        var visitorId = Guid.NewGuid();
-        var history = new List<ScoreHistoryModelOut>
+        Guid visitorId = Guid.NewGuid();
+        List<ScoreHistoryModelOut> history = new List<ScoreHistoryModelOut>
         {
             new ScoreHistoryModelOut
             {
@@ -147,18 +144,15 @@ public class ScoreHistoryControllerTest
 
         _mockScoreHistoryLogic.Setup(l => l.GetVisitorScoreHistory(visitorId, null, null)).Returns(history);
 
-        // Act
-        var response = await _adminClient.GetAsync($"/api/score-history/visitor/{visitorId}");
+        HttpResponseMessage response = await _adminClient.GetAsync($"/api/score-history/visitor/{visitorId}");
 
-        // Assert
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
     public async Task GetAllHistory_AsAdministrator_ReturnsOk()
     {
-        // Arrange
-        var history = new List<ScoreHistoryModelOut>
+        List<ScoreHistoryModelOut> history = new List<ScoreHistoryModelOut>
         {
             new ScoreHistoryModelOut
             {
@@ -175,90 +169,78 @@ public class ScoreHistoryControllerTest
 
         _mockScoreHistoryLogic.Setup(l => l.GetAllScoreHistory()).Returns(history);
 
-        // Act
-        var response = await _adminClient.GetAsync("/api/score-history");
+        HttpResponseMessage response = await _adminClient.GetAsync("/api/score-history");
 
-        // Assert
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
     public async Task GetMyScoreHistory_WithBusinessLogicException_ReturnsBadRequest()
     {
-        // Arrange
         _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(_visitorUserId))
             .Throws(new ArgumentException("Invalid visitor"));
 
-        // Act
-        var response = await _visitorClient.GetAsync("/api/score-history/my-history");
+        HttpResponseMessage response = await _visitorClient.GetAsync("/api/score-history/my-history");
 
-        // Assert
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [TestMethod]
     public async Task GetVisitorHistory_VisitorNotFound_ReturnsNotFound()
     {
-        // Arrange
-        var visitorId = Guid.NewGuid();
+        Guid visitorId = Guid.NewGuid();
         _mockScoreHistoryLogic.Setup(l => l.GetVisitorScoreHistory(visitorId, null, null))
             .Throws(new KeyNotFoundException("Visitor not found"));
 
-        // Act
-        var response = await _adminClient.GetAsync($"/api/score-history/visitor/{visitorId}");
+        HttpResponseMessage response = await _adminClient.GetAsync($"/api/score-history/visitor/{visitorId}");
 
-        // Assert
         Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [TestMethod]
     public async Task GetAllHistory_WithInvalidDateRange_ReturnsBadRequest()
     {
-        // Arrange
         _mockScoreHistoryLogic.Setup(l => l.GetAllScoreHistory())
             .Throws(new ArgumentException("Invalid data"));
 
-        // Act
-        var response = await _adminClient.GetAsync("/api/score-history");
+        HttpResponseMessage response = await _adminClient.GetAsync("/api/score-history");
 
-        // Assert
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [TestMethod]
     public async Task GetMyScoreHistory_WithMissingNameIdentifierClaim_UsesEmptyGuid()
     {
-        // Arrange - Create token without NameIdentifier claim
-        var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-        var key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
-        var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
-        {
-            Subject = new System.Security.Claims.ClaimsIdentity(new[]
+        System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler tokenHandler =
+            new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+        byte[] key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
+        Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor =
+            new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
             {
-                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Visitor")
-                // Missing NameIdentifier claim
-            }),
-            Expires = System.DateTime.UtcNow.AddHours(1),
-            Issuer = "ParqueTematico",
-            Audience = "ParqueTematico",
-            SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
-                new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
-                Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
-        };
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        var tokenString = tokenHandler.WriteToken(token);
+                Subject = new System.Security.Claims.ClaimsIdentity(new[]
+                {
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Visitor")
+                }),
+                Expires = System.DateTime.UtcNow.AddHours(1),
+                Issuer = "ParqueTematico",
+                Audience = "ParqueTematico",
+                SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+                    new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
+                    Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
+            };
+        System.IdentityModel.Tokens.Jwt.JwtSecurityToken token =
+            tokenHandler.CreateToken(tokenDescriptor) as System.IdentityModel.Tokens.Jwt.JwtSecurityToken;
+        string tokenString = tokenHandler.WriteToken(token);
 
-        var client = _factory.CreateClient();
+        HttpClient client = _factory.CreateClient();
         client.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
 
         _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(Guid.Empty))
             .Returns(new List<ScoreHistoryModelOut>());
 
-        // Act
-        var response = await client.GetAsync("/api/score-history/my-history");
+        HttpResponseMessage response = await client.GetAsync("/api/score-history/my-history");
 
-        // Assert - Should use Guid.Empty when NameIdentifier is missing and return OK
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 }

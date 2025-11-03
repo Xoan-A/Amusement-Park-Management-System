@@ -21,6 +21,7 @@ namespace Domain
                 {
                     throw new ArgumentException("Strategy name is required");
                 }
+
                 _strategyName = value;
             }
         }
@@ -44,7 +45,6 @@ namespace Domain
             }
         }
 
-        // Navigation property
         public virtual User? Visitor { get; set; }
 
         public ScoreHistory()

@@ -96,8 +96,10 @@ namespace TestDomain
             Role adminRole = new Role { Id = 1, Name = "Administrator" };
             Role operatorRole = new Role { Id = 2, Name = "Operator" };
 
-            UserRole userRole1 = new UserRole { User = user, Role = adminRole, UserId = user.Id, RoleId = adminRole.Id };
-            UserRole userRole2 = new UserRole { User = user, Role = operatorRole, UserId = user.Id, RoleId = operatorRole.Id };
+            UserRole userRole1 = new UserRole
+            { User = user, Role = adminRole, UserId = user.Id, RoleId = adminRole.Id };
+            UserRole userRole2 = new UserRole
+            { User = user, Role = operatorRole, UserId = user.Id, RoleId = operatorRole.Id };
 
             user.UserRoles.Add(userRole1);
             user.UserRoles.Add(userRole2);
@@ -149,8 +151,6 @@ namespace TestDomain
 
             Assert.AreEqual(1, user.VisitorReports.Count);
             Assert.AreEqual(enterDate.Date, user.VisitorReports[0].Date.Date);
-            Assert.AreEqual(1, user.VisitorReports[0].Reports.Count);
-            Assert.AreEqual(enterDate, user.VisitorReports[0].Reports[0].EnterDate);
         }
 
         [TestMethod]

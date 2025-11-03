@@ -8,10 +8,8 @@ namespace TestDomain
         [TestMethod]
         public void ScoreHistory_DefaultConstructor_SetsCreatedAt()
         {
-            // Act
-            var history = new ScoreHistory();
+            ScoreHistory history = new ScoreHistory();
 
-            // Assert
             Assert.IsTrue(history.CreatedAt > DateTime.MinValue);
             Assert.IsTrue(history.CreatedAt <= DateTime.UtcNow);
         }
@@ -19,22 +17,19 @@ namespace TestDomain
         [TestMethod]
         public void ScoreHistory_SetValidValues_Success()
         {
-            // Arrange
-            var history = new ScoreHistory();
-            var visitorId = Guid.NewGuid();
-            var points = 100;
-            var origin = ScoreOrigin.AttractionVisit;
-            var strategyName = "PerAttraction";
-            var description = "Visited Roller Coaster";
+            ScoreHistory history = new ScoreHistory();
+            Guid visitorId = Guid.NewGuid();
+            int points = 100;
+            ScoreOrigin origin = ScoreOrigin.AttractionVisit;
+            string strategyName = "PerAttraction";
+            string description = "Visited Roller Coaster";
 
-            // Act
             history.VisitorId = visitorId;
             history.Points = points;
             history.Origin = origin;
             history.StrategyName = strategyName;
             history.Description = description;
 
-            // Assert
             Assert.AreEqual(visitorId, history.VisitorId);
             Assert.AreEqual(points, history.Points);
             Assert.AreEqual(origin, history.Origin);
@@ -45,25 +40,20 @@ namespace TestDomain
         [TestMethod]
         public void ScoreHistory_NegativePoints_AllowedForRedemptions()
         {
-            // Arrange
-            var history = new ScoreHistory();
+            ScoreHistory history = new ScoreHistory();
 
-            // Act
             history.Points = -50;
             history.Origin = ScoreOrigin.Redemption;
 
-            // Assert
             Assert.AreEqual(-50, history.Points);
         }
 
         [TestMethod]
         public void ScoreHistory_SetDescription_TooLong_ThrowsException()
         {
-            // Arrange
-            var history = new ScoreHistory();
-            var longDescription = new string('a', 1001);
+            ScoreHistory history = new ScoreHistory();
+            string longDescription = new string('a', 1001);
 
-            // Act & Assert
             Assert.ThrowsException<ArgumentException>(() =>
             {
                 history.Description = longDescription;
@@ -73,10 +63,8 @@ namespace TestDomain
         [TestMethod]
         public void ScoreHistory_SetDescription_EmptyOrNull_ThrowsException()
         {
-            // Arrange
-            var history = new ScoreHistory();
+            ScoreHistory history = new ScoreHistory();
 
-            // Act & Assert
             Assert.ThrowsException<ArgumentException>(() =>
             {
                 history.Description = "";
@@ -91,10 +79,8 @@ namespace TestDomain
         [TestMethod]
         public void ScoreHistory_SetStrategyName_EmptyOrNull_ThrowsException()
         {
-            // Arrange
-            var history = new ScoreHistory();
+            ScoreHistory history = new ScoreHistory();
 
-            // Act & Assert
             Assert.ThrowsException<ArgumentException>(() =>
             {
                 history.StrategyName = "";
@@ -109,10 +95,9 @@ namespace TestDomain
         [TestMethod]
         public void ScoreHistory_AllOriginTypes_CanBeSet()
         {
-            // Arrange & Act & Assert
             foreach (ScoreOrigin origin in Enum.GetValues(typeof(ScoreOrigin)))
             {
-                var history = new ScoreHistory
+                ScoreHistory history = new ScoreHistory
                 {
                     VisitorId = Guid.NewGuid(),
                     Points = 10,
@@ -128,8 +113,7 @@ namespace TestDomain
         [TestMethod]
         public void ScoreHistory_WithRelatedEntity_References_Success()
         {
-            // Arrange
-            var visitor = new User
+            User visitor = new User
             {
                 Id = Guid.NewGuid(),
                 Name = "John",
@@ -139,7 +123,7 @@ namespace TestDomain
                 BirthDate = new DateTime(1990, 1, 1)
             };
 
-            var history = new ScoreHistory
+            ScoreHistory history = new ScoreHistory
             {
                 VisitorId = visitor.Id,
                 Visitor = visitor,
@@ -149,7 +133,6 @@ namespace TestDomain
                 Description = "Visited attraction"
             };
 
-            // Assert
             Assert.IsNotNull(history.Visitor);
             Assert.AreEqual(visitor.Id, history.Visitor.Id);
         }
@@ -157,27 +140,21 @@ namespace TestDomain
         [TestMethod]
         public void ScoreHistory_SetRelatedEntityId_ValidGuid_Success()
         {
-            // Arrange
-            var history = new ScoreHistory();
-            var attractionId = Guid.NewGuid();
+            ScoreHistory history = new ScoreHistory();
+            Guid attractionId = Guid.NewGuid();
 
-            // Act
             history.RelatedEntityId = attractionId;
 
-            // Assert
             Assert.AreEqual(attractionId, history.RelatedEntityId);
         }
 
         [TestMethod]
         public void ScoreHistory_SetRelatedEntityId_Null_Success()
         {
-            // Arrange
-            var history = new ScoreHistory();
+            ScoreHistory history = new ScoreHistory();
 
-            // Act
             history.RelatedEntityId = null;
 
-            // Assert
             Assert.IsNull(history.RelatedEntityId);
         }
     }

@@ -5,7 +5,8 @@ using BusinessLogic.Plugins;
 
 namespace ExamplePlugin;
 
-[PluginDescription("Multiplies scoring points based on hour of the day. 2x during peak hours (10-14, 18-22), 1.5x during normal hours, 1x during off-peak hours.")]
+[PluginDescription(
+    "Multiplies scoring points based on hour of the day. 2x during peak hours (10-14, 18-22), 1.5x during normal hours, 1x during off-peak hours.")]
 [PluginAuthor("Theme Park Team")]
 public class PuntuacionPorHora : IConcreteStrategy
 {
@@ -23,17 +24,14 @@ public class PuntuacionPorHora : IConcreteStrategy
 
         if (_peakHours.Contains(currentHour))
         {
-            // Double points during peak hours
             return baseScore * 2;
         }
         else if (_normalHours.Contains(currentHour))
         {
-            // 1.5x points during normal hours
             return (int)(baseScore * 1.5);
         }
         else
         {
-            // Regular points during off-peak hours (0-8, 23)
             return baseScore;
         }
     }

@@ -38,7 +38,6 @@ public class PluginLoader : IPluginLoader
             }
             catch (Exception)
             {
-                // Skip assemblies that can't be loaded
                 continue;
             }
         }
@@ -64,7 +63,6 @@ public class PluginLoader : IPluginLoader
             {
                 try
                 {
-                    // Try to create an instance to get the Name property
                     IConcreteStrategy? instance = Activator.CreateInstance(type) as IConcreteStrategy;
                     if (instance != null)
                     {
@@ -83,7 +81,6 @@ public class PluginLoader : IPluginLoader
                 }
                 catch (Exception)
                 {
-                    // Skip strategies that can't be instantiated with default constructor
                     continue;
                 }
             }
@@ -92,7 +89,7 @@ public class PluginLoader : IPluginLoader
 
     public PluginInfoResponse? GetPluginByName(string name)
     {
-        var pluginInfo = _availablePlugins.GetValueOrDefault(name);
+        PluginInfo pluginInfo = _availablePlugins.GetValueOrDefault(name);
         return pluginInfo != null ? MapToResponse(pluginInfo) : null;
     }
 
@@ -137,7 +134,6 @@ public class PluginLoader : IPluginLoader
     }
 }
 
-// Custom attributes for plugin metadata
 [AttributeUsage(AttributeTargets.Class)]
 public class PluginDescriptionAttribute : Attribute
 {

@@ -24,13 +24,13 @@ namespace BusinessLogic
 
         public RedemptionHistoryModelOut RedeemReward(Guid visitorId, Guid rewardId)
         {
-            var visitor = _userRepository.GetById(visitorId).Result;
+            User? visitor = _userRepository.GetById(visitorId).Result;
             if (visitor == null)
             {
                 throw new KeyNotFoundException($"Visitor with ID '{visitorId}' not found");
             }
 
-            var reward = _rewardRepository.GetById(rewardId);
+            Reward? reward = _rewardRepository.GetById(rewardId);
             if (reward == null)
             {
                 throw new KeyNotFoundException($"Reward with ID '{rewardId}' not found");
@@ -41,7 +41,7 @@ namespace BusinessLogic
             visitor.Score -= reward.PointsCost;
             reward.DecrementQuantity();
 
-            var redemption = new RedemptionHistory
+            RedemptionHistory redemption = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor.Id,
@@ -59,21 +59,24 @@ namespace BusinessLogic
 
         public List<RedemptionHistoryModelOut> GetRedemptionHistory(Guid visitorId)
         {
-            var redemptions = _redemptionHistoryRepository.GetByVisitorId(visitorId);
+            List<RedemptionHistory> redemptions = _redemptionHistoryRepository.GetByVisitorId(visitorId);
             return MapToModelOutList(redemptions);
         }
 
-        public List<RedemptionHistoryModelOut> GetRedemptionHistoryWithDateRange(Guid visitorId, DateTime dateFrom, DateTime dateTo)
+        public List<RedemptionHistoryModelOut> GetRedemptionHistoryWithDateRange(Guid visitorId, DateTime dateFrom,
+            DateTime dateTo)
         {
-            var redemptions = _redemptionHistoryRepository.GetByVisitorIdWithDateRange(visitorId, dateFrom, dateTo);
+            List<RedemptionHistory> redemptions =
+                _redemptionHistoryRepository.GetByVisitorIdWithDateRange(visitorId, dateFrom, dateTo);
             return MapToModelOutList(redemptions);
         }
 
         private void ValidateRedemptionEligibility(User visitor, Reward reward)
         {
-            var pointsSpec = new HasSufficientPointsSpecification(reward.PointsCost);
-            var membershipSpec = new MeetsRequiredMembershipSpecification(reward.RequiredMembershipLevel);
-            var availabilitySpec = new RewardIsAvailableSpecification();
+            HasSufficientPointsSpecification pointsSpec = new HasSufficientPointsSpecification(reward.PointsCost);
+            MeetsRequiredMembershipSpecification membershipSpec =
+                new MeetsRequiredMembershipSpecification(reward.RequiredMembershipLevel);
+            RewardIsAvailableSpecification availabilitySpec = new RewardIsAvailableSpecification();
 
             if (!pointsSpec.IsSatisfiedBy(visitor))
             {
@@ -107,7 +110,8 @@ namespace BusinessLogic
             }).ToList();
         }
 
-        private RedemptionHistoryModelOut MapToModelOut(RedemptionHistory redemption, string? visitorName, string? rewardName)
+        private RedemptionHistoryModelOut MapToModelOut(RedemptionHistory redemption, string? visitorName,
+            string? rewardName)
         {
             return new RedemptionHistoryModelOut
             {
