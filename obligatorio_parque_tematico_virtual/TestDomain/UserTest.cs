@@ -10,10 +10,10 @@ namespace TestDomain
         {
             User user = new User
             {
-                Name = "John",
-                LastName = "Doe",
-                Email = "john.doe@example.com",
-                Password = "hashedPassword123"
+            Name = "John",
+            LastName = "Doe",
+            Email = "john.doe@example.com",
+            Password = "hashedPassword123"
             };
 
             Assert.IsNotNull(user.Id);
@@ -57,11 +57,11 @@ namespace TestDomain
 
             User user = new User
             {
-                Name = "Visitor",
-                LastName = "User",
-                Email = "visitor@example.com",
-                Password = "visitorPass",
-                BirthDate = birthDate
+            Name = "Visitor",
+            LastName = "User",
+            Email = "visitor@example.com",
+            Password = "visitorPass",
+            BirthDate = birthDate
             };
 
             Assert.AreEqual(birthDate, user.BirthDate);
@@ -72,11 +72,11 @@ namespace TestDomain
         {
             User user = new User
             {
-                Name = "Visitor",
-                LastName = "User",
-                Email = "visitor@example.com",
-                Password = "visitorPass",
-                MembershipLevel = MembershipLevel.Premium
+            Name = "Visitor",
+            LastName = "User",
+            Email = "visitor@example.com",
+            Password = "visitorPass",
+            MembershipLevel = MembershipLevel.Premium
             };
 
             Assert.AreEqual(MembershipLevel.Premium, user.MembershipLevel);
@@ -87,19 +87,19 @@ namespace TestDomain
         {
             User user = new User
             {
-                Name = "MultiRole",
-                LastName = "User",
-                Email = "multi@example.com",
-                Password = "pass"
+            Name = "MultiRole",
+            LastName = "User",
+            Email = "multi@example.com",
+            Password = "pass"
             };
 
             Role adminRole = new Role { Id = 1, Name = "Administrator" };
             Role operatorRole = new Role { Id = 2, Name = "Operator" };
 
             UserRole userRole1 = new UserRole
-                { User = user, Role = adminRole, UserId = user.Id, RoleId = adminRole.Id };
+            { User = user, Role = adminRole, UserId = user.Id, RoleId = adminRole.Id };
             UserRole userRole2 = new UserRole
-                { User = user, Role = operatorRole, UserId = user.Id, RoleId = operatorRole.Id };
+            { User = user, Role = operatorRole, UserId = user.Id, RoleId = operatorRole.Id };
 
             user.UserRoles.Add(userRole1);
             user.UserRoles.Add(userRole2);
@@ -114,10 +114,10 @@ namespace TestDomain
         {
             User user = new User
             {
-                Name = "Admin",
-                LastName = "User",
-                Email = "admin@example.com",
-                Password = "pass"
+            Name = "Admin",
+            LastName = "User",
+            Email = "admin@example.com",
+            Password = "pass"
             };
 
             Assert.IsNull(user.BirthDate);
@@ -137,14 +137,14 @@ namespace TestDomain
         {
             User user = new User
             {
-                Name = "John",
-                LastName = "Doe"
+            Name = "John",
+            LastName = "Doe"
             };
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
             Attraction attraction = new Attraction
             {
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster
+            Name = "Roller Coaster",
+            Type = AttractionType.RollerCoaster
             };
 
             user.RegisterEntry(attraction, enterDate);
@@ -160,18 +160,18 @@ namespace TestDomain
             DateTime enterDate2 = new DateTime(2025, 10, 1, 14, 0, 0);
             Attraction attraction1 = new Attraction
             {
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster
+            Name = "Roller Coaster",
+            Type = AttractionType.RollerCoaster
             };
             Attraction attraction2 = new Attraction
             {
-                Name = "Simulator",
-                Type = AttractionType.Simulator
+            Name = "Simulator",
+            Type = AttractionType.Simulator
             };
             User user = new User
             {
-                Name = "John",
-                LastName = "Doe"
+            Name = "John",
+            LastName = "Doe"
             };
 
             user.RegisterEntry(attraction1, enterDate1);
@@ -190,13 +190,13 @@ namespace TestDomain
             DateTime enterDate2 = new DateTime(2025, 10, 2, 10, 0, 0);
             Attraction attraction = new Attraction
             {
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster
+            Name = "Roller Coaster",
+            Type = AttractionType.RollerCoaster
             };
             User user = new User
             {
-                Name = "John",
-                LastName = "Doe"
+            Name = "John",
+            LastName = "Doe"
             };
 
             user.RegisterEntry(attraction, enterDate1);
@@ -214,13 +214,13 @@ namespace TestDomain
             DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
             Attraction attraction = new Attraction
             {
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster
+            Name = "Roller Coaster",
+            Type = AttractionType.RollerCoaster
             };
             User user = new User
             {
-                Name = "John",
-                LastName = "Doe"
+            Name = "John",
+            LastName = "Doe"
             };
             user.RegisterEntry(attraction, enterDate);
 
@@ -235,14 +235,14 @@ namespace TestDomain
         {
             Attraction attraction = new Attraction
             {
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster
+            Name = "Roller Coaster",
+            Type = AttractionType.RollerCoaster
             };
             DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
             User user = new User
             {
-                Name = "John",
-                LastName = "Doe"
+            Name = "John",
+            LastName = "Doe"
             };
 
             user.RegisterExit(attraction, exitDate);
@@ -257,13 +257,13 @@ namespace TestDomain
             DateTime exitDate2 = new DateTime(2025, 10, 1, 15, 30, 0);
             Attraction attraction = new Attraction
             {
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster
+            Name = "Roller Coaster",
+            Type = AttractionType.RollerCoaster
             };
             User user = new User
             {
-                Name = "John",
-                LastName = "Doe"
+            Name = "John",
+            LastName = "Doe"
             };
             user.RegisterEntry(attraction, enterDate);
 
@@ -276,8 +276,8 @@ namespace TestDomain
         {
             User visitor = new User
             {
-                Name = "John",
-                LastName = "Doe"
+            Name = "John",
+            LastName = "Doe"
             };
 
             Assert.AreEqual(0, visitor.Score);
@@ -288,9 +288,9 @@ namespace TestDomain
         {
             User visitor = new User
             {
-                Name = "John",
-                LastName = "Doe",
-                Score = 50
+            Name = "John",
+            LastName = "Doe",
+            Score = 50
             };
 
             Assert.AreEqual(50, visitor.Score);
@@ -301,9 +301,9 @@ namespace TestDomain
         {
             User visitor = new User
             {
-                Name = "John",
-                LastName = "Doe",
-                Score = 10
+            Name = "John",
+            LastName = "Doe",
+            Score = 10
             };
 
             visitor.Score += 5;
@@ -316,9 +316,9 @@ namespace TestDomain
         {
             User visitor = new User
             {
-                Name = "John",
-                LastName = "Doe",
-                Score = -10
+            Name = "John",
+            LastName = "Doe",
+            Score = -10
             };
 
             Assert.AreEqual(-10, visitor.Score);

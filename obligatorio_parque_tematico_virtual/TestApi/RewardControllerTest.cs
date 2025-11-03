@@ -426,7 +426,7 @@ public class RewardControllerTest
             }
         };
 
-        _mockRewardLogic.Setup(s => s.GetAvailableRewards()). Returns(availableRewards);
+        _mockRewardLogic.Setup(s => s.GetAvailableRewards()).Returns(availableRewards);
 
         HttpResponseMessage response = await _visitorClient.GetAsync("/api/rewards/available");
 

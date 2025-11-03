@@ -209,13 +209,13 @@ namespace TestDomain
         public void SetMaintenanceType_AllTypes_Success()
         {
             MaintenanceRecord inspection = new MaintenanceRecord
-                { MaintenanceType = MaintenanceType.Inspection, Description = "Test" };
+            { MaintenanceType = MaintenanceType.Inspection, Description = "Test" };
             MaintenanceRecord cleaning = new MaintenanceRecord
-                { MaintenanceType = MaintenanceType.Cleaning, Description = "Test" };
+            { MaintenanceType = MaintenanceType.Cleaning, Description = "Test" };
             MaintenanceRecord repair = new MaintenanceRecord
-                { MaintenanceType = MaintenanceType.Repair, Description = "Test" };
+            { MaintenanceType = MaintenanceType.Repair, Description = "Test" };
             MaintenanceRecord safety = new MaintenanceRecord
-                { MaintenanceType = MaintenanceType.SafetyCheck, Description = "Test" };
+            { MaintenanceType = MaintenanceType.SafetyCheck, Description = "Test" };
 
             Assert.AreEqual(MaintenanceType.Inspection, inspection.MaintenanceType);
             Assert.AreEqual(MaintenanceType.Cleaning, cleaning.MaintenanceType);
