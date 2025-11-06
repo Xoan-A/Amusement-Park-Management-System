@@ -15,11 +15,11 @@ namespace BusinessLogic
         private readonly ITicketLogic _ticketLogic;
         private readonly IRoleRepository _roleRepository;
         private readonly IEventRepository _eventRepository;
-        private readonly IActiveStrategy _activeStrategy;
+        private readonly IDailyScoreLogic _dailyScoreLogic;
 
         public UserLogic(IUserRepository userRepository, IPasswordLogic passwordLogic,
             IAttractionRepository attractionRepository, ITicketLogic ticketLogic, IRoleRepository roleRepository,
-            IEventRepository eventRepository, IActiveStrategy activeStrategy)
+            IEventRepository eventRepository, IDailyScoreLogic dailyScoreLogic)
         {
             _userRepository = userRepository;
             _passwordLogic = passwordLogic;
@@ -27,7 +27,7 @@ namespace BusinessLogic
             _ticketLogic = ticketLogic;
             _roleRepository = roleRepository;
             _eventRepository = eventRepository;
-            _activeStrategy = activeStrategy;
+            _dailyScoreLogic = dailyScoreLogic;
         }
 
         public async Task<UserResponse> RegisterVisitor(RegisterVisitorRequest request)
@@ -192,17 +192,7 @@ namespace BusinessLogic
 
             bool isEvent = even != null;
 
-            StrategyRequest strategyRequest = new StrategyRequest
-            {
-                UserId = user.Id,
-                AttractionId = attraction.Id,
-                IsSepcialEvent = isEvent,
-            };
-
-            int score = _activeStrategy.CalculateScore(user, attraction, strategyRequest);
-
-            user.Score += score;
-            await _userRepository.Update(user);
+            await _dailyScoreLogic.AddScoreToUser(user, attraction, isEvent);
         }
 
         public async Task RegisterExit(Guid attractionId, RegisterExitRequest request)

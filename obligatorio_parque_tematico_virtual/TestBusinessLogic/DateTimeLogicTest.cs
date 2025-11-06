@@ -8,16 +8,14 @@ namespace TestBusinessLogic
     [TestClass]
     public class DateTimeLogicTest
     {
-        private IDateTimeLogic _dateTimeLogic;
+        private DateTimeLogic _dateTimeLogic;
         private Mock<IDateTimeRepository> _mockDateTimeRepository;
-        private Mock<IUserRepository> _mockUserRepository;
 
         [TestInitialize]
         public void Setup()
         {
             _mockDateTimeRepository = new Mock<IDateTimeRepository>();
-            _mockUserRepository = new Mock<IUserRepository>();
-            _dateTimeLogic = new DateTimeLogic(_mockDateTimeRepository.Object, _mockUserRepository.Object);
+            _dateTimeLogic = new DateTimeLogic(_mockDateTimeRepository.Object);
         }
 
         [TestMethod]
@@ -47,6 +45,7 @@ namespace TestBusinessLogic
         public async Task SetDateTime_ShouldCallRepository()
         {
             DateTime configuredTime = new DateTime(2025, 9, 2, 14, 45, 0);
+            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync(new DateTime(2025, 9, 1));
 
             await _dateTimeLogic.SetDateTime(configuredTime);
 
@@ -54,13 +53,17 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public async Task SetDateTime_ShouldResetUserScores()
+        public async Task SetDateTime_ShouldNotifyObservers()
         {
             DateTime configuredTime = new DateTime(2025, 9, 2, 14, 45, 0);
+            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync(new DateTime(2025, 9, 1));
+
+            Mock<IDateObserver> mockObserver = new Mock<IDateObserver>();
+            _dateTimeLogic.Attach(mockObserver.Object);
 
             await _dateTimeLogic.SetDateTime(configuredTime);
 
-            _mockUserRepository.Verify(r => r.ResetScores(), Times.Once);
+            mockObserver.Verify(o => o.DateUpdated(_dateTimeLogic), Times.Once);
         }
 
         [TestMethod]
@@ -68,6 +71,7 @@ namespace TestBusinessLogic
         {
             string dateTimeString = "2025-09-02T14:45";
             DateTime expectedTime = new DateTime(2025, 9, 2, 14, 45, 0);
+            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync(new DateTime(2025, 9, 1));
 
             await _dateTimeLogic.SetDateTime(dateTimeString);
 
@@ -75,13 +79,74 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public async Task SetDateTime_WithStringFormat_ShouldResetUserScores()
+        public async Task SetDateTime_WithStringFormat_ShouldNotifyObservers()
         {
             string dateTimeString = "2025-09-02T14:45";
+            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync(new DateTime(2025, 9, 1));
+
+            Mock<IDateObserver> mockObserver = new Mock<IDateObserver>();
+            _dateTimeLogic.Attach(mockObserver.Object);
 
             await _dateTimeLogic.SetDateTime(dateTimeString);
 
-            _mockUserRepository.Verify(r => r.ResetScores(), Times.Once);
+            mockObserver.Verify(o => o.DateUpdated(_dateTimeLogic), Times.Once);
+        }
+
+        [TestMethod]
+        public void Attach_ShouldAddObserver()
+        {
+            Mock<IDateObserver> mockObserver = new Mock<IDateObserver>();
+
+            _dateTimeLogic.Attach(mockObserver.Object);
+            _dateTimeLogic.Attach(mockObserver.Object);
+
+            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync(new DateTime(2025, 9, 1));
+            _dateTimeLogic.SetDateTime(new DateTime(2025, 9, 2)).Wait();
+
+            mockObserver.Verify(o => o.DateUpdated(_dateTimeLogic), Times.Once);
+        }
+
+        [TestMethod]
+        public void Detach_ShouldRemoveObserver()
+        {
+            Mock<IDateObserver> mockObserver = new Mock<IDateObserver>();
+            _dateTimeLogic.Attach(mockObserver.Object);
+            _dateTimeLogic.Detach(mockObserver.Object);
+
+            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync(new DateTime(2025, 9, 1));
+            _dateTimeLogic.SetDateTime(new DateTime(2025, 9, 2)).Wait();
+
+            mockObserver.Verify(o => o.DateUpdated(_dateTimeLogic), Times.Never);
+        }
+
+        [TestMethod]
+        public void GetPreviousDateTime_ShouldReturnPreviousDateTime()
+        {
+            DateTime previousTime = new DateTime(2025, 9, 1, 10, 0, 0);
+            DateTime newTime = new DateTime(2025, 9, 2, 14, 45, 0);
+            
+            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync(previousTime);
+            _dateTimeLogic.SetDateTime(newTime).Wait();
+
+            DateTime result = _dateTimeLogic.GetPreviousDateTime();
+
+            Assert.AreEqual(previousTime, result);
+        }
+
+        [TestMethod]
+        public async Task NotifyDateChange_ShouldCallDateUpdatedOnAllObservers()
+        {
+            Mock<IDateObserver> mockObserver1 = new Mock<IDateObserver>();
+            Mock<IDateObserver> mockObserver2 = new Mock<IDateObserver>();
+
+            _dateTimeLogic.Attach(mockObserver1.Object);
+            _dateTimeLogic.Attach(mockObserver2.Object);
+
+            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync(new DateTime(2025, 9, 1));
+            await _dateTimeLogic.SetDateTime(new DateTime(2025, 9, 2));
+
+            mockObserver1.Verify(o => o.DateUpdated(_dateTimeLogic), Times.Once);
+            mockObserver2.Verify(o => o.DateUpdated(_dateTimeLogic), Times.Once);
         }
     }
 }

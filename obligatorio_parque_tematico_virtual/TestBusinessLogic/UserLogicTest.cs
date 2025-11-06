@@ -18,7 +18,7 @@ namespace TestBusinessLogic
         private Mock<ITicketLogic> _mockTicketLogic;
         private Mock<IRoleRepository> _mockRoleRepository;
         private Mock<IEventRepository> _mockEventRepository;
-        private Mock<IActiveStrategy> _mockActiveStrategy;
+         private Mock<IDailyScoreLogic> _mockDailyScoreLogic;
         private IUserLogic _userLogic;
 
         [TestInitialize]
@@ -30,10 +30,10 @@ namespace TestBusinessLogic
             _mockTicketLogic = new Mock<ITicketLogic>();
             _mockRoleRepository = new Mock<IRoleRepository>();
             _mockEventRepository = new Mock<IEventRepository>();
-            _mockActiveStrategy = new Mock<IActiveStrategy>();
+            _mockDailyScoreLogic = new Mock<IDailyScoreLogic>();
             _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
                 _mockAttractionRepository.Object, _mockTicketLogic.Object, _mockRoleRepository.Object,
-                _mockEventRepository.Object, _mockActiveStrategy.Object);
+                _mockEventRepository.Object, _mockDailyScoreLogic.Object);
         }
 
         [TestMethod]
@@ -1028,9 +1028,6 @@ namespace TestBusinessLogic
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
                 .ReturnsAsync((Event)null);
-            _mockActiveStrategy.Setup(s =>
-                    s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
-                .Returns(5);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
@@ -1043,11 +1040,7 @@ namespace TestBusinessLogic
 
             await _userLogic.RegisterEntry(attractionId, request);
 
-            Assert.AreEqual(5, visitor.Score);
-            _mockActiveStrategy.Verify(s => s.CalculateScore(
-                visitor,
-                attraction,
-                It.Is<StrategyRequest>(req => req.IsSepcialEvent == false)), Times.Once);
+            _mockDailyScoreLogic.Verify(s => s.AddScoreToUser(visitor, attraction, false), Times.Once);
         }
 
         [TestMethod]
@@ -1088,9 +1081,6 @@ namespace TestBusinessLogic
                 .ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
                 .ReturnsAsync(specialEvent);
-            _mockActiveStrategy.Setup(s =>
-                    s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
-                .Returns(6);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
@@ -1103,11 +1093,7 @@ namespace TestBusinessLogic
 
             await _userLogic.RegisterEntry(attractionId, request);
 
-            Assert.AreEqual(16, visitor.Score);
-            _mockActiveStrategy.Verify(s => s.CalculateScore(
-                visitor,
-                attraction,
-                It.Is<StrategyRequest>(req => req.IsSepcialEvent == true)), Times.Once);
+            _mockDailyScoreLogic.Verify(s => s.AddScoreToUser(visitor, attraction, true), Times.Once);
         }
 
         [TestMethod]
@@ -1153,9 +1139,6 @@ namespace TestBusinessLogic
                 .ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(It.IsAny<Guid>(), It.IsAny<DateTime>()))
                 .ReturnsAsync((Event)null);
-            _mockActiveStrategy.Setup(s =>
-                    s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
-                .Returns(3);
 
             RegisterEntryRequest entryRequest = new RegisterEntryRequest
             {
@@ -1178,9 +1161,8 @@ namespace TestBusinessLogic
             await _userLogic.RegisterEntry(attractionId1, entryRequest);
             await _userLogic.RegisterEntry(attractionId2, entryRequest2);
 
-            Assert.AreEqual(6, visitor.Score);
-            _mockActiveStrategy.Verify(
-                s => s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()),
+            _mockDailyScoreLogic.Verify(
+                s => s.AddScoreToUser(It.IsAny<User>(), It.IsAny<Attraction>(), false),
                 Times.Exactly(2));
         }
 
@@ -1214,9 +1196,6 @@ namespace TestBusinessLogic
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
                 .ReturnsAsync((Event)null);
-            _mockActiveStrategy.Setup(s =>
-                    s.CalculateScore(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<StrategyRequest>()))
-                .Returns(0);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
@@ -1229,7 +1208,7 @@ namespace TestBusinessLogic
 
             await _userLogic.RegisterEntry(attractionId, request);
 
-            Assert.AreEqual(5, visitor.Score);
+            _mockDailyScoreLogic.Verify(s => s.AddScoreToUser(visitor, attraction, false), Times.Once);
         }
 
         [TestMethod]

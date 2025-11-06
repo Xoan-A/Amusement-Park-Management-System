@@ -17,7 +17,7 @@ public class UserLogicRoleTest
     private Mock<IAttractionRepository> _mockAttractionRepository = null!;
     private Mock<ITicketLogic> _mockTicketLogic = null!;
     private Mock<IEventRepository> _mockEventRepository = null!;
-    private Mock<IActiveStrategy> _mockActiveStrategy = null!;
+    private Mock<IDailyScoreLogic> _mockDailyScoreLogic = null!;
     private IUserLogic _userLogic = null!;
 
     [TestInitialize]
@@ -29,10 +29,10 @@ public class UserLogicRoleTest
         _mockAttractionRepository = new Mock<IAttractionRepository>();
         _mockTicketLogic = new Mock<ITicketLogic>();
         _mockEventRepository = new Mock<IEventRepository>();
-        _mockActiveStrategy = new Mock<IActiveStrategy>();
+        _mockDailyScoreLogic = new Mock<IDailyScoreLogic>();
         _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
             _mockAttractionRepository.Object, _mockTicketLogic.Object, _mockRoleRepository.Object,
-            _mockEventRepository.Object, _mockActiveStrategy.Object);
+            _mockEventRepository.Object, _mockDailyScoreLogic.Object);
     }
 
     [TestMethod]
