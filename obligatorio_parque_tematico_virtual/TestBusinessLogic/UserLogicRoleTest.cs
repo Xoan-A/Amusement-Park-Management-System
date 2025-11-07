@@ -48,7 +48,7 @@ public class UserLogicRoleTest
 
         _mockUserRepository.Setup(r => r.IsEmailUnique(email)).ReturnsAsync(true);
         _mockPasswordService.Setup(p => p.HashPassword(password)).Returns("hashedPassword");
-        _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns(visitorRole);
+        _mockRoleRepository.Setup(r => r.GetByNameAsync(Role.VISITOR)).ReturnsAsync(visitorRole);
         _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
 
         RegisterVisitorRequest request = new RegisterVisitorRequest
@@ -64,7 +64,7 @@ public class UserLogicRoleTest
 
         Assert.IsNotNull(result);
         Assert.AreEqual(email, result.Email);
-        _mockRoleRepository.Verify(r => r.GetByName(Role.VISITOR), Times.Once);
+        _mockRoleRepository.Verify(r => r.GetByNameAsync(Role.VISITOR), Times.Once);
     }
 
     [TestMethod]
@@ -81,8 +81,8 @@ public class UserLogicRoleTest
 
         _mockUserRepository.Setup(r => r.IsEmailUnique(email)).ReturnsAsync(true);
         _mockPasswordService.Setup(p => p.HashPassword(password)).Returns("hashedPassword");
-        _mockRoleRepository.Setup(r => r.GetByName(Role.ADMINISTRATOR)).Returns(adminRole);
-        _mockRoleRepository.Setup(r => r.GetByName(Role.OPERATOR)).Returns(operatorRole);
+        _mockRoleRepository.Setup(r => r.GetByNameAsync(Role.ADMINISTRATOR)).ReturnsAsync(adminRole);
+        _mockRoleRepository.Setup(r => r.GetByNameAsync(Role.OPERATOR)).ReturnsAsync(operatorRole);
         _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
 
         CreateUserRequest request = new CreateUserRequest
@@ -257,7 +257,7 @@ public class UserLogicRoleTest
     {
         _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
         _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
-        _mockRoleRepository.Setup(r => r.GetByName("InvalidRole")).Returns((Role)null);
+        _mockRoleRepository.Setup(r => r.GetByNameAsync("InvalidRole")).ReturnsAsync((Role)null);
         _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
 
         CreateUserRequest request = new CreateUserRequest
@@ -282,7 +282,7 @@ public class UserLogicRoleTest
 
         _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
         _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
-        _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns(visitorRole);
+        _mockRoleRepository.Setup(r => r.GetByNameAsync(Role.VISITOR)).ReturnsAsync(visitorRole);
         _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
 
         CreateUserRequest request = new CreateUserRequest
@@ -319,7 +319,7 @@ public class UserLogicRoleTest
         Role operatorRole = new Role { Id = 2, Name = Role.OPERATOR };
 
         _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(Task.FromResult(user));
-        _mockRoleRepository.Setup(r => r.GetByName(roleName)).Returns(operatorRole);
+        _mockRoleRepository.Setup(r => r.GetByNameAsync(roleName)).ReturnsAsync(operatorRole);
         _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
 
         await _userLogic.AddRoleToUser(userId, roleName);
@@ -361,7 +361,7 @@ public class UserLogicRoleTest
         };
 
         _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(Task.FromResult(user));
-        _mockRoleRepository.Setup(r => r.GetByName(roleName)).Returns((Role)null);
+        _mockRoleRepository.Setup(r => r.GetByNameAsync(roleName)).ReturnsAsync((Role)null);
 
         await Assert.ThrowsExceptionAsync<ArgumentException>(
             async () => await _userLogic.AddRoleToUser(userId, roleName),
@@ -392,7 +392,7 @@ public class UserLogicRoleTest
         };
 
         _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(Task.FromResult(user));
-        _mockRoleRepository.Setup(r => r.GetByName(roleName)).Returns(visitorRole);
+        _mockRoleRepository.Setup(r => r.GetByNameAsync(roleName)).ReturnsAsync(visitorRole);
 
         await Assert.ThrowsExceptionAsync<ArgumentException>(
             async () => await _userLogic.AddRoleToUser(userId, roleName),
@@ -425,7 +425,7 @@ public class UserLogicRoleTest
         };
 
         _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(Task.FromResult(user));
-        _mockRoleRepository.Setup(r => r.GetByName(newRoleName)).Returns(adminRole);
+        _mockRoleRepository.Setup(r => r.GetByNameAsync(newRoleName)).ReturnsAsync(adminRole);
         _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
 
         await _userLogic.AddRoleToUser(userId, newRoleName);

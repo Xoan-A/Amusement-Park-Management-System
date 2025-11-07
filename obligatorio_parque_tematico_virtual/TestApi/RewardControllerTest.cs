@@ -129,7 +129,7 @@ public class RewardControllerTest
             }
         };
 
-        _mockRewardLogic.Setup(s => s.GetAllRewards()).Returns(rewards);
+        _mockRewardLogic.Setup(s => s.GetAllRewards()).ReturnsAsync(rewards);
 
         HttpResponseMessage response = await _adminClient.GetAsync("/api/rewards");
 
@@ -155,7 +155,7 @@ public class RewardControllerTest
             }
         };
 
-        _mockRewardLogic.Setup(s => s.GetAllRewards()).Returns(rewards);
+        _mockRewardLogic.Setup(s => s.GetAllRewards()).ReturnsAsync(rewards);
 
         HttpResponseMessage response = await _visitorClient.GetAsync("/api/rewards");
 
@@ -176,7 +176,7 @@ public class RewardControllerTest
             IsAvailable = true
         };
 
-        _mockRewardLogic.Setup(s => s.GetRewardById(rewardId)).Returns(reward);
+        _mockRewardLogic.Setup(s => s.GetRewardById(rewardId)).ReturnsAsync(reward);
 
         HttpResponseMessage response = await _adminClient.GetAsync($"/api/rewards/{rewardId}");
 
@@ -220,7 +220,7 @@ public class RewardControllerTest
             IsAvailable = true
         };
 
-        _mockRewardLogic.Setup(s => s.CreateReward(It.IsAny<RewardModelIn>())).Returns(createdReward);
+        _mockRewardLogic.Setup(s => s.CreateReward(It.IsAny<RewardModelIn>())).ReturnsAsync(createdReward);
 
         string json = JsonSerializer.Serialize(rewardModelIn);
         StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -315,7 +315,7 @@ public class RewardControllerTest
             IsAvailable = true
         };
 
-        _mockRewardLogic.Setup(s => s.UpdateReward(rewardId, It.IsAny<RewardModelIn>())).Returns(updatedReward);
+        _mockRewardLogic.Setup(s => s.UpdateReward(rewardId, It.IsAny<RewardModelIn>())).ReturnsAsync(updatedReward);
 
         string json = JsonSerializer.Serialize(rewardModelIn);
         StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -426,7 +426,7 @@ public class RewardControllerTest
             }
         };
 
-        _mockRewardLogic.Setup(s => s.GetAvailableRewards()).Returns(availableRewards);
+        _mockRewardLogic.Setup(s => s.GetAvailableRewards()).ReturnsAsync(availableRewards);
 
         HttpResponseMessage response = await _visitorClient.GetAsync("/api/rewards/available");
 

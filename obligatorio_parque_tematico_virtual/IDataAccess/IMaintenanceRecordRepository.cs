@@ -4,17 +4,17 @@ namespace IDataAccess
 {
     public interface IMaintenanceRecordRepository
     {
-        void Create(MaintenanceRecord record);
-        MaintenanceRecord? GetById(Guid id);
-        List<MaintenanceRecord> GetAll();
-        List<MaintenanceRecord> GetByAttractionId(Guid attractionId);
-        List<MaintenanceRecord> GetByScheduleId(Guid scheduleId);
-        List<MaintenanceRecord> GetUnscheduledMaintenance();
-        List<MaintenanceRecord> GetByOperator(Guid operatorId);
-        List<MaintenanceRecord> GetByDateRange(DateTime dateFrom, DateTime dateTo);
-        List<MaintenanceRecord> GetByMaintenanceType(MaintenanceType type);
-        List<MaintenanceRecord> GetByAttractionIdAndDateRange(Guid attractionId, DateTime dateFrom, DateTime dateTo);
-        void Update(MaintenanceRecord record);
-        void Delete(Guid id);
+        Task CreateAsync(MaintenanceRecord record);
+        Task<MaintenanceRecord?> GetByIdAsync(Guid id);
+        Task<List<MaintenanceRecord>> GetAllAsync();
+        Task<List<MaintenanceRecord>> GetByAttractionIdAsync(Guid attractionId);
+        Task<List<MaintenanceRecord>> GetByScheduleIdAsync(Guid scheduleId);
+        Task<List<MaintenanceRecord>> GetUnscheduledMaintenanceAsync();
+        Task<List<MaintenanceRecord>> GetByOperatorAsync(Guid operatorId);
+        Task<List<MaintenanceRecord>> GetByDateRangeAsync(DateTime dateFrom, DateTime dateTo);
+        Task<List<MaintenanceRecord>> GetByMaintenanceTypeAsync(MaintenanceType type);
+        Task<List<MaintenanceRecord>> GetByAttractionIdAndDateRangeAsync(Guid attractionId, DateTime dateFrom, DateTime dateTo);
+        Task UpdateAsync(MaintenanceRecord record);
+        Task DeleteAsync(Guid id);
     }
 }

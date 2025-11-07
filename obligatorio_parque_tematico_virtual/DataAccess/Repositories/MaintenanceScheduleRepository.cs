@@ -14,104 +14,104 @@ namespace DataAccess.Repositories
             _context = context;
         }
 
-        public void Create(MaintenanceSchedule schedule)
+        public async Task CreateAsync(MaintenanceSchedule schedule)
         {
             _context.MaintenanceSchedules.Add(schedule);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public MaintenanceSchedule? GetById(Guid id)
+        public async Task<MaintenanceSchedule?> GetByIdAsync(Guid id)
         {
-            return _context.MaintenanceSchedules
+            return await _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
-                .FirstOrDefault(s => s.Id == id);
+                .FirstOrDefaultAsync(s => s.Id == id);
         }
 
-        public List<MaintenanceSchedule> GetAll()
+        public async Task<List<MaintenanceSchedule>> GetAllAsync()
         {
-            return _context.MaintenanceSchedules
+            return await _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
                 .OrderBy(s => s.ScheduledDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceSchedule> GetByAttractionId(Guid attractionId)
+        public async Task<List<MaintenanceSchedule>> GetByAttractionIdAsync(Guid attractionId)
         {
-            return _context.MaintenanceSchedules
+            return await _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
                 .Where(s => s.AttractionId == attractionId)
                 .OrderBy(s => s.ScheduledDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceSchedule> GetByStatus(MaintenanceStatus status)
+        public async Task<List<MaintenanceSchedule>> GetByStatusAsync(MaintenanceStatus status)
         {
-            return _context.MaintenanceSchedules
+            return await _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
                 .Where(s => s.Status == status)
                 .OrderBy(s => s.ScheduledDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceSchedule> GetOverdueSchedules()
+        public async Task<List<MaintenanceSchedule>> GetOverdueSchedulesAsync()
         {
             DateTime now = DateTime.Now;
-            return _context.MaintenanceSchedules
+            return await _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
                 .Where(s => s.ScheduledDate < now &&
                             (s.Status == MaintenanceStatus.Pending || s.Status == MaintenanceStatus.InProgress))
                 .OrderBy(s => s.ScheduledDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceSchedule> GetByDateRange(DateTime dateFrom, DateTime dateTo)
+        public async Task<List<MaintenanceSchedule>> GetByDateRangeAsync(DateTime dateFrom, DateTime dateTo)
         {
-            return _context.MaintenanceSchedules
+            return await _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
                 .Where(s => s.ScheduledDate >= dateFrom && s.ScheduledDate <= dateTo)
                 .OrderBy(s => s.ScheduledDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceSchedule> GetUpcomingSchedules(int daysAhead)
+        public async Task<List<MaintenanceSchedule>> GetUpcomingSchedulesAsync(int daysAhead)
         {
             DateTime now = DateTime.Now;
             DateTime futureDate = now.AddDays(daysAhead);
 
-            return _context.MaintenanceSchedules
+            return await _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
                 .Where(s => s.ScheduledDate >= now &&
                             s.ScheduledDate <= futureDate &&
                             s.Status == MaintenanceStatus.Pending)
                 .OrderBy(s => s.ScheduledDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceSchedule> GetByAttractionIdAndDateRange(Guid attractionId, DateTime dateFrom,
+        public async Task<List<MaintenanceSchedule>> GetByAttractionIdAndDateRangeAsync(Guid attractionId, DateTime dateFrom,
             DateTime dateTo)
         {
-            return _context.MaintenanceSchedules
+            return await _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
                 .Where(s => s.AttractionId == attractionId &&
                             s.ScheduledDate >= dateFrom &&
                             s.ScheduledDate <= dateTo)
                 .OrderBy(s => s.ScheduledDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public void Update(MaintenanceSchedule schedule)
+        public async Task UpdateAsync(MaintenanceSchedule schedule)
         {
             _context.MaintenanceSchedules.Update(schedule);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void Delete(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
-            MaintenanceSchedule schedule = _context.MaintenanceSchedules.Find(id);
+            MaintenanceSchedule? schedule = await _context.MaintenanceSchedules.FindAsync(id);
             if (schedule != null)
             {
                 _context.MaintenanceSchedules.Remove(schedule);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
     }

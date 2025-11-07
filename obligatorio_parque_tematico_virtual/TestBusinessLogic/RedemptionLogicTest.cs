@@ -30,7 +30,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void RedeemReward_ValidRedemption_Success()
+        public async Task RedeemReward_ValidRedemption_Success()
         {
             User visitor = new User
             {
@@ -54,38 +54,38 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
-            _mockRewardRepository.Setup(r => r.GetById(reward.Id)).Returns(reward);
-            _mockRedemptionHistoryRepository.Setup(r => r.Create(It.IsAny<RedemptionHistory>()));
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
+            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>())).Returns(Task.CompletedTask);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
-            _mockRewardRepository.Setup(r => r.Update(It.IsAny<Reward>()));
+            _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
 
-            RedemptionHistoryModelOut redemption = _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
+            RedemptionHistoryModelOut redemption = await _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
 
             Assert.IsNotNull(redemption);
             Assert.AreEqual(visitor.Id, redemption.VisitorId);
             Assert.AreEqual(reward.Id, redemption.RewardId);
             Assert.AreEqual(500, redemption.PointsSpent);
 
-            _mockRedemptionHistoryRepository.Verify(r => r.Create(It.IsAny<RedemptionHistory>()), Times.Once);
+            _mockRedemptionHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<RedemptionHistory>()), Times.Once);
             _mockUserRepository.Verify(r => r.Update(It.Is<User>(u => u.Score == 500)), Times.Once);
-            _mockRewardRepository.Verify(r => r.Update(It.Is<Reward>(rw => rw.AvailableQuantity == 9)), Times.Once);
+            _mockRewardRepository.Verify(r => r.UpdateAsync(It.Is<Reward>(rw => rw.AvailableQuantity == 9)), Times.Once);
         }
 
         [TestMethod]
         [ExpectedException(typeof(KeyNotFoundException))]
-        public void RedeemReward_VisitorNotFound_ThrowsException()
+        public async Task RedeemReward_VisitorNotFound_ThrowsException()
         {
             Guid visitorId = Guid.NewGuid();
             Guid rewardId = Guid.NewGuid();
 
             _mockUserRepository.Setup(r => r.GetById(visitorId)).ReturnsAsync((User?)null);
 
-            _redemptionLogic.RedeemReward(visitorId, rewardId);
+            await _redemptionLogic.RedeemReward(visitorId, rewardId);
         }
 
         [TestMethod]
         [ExpectedException(typeof(KeyNotFoundException))]
-        public void RedeemReward_RewardNotFound_ThrowsException()
+        public async Task RedeemReward_RewardNotFound_ThrowsException()
         {
             User visitor = new User
             {
@@ -100,14 +100,14 @@ namespace TestBusinessLogic
             Guid rewardId = Guid.NewGuid();
 
             _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
-            _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns((Reward?)null);
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(rewardId)).ReturnsAsync((Reward?)null);
 
-            _redemptionLogic.RedeemReward(visitor.Id, rewardId);
+            await _redemptionLogic.RedeemReward(visitor.Id, rewardId);
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void RedeemReward_InsufficientPoints_ThrowsException()
+        public async Task RedeemReward_InsufficientPoints_ThrowsException()
         {
             User visitor = new User
             {
@@ -131,14 +131,14 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
-            _mockRewardRepository.Setup(r => r.GetById(reward.Id)).Returns(reward);
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
 
-            _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
+            await _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void RedeemReward_RewardNotAvailable_ThrowsException()
+        public async Task RedeemReward_RewardNotAvailable_ThrowsException()
         {
             User visitor = new User
             {
@@ -162,14 +162,14 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
-            _mockRewardRepository.Setup(r => r.GetById(reward.Id)).Returns(reward);
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
 
-            _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
+            await _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void RedeemReward_InsufficientMembershipLevel_ThrowsException()
+        public async Task RedeemReward_InsufficientMembershipLevel_ThrowsException()
         {
             User visitor = new User
             {
@@ -193,13 +193,13 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
-            _mockRewardRepository.Setup(r => r.GetById(reward.Id)).Returns(reward);
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
 
-            RedemptionHistoryModelOut redemption = _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
+            RedemptionHistoryModelOut redemption = await _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
         }
 
         [TestMethod]
-        public void RedeemReward_NoMembershipRequired_Success()
+        public async Task RedeemReward_NoMembershipRequired_Success()
         {
             User visitor = new User
             {
@@ -223,18 +223,18 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
-            _mockRewardRepository.Setup(r => r.GetById(reward.Id)).Returns(reward);
-            _mockRedemptionHistoryRepository.Setup(r => r.Create(It.IsAny<RedemptionHistory>()));
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
+            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>())).Returns(Task.CompletedTask);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
-            _mockRewardRepository.Setup(r => r.Update(It.IsAny<Reward>()));
+            _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
 
-            RedemptionHistoryModelOut redemption = _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
+            RedemptionHistoryModelOut redemption = await _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
 
             Assert.IsNotNull(redemption);
         }
 
         [TestMethod]
-        public void RedeemReward_ExactPoints_Success()
+        public async Task RedeemReward_ExactPoints_Success()
         {
             User visitor = new User
             {
@@ -258,18 +258,18 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
-            _mockRewardRepository.Setup(r => r.GetById(reward.Id)).Returns(reward);
-            _mockRedemptionHistoryRepository.Setup(r => r.Create(It.IsAny<RedemptionHistory>()));
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
+            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>())).Returns(Task.CompletedTask);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
-            _mockRewardRepository.Setup(r => r.Update(It.IsAny<Reward>()));
+            _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
 
-            RedemptionHistoryModelOut redemption = _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
+            RedemptionHistoryModelOut redemption = await _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
 
             Assert.IsNotNull(redemption);
         }
 
         [TestMethod]
-        public void GetRedemptionHistory_ReturnsVisitorHistory()
+        public async Task GetRedemptionHistory_ReturnsVisitorHistory()
         {
             Guid visitorId = Guid.NewGuid();
             List<RedemptionHistory> history = new List<RedemptionHistory>
@@ -284,17 +284,17 @@ namespace TestBusinessLogic
                 }
             };
 
-            _mockRedemptionHistoryRepository.Setup(r => r.GetByVisitorId(visitorId)).Returns(history);
+            _mockRedemptionHistoryRepository.Setup(r => r.GetByVisitorIdAsync(visitorId)).ReturnsAsync(history);
 
-            List<RedemptionHistoryModelOut> result = _redemptionLogic.GetRedemptionHistory(visitorId);
+            List<RedemptionHistoryModelOut> result = await _redemptionLogic.GetRedemptionHistory(visitorId);
 
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(visitorId, result[0].VisitorId);
-            _mockRedemptionHistoryRepository.Verify(r => r.GetByVisitorId(visitorId), Times.Once);
+            _mockRedemptionHistoryRepository.Verify(r => r.GetByVisitorIdAsync(visitorId), Times.Once);
         }
 
         [TestMethod]
-        public void GetRedemptionHistoryWithDateRange_FiltersCorrectly()
+        public async Task GetRedemptionHistoryWithDateRange_FiltersCorrectly()
         {
             Guid visitorId = Guid.NewGuid();
             DateTime dateFrom = DateTime.Now.AddDays(-7);
@@ -311,18 +311,19 @@ namespace TestBusinessLogic
                 }
             };
 
-            _mockRedemptionHistoryRepository.Setup(r => r.GetByVisitorIdWithDateRange(visitorId, dateFrom, dateTo))
-                .Returns(history);
+            _mockRedemptionHistoryRepository.Setup(r => r.GetByVisitorIdWithDateRangeAsync(visitorId, dateFrom, dateTo))
+                .ReturnsAsync(history);
 
-            List<RedemptionHistoryModelOut> result = _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom, dateTo);
+            List<RedemptionHistoryModelOut> result = await _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom, dateTo);
 
             Assert.AreEqual(1, result.Count);
-            _mockRedemptionHistoryRepository.Verify(r => r.GetByVisitorIdWithDateRange(visitorId, dateFrom, dateTo),
+            _mockRedemptionHistoryRepository.Verify(r => r.GetByVisitorIdWithDateRangeAsync(visitorId, dateFrom, dateTo),
                 Times.Once);
         }
 
         [TestMethod]
-        public void RedeemReward_WhenVisitorMembershipLevelIsNull_ThrowsInvalidOperationException()
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task RedeemReward_WhenVisitorMembershipLevelIsNull_ThrowsInvalidOperationException()
         {
             Guid visitorId = Guid.NewGuid();
             Guid rewardId = Guid.NewGuid();
@@ -349,11 +350,9 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetById(visitorId)).ReturnsAsync(visitor);
-            _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns(reward);
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(rewardId)).ReturnsAsync(reward);
 
-            Assert.ThrowsException<InvalidOperationException>(
-                () => _redemptionLogic.RedeemReward(visitorId, rewardId),
-                "Should throw InvalidOperationException when visitor MembershipLevel is null and reward requires membership");
+            await _redemptionLogic.RedeemReward(visitorId, rewardId);
         }
     }
 }

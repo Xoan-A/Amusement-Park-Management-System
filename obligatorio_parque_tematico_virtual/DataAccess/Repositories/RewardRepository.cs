@@ -1,6 +1,7 @@
 using DataAccess.Context;
 using Domain;
 using IDataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories
 {
@@ -13,53 +14,56 @@ namespace DataAccess.Repositories
             _context = context;
         }
 
-        public void Create(Reward reward)
+        public async Task CreateAsync(Reward reward)
         {
             _context.Rewards.Add(reward);
+            await _context.SaveChangesAsync();
         }
 
-        public List<Reward> GetAll()
+        public async Task<List<Reward>> GetAllAsync()
         {
-            return _context.Rewards.ToList();
+            return await _context.Rewards.ToListAsync();
         }
 
-        public Reward? GetById(Guid id)
+        public async Task<Reward?> GetByIdAsync(Guid id)
         {
-            return _context.Rewards.Find(id);
+            return await _context.Rewards.FindAsync(id);
         }
 
-        public void Update(Reward reward)
+        public async Task UpdateAsync(Reward reward)
         {
             _context.Rewards.Update(reward);
+            await _context.SaveChangesAsync();
         }
 
-        public void Delete(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
-            Reward? reward = GetById(id);
+            Reward? reward = await GetByIdAsync(id);
             if (reward != null)
             {
                 _context.Rewards.Remove(reward);
+                await _context.SaveChangesAsync();
             }
         }
 
-        public List<Reward> GetAvailableRewards()
+        public async Task<List<Reward>> GetAvailableRewardsAsync()
         {
-            return _context.Rewards
+            return await _context.Rewards
                 .Where(r => r.AvailableQuantity > 0)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<Reward> GetRewardsByMembershipLevel(MembershipLevel? level)
+        public async Task<List<Reward>> GetRewardsByMembershipLevelAsync(MembershipLevel? level)
         {
-            return _context.Rewards
+            return await _context.Rewards
                 .Where(r => r.RequiredMembershipLevel == level)
-                .ToList();
+                .ToListAsync();
         }
 
-        public Reward? GetByName(string name)
+        public async Task<Reward?> GetByNameAsync(string name)
         {
-            return _context.Rewards
-                .FirstOrDefault(r => r.Name == name);
+            return await _context.Rewards
+                .FirstOrDefaultAsync(r => r.Name == name);
         }
     }
 }

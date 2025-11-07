@@ -4,11 +4,11 @@ namespace IDataAccess
 {
     public interface IScoreHistoryRepository
     {
-        void Create(ScoreHistory history);
-        ScoreHistory? GetById(Guid id);
-        List<ScoreHistory> GetByVisitor(Guid visitorId);
-        List<ScoreHistory> GetByVisitorAndDateRange(Guid visitorId, DateTime dateFrom, DateTime dateTo);
-        List<ScoreHistory> GetByOrigin(ScoreOrigin origin);
-        List<ScoreHistory> GetAll();
+        Task CreateAsync(ScoreHistory history);
+        Task<ScoreHistory?> GetByIdAsync(Guid id);
+        Task<List<ScoreHistory>> GetByVisitorAsync(Guid visitorId);
+        Task<List<ScoreHistory>> GetByVisitorAndDateRangeAsync(Guid visitorId, DateTime dateFrom, DateTime dateTo);
+        Task<List<ScoreHistory>> GetByOriginAsync(ScoreOrigin origin);
+        Task<List<ScoreHistory>> GetAllAsync();
     }
 }

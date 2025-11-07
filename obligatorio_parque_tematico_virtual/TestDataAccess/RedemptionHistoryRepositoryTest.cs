@@ -37,13 +37,13 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void Create_ValidRedemptionHistory_Success()
+        public async Task Create_ValidRedemptionHistory_Success()
         {
             User visitor = CreateTestVisitor();
             Reward reward = CreateTestReward();
             _context.Users.Add(visitor);
             _context.Rewards.Add(reward);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             RedemptionHistory redemption = new RedemptionHistory
             {
@@ -54,10 +54,9 @@ namespace TestDataAccess
                 PointsSpent = 500
             };
 
-            _repository.Create(redemption);
-            _context.SaveChanges();
+            await _repository.CreateAsync(redemption);
 
-            RedemptionHistory? retrieved = _context.RedemptionHistories.Find(redemption.Id);
+            RedemptionHistory? retrieved = await _context.RedemptionHistories.FindAsync(redemption.Id);
             Assert.IsNotNull(retrieved);
             Assert.AreEqual(visitor.Id, retrieved.VisitorId);
             Assert.AreEqual(reward.Id, retrieved.RewardId);
@@ -65,7 +64,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetByVisitorId_ExistingRedemptions_ReturnsAll()
+        public async Task GetByVisitorId_ExistingRedemptions_ReturnsAll()
         {
             User visitor1 = CreateTestVisitor();
             User visitor2 = CreateTestVisitor();
@@ -74,7 +73,7 @@ namespace TestDataAccess
 
             _context.Users.AddRange(visitor1, visitor2);
             _context.Rewards.AddRange(reward1, reward2);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             RedemptionHistory redemption1 = new RedemptionHistory
             {
@@ -104,35 +103,35 @@ namespace TestDataAccess
             };
 
             _context.RedemptionHistories.AddRange(redemption1, redemption2, redemption3);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<RedemptionHistory> visitor1Redemptions = _repository.GetByVisitorId(visitor1.Id);
+            List<RedemptionHistory> visitor1Redemptions = await _repository.GetByVisitorIdAsync(visitor1.Id);
 
             Assert.AreEqual(2, visitor1Redemptions.Count);
             Assert.IsTrue(visitor1Redemptions.All(r => r.VisitorId == visitor1.Id));
         }
 
         [TestMethod]
-        public void GetByVisitorId_NoRedemptions_ReturnsEmptyList()
+        public async Task GetByVisitorId_NoRedemptions_ReturnsEmptyList()
         {
             User visitor = CreateTestVisitor();
             _context.Users.Add(visitor);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<RedemptionHistory> redemptions = _repository.GetByVisitorId(visitor.Id);
+            List<RedemptionHistory> redemptions = await _repository.GetByVisitorIdAsync(visitor.Id);
 
             Assert.AreEqual(0, redemptions.Count);
         }
 
         [TestMethod]
-        public void GetByVisitorId_IncludesNavigationProperties_Success()
+        public async Task GetByVisitorId_IncludesNavigationProperties_Success()
         {
             User visitor = CreateTestVisitor();
             Reward reward = CreateTestReward();
 
             _context.Users.Add(visitor);
             _context.Rewards.Add(reward);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             RedemptionHistory redemption = new RedemptionHistory
             {
@@ -144,9 +143,9 @@ namespace TestDataAccess
             };
 
             _context.RedemptionHistories.Add(redemption);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<RedemptionHistory> redemptions = _repository.GetByVisitorId(visitor.Id);
+            List<RedemptionHistory> redemptions = await _repository.GetByVisitorIdAsync(visitor.Id);
 
             Assert.AreEqual(1, redemptions.Count);
             Assert.IsNotNull(redemptions[0].Visitor);
@@ -156,14 +155,14 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetByVisitorIdWithDateRange_FiltersCorrectly()
+        public async Task GetByVisitorIdWithDateRange_FiltersCorrectly()
         {
             User visitor = CreateTestVisitor();
             Reward reward = CreateTestReward();
 
             _context.Users.Add(visitor);
             _context.Rewards.Add(reward);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             RedemptionHistory oldRedemption = new RedemptionHistory
             {
@@ -193,12 +192,12 @@ namespace TestDataAccess
             };
 
             _context.RedemptionHistories.AddRange(oldRedemption, recentRedemption, veryRecentRedemption);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             DateTime dateFrom = DateTime.Now.AddDays(-5);
             DateTime dateTo = DateTime.Now.AddDays(1);
             List<RedemptionHistory> filteredRedemptions =
-                _repository.GetByVisitorIdWithDateRange(visitor.Id, dateFrom, dateTo);
+                await _repository.GetByVisitorIdWithDateRangeAsync(visitor.Id, dateFrom, dateTo);
 
             Assert.AreEqual(2, filteredRedemptions.Count);
             Assert.IsFalse(filteredRedemptions.Any(r => r.RedeemedAt < dateFrom));
@@ -206,14 +205,14 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetByVisitorIdWithDateRange_OrderedByDateDescending()
+        public async Task GetByVisitorIdWithDateRange_OrderedByDateDescending()
         {
             User visitor = CreateTestVisitor();
             Reward reward = CreateTestReward();
 
             _context.Users.Add(visitor);
             _context.Rewards.Add(reward);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             RedemptionHistory redemption1 = new RedemptionHistory
             {
@@ -243,9 +242,9 @@ namespace TestDataAccess
             };
 
             _context.RedemptionHistories.AddRange(redemption1, redemption2, redemption3);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<RedemptionHistory> redemptions = _repository.GetByVisitorIdWithDateRange(
+            List<RedemptionHistory> redemptions = await _repository.GetByVisitorIdWithDateRangeAsync(
                 visitor.Id,
                 DateTime.Now.AddDays(-10),
                 DateTime.Now
@@ -257,7 +256,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetAll_ReturnsAllRedemptions()
+        public async Task GetAll_ReturnsAllRedemptions()
         {
             User visitor1 = CreateTestVisitor();
             User visitor2 = CreateTestVisitor();
@@ -265,7 +264,7 @@ namespace TestDataAccess
 
             _context.Users.AddRange(visitor1, visitor2);
             _context.Rewards.Add(reward);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             RedemptionHistory redemption1 = new RedemptionHistory
             {
@@ -286,9 +285,9 @@ namespace TestDataAccess
             };
 
             _context.RedemptionHistories.AddRange(redemption1, redemption2);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<RedemptionHistory> allRedemptions = _repository.GetAll();
+            List<RedemptionHistory> allRedemptions = await _repository.GetAllAsync();
 
             Assert.AreEqual(2, allRedemptions.Count);
         }

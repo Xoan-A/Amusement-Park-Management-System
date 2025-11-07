@@ -15,14 +15,14 @@ namespace BusinessLogic
             _rewardRepository = rewardRepository;
         }
 
-        public RewardModelOut CreateReward(RewardModelIn rewardIn)
+        public async Task<RewardModelOut> CreateReward(RewardModelIn rewardIn)
         {
             if (rewardIn == null)
             {
                 throw new ArgumentNullException(nameof(rewardIn));
             }
 
-            Reward? existingReward = _rewardRepository.GetByName(rewardIn.Name);
+            Reward? existingReward = await _rewardRepository.GetByNameAsync(rewardIn.Name);
             if (existingReward != null)
             {
                 throw new ArgumentException($"A reward with the name '{rewardIn.Name}' already exists");
@@ -38,20 +38,20 @@ namespace BusinessLogic
                 RequiredMembershipLevel = rewardIn.RequiredMembershipLevel
             };
 
-            _rewardRepository.Create(reward);
+            await _rewardRepository.CreateAsync(reward);
 
             return MapToModelOut(reward);
         }
 
-        public List<RewardModelOut> GetAllRewards()
+        public async Task<List<RewardModelOut>> GetAllRewards()
         {
-            List<Reward> rewards = _rewardRepository.GetAll();
+            List<Reward> rewards = await _rewardRepository.GetAllAsync();
             return rewards.Select(MapToModelOut).ToList();
         }
 
-        public RewardModelOut GetRewardById(Guid id)
+        public async Task<RewardModelOut> GetRewardById(Guid id)
         {
-            Reward? reward = _rewardRepository.GetById(id);
+            Reward? reward = await _rewardRepository.GetByIdAsync(id);
             if (reward == null)
             {
                 throw new KeyNotFoundException($"Reward with ID '{id}' not found");
@@ -60,15 +60,15 @@ namespace BusinessLogic
             return MapToModelOut(reward);
         }
 
-        public RewardModelOut UpdateReward(Guid id, RewardModelIn rewardIn)
+        public async Task<RewardModelOut> UpdateReward(Guid id, RewardModelIn rewardIn)
         {
-            Reward existingReward = _rewardRepository.GetById(id);
+            Reward? existingReward = await _rewardRepository.GetByIdAsync(id);
             if (existingReward == null)
             {
                 throw new KeyNotFoundException($"Reward with ID '{id}' not found");
             }
 
-            Reward rewardWithSameName = _rewardRepository.GetByName(rewardIn.Name);
+            Reward? rewardWithSameName = await _rewardRepository.GetByNameAsync(rewardIn.Name);
             if (rewardWithSameName != null && rewardWithSameName.Id != id)
             {
                 throw new ArgumentException($"A reward with the name '{rewardIn.Name}' already exists");
@@ -80,31 +80,31 @@ namespace BusinessLogic
             existingReward.AvailableQuantity = rewardIn.AvailableQuantity;
             existingReward.RequiredMembershipLevel = rewardIn.RequiredMembershipLevel;
 
-            _rewardRepository.Update(existingReward);
+            await _rewardRepository.UpdateAsync(existingReward);
 
             return MapToModelOut(existingReward);
         }
 
-        public void DeleteReward(Guid id)
+        public async Task DeleteReward(Guid id)
         {
-            Reward? reward = _rewardRepository.GetById(id);
+            Reward? reward = await _rewardRepository.GetByIdAsync(id);
             if (reward == null)
             {
                 throw new KeyNotFoundException($"Reward with ID '{id}' not found");
             }
 
-            _rewardRepository.Delete(id);
+            await _rewardRepository.DeleteAsync(id);
         }
 
-        public List<RewardModelOut> GetAvailableRewards()
+        public async Task<List<RewardModelOut>> GetAvailableRewards()
         {
-            List<Reward> rewards = _rewardRepository.GetAvailableRewards();
+            List<Reward> rewards = await _rewardRepository.GetAvailableRewardsAsync();
             return rewards.Select(MapToModelOut).ToList();
         }
 
-        public List<RewardModelOut> GetRewardsByMembershipLevel(MembershipLevel? level)
+        public async Task<List<RewardModelOut>> GetRewardsByMembershipLevel(MembershipLevel? level)
         {
-            List<Reward> rewards = _rewardRepository.GetRewardsByMembershipLevel(level);
+            List<Reward> rewards = await _rewardRepository.GetRewardsByMembershipLevelAsync(level);
             return rewards.Select(MapToModelOut).ToList();
         }
 

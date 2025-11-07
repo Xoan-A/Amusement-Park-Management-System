@@ -14,54 +14,54 @@ namespace DataAccess.Repositories
             _context = context;
         }
 
-        public void Create(ScoreHistory history)
+        public async Task CreateAsync(ScoreHistory history)
         {
             _context.ScoreHistories.Add(history);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public ScoreHistory? GetById(Guid id)
+        public async Task<ScoreHistory?> GetByIdAsync(Guid id)
         {
-            return _context.ScoreHistories
+            return await _context.ScoreHistories
                 .Include(h => h.Visitor)
-                .FirstOrDefault(h => h.Id == id);
+                .FirstOrDefaultAsync(h => h.Id == id);
         }
 
-        public List<ScoreHistory> GetByVisitor(Guid visitorId)
+        public async Task<List<ScoreHistory>> GetByVisitorAsync(Guid visitorId)
         {
-            return _context.ScoreHistories
+            return await _context.ScoreHistories
                 .Include(h => h.Visitor)
                 .Where(h => h.VisitorId == visitorId)
                 .OrderByDescending(h => h.CreatedAt)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<ScoreHistory> GetByVisitorAndDateRange(Guid visitorId, DateTime dateFrom, DateTime dateTo)
+        public async Task<List<ScoreHistory>> GetByVisitorAndDateRangeAsync(Guid visitorId, DateTime dateFrom, DateTime dateTo)
         {
-            return _context.ScoreHistories
+            return await _context.ScoreHistories
                 .Include(h => h.Visitor)
                 .Where(h => h.VisitorId == visitorId &&
                            h.CreatedAt >= dateFrom &&
                            h.CreatedAt <= dateTo)
                 .OrderByDescending(h => h.CreatedAt)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<ScoreHistory> GetByOrigin(ScoreOrigin origin)
+        public async Task<List<ScoreHistory>> GetByOriginAsync(ScoreOrigin origin)
         {
-            return _context.ScoreHistories
+            return await _context.ScoreHistories
                 .Include(h => h.Visitor)
                 .Where(h => h.Origin == origin)
                 .OrderByDescending(h => h.CreatedAt)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<ScoreHistory> GetAll()
+        public async Task<List<ScoreHistory>> GetAllAsync()
         {
-            return _context.ScoreHistories
+            return await _context.ScoreHistories
                 .Include(h => h.Visitor)
                 .OrderByDescending(h => h.CreatedAt)
-                .ToList();
+                .ToListAsync();
         }
     }
 }

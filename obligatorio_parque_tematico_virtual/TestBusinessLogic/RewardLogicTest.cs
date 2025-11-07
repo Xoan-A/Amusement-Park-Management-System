@@ -21,7 +21,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void CreateReward_ValidReward_Success()
+        public async Task CreateReward_ValidReward_Success()
         {
             RewardModelIn rewardModelIn = new RewardModelIn
             {
@@ -32,19 +32,19 @@ namespace TestBusinessLogic
                 RequiredMembershipLevel = MembershipLevel.Premium
             };
 
-            _mockRewardRepository.Setup(r => r.GetByName(rewardModelIn.Name)).Returns((Reward?)null);
-            _mockRewardRepository.Setup(r => r.Create(It.IsAny<Reward>()));
+            _mockRewardRepository.Setup(r => r.GetByNameAsync(rewardModelIn.Name)).ReturnsAsync((Reward?)null);
+            _mockRewardRepository.Setup(r => r.CreateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
 
-            RewardModelOut createdReward = _rewardLogic.CreateReward(rewardModelIn);
+            RewardModelOut createdReward = await _rewardLogic.CreateReward(rewardModelIn);
 
             Assert.IsNotNull(createdReward);
             Assert.AreNotEqual(Guid.Empty, createdReward.Id);
-            _mockRewardRepository.Verify(r => r.Create(It.IsAny<Reward>()), Times.Once);
+            _mockRewardRepository.Verify(r => r.CreateAsync(It.IsAny<Reward>()), Times.Once);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void CreateReward_DuplicateName_ThrowsException()
+        public async Task CreateReward_DuplicateName_ThrowsException()
         {
             Reward existingReward = new Reward
             {
@@ -63,20 +63,20 @@ namespace TestBusinessLogic
                 AvailableQuantity = 10
             };
 
-            _mockRewardRepository.Setup(r => r.GetByName(newRewardModelIn.Name)).Returns(existingReward);
+            _mockRewardRepository.Setup(r => r.GetByNameAsync(newRewardModelIn.Name)).ReturnsAsync(existingReward);
 
-            _rewardLogic.CreateReward(newRewardModelIn);
+            await _rewardLogic.CreateReward(newRewardModelIn);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void CreateReward_NullReward_ThrowsException()
+        public async Task CreateReward_NullReward_ThrowsException()
         {
-            _rewardLogic.CreateReward(null);
+            await _rewardLogic.CreateReward(null);
         }
 
         [TestMethod]
-        public void GetAllRewards_ReturnsAllRewards()
+        public async Task GetAllRewards_ReturnsAllRewards()
         {
             List<Reward> rewards = new List<Reward>
             {
@@ -98,16 +98,16 @@ namespace TestBusinessLogic
                 }
             };
 
-            _mockRewardRepository.Setup(r => r.GetAll()).Returns(rewards);
+            _mockRewardRepository.Setup(r => r.GetAllAsync()).ReturnsAsync(rewards);
 
-            List<RewardModelOut> result = _rewardLogic.GetAllRewards();
+            List<RewardModelOut> result = await _rewardLogic.GetAllRewards();
 
             Assert.AreEqual(2, result.Count);
-            _mockRewardRepository.Verify(r => r.GetAll(), Times.Once);
+            _mockRewardRepository.Verify(r => r.GetAllAsync(), Times.Once);
         }
 
         [TestMethod]
-        public void GetRewardById_ExistingReward_ReturnsReward()
+        public async Task GetRewardById_ExistingReward_ReturnsReward()
         {
             Guid rewardId = Guid.NewGuid();
             Reward reward = new Reward
@@ -119,28 +119,28 @@ namespace TestBusinessLogic
                 AvailableQuantity = 7
             };
 
-            _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns(reward);
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(rewardId)).ReturnsAsync(reward);
 
-            RewardModelOut result = _rewardLogic.GetRewardById(rewardId);
+            RewardModelOut result = await _rewardLogic.GetRewardById(rewardId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(rewardId, result.Id);
             Assert.AreEqual("Test Reward", result.Name);
-            _mockRewardRepository.Verify(r => r.GetById(rewardId), Times.Once);
+            _mockRewardRepository.Verify(r => r.GetByIdAsync(rewardId), Times.Once);
         }
 
         [TestMethod]
         [ExpectedException(typeof(KeyNotFoundException))]
-        public void GetRewardById_NonExistingReward_ThrowsException()
+        public async Task GetRewardById_NonExistingReward_ThrowsException()
         {
             Guid rewardId = Guid.NewGuid();
-            _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns((Reward?)null);
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(rewardId)).ReturnsAsync((Reward?)null);
 
-            _rewardLogic.GetRewardById(rewardId);
+            await _rewardLogic.GetRewardById(rewardId);
         }
 
         [TestMethod]
-        public void UpdateReward_ValidReward_Success()
+        public async Task UpdateReward_ValidReward_Success()
         {
             Guid rewardId = Guid.NewGuid();
             Reward existingReward = new Reward
@@ -160,21 +160,21 @@ namespace TestBusinessLogic
                 AvailableQuantity = 8
             };
 
-            _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns(existingReward);
-            _mockRewardRepository.Setup(r => r.GetByName("Updated Name")).Returns((Reward?)null);
-            _mockRewardRepository.Setup(r => r.Update(It.IsAny<Reward>()));
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(rewardId)).ReturnsAsync(existingReward);
+            _mockRewardRepository.Setup(r => r.GetByNameAsync("Updated Name")).ReturnsAsync((Reward?)null);
+            _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
 
-            RewardModelOut result = _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
+            RewardModelOut result = await _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Updated Name", result.Name);
             Assert.AreEqual(150, result.PointsCost);
-            _mockRewardRepository.Verify(r => r.Update(It.IsAny<Reward>()), Times.Once);
+            _mockRewardRepository.Verify(r => r.UpdateAsync(It.IsAny<Reward>()), Times.Once);
         }
 
         [TestMethod]
         [ExpectedException(typeof(KeyNotFoundException))]
-        public void UpdateReward_NonExistingReward_ThrowsException()
+        public async Task UpdateReward_NonExistingReward_ThrowsException()
         {
             Guid rewardId = Guid.NewGuid();
             RewardModelIn updatedRewardModelIn = new RewardModelIn
@@ -185,14 +185,14 @@ namespace TestBusinessLogic
                 AvailableQuantity = 8
             };
 
-            _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns((Reward?)null);
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(rewardId)).ReturnsAsync((Reward?)null);
 
-            _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
+            await _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void UpdateReward_DuplicateName_ThrowsException()
+        public async Task UpdateReward_DuplicateName_ThrowsException()
         {
             Guid rewardId = Guid.NewGuid();
             Reward existingReward = new Reward
@@ -221,14 +221,14 @@ namespace TestBusinessLogic
                 AvailableQuantity = 8
             };
 
-            _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns(existingReward);
-            _mockRewardRepository.Setup(r => r.GetByName("Another Reward")).Returns(anotherReward);
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(rewardId)).ReturnsAsync(existingReward);
+            _mockRewardRepository.Setup(r => r.GetByNameAsync("Another Reward")).ReturnsAsync(anotherReward);
 
-            _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
+            await _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
         }
 
         [TestMethod]
-        public void UpdateReward_SameName_Success()
+        public async Task UpdateReward_SameName_Success()
         {
             Guid rewardId = Guid.NewGuid();
             Reward existingReward = new Reward
@@ -248,19 +248,19 @@ namespace TestBusinessLogic
                 AvailableQuantity = 8
             };
 
-            _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns(existingReward);
-            _mockRewardRepository.Setup(r => r.GetByName("Same Name")).Returns(existingReward);
-            _mockRewardRepository.Setup(r => r.Update(It.IsAny<Reward>()));
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(rewardId)).ReturnsAsync(existingReward);
+            _mockRewardRepository.Setup(r => r.GetByNameAsync("Same Name")).ReturnsAsync(existingReward);
+            _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
 
-            RewardModelOut result = _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
+            RewardModelOut result = await _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Same Name", result.Name);
-            _mockRewardRepository.Verify(r => r.Update(It.IsAny<Reward>()), Times.Once);
+            _mockRewardRepository.Verify(r => r.UpdateAsync(It.IsAny<Reward>()), Times.Once);
         }
 
         [TestMethod]
-        public void DeleteReward_ExistingReward_Success()
+        public async Task DeleteReward_ExistingReward_Success()
         {
             Guid rewardId = Guid.NewGuid();
             Reward reward = new Reward
@@ -272,26 +272,26 @@ namespace TestBusinessLogic
                 AvailableQuantity = 5
             };
 
-            _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns(reward);
-            _mockRewardRepository.Setup(r => r.Delete(rewardId));
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(rewardId)).ReturnsAsync(reward);
+            _mockRewardRepository.Setup(r => r.DeleteAsync(rewardId)).Returns(Task.CompletedTask);
 
-            _rewardLogic.DeleteReward(rewardId);
+            await _rewardLogic.DeleteReward(rewardId);
 
-            _mockRewardRepository.Verify(r => r.Delete(rewardId), Times.Once);
+            _mockRewardRepository.Verify(r => r.DeleteAsync(rewardId), Times.Once);
         }
 
         [TestMethod]
         [ExpectedException(typeof(KeyNotFoundException))]
-        public void DeleteReward_NonExistingReward_ThrowsException()
+        public async Task DeleteReward_NonExistingReward_ThrowsException()
         {
             Guid rewardId = Guid.NewGuid();
-            _mockRewardRepository.Setup(r => r.GetById(rewardId)).Returns((Reward?)null);
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(rewardId)).ReturnsAsync((Reward?)null);
 
-            _rewardLogic.DeleteReward(rewardId);
+            await _rewardLogic.DeleteReward(rewardId);
         }
 
         [TestMethod]
-        public void GetAvailableRewards_ReturnsOnlyAvailable()
+        public async Task GetAvailableRewards_ReturnsOnlyAvailable()
         {
             List<Reward> availableRewards = new List<Reward>
             {
@@ -313,17 +313,17 @@ namespace TestBusinessLogic
                 }
             };
 
-            _mockRewardRepository.Setup(r => r.GetAvailableRewards()).Returns(availableRewards);
+            _mockRewardRepository.Setup(r => r.GetAvailableRewardsAsync()).ReturnsAsync(availableRewards);
 
-            List<RewardModelOut> result = _rewardLogic.GetAvailableRewards();
+            List<RewardModelOut> result = await _rewardLogic.GetAvailableRewards();
 
             Assert.AreEqual(2, result.Count);
             Assert.IsTrue(result.All(r => r.AvailableQuantity > 0));
-            _mockRewardRepository.Verify(r => r.GetAvailableRewards(), Times.Once);
+            _mockRewardRepository.Verify(r => r.GetAvailableRewardsAsync(), Times.Once);
         }
 
         [TestMethod]
-        public void GetRewardsByMembershipLevel_FiltersCorrectly()
+        public async Task GetRewardsByMembershipLevel_FiltersCorrectly()
         {
             List<Reward> premiumRewards = new List<Reward>
             {
@@ -338,14 +338,14 @@ namespace TestBusinessLogic
                 }
             };
 
-            _mockRewardRepository.Setup(r => r.GetRewardsByMembershipLevel(MembershipLevel.Premium))
-                .Returns(premiumRewards);
+            _mockRewardRepository.Setup(r => r.GetRewardsByMembershipLevelAsync(MembershipLevel.Premium))
+                .ReturnsAsync(premiumRewards);
 
-            List<RewardModelOut> result = _rewardLogic.GetRewardsByMembershipLevel(MembershipLevel.Premium);
+            List<RewardModelOut> result = await _rewardLogic.GetRewardsByMembershipLevel(MembershipLevel.Premium);
 
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(MembershipLevel.Premium, result[0].RequiredMembershipLevel);
-            _mockRewardRepository.Verify(r => r.GetRewardsByMembershipLevel(MembershipLevel.Premium), Times.Once);
+            _mockRewardRepository.Verify(r => r.GetRewardsByMembershipLevelAsync(MembershipLevel.Premium), Times.Once);
         }
     }
 }

@@ -38,13 +38,13 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void Create_ValidRecord_Success()
+        public async Task Create_ValidRecord_Success()
         {
             Attraction attraction = CreateTestAttraction();
             User operatorUser = CreateTestOperator();
             _context.Attractions.Add(attraction);
             _context.Users.Add(operatorUser);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             MaintenanceRecord record = new MaintenanceRecord
             {
@@ -58,16 +58,16 @@ namespace TestDataAccess
                 Notes = "All systems operational"
             };
 
-            _repository.Create(record);
+            await _repository.CreateAsync(record);
 
-            MaintenanceRecord? result = _context.MaintenanceRecords.Find(record.Id);
+            MaintenanceRecord? result = await _context.MaintenanceRecords.FindAsync(record.Id);
             Assert.IsNotNull(result);
             Assert.AreEqual(record.Description, result.Description);
             Assert.AreEqual(record.Duration, result.Duration);
         }
 
         [TestMethod]
-        public void Create_RecordLinkedToSchedule_Success()
+        public async Task Create_RecordLinkedToSchedule_Success()
         {
             Attraction attraction = CreateTestAttraction();
             User operatorUser = CreateTestOperator();
@@ -76,7 +76,7 @@ namespace TestDataAccess
 
             MaintenanceSchedule schedule = CreateTestSchedule(attraction.Id);
             _context.MaintenanceSchedules.Add(schedule);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             MaintenanceRecord record = new MaintenanceRecord
             {
@@ -90,15 +90,15 @@ namespace TestDataAccess
                 Duration = TimeSpan.FromHours(1.5)
             };
 
-            _repository.Create(record);
+            await _repository.CreateAsync(record);
 
-            MaintenanceRecord? result = _context.MaintenanceRecords.Find(record.Id);
+            MaintenanceRecord? result = await _context.MaintenanceRecords.FindAsync(record.Id);
             Assert.IsNotNull(result);
             Assert.AreEqual(schedule.Id, result.MaintenanceScheduleId);
         }
 
         [TestMethod]
-        public void GetById_ExistingRecord_ReturnsRecord()
+        public async Task GetById_ExistingRecord_ReturnsRecord()
         {
             Attraction attraction = CreateTestAttraction();
             User operatorUser = CreateTestOperator();
@@ -107,9 +107,9 @@ namespace TestDataAccess
 
             MaintenanceRecord record = CreateTestRecord(attraction.Id, operatorUser.Id);
             _context.MaintenanceRecords.Add(record);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            MaintenanceRecord? result = _repository.GetById(record.Id);
+            MaintenanceRecord? result = await _repository.GetByIdAsync(record.Id);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(record.Id, result.Id);
@@ -117,15 +117,15 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetById_NonExistingRecord_ReturnsNull()
+        public async Task GetById_NonExistingRecord_ReturnsNull()
         {
-            MaintenanceRecord? result = _repository.GetById(Guid.NewGuid());
+            MaintenanceRecord? result = await _repository.GetByIdAsync(Guid.NewGuid());
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void GetAll_MultipleRecords_ReturnsAllRecords()
+        public async Task GetAll_MultipleRecords_ReturnsAllRecords()
         {
             Attraction attraction = CreateTestAttraction();
             User operatorUser = CreateTestOperator();
@@ -137,15 +137,15 @@ namespace TestDataAccess
             record2.Description = "Different maintenance task";
 
             _context.MaintenanceRecords.AddRange(record1, record2);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<MaintenanceRecord> results = _repository.GetAll();
+            List<MaintenanceRecord> results = await _repository.GetAllAsync();
 
             Assert.AreEqual(2, results.Count);
         }
 
         [TestMethod]
-        public void GetByAttractionId_ExistingRecords_ReturnsRecordsForAttraction()
+        public async Task GetByAttractionId_ExistingRecords_ReturnsRecordsForAttraction()
         {
             Attraction attraction1 = CreateTestAttraction();
             Attraction attraction2 = CreateTestAttraction();
@@ -158,16 +158,16 @@ namespace TestDataAccess
             MaintenanceRecord record3 = CreateTestRecord(attraction2.Id, operatorUser.Id);
 
             _context.MaintenanceRecords.AddRange(record1, record2, record3);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<MaintenanceRecord> results = _repository.GetByAttractionId(attraction1.Id);
+            List<MaintenanceRecord> results = await _repository.GetByAttractionIdAsync(attraction1.Id);
 
             Assert.AreEqual(2, results.Count);
             Assert.IsTrue(results.All(r => r.AttractionId == attraction1.Id));
         }
 
         [TestMethod]
-        public void GetByScheduleId_ExistingRecords_ReturnsRecordsForSchedule()
+        public async Task GetByScheduleId_ExistingRecords_ReturnsRecordsForSchedule()
         {
             Attraction attraction = CreateTestAttraction();
             User operatorUser = CreateTestOperator();
@@ -176,7 +176,7 @@ namespace TestDataAccess
 
             MaintenanceSchedule schedule = CreateTestSchedule(attraction.Id);
             _context.MaintenanceSchedules.Add(schedule);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             MaintenanceRecord record1 = CreateTestRecord(attraction.Id, operatorUser.Id);
             record1.MaintenanceScheduleId = schedule.Id;
@@ -187,16 +187,16 @@ namespace TestDataAccess
             MaintenanceRecord record3 = CreateTestRecord(attraction.Id, operatorUser.Id);
 
             _context.MaintenanceRecords.AddRange(record1, record2, record3);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<MaintenanceRecord> results = _repository.GetByScheduleId(schedule.Id);
+            List<MaintenanceRecord> results = await _repository.GetByScheduleIdAsync(schedule.Id);
 
             Assert.AreEqual(2, results.Count);
             Assert.IsTrue(results.All(r => r.MaintenanceScheduleId == schedule.Id));
         }
 
         [TestMethod]
-        public void GetUnscheduledMaintenance_ReturnsRecordsWithNoSchedule()
+        public async Task GetUnscheduledMaintenance_ReturnsRecordsWithNoSchedule()
         {
             Attraction attraction = CreateTestAttraction();
             User operatorUser = CreateTestOperator();
@@ -205,7 +205,7 @@ namespace TestDataAccess
 
             MaintenanceSchedule schedule = CreateTestSchedule(attraction.Id);
             _context.MaintenanceSchedules.Add(schedule);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             MaintenanceRecord scheduledRecord = CreateTestRecord(attraction.Id, operatorUser.Id);
             scheduledRecord.MaintenanceScheduleId = schedule.Id;
@@ -214,16 +214,16 @@ namespace TestDataAccess
             MaintenanceRecord unscheduledRecord2 = CreateTestRecord(attraction.Id, operatorUser.Id);
 
             _context.MaintenanceRecords.AddRange(scheduledRecord, unscheduledRecord1, unscheduledRecord2);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<MaintenanceRecord> results = _repository.GetUnscheduledMaintenance();
+            List<MaintenanceRecord> results = await _repository.GetUnscheduledMaintenanceAsync();
 
             Assert.AreEqual(2, results.Count);
             Assert.IsTrue(results.All(r => r.MaintenanceScheduleId == null));
         }
 
         [TestMethod]
-        public void GetByOperator_FiltersByOperator_ReturnsMatchingRecords()
+        public async Task GetByOperator_FiltersByOperator_ReturnsMatchingRecords()
         {
             Attraction attraction = CreateTestAttraction();
             User operator1 = CreateTestOperator();
@@ -232,23 +232,23 @@ namespace TestDataAccess
 
             _context.Attractions.Add(attraction);
             _context.Users.AddRange(operator1, operator2);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             MaintenanceRecord record1 = CreateTestRecord(attraction.Id, operator1.Id);
             MaintenanceRecord record2 = CreateTestRecord(attraction.Id, operator1.Id);
             MaintenanceRecord record3 = CreateTestRecord(attraction.Id, operator2.Id);
 
             _context.MaintenanceRecords.AddRange(record1, record2, record3);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<MaintenanceRecord> results = _repository.GetByOperator(operator1.Id);
+            List<MaintenanceRecord> results = await _repository.GetByOperatorAsync(operator1.Id);
 
             Assert.AreEqual(2, results.Count);
             Assert.IsTrue(results.All(r => r.PerformedBy == operator1.Id));
         }
 
         [TestMethod]
-        public void GetByDateRange_FiltersCorrectly_ReturnsRecordsInRange()
+        public async Task GetByDateRange_FiltersCorrectly_ReturnsRecordsInRange()
         {
             Attraction attraction = CreateTestAttraction();
             User operatorUser = CreateTestOperator();
@@ -268,9 +268,9 @@ namespace TestDataAccess
             recordAfterRange.PerformedDate = DateTime.Now.AddDays(1);
 
             _context.MaintenanceRecords.AddRange(recordInRange, recordBeforeRange, recordAfterRange);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<MaintenanceRecord> results = _repository.GetByDateRange(dateFrom, dateTo);
+            List<MaintenanceRecord> results = await _repository.GetByDateRangeAsync(dateFrom, dateTo);
 
             Assert.AreEqual(1, results.Count);
             Assert.IsTrue(results[0].PerformedDate >= dateFrom);
@@ -278,7 +278,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetByMaintenanceType_FiltersByType_ReturnsMatchingRecords()
+        public async Task GetByMaintenanceType_FiltersByType_ReturnsMatchingRecords()
         {
             Attraction attraction = CreateTestAttraction();
             User operatorUser = CreateTestOperator();
@@ -292,16 +292,16 @@ namespace TestDataAccess
             repairRecord.MaintenanceType = MaintenanceType.Repair;
 
             _context.MaintenanceRecords.AddRange(inspectionRecord, repairRecord);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<MaintenanceRecord> results = _repository.GetByMaintenanceType(MaintenanceType.Inspection);
+            List<MaintenanceRecord> results = await _repository.GetByMaintenanceTypeAsync(MaintenanceType.Inspection);
 
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(MaintenanceType.Inspection, results[0].MaintenanceType);
         }
 
         [TestMethod]
-        public void Update_ExistingRecord_UpdatesSuccessfully()
+        public async Task Update_ExistingRecord_UpdatesSuccessfully()
         {
             Attraction attraction = CreateTestAttraction();
             User operatorUser = CreateTestOperator();
@@ -310,20 +310,20 @@ namespace TestDataAccess
 
             MaintenanceRecord record = CreateTestRecord(attraction.Id, operatorUser.Id);
             _context.MaintenanceRecords.Add(record);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             record.Notes = "Updated notes after review";
             record.Duration = TimeSpan.FromHours(3);
-            _repository.Update(record);
+            await _repository.UpdateAsync(record);
 
-            MaintenanceRecord? result = _context.MaintenanceRecords.Find(record.Id);
+            MaintenanceRecord? result = await _context.MaintenanceRecords.FindAsync(record.Id);
             Assert.IsNotNull(result);
             Assert.AreEqual("Updated notes after review", result.Notes);
             Assert.AreEqual(TimeSpan.FromHours(3), result.Duration);
         }
 
         [TestMethod]
-        public void Delete_ExistingRecord_RemovesRecord()
+        public async Task Delete_ExistingRecord_RemovesRecord()
         {
             Attraction attraction = CreateTestAttraction();
             User operatorUser = CreateTestOperator();
@@ -332,16 +332,16 @@ namespace TestDataAccess
 
             MaintenanceRecord record = CreateTestRecord(attraction.Id, operatorUser.Id);
             _context.MaintenanceRecords.Add(record);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            _repository.Delete(record.Id);
+            await _repository.DeleteAsync(record.Id);
 
-            MaintenanceRecord? result = _context.MaintenanceRecords.Find(record.Id);
+            MaintenanceRecord? result = await _context.MaintenanceRecords.FindAsync(record.Id);
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void GetByAttractionIdAndDateRange_CombinesFilters_Success()
+        public async Task GetByAttractionIdAndDateRange_CombinesFilters_Success()
         {
             Attraction attraction1 = CreateTestAttraction();
             Attraction attraction2 = CreateTestAttraction();
@@ -362,10 +362,10 @@ namespace TestDataAccess
             wrongDate.PerformedDate = DateTime.Now.AddDays(-20);
 
             _context.MaintenanceRecords.AddRange(targetRecord, wrongAttraction, wrongDate);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             List<MaintenanceRecord> results =
-                _repository.GetByAttractionIdAndDateRange(attraction1.Id, dateFrom, dateTo);
+                await _repository.GetByAttractionIdAndDateRangeAsync(attraction1.Id, dateFrom, dateTo);
 
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(targetRecord.Id, results[0].Id);

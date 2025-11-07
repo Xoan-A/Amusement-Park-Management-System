@@ -117,7 +117,7 @@ public class ScoreHistoryControllerTest
             }
         };
 
-        _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(_visitorUserId)).Returns(history);
+        _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(_visitorUserId)).ReturnsAsync(history);
 
         HttpResponseMessage response = await _visitorClient.GetAsync("/api/score-history/my-history");
 
@@ -142,7 +142,7 @@ public class ScoreHistoryControllerTest
             }
         };
 
-        _mockScoreHistoryLogic.Setup(l => l.GetVisitorScoreHistory(visitorId, null, null)).Returns(history);
+        _mockScoreHistoryLogic.Setup(l => l.GetVisitorScoreHistory(visitorId, null, null)).ReturnsAsync(history);
 
         HttpResponseMessage response = await _adminClient.GetAsync($"/api/score-history/visitor/{visitorId}");
 
@@ -167,7 +167,7 @@ public class ScoreHistoryControllerTest
             }
         };
 
-        _mockScoreHistoryLogic.Setup(l => l.GetAllScoreHistory()).Returns(history);
+        _mockScoreHistoryLogic.Setup(l => l.GetAllScoreHistory()).ReturnsAsync(history);
 
         HttpResponseMessage response = await _adminClient.GetAsync("/api/score-history");
 
@@ -237,7 +237,7 @@ public class ScoreHistoryControllerTest
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
 
         _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(Guid.Empty))
-            .Returns(new List<ScoreHistoryModelOut>());
+            .ReturnsAsync(new List<ScoreHistoryModelOut>());
 
         HttpResponseMessage response = await client.GetAsync("/api/score-history/my-history");
 
