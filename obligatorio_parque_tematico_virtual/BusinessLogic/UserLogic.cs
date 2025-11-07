@@ -16,10 +16,11 @@ namespace BusinessLogic
         private readonly IRoleRepository _roleRepository;
         private readonly IEventRepository _eventRepository;
         private readonly IDailyScoreLogic _dailyScoreLogic;
+        private readonly IDateTimeLogic _dateTimeLogic;
 
         public UserLogic(IUserRepository userRepository, IPasswordLogic passwordLogic,
             IAttractionRepository attractionRepository, ITicketLogic ticketLogic, IRoleRepository roleRepository,
-            IEventRepository eventRepository, IDailyScoreLogic dailyScoreLogic)
+            IEventRepository eventRepository, IDailyScoreLogic dailyScoreLogic, IDateTimeLogic dateTimeLogic)
         {
             _userRepository = userRepository;
             _passwordLogic = passwordLogic;
@@ -28,6 +29,7 @@ namespace BusinessLogic
             _roleRepository = roleRepository;
             _eventRepository = eventRepository;
             _dailyScoreLogic = dailyScoreLogic;
+            _dateTimeLogic = dateTimeLogic;
         }
 
         public async Task<UserResponse> RegisterVisitor(RegisterVisitorRequest request)
@@ -42,7 +44,9 @@ namespace BusinessLogic
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 throw new ArgumentException("Name, last name, email, and password must be provided.");
 
-            if (birthDate >= DateTime.Now)
+            DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+
+            if (birthDate >= currentDateTime)
                 throw new ArgumentException("Birth date cannot be after today.");
 
             if (!await _userRepository.IsEmailUnique(email))
@@ -303,7 +307,8 @@ namespace BusinessLogic
 
             if (request.BirthDate.HasValue)
             {
-                if (request.BirthDate.Value >= DateTime.Now)
+                DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+                if (request.BirthDate.Value >= currentDateTime)
                     throw new ArgumentException("Birth date must be in the past");
                 user.BirthDate = request.BirthDate.Value;
             }

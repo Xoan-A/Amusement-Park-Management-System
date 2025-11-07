@@ -6,15 +6,6 @@ namespace TestDomain
     public class ScoreHistoryTest
     {
         [TestMethod]
-        public void ScoreHistory_DefaultConstructor_SetsCreatedAt()
-        {
-            ScoreHistory history = new ScoreHistory();
-
-            Assert.IsTrue(history.CreatedAt > DateTime.MinValue);
-            Assert.IsTrue(history.CreatedAt <= DateTime.UtcNow);
-        }
-
-        [TestMethod]
         public void ScoreHistory_SetValidValues_Success()
         {
             ScoreHistory history = new ScoreHistory();

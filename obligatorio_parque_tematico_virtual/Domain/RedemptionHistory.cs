@@ -56,10 +56,5 @@ namespace Domain
 
         public User? Visitor { get; set; }
         public Reward? Reward { get; set; }
-
-        public RedemptionHistory()
-        {
-            _redeemedAt = DateTime.Now;
-        }
     }
 }

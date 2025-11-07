@@ -10,16 +10,18 @@ public class EventLogic : IEventLogic
 {
     private IEventRepository _eventRepository;
     private IAttractionLogicEntity _attractionLogic;
+    private readonly IDateTimeLogic _dateTimeLogic;
     private const int MinCapacityLimit = 1;
     private const int MaxCapacityLimit = 10000;
     private const int MinHour = 0;
     private const int MaxHour = 23;
     private const int MinCost = 1;
 
-    public EventLogic(IEventRepository eventRepository, IAttractionLogicEntity attractionLogic)
+    public EventLogic(IEventRepository eventRepository, IAttractionLogicEntity attractionLogic, IDateTimeLogic dateTimeLogic)
     {
         _eventRepository = eventRepository;
         _attractionLogic = attractionLogic;
+        _dateTimeLogic = dateTimeLogic;
     }
 
     public async Task<EventResponse> GetEventById(Guid expectedEventId)
@@ -128,8 +130,11 @@ public class EventLogic : IEventLogic
             throw new ArgumentException("El nombre del evento no puede estar vacío.");
         if (!await IsEventNameUnique(newEvent.Name))
             throw new ArgumentException("El nombre del evento ya existe.");
-        if (newEvent.Date <= DateTime.Now)
+        
+        DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+        if (newEvent.Date <= currentDateTime)
             throw new ArgumentException("La fecha del evento debe ser futura.");
+        
         if (newEvent.Hour < MinHour || newEvent.Hour > MaxHour)
             throw new ArgumentException("La hora debe estar entre 0 y 23.");
         if (newEvent.MaxCapacity <= MinCapacityLimit || newEvent.MaxCapacity > MaxCapacityLimit)

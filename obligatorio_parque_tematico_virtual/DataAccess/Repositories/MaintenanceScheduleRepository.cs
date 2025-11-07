@@ -8,10 +8,12 @@ namespace DataAccess.Repositories
     public class MaintenanceScheduleRepository : IMaintenanceScheduleRepository
     {
         private readonly AppDbContext _context;
+        private readonly IDateTimeRepository _dateTimeRepository;
 
-        public MaintenanceScheduleRepository(AppDbContext context)
+        public MaintenanceScheduleRepository(AppDbContext context, IDateTimeRepository dateTimeRepository)
         {
             _context = context;
+            _dateTimeRepository = dateTimeRepository;
         }
 
         public void Create(MaintenanceSchedule schedule)
@@ -55,7 +57,7 @@ namespace DataAccess.Repositories
 
         public List<MaintenanceSchedule> GetOverdueSchedules()
         {
-            DateTime now = DateTime.Now;
+            DateTime now = _dateTimeRepository.GetConfiguredDateTime().Result ?? DateTime.Now;
             return _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
                 .Where(s => s.ScheduledDate < now &&
@@ -75,7 +77,7 @@ namespace DataAccess.Repositories
 
         public List<MaintenanceSchedule> GetUpcomingSchedules(int daysAhead)
         {
-            DateTime now = DateTime.Now;
+            DateTime now = _dateTimeRepository.GetConfiguredDateTime().Result ?? DateTime.Now;
             DateTime futureDate = now.AddDays(daysAhead);
 
             return _context.MaintenanceSchedules

@@ -1,8 +1,10 @@
 using DataAccess.Context;
 using DataAccess.Repositories;
 using Domain;
+using IDataAccess;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 
 namespace TestDataAccess
 {
@@ -12,6 +14,7 @@ namespace TestDataAccess
         private AppDbContext _context = null!;
         private MaintenanceScheduleRepository _repository = null!;
         private SqliteConnection _connection = null!;
+        private Mock<IDateTimeRepository> _mockDateTimeRepository = null!;
 
         [TestInitialize]
         public void Setup()
@@ -26,7 +29,10 @@ namespace TestDataAccess
             _context = new AppDbContext(options);
             _context.Database.EnsureCreated();
 
-            _repository = new MaintenanceScheduleRepository(_context);
+            _mockDateTimeRepository = new Mock<IDateTimeRepository>();
+            _mockDateTimeRepository.Setup(x => x.GetConfiguredDateTime()).ReturnsAsync(DateTime.Now);
+
+            _repository = new MaintenanceScheduleRepository(_context, _mockDateTimeRepository.Object);
         }
 
         [TestCleanup]

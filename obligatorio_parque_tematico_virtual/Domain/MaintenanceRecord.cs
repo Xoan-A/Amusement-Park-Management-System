@@ -65,10 +65,5 @@ namespace Domain
         public virtual MaintenanceSchedule? MaintenanceSchedule { get; set; }
         public virtual Attraction? Attraction { get; set; }
         public virtual User? Operator { get; set; }
-
-        public MaintenanceRecord()
-        {
-            CreatedAt = DateTime.UtcNow;
-        }
     }
 }

@@ -151,22 +151,6 @@ namespace TestDomain
         }
 
         [TestMethod]
-        public void CreateMaintenanceSchedule_DefaultsToUtcNow_Success()
-        {
-            DateTime beforeCreate = DateTime.UtcNow;
-
-            MaintenanceSchedule schedule = new MaintenanceSchedule
-            {
-                Description = "Test",
-                ScheduledDate = DateTime.Now
-            };
-            DateTime afterCreate = DateTime.UtcNow;
-
-            Assert.IsTrue(schedule.CreatedAt >= beforeCreate);
-            Assert.IsTrue(schedule.CreatedAt <= afterCreate);
-        }
-
-        [TestMethod]
         public void SetAttractionId_ValidGuid_Success()
         {
             Guid attractionId = Guid.NewGuid();
@@ -184,14 +168,15 @@ namespace TestDomain
         [TestMethod]
         public void IsOverdue_PastScheduledDate_ReturnsTrue()
         {
+            DateTime currentDateTime = DateTime.Now;
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-                ScheduledDate = DateTime.Now.AddDays(-1),
+                ScheduledDate = currentDateTime.AddDays(-1),
                 Status = MaintenanceStatus.Pending,
                 Description = "Test"
             };
 
-            bool isOverdue = schedule.IsOverdue();
+            bool isOverdue = schedule.IsOverdue(currentDateTime);
 
             Assert.IsTrue(isOverdue);
         }
@@ -199,14 +184,15 @@ namespace TestDomain
         [TestMethod]
         public void IsOverdue_FutureScheduledDate_ReturnsFalse()
         {
+            DateTime currentDateTime = DateTime.Now;
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-                ScheduledDate = DateTime.Now.AddDays(7),
+                ScheduledDate = currentDateTime.AddDays(7),
                 Status = MaintenanceStatus.Pending,
                 Description = "Test"
             };
 
-            bool isOverdue = schedule.IsOverdue();
+            bool isOverdue = schedule.IsOverdue(currentDateTime);
 
             Assert.IsFalse(isOverdue);
         }
@@ -214,14 +200,15 @@ namespace TestDomain
         [TestMethod]
         public void IsOverdue_CompletedStatus_ReturnsFalse()
         {
+            DateTime currentDateTime = DateTime.Now;
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-                ScheduledDate = DateTime.Now.AddDays(-1),
+                ScheduledDate = currentDateTime.AddDays(-1),
                 Status = MaintenanceStatus.Completed,
                 Description = "Test"
             };
 
-            bool isOverdue = schedule.IsOverdue();
+            bool isOverdue = schedule.IsOverdue(currentDateTime);
 
             Assert.IsFalse(isOverdue);
         }
@@ -229,14 +216,15 @@ namespace TestDomain
         [TestMethod]
         public void IsOverdue_CancelledStatus_ReturnsFalse()
         {
+            DateTime currentDateTime = DateTime.Now;
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-                ScheduledDate = DateTime.Now.AddDays(-1),
+                ScheduledDate = currentDateTime.AddDays(-1),
                 Status = MaintenanceStatus.Cancelled,
                 Description = "Test"
             };
 
-            bool isOverdue = schedule.IsOverdue();
+            bool isOverdue = schedule.IsOverdue(currentDateTime);
 
             Assert.IsFalse(isOverdue);
         }

@@ -14,6 +14,7 @@ public class EventLogicTest
     private Mock<IEventRepository> _mockEventRepository;
     private IEventLogic _eventLogic;
     private Mock<IAttractionLogicEntity> _mockAttractionService;
+    private Mock<IDateTimeLogic> _mockDateTimeLogic;
     private Event baseEvent;
     private EventRequest baseEventRequest;
 
@@ -22,7 +23,10 @@ public class EventLogicTest
     {
         _mockEventRepository = new Mock<IEventRepository>();
         _mockAttractionService = new Mock<IAttractionLogicEntity>();
-        _eventLogic = new EventLogic(_mockEventRepository.Object, _mockAttractionService.Object);
+        _mockDateTimeLogic = new Mock<IDateTimeLogic>();
+        _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(DateTime.Now);
+        
+        _eventLogic = new EventLogic(_mockEventRepository.Object, _mockAttractionService.Object, _mockDateTimeLogic.Object);
         baseEvent = new Event
         {
             Name = "Base Event",

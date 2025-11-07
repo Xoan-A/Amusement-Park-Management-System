@@ -36,18 +36,17 @@ namespace Domain
 
         public MaintenanceSchedule()
         {
-            CreatedAt = DateTime.UtcNow;
             Status = MaintenanceStatus.Pending;
         }
 
-        public bool IsOverdue()
+        public bool IsOverdue(DateTime currentDateTime)
         {
             if (Status == MaintenanceStatus.Completed || Status == MaintenanceStatus.Cancelled)
             {
                 return false;
             }
 
-            return ScheduledDate < DateTime.Now;
+            return ScheduledDate < currentDateTime;
         }
 
         public bool CanComplete()

@@ -18,7 +18,8 @@ namespace TestBusinessLogic
         private Mock<ITicketLogic> _mockTicketLogic;
         private Mock<IRoleRepository> _mockRoleRepository;
         private Mock<IEventRepository> _mockEventRepository;
-         private Mock<IDailyScoreLogic> _mockDailyScoreLogic;
+        private Mock<IDailyScoreLogic> _mockDailyScoreLogic;
+        private Mock<IDateTimeLogic> _mockDateTimeLogic;
         private IUserLogic _userLogic;
 
         [TestInitialize]
@@ -31,9 +32,12 @@ namespace TestBusinessLogic
             _mockRoleRepository = new Mock<IRoleRepository>();
             _mockEventRepository = new Mock<IEventRepository>();
             _mockDailyScoreLogic = new Mock<IDailyScoreLogic>();
+            _mockDateTimeLogic = new Mock<IDateTimeLogic>();
+            _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(DateTime.Now);
+            
             _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
                 _mockAttractionRepository.Object, _mockTicketLogic.Object, _mockRoleRepository.Object,
-                _mockEventRepository.Object, _mockDailyScoreLogic.Object);
+                _mockEventRepository.Object, _mockDailyScoreLogic.Object, _mockDateTimeLogic.Object);
         }
 
         [TestMethod]

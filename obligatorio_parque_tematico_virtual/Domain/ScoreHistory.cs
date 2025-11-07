@@ -46,10 +46,5 @@ namespace Domain
         }
 
         public virtual User? Visitor { get; set; }
-
-        public ScoreHistory()
-        {
-            CreatedAt = DateTime.UtcNow;
-        }
     }
 }

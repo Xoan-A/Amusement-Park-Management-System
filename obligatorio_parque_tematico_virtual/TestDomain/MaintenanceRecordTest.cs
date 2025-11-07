@@ -147,19 +147,18 @@ namespace TestDomain
         }
 
         [TestMethod]
-        public void CreateMaintenanceRecord_DefaultsToUtcNow_Success()
+        public void CreateMaintenanceRecord_CreatedAtCanBeSet_Success()
         {
-            DateTime beforeCreate = DateTime.UtcNow;
+            DateTime createdAt = new DateTime(2025, 10, 15, 10, 30, 0);
 
             MaintenanceRecord record = new MaintenanceRecord
             {
                 Description = "Test",
-                PerformedDate = DateTime.Now
+                PerformedDate = DateTime.Now,
+                CreatedAt = createdAt
             };
-            DateTime afterCreate = DateTime.UtcNow;
 
-            Assert.IsTrue(record.CreatedAt >= beforeCreate);
-            Assert.IsTrue(record.CreatedAt <= afterCreate);
+            Assert.AreEqual(createdAt, record.CreatedAt);
         }
 
         [TestMethod]

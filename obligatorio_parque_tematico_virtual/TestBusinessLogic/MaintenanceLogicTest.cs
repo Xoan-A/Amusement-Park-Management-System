@@ -14,6 +14,7 @@ public class MaintenanceLogicTest
     private Mock<IMaintenanceScheduleRepository> _mockScheduleRepository;
     private Mock<IMaintenanceRecordRepository> _mockRecordRepository;
     private Mock<IAttractionRepository> _mockAttractionRepository;
+    private Mock<IDateTimeLogic> _mockDateTimeLogic;
     private IMaintenanceLogic _maintenanceLogic;
 
     [TestInitialize]
@@ -22,10 +23,14 @@ public class MaintenanceLogicTest
         _mockScheduleRepository = new Mock<IMaintenanceScheduleRepository>();
         _mockRecordRepository = new Mock<IMaintenanceRecordRepository>();
         _mockAttractionRepository = new Mock<IAttractionRepository>();
+        _mockDateTimeLogic = new Mock<IDateTimeLogic>();
+        _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(DateTime.Now);
+
         _maintenanceLogic = new MaintenanceLogic(
             _mockScheduleRepository.Object,
             _mockRecordRepository.Object,
-            _mockAttractionRepository.Object
+            _mockAttractionRepository.Object,
+            _mockDateTimeLogic.Object
         );
     }
 
