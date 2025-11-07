@@ -174,7 +174,7 @@ namespace TestBusinessLogic
 
             StrategyRequest request = new StrategyRequest
             {
-                IsSepcialEvent = false
+                IsSpecialEvent = false
             };
 
             int score = strategy.CalculateScore(user, attraction, request);
@@ -191,7 +191,7 @@ namespace TestBusinessLogic
 
             StrategyRequest request = new StrategyRequest
             {
-                IsSepcialEvent = true
+                IsSpecialEvent = true
             };
 
             int score = strategy.CalculateScore(user, attraction, request);

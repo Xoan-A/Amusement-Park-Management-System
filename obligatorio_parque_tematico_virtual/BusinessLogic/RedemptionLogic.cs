@@ -11,15 +11,18 @@ namespace BusinessLogic
         private readonly IRewardRepository _rewardRepository;
         private readonly IUserRepository _userRepository;
         private readonly IRedemptionHistoryRepository _redemptionHistoryRepository;
+        private readonly IDateTimeLogic _dateTimeLogic;
 
         public RedemptionLogic(
             IRewardRepository rewardRepository,
             IUserRepository userRepository,
-            IRedemptionHistoryRepository redemptionHistoryRepository)
+            IRedemptionHistoryRepository redemptionHistoryRepository,
+            IDateTimeLogic dateTimeLogic)
         {
             _rewardRepository = rewardRepository;
             _userRepository = userRepository;
             _redemptionHistoryRepository = redemptionHistoryRepository;
+            _dateTimeLogic = dateTimeLogic;
         }
 
         public async Task<RedemptionHistoryModelOut> RedeemReward(Guid visitorId, Guid rewardId)
@@ -41,12 +44,14 @@ namespace BusinessLogic
             visitor.Score -= reward.PointsCost;
             reward.DecrementQuantity();
 
+            DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime().Result;
+
             RedemptionHistory redemption = new RedemptionHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = visitor.Id,
                 RewardId = reward.Id,
-                RedeemedAt = DateTime.Now,
+                RedeemedAt = currentDateTime,
                 PointsSpent = reward.PointsCost
             };
 

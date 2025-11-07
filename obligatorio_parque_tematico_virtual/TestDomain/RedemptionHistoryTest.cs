@@ -84,23 +84,6 @@ namespace TestDomain
         }
 
         [TestMethod]
-        public void RedemptionHistory_DefaultRedeemedAt_UsesCurrentTime()
-        {
-            DateTime beforeCreation = DateTime.Now;
-
-            RedemptionHistory redemption = new RedemptionHistory
-            {
-                Id = Guid.NewGuid(),
-                VisitorId = Guid.NewGuid(),
-                RewardId = Guid.NewGuid(),
-                PointsSpent = 100
-            };
-            DateTime afterCreation = DateTime.Now;
-
-            Assert.IsTrue(redemption.RedeemedAt >= beforeCreation && redemption.RedeemedAt <= afterCreation);
-        }
-
-        [TestMethod]
         public void RedemptionHistory_WithNavigationProperties_Success()
         {
             User visitor = new User

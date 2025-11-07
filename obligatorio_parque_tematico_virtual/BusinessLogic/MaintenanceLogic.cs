@@ -11,15 +11,18 @@ public class MaintenanceLogic : IMaintenanceLogic
     private readonly IMaintenanceScheduleRepository _scheduleRepository;
     private readonly IMaintenanceRecordRepository _recordRepository;
     private readonly IAttractionRepository _attractionRepository;
+    private readonly IDateTimeLogic _dateTimeLogic;
 
     public MaintenanceLogic(
         IMaintenanceScheduleRepository scheduleRepository,
         IMaintenanceRecordRepository recordRepository,
-        IAttractionRepository attractionRepository)
+        IAttractionRepository attractionRepository,
+        IDateTimeLogic dateTimeLogic)
     {
         _scheduleRepository = scheduleRepository;
         _recordRepository = recordRepository;
         _attractionRepository = attractionRepository;
+        _dateTimeLogic = dateTimeLogic;
     }
 
     #region Schedule Management
@@ -37,6 +40,8 @@ public class MaintenanceLogic : IMaintenanceLogic
             throw new ArgumentException($"Invalid maintenance type: {request.MaintenanceType}");
         }
 
+        DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+
         MaintenanceSchedule schedule = new MaintenanceSchedule
         {
             Id = Guid.NewGuid(),
@@ -46,7 +51,7 @@ public class MaintenanceLogic : IMaintenanceLogic
             Description = request.Description,
             Status = MaintenanceStatus.Pending,
             CreatedBy = createdBy,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = currentDateTime
         };
 
         await _scheduleRepository.CreateAsync(schedule);
@@ -136,6 +141,8 @@ public class MaintenanceLogic : IMaintenanceLogic
             throw new ArgumentException($"Invalid maintenance type: {request.MaintenanceType}");
         }
 
+        DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+
         MaintenanceRecord record = new MaintenanceRecord
         {
             Id = Guid.NewGuid(),
@@ -147,7 +154,7 @@ public class MaintenanceLogic : IMaintenanceLogic
             Description = request.Description,
             Notes = request.Notes,
             Duration = request.Duration,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = currentDateTime
         };
 
         await _recordRepository.CreateAsync(record);
@@ -238,6 +245,8 @@ public class MaintenanceLogic : IMaintenanceLogic
 
     private MaintenanceScheduleResponse MapToScheduleResponse(MaintenanceSchedule schedule)
     {
+        DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime().Result;
+
         return new MaintenanceScheduleResponse
         {
             Id = schedule.Id,
@@ -248,7 +257,7 @@ public class MaintenanceLogic : IMaintenanceLogic
             Description = schedule.Description,
             Status = schedule.Status.ToString(),
             CreatedAt = schedule.CreatedAt,
-            IsOverdue = schedule.IsOverdue()
+            IsOverdue = schedule.IsOverdue(currentDateTime)
         };
     }
 

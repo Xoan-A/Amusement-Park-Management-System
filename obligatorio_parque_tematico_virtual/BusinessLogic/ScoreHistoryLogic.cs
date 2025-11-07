@@ -48,7 +48,6 @@ namespace BusinessLogic
                 VisitorName = h.Visitor?.Name,
                 Points = h.Points,
                 Origin = h.Origin.ToString(),
-                Description = h.Description,
                 StrategyName = h.StrategyName,
                 RelatedEntityId = h.RelatedEntityId,
                 CreatedAt = h.CreatedAt

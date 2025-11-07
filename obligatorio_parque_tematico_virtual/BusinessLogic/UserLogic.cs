@@ -15,11 +15,12 @@ namespace BusinessLogic
         private readonly ITicketLogic _ticketLogic;
         private readonly IRoleRepository _roleRepository;
         private readonly IEventRepository _eventRepository;
-        private readonly IActiveStrategy _activeStrategy;
+        private readonly IDailyScoreLogic _dailyScoreLogic;
+        private readonly IDateTimeLogic _dateTimeLogic;
 
         public UserLogic(IUserRepository userRepository, IPasswordLogic passwordLogic,
             IAttractionRepository attractionRepository, ITicketLogic ticketLogic, IRoleRepository roleRepository,
-            IEventRepository eventRepository, IActiveStrategy activeStrategy)
+            IEventRepository eventRepository, IDailyScoreLogic dailyScoreLogic, IDateTimeLogic dateTimeLogic)
         {
             _userRepository = userRepository;
             _passwordLogic = passwordLogic;
@@ -27,7 +28,8 @@ namespace BusinessLogic
             _ticketLogic = ticketLogic;
             _roleRepository = roleRepository;
             _eventRepository = eventRepository;
-            _activeStrategy = activeStrategy;
+            _dailyScoreLogic = dailyScoreLogic;
+            _dateTimeLogic = dateTimeLogic;
         }
 
         public async Task<UserResponse> RegisterVisitor(RegisterVisitorRequest request)
@@ -42,7 +44,9 @@ namespace BusinessLogic
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 throw new ArgumentException("Name, last name, email, and password must be provided.");
 
-            if (birthDate >= DateTime.Now)
+            DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+
+            if (birthDate >= currentDateTime)
                 throw new ArgumentException("Birth date cannot be after today.");
 
             if (!await _userRepository.IsEmailUnique(email))
@@ -190,19 +194,7 @@ namespace BusinessLogic
 
             Event even = await _eventRepository.GetEventByAttractionAndDate(attractionId, enterDate.Date);
 
-            bool isEvent = even != null;
-
-            StrategyRequest strategyRequest = new StrategyRequest
-            {
-                UserId = user.Id,
-                AttractionId = attraction.Id,
-                IsSepcialEvent = isEvent,
-            };
-
-            int score = _activeStrategy.CalculateScore(user, attraction, strategyRequest);
-
-            user.Score += score;
-            await _userRepository.Update(user);
+            await _dailyScoreLogic.AddScoreToUser(user, attraction, even);
         }
 
         public async Task RegisterExit(Guid attractionId, RegisterExitRequest request)
@@ -313,7 +305,8 @@ namespace BusinessLogic
 
             if (request.BirthDate.HasValue)
             {
-                if (request.BirthDate.Value >= DateTime.Now)
+                DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+                if (request.BirthDate.Value >= currentDateTime)
                     throw new ArgumentException("Birth date must be in the past");
                 user.BirthDate = request.BirthDate.Value;
             }

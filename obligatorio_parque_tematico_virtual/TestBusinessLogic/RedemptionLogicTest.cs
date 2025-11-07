@@ -1,6 +1,7 @@
 using BusinessLogic;
 using BusinessLogic.Specifications;
 using Domain;
+using IBusinessLogic;
 using IDataAccess;
 using Models.Out;
 using Moq;
@@ -13,6 +14,7 @@ namespace TestBusinessLogic
         private Mock<IRewardRepository> _mockRewardRepository;
         private Mock<IUserRepository> _mockUserRepository;
         private Mock<IRedemptionHistoryRepository> _mockRedemptionHistoryRepository;
+        private Mock<IDateTimeLogic> _mockDateTimeLogic;
         private RedemptionLogic _redemptionLogic;
 
         [TestInitialize]
@@ -21,11 +23,14 @@ namespace TestBusinessLogic
             _mockRewardRepository = new Mock<IRewardRepository>();
             _mockUserRepository = new Mock<IUserRepository>();
             _mockRedemptionHistoryRepository = new Mock<IRedemptionHistoryRepository>();
+            _mockDateTimeLogic = new Mock<IDateTimeLogic>();
+            _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(DateTime.Now);
 
             _redemptionLogic = new RedemptionLogic(
                 _mockRewardRepository.Object,
                 _mockUserRepository.Object,
-                _mockRedemptionHistoryRepository.Object
+                _mockRedemptionHistoryRepository.Object,
+                _mockDateTimeLogic.Object
             );
         }
 

@@ -50,7 +50,6 @@ namespace TestDataAccess
                 Points = 100,
                 Origin = ScoreOrigin.AttractionVisit,
                 StrategyName = "PerAttraction",
-                Description = "Visited Roller Coaster"
             };
 
             await _repository.CreateAsync(history);
@@ -220,7 +219,6 @@ namespace TestDataAccess
                 Points = 50,
                 Origin = ScoreOrigin.AttractionVisit,
                 StrategyName = "PerAttraction",
-                Description = "Test score entry"
             };
         }
     }

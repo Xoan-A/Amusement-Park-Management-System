@@ -42,7 +42,6 @@ namespace TestBusinessLogic
                     },
                     Points = 100,
                     Origin = ScoreOrigin.AttractionVisit,
-                    Description = "Visited Roller Coaster",
                     StrategyName = "PerAttraction",
                     CreatedAt = DateTime.UtcNow
                 }
@@ -84,7 +83,6 @@ namespace TestBusinessLogic
                     },
                     Points = 50,
                     Origin = ScoreOrigin.EventParticipation,
-                    Description = "Participated in event",
                     StrategyName = "PerEvent",
                     CreatedAt = DateTime.UtcNow.AddDays(-3)
                 }
@@ -125,7 +123,6 @@ namespace TestBusinessLogic
                     },
                     Points = 75,
                     Origin = ScoreOrigin.AttractionVisit,
-                    Description = "Visited Water Slide",
                     StrategyName = "PerAttraction",
                     CreatedAt = DateTime.UtcNow.AddDays(-10)
                 },
@@ -144,7 +141,6 @@ namespace TestBusinessLogic
                     },
                     Points = 25,
                     Origin = ScoreOrigin.EventParticipation,
-                    Description = "Participated in contest",
                     StrategyName = "PerEvent",
                     CreatedAt = DateTime.UtcNow.AddDays(-5)
                 }
@@ -184,7 +180,6 @@ namespace TestBusinessLogic
                     },
                     Points = 150,
                     Origin = ScoreOrigin.AttractionVisit,
-                    Description = "Visited Ferris Wheel",
                     StrategyName = "PerAttraction",
                     CreatedAt = DateTime.UtcNow.AddDays(-2)
                 },
@@ -203,7 +198,6 @@ namespace TestBusinessLogic
                     },
                     Points = 200,
                     Origin = ScoreOrigin.EventParticipation,
-                    Description = "Won grand prize",
                     StrategyName = "PerEvent",
                     CreatedAt = DateTime.UtcNow.AddDays(-1)
                 }
@@ -247,7 +241,6 @@ namespace TestBusinessLogic
                     },
                     Points = 60,
                     Origin = ScoreOrigin.AttractionVisit,
-                    Description = "Test entry",
                     StrategyName = "PerAttraction",
                     CreatedAt = DateTime.UtcNow
                 }
@@ -286,7 +279,6 @@ namespace TestBusinessLogic
                     },
                     Points = 45,
                     Origin = ScoreOrigin.EventParticipation,
-                    Description = "Test entry",
                     StrategyName = "PerEvent",
                     CreatedAt = DateTime.UtcNow
                 }

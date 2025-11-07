@@ -144,5 +144,77 @@ namespace ApiTests
             HttpResponseMessage postResponse = await _client.PutAsync("/api/datetime", content);
             Assert.AreEqual(System.Net.HttpStatusCode.OK, postResponse.StatusCode);
         }
+
+        [TestMethod]
+        public async Task ServiceFactory_RegistersDateTimeLogicWithObservers()
+        {
+            SqliteConnection connection = new SqliteConnection("DataSource=:memory:");
+            connection.Open();
+
+            WebApplicationFactory<Program> factoryWithObservers = new WebApplicationFactory<Program>()
+                .WithWebHostBuilder(builder =>
+                {
+                    builder.ConfigureServices(services =>
+                    {
+                        ServiceDescriptor descriptor = services.SingleOrDefault(
+                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                        if (descriptor != null)
+                        {
+                            services.Remove(descriptor);
+                        }
+
+                        ServiceDescriptor dateTimeRepoDescriptor = services.SingleOrDefault(
+                            d => d.ServiceType == typeof(IDateTimeRepository));
+                        if (dateTimeRepoDescriptor != null)
+                        {
+                            services.Remove(dateTimeRepoDescriptor);
+                        }
+
+                        services.AddDbContext<AppDbContext>(options =>
+                            options.UseSqlite(connection));
+
+                        services.AddScoped<IDateTimeRepository, DateTimeRepository>();
+                    });
+                });
+
+            using (IServiceScope scope = factoryWithObservers.Services.CreateScope())
+            {
+                AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                context.Database.EnsureCreated();
+            }
+
+            HttpClient client = factoryWithObservers.CreateClient();
+
+            HttpResponseMessage getResponse = await client.GetAsync("/api/datetime");
+            Assert.AreEqual(System.Net.HttpStatusCode.OK, getResponse.StatusCode);
+
+            SetDateTimeRequest setRequest = new SetDateTimeRequest
+            {
+                DateTime = "2024-12-25T10:00:00"
+            };
+
+            string jsonContent = JsonSerializer.Serialize(setRequest);
+            StringContent content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage putResponse = await client.PutAsync("/api/datetime", content);
+            Assert.AreEqual(System.Net.HttpStatusCode.OK, putResponse.StatusCode);
+
+            using (IServiceScope scope = factoryWithObservers.Services.CreateScope())
+            {
+                IDateTimeLogic? dateTimeLogic = scope.ServiceProvider.GetService<IDateTimeLogic>();
+                Assert.IsNotNull(dateTimeLogic, "IDateTimeLogic debería estar registrado");
+
+                IEnumerable<IDateObserver> observers = scope.ServiceProvider.GetServices<IDateObserver>();
+                Assert.IsTrue(observers.Any(), "Debería haber observadores registrados");
+
+                IDailyScoreLogic? dailyScoreLogic = scope.ServiceProvider.GetService<IDailyScoreLogic>();
+                Assert.IsNotNull(dailyScoreLogic, "IDailyScoreLogic debería estar registrado como observador");
+            }
+
+            client.Dispose();
+            factoryWithObservers.Dispose();
+            connection.Close();
+            connection.Dispose();
+        }
     }
 }
