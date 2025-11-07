@@ -33,7 +33,7 @@ public static class ServiceFactory
 
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(connectionString));
+        options.UseSqlServer(connectionString));
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
@@ -46,7 +46,7 @@ public static class ServiceFactory
         services.AddScoped<IMaintenanceScheduleRepository, MaintenanceScheduleRepository>();
         services.AddScoped<IMaintenanceRecordRepository, MaintenanceRecordRepository>();
         services.AddScoped<IScoreHistoryRepository, ScoreHistoryRepository>();
-        
+
         services.AddScoped<IDailyScoreLogic, DailyScoreLogic>();
         services.AddScoped<IDateTimeLogic>(serviceProvider =>
         {
@@ -54,10 +54,10 @@ public static class ServiceFactory
             IUserRepository userRepository = serviceProvider.GetRequiredService<IUserRepository>();
             IActiveStrategy activeStrategy = serviceProvider.GetRequiredService<IActiveStrategy>();
             DateTimeLogic dateTimeLogic = new DateTimeLogic(dateTimeRepository);
-            
+
             DailyScoreLogic dailyScoreLogic = new DailyScoreLogic(userRepository, activeStrategy);
             dateTimeLogic.Attach(dailyScoreLogic);
-            
+
             return dateTimeLogic;
         });
     }

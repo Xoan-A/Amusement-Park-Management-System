@@ -34,7 +34,7 @@ namespace TestBusinessLogic
             _mockDailyScoreLogic = new Mock<IDailyScoreLogic>();
             _mockDateTimeLogic = new Mock<IDateTimeLogic>();
             _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(DateTime.Now);
-            
+
             _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
                 _mockAttractionRepository.Object, _mockTicketLogic.Object, _mockRoleRepository.Object,
                 _mockEventRepository.Object, _mockDailyScoreLogic.Object, _mockDateTimeLogic.Object);
@@ -245,7 +245,7 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.Create(It.Is<User>(v => v.Password == hashedPassword)))
-                .ReturnsAsync(createdUser);
+            .ReturnsAsync(createdUser);
 
             RegisterVisitorRequest request = new RegisterVisitorRequest
             {
@@ -1031,7 +1031,7 @@ namespace TestBusinessLogic
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-                .ReturnsAsync((Event)null);
+            .ReturnsAsync((Event)null);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
@@ -1082,9 +1082,9 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, specialEvent.Id))
-                .ReturnsAsync(true);
+            .ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-                .ReturnsAsync(specialEvent);
+            .ReturnsAsync(specialEvent);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
@@ -1140,9 +1140,9 @@ namespace TestBusinessLogic
             _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).ReturnsAsync(attraction1);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).ReturnsAsync(attraction2);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, It.IsAny<DateTime>(), null))
-                .ReturnsAsync(true);
+            .ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(It.IsAny<Guid>(), It.IsAny<DateTime>()))
-                .ReturnsAsync((Event)null);
+            .ReturnsAsync((Event)null);
 
             RegisterEntryRequest entryRequest = new RegisterEntryRequest
             {
@@ -1199,7 +1199,7 @@ namespace TestBusinessLogic
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-                .ReturnsAsync((Event)null);
+            .ReturnsAsync((Event)null);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
@@ -1367,11 +1367,11 @@ namespace TestBusinessLogic
             _mockUserRepository.Verify(r => r.IsEmailUnique("new@example.com"), Times.Once);
             _mockPasswordService.Verify(p => p.HashPassword("New#Pass1"), Times.Once);
             _mockUserRepository.Verify(r => r.Update(It.Is<User>(u =>
-                u.Name == request.Name &&
-                u.LastName == request.LastName &&
-                u.Email == request.Email &&
-                u.Password == "hashed" &&
-                u.BirthDate == request.BirthDate
+            u.Name == request.Name &&
+            u.LastName == request.LastName &&
+            u.Email == request.Email &&
+            u.Password == "hashed" &&
+            u.BirthDate == request.BirthDate
             )), Times.Once);
         }
 
@@ -1640,8 +1640,8 @@ namespace TestBusinessLogic
 
             User createdUser = null;
             _mockUserRepository.Setup(r => r.Create(It.IsAny<User>()))
-                .Callback<User>(u => createdUser = u)
-                .ReturnsAsync((User u) => u);
+            .Callback<User>(u => createdUser = u)
+            .ReturnsAsync((User u) => u);
 
             RegisterVisitorRequest request = new RegisterVisitorRequest
             {
@@ -1679,8 +1679,8 @@ namespace TestBusinessLogic
 
             User createdUser = null;
             _mockUserRepository.Setup(r => r.Create(It.IsAny<User>()))
-                .Callback<User>(u => createdUser = u)
-                .ReturnsAsync((User u) => u);
+            .Callback<User>(u => createdUser = u)
+            .ReturnsAsync((User u) => u);
 
             await _userLogic.CreateUser(request);
 
@@ -1709,8 +1709,8 @@ namespace TestBusinessLogic
 
             User createdUser = null;
             _mockUserRepository.Setup(r => r.Create(It.IsAny<User>()))
-                .Callback<User>(u => createdUser = u)
-                .ReturnsAsync((User u) => u);
+            .Callback<User>(u => createdUser = u)
+            .ReturnsAsync((User u) => u);
 
             await _userLogic.CreateUser(request);
 

@@ -98,7 +98,7 @@ namespace TestBusinessLogic
         {
             DateTime previousTime = new DateTime(2025, 9, 1, 10, 0, 0);
             DateTime newTime = new DateTime(2025, 9, 2, 14, 45, 0);
-            
+
             _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync(previousTime);
             _dateTimeLogic.SetDateTime(newTime).Wait();
 
