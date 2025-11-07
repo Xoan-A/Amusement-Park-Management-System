@@ -4,6 +4,5 @@ namespace IBusinessLogic
     {
         Task<DateTime> GetCurrentDateTime();
         Task SetDateTime(DateTime dateTime);
-        Task SetDateTime(string dateTimeString);
     }
 }

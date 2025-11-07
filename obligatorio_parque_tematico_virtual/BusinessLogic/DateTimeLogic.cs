@@ -54,14 +54,5 @@ namespace BusinessLogic
             _currentDateTime = dateTime;
             await NotifyDateChange();
         }
-
-        public async Task SetDateTime(string dateTimeString)
-        {
-            DateTime dateTime = DateTime.Parse(dateTimeString);
-            _previousDateTime = await _dateTimeRepository.GetConfiguredDateTime() ?? DateTime.Now;
-            await _dateTimeRepository.SetConfiguredDateTime(dateTime);
-            _currentDateTime = dateTime;
-            await NotifyDateChange();
-        }
     }
 }

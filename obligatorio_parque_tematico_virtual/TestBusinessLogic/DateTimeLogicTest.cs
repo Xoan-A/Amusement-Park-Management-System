@@ -67,32 +67,6 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public async Task SetDateTime_WithStringFormat_ShouldParseAndCallRepository()
-        {
-            string dateTimeString = "2025-09-02T14:45";
-            DateTime expectedTime = new DateTime(2025, 9, 2, 14, 45, 0);
-            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync(new DateTime(2025, 9, 1));
-
-            await _dateTimeLogic.SetDateTime(dateTimeString);
-
-            _mockDateTimeRepository.Verify(r => r.SetConfiguredDateTime(expectedTime), Times.Once);
-        }
-
-        [TestMethod]
-        public async Task SetDateTime_WithStringFormat_ShouldNotifyObservers()
-        {
-            string dateTimeString = "2025-09-02T14:45";
-            _mockDateTimeRepository.Setup(r => r.GetConfiguredDateTime()).ReturnsAsync(new DateTime(2025, 9, 1));
-
-            Mock<IDateObserver> mockObserver = new Mock<IDateObserver>();
-            _dateTimeLogic.Attach(mockObserver.Object);
-
-            await _dateTimeLogic.SetDateTime(dateTimeString);
-
-            mockObserver.Verify(o => o.DateUpdated(_dateTimeLogic), Times.Once);
-        }
-
-        [TestMethod]
         public void Attach_ShouldAddObserver()
         {
             Mock<IDateObserver> mockObserver = new Mock<IDateObserver>();
