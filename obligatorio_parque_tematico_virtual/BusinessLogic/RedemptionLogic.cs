@@ -1,4 +1,3 @@
-using BusinessLogic.Specifications;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -75,7 +74,6 @@ namespace BusinessLogic
 
             await _scoreHistoryRepository.CreateAsync(scoreHistory);
 
-
             return MapToModelOut(redemption, visitor.Name, reward.Name);
         }
 
@@ -96,24 +94,43 @@ namespace BusinessLogic
 
         private void ValidateRedemptionEligibility(User visitor, Reward reward)
         {
-            HasSufficientPointsSpecification pointsSpec = new HasSufficientPointsSpecification(reward.PointsCost);
-            MeetsRequiredMembershipSpecification membershipSpec =
-            new MeetsRequiredMembershipSpecification(reward.RequiredMembershipLevel);
-            RewardIsAvailableSpecification availabilitySpec = new RewardIsAvailableSpecification();
+            ValidateHasSufficientPoints(visitor, reward.PointsCost);
+            ValidateMeetsRequiredMembership(visitor, reward.RequiredMembershipLevel);
+            ValidateRewardIsAvailable(reward);
+        }
 
-            if (!pointsSpec.IsSatisfiedBy(visitor))
+        private void ValidateHasSufficientPoints(User visitor, int requiredPoints)
+        {
+            if (visitor.Score < requiredPoints)
             {
                 throw new InvalidOperationException(
-                    $"Visitor does not have sufficient points. Required: {reward.PointsCost}, Available: {visitor.Score}");
+                    $"Visitor does not have sufficient points. Required: {requiredPoints}, Available: {visitor.Score}");
+            }
+        }
+
+        private void ValidateMeetsRequiredMembership(User visitor, MembershipLevel? requiredLevel)
+        {
+            if (requiredLevel == null)
+            {
+                return;
             }
 
-            if (!membershipSpec.IsSatisfiedBy(visitor))
+            if (visitor.MembershipLevel == null)
             {
                 throw new InvalidOperationException(
-                    $"Visitor does not meet the required membership level. Required: {reward.RequiredMembershipLevel}, Current: {visitor.MembershipLevel}");
+                    $"Visitor does not meet the required membership level. Required: {requiredLevel}, Current: None");
             }
 
-            if (!availabilitySpec.IsSatisfiedBy(reward))
+            if (visitor.MembershipLevel < requiredLevel)
+            {
+                throw new InvalidOperationException(
+                    $"Visitor does not meet the required membership level. Required: {requiredLevel}, Current: {visitor.MembershipLevel}");
+            }
+        }
+
+        private void ValidateRewardIsAvailable(Reward reward)
+        {
+            if (!reward.IsAvailable())
             {
                 throw new InvalidOperationException($"Reward '{reward.Name}' is not available (out of stock)");
             }
