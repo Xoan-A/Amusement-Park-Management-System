@@ -194,9 +194,7 @@ namespace BusinessLogic
 
             Event even = await _eventRepository.GetEventByAttractionAndDate(attractionId, enterDate.Date);
 
-            bool isEvent = even != null;
-
-            await _dailyScoreLogic.AddScoreToUser(user, attraction, isEvent);
+            await _dailyScoreLogic.AddScoreToUser(user, attraction, even);
         }
 
         public async Task RegisterExit(Guid attractionId, RegisterExitRequest request)

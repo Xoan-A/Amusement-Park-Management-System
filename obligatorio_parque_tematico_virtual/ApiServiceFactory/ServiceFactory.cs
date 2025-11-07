@@ -46,18 +46,22 @@ public static class ServiceFactory
         services.AddScoped<IMaintenanceScheduleRepository, MaintenanceScheduleRepository>();
         services.AddScoped<IMaintenanceRecordRepository, MaintenanceRecordRepository>();
         services.AddScoped<IScoreHistoryRepository, ScoreHistoryRepository>();
-
-        services.AddScoped<IDailyScoreLogic, DailyScoreLogic>();
+        
+        services.AddScoped<DailyScoreLogic>();
+        services.AddScoped<IDailyScoreLogic>(sp => sp.GetRequiredService<DailyScoreLogic>());
+        services.AddScoped<IDateObserver>(sp => sp.GetRequiredService<DailyScoreLogic>());
         services.AddScoped<IDateTimeLogic>(serviceProvider =>
         {
             IDateTimeRepository dateTimeRepository = serviceProvider.GetRequiredService<IDateTimeRepository>();
-            IUserRepository userRepository = serviceProvider.GetRequiredService<IUserRepository>();
-            IActiveStrategy activeStrategy = serviceProvider.GetRequiredService<IActiveStrategy>();
+            IEnumerable<IDateObserver> observers = serviceProvider.GetServices<IDateObserver>();
+            
             DateTimeLogic dateTimeLogic = new DateTimeLogic(dateTimeRepository);
-
-            DailyScoreLogic dailyScoreLogic = new DailyScoreLogic(userRepository, activeStrategy);
-            dateTimeLogic.Attach(dailyScoreLogic);
-
+            
+            foreach (IDateObserver observer in observers)
+            {
+                dateTimeLogic.Attach(observer);
+            }
+            
             return dateTimeLogic;
         });
     }

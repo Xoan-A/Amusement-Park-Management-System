@@ -4,7 +4,7 @@ namespace IBusinessLogic
 {
     public interface IDailyScoreLogic
     {
-        Task AddScoreToUser(User user, Attraction attraction, bool isSpecialEvent);
+        Task AddScoreToUser(User user, Attraction attraction, Event? attractionEvent = null);
     }
 }
 

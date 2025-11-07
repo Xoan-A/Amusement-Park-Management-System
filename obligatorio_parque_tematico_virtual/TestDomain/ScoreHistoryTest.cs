@@ -19,13 +19,11 @@ namespace TestDomain
             history.Points = points;
             history.Origin = origin;
             history.StrategyName = strategyName;
-            history.Description = description;
 
             Assert.AreEqual(visitorId, history.VisitorId);
             Assert.AreEqual(points, history.Points);
             Assert.AreEqual(origin, history.Origin);
             Assert.AreEqual(strategyName, history.StrategyName);
-            Assert.AreEqual(description, history.Description);
         }
 
         [TestMethod]
@@ -37,34 +35,6 @@ namespace TestDomain
             history.Origin = ScoreOrigin.Redemption;
 
             Assert.AreEqual(-50, history.Points);
-        }
-
-        [TestMethod]
-        public void ScoreHistory_SetDescription_TooLong_ThrowsException()
-        {
-            ScoreHistory history = new ScoreHistory();
-            string longDescription = new string('a', 1001);
-
-            Assert.ThrowsException<ArgumentException>(() =>
-            {
-                history.Description = longDescription;
-            });
-        }
-
-        [TestMethod]
-        public void ScoreHistory_SetDescription_EmptyOrNull_ThrowsException()
-        {
-            ScoreHistory history = new ScoreHistory();
-
-            Assert.ThrowsException<ArgumentException>(() =>
-            {
-                history.Description = "";
-            });
-
-            Assert.ThrowsException<ArgumentException>(() =>
-            {
-                history.Description = null;
-            });
         }
 
         [TestMethod]
@@ -94,7 +64,6 @@ namespace TestDomain
                     Points = 10,
                     Origin = origin,
                     StrategyName = "Test",
-                    Description = "Test description"
                 };
 
                 Assert.AreEqual(origin, history.Origin);
@@ -121,7 +90,6 @@ namespace TestDomain
                 Points = 100,
                 Origin = ScoreOrigin.AttractionVisit,
                 StrategyName = "PerAttraction",
-                Description = "Visited attraction"
             };
 
             Assert.IsNotNull(history.Visitor);

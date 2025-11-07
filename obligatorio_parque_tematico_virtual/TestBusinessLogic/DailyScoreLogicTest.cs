@@ -12,13 +12,15 @@ namespace TestBusinessLogic
         private DailyScoreLogic _dailyScoreLogic;
         private Mock<IUserRepository> _mockUserRepository;
         private Mock<IActiveStrategy> _mockActiveStrategy;
+        private Mock<IScoreHistoryRepository> _mockScoreHistoryRepository;
 
         [TestInitialize]
         public void Setup()
         {
             _mockUserRepository = new Mock<IUserRepository>();
             _mockActiveStrategy = new Mock<IActiveStrategy>();
-            _dailyScoreLogic = new DailyScoreLogic(_mockUserRepository.Object, _mockActiveStrategy.Object);
+            _mockScoreHistoryRepository = new Mock<IScoreHistoryRepository>();
+            _dailyScoreLogic = new DailyScoreLogic(_mockUserRepository.Object, _mockActiveStrategy.Object, _mockScoreHistoryRepository.Object);
         }
 
         [TestMethod]
@@ -77,7 +79,7 @@ namespace TestBusinessLogic
                 It.IsAny<StrategyRequest>()
             )).Returns(calculatedScore);
 
-            await _dailyScoreLogic.AddScoreToUser(user, attraction, false);
+            await _dailyScoreLogic.AddScoreToUser(user, attraction);
 
             Assert.AreEqual(initialScore + calculatedScore, user.Score);
             _mockUserRepository.Verify(r => r.Update(user), Times.Once);
@@ -92,6 +94,7 @@ namespace TestBusinessLogic
 
             User user = new User { Id = userId, Score = 0 };
             Attraction attraction = new Attraction { Id = attractionId };
+            Event attractionEvent = new Event();
 
             StrategyRequest capturedRequest = null;
 
@@ -102,11 +105,11 @@ namespace TestBusinessLogic
             )).Callback<User, Attraction, StrategyRequest>((u, a, sr) => capturedRequest = sr)
               .Returns(10);
 
-            await _dailyScoreLogic.AddScoreToUser(user, attraction, isSpecialEvent);
+            await _dailyScoreLogic.AddScoreToUser(user, attraction, attractionEvent);
 
             Assert.AreEqual(userId, capturedRequest.UserId);
             Assert.AreEqual(attractionId, capturedRequest.AttractionId);
-            Assert.AreEqual(isSpecialEvent, capturedRequest.IsSepcialEvent);
+            Assert.AreEqual(isSpecialEvent, capturedRequest.IsSpecialEvent);
         }
 
         [TestMethod]
@@ -114,6 +117,7 @@ namespace TestBusinessLogic
         {
             User user = new User { Id = Guid.NewGuid(), Score = 0 };
             Attraction attraction = new Attraction { Id = Guid.NewGuid() };
+            Event attractionEvent = new Event();
 
             StrategyRequest capturedRequest = null;
 
@@ -124,9 +128,9 @@ namespace TestBusinessLogic
             )).Callback<User, Attraction, StrategyRequest>((u, a, sr) => capturedRequest = sr)
               .Returns(20);
 
-            await _dailyScoreLogic.AddScoreToUser(user, attraction, true);
+            await _dailyScoreLogic.AddScoreToUser(user, attraction, attractionEvent);
 
-            Assert.IsTrue(capturedRequest.IsSepcialEvent);
+            Assert.IsTrue(capturedRequest.IsSpecialEvent);
         }
 
         [TestMethod]
@@ -144,9 +148,9 @@ namespace TestBusinessLogic
             )).Callback<User, Attraction, StrategyRequest>((u, a, sr) => capturedRequest = sr)
               .Returns(15);
 
-            await _dailyScoreLogic.AddScoreToUser(user, attraction, false);
+            await _dailyScoreLogic.AddScoreToUser(user, attraction);
 
-            Assert.IsFalse(capturedRequest.IsSepcialEvent);
+            Assert.IsFalse(capturedRequest.IsSpecialEvent);
         }
 
         [TestMethod]
@@ -161,7 +165,7 @@ namespace TestBusinessLogic
                 It.IsAny<StrategyRequest>()
             )).Returns(25);
 
-            await _dailyScoreLogic.AddScoreToUser(user, attraction, false);
+            await _dailyScoreLogic.AddScoreToUser(user, attraction);
 
             _mockActiveStrategy.Verify(s => s.CalculateScore(
                 user,
