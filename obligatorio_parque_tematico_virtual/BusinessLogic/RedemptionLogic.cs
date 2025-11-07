@@ -74,7 +74,7 @@ namespace BusinessLogic
             };
 
             await _scoreHistoryRepository.CreateAsync(scoreHistory);
-            
+
 
             return MapToModelOut(redemption, visitor.Name, reward.Name);
         }
@@ -85,11 +85,12 @@ namespace BusinessLogic
             return MapToModelOutList(redemptions);
         }
 
-        public async Task<List<RedemptionHistoryModelOut>> GetRedemptionHistoryWithDateRange(Guid visitorId, DateTime dateFrom,
+        public async Task<List<RedemptionHistoryModelOut>> GetRedemptionHistoryWithDateRange(Guid visitorId,
+            DateTime dateFrom,
             DateTime dateTo)
         {
             List<RedemptionHistory> redemptions =
-                await _redemptionHistoryRepository.GetByVisitorIdWithDateRangeAsync(visitorId, dateFrom, dateTo);
+            await _redemptionHistoryRepository.GetByVisitorIdWithDateRangeAsync(visitorId, dateFrom, dateTo);
             return MapToModelOutList(redemptions);
         }
 
@@ -97,7 +98,7 @@ namespace BusinessLogic
         {
             HasSufficientPointsSpecification pointsSpec = new HasSufficientPointsSpecification(reward.PointsCost);
             MeetsRequiredMembershipSpecification membershipSpec =
-                new MeetsRequiredMembershipSpecification(reward.RequiredMembershipLevel);
+            new MeetsRequiredMembershipSpecification(reward.RequiredMembershipLevel);
             RewardIsAvailableSpecification availabilitySpec = new RewardIsAvailableSpecification();
 
             if (!pointsSpec.IsSatisfiedBy(visitor))
