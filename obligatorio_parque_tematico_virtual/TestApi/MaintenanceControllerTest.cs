@@ -128,7 +128,6 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             ScheduledDate = DateTime.Now.AddDays(7),
-            MaintenanceType = "Inspection",
             Description = "Monthly safety inspection"
         };
 
@@ -151,7 +150,6 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             ScheduledDate = DateTime.Now.AddDays(7),
-            MaintenanceType = "Inspection",
             Description = "Monthly safety inspection"
         };
 
@@ -173,7 +171,6 @@ public class MaintenanceControllerTest
                 AttractionId = Guid.NewGuid(),
                 AttractionName = "Roller Coaster",
                 ScheduledDate = DateTime.Now.AddDays(7),
-                MaintenanceType = "Inspection",
                 Description = "Monthly inspection",
                 Status = "Pending",
                 CreatedAt = DateTime.UtcNow,
@@ -200,7 +197,6 @@ public class MaintenanceControllerTest
             AttractionId = Guid.NewGuid(),
             AttractionName = "Roller Coaster",
             ScheduledDate = DateTime.Now.AddDays(7),
-            MaintenanceType = "Inspection",
             Description = "Monthly inspection",
             Status = "Pending",
             CreatedAt = DateTime.UtcNow,
@@ -225,7 +221,6 @@ public class MaintenanceControllerTest
                 AttractionId = Guid.NewGuid(),
                 AttractionName = "Roller Coaster",
                 ScheduledDate = DateTime.Now.AddDays(-1),
-                MaintenanceType = "Inspection",
                 Description = "Overdue inspection",
                 Status = "Pending",
                 CreatedAt = DateTime.UtcNow,
@@ -263,7 +258,6 @@ public class MaintenanceControllerTest
                 AttractionId = attractionId,
                 AttractionName = "Roller Coaster",
                 ScheduledDate = DateTime.Now.AddDays(3),
-                MaintenanceType = "Inspection",
                 Description = "Routine inspection",
                 Status = "Pending",
                 CreatedAt = DateTime.UtcNow,
@@ -328,7 +322,6 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             PerformedDate = DateTime.Now,
-            MaintenanceType = "Inspection",
             Description = "Completed safety inspection",
             Duration = TimeSpan.FromHours(2)
         };
@@ -350,7 +343,6 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             PerformedDate = DateTime.Now,
-            MaintenanceType = "Inspection",
             Description = "Test",
             Duration = TimeSpan.FromHours(1)
         };
@@ -375,7 +367,6 @@ public class MaintenanceControllerTest
                 PerformedDate = DateTime.Now,
                 PerformedBy = Guid.NewGuid(),
                 PerformedByName = "John Operator",
-                MaintenanceType = "Inspection",
                 Description = "Completed inspection",
                 Duration = TimeSpan.FromHours(2),
                 CreatedAt = DateTime.UtcNow
@@ -401,7 +392,6 @@ public class MaintenanceControllerTest
             PerformedDate = DateTime.Now,
             PerformedBy = Guid.NewGuid(),
             PerformedByName = "John Operator",
-            MaintenanceType = "Inspection",
             Description = "Completed inspection",
             Duration = TimeSpan.FromHours(2),
             CreatedAt = DateTime.UtcNow
@@ -440,7 +430,6 @@ public class MaintenanceControllerTest
                 AttractionName = "Roller Coaster",
                 PerformedBy = operatorId,
                 PerformedByName = "John Operator",
-                MaintenanceType = "Inspection",
                 Description = "Completed inspection",
                 PerformedDate = DateTime.UtcNow,
                 Duration = TimeSpan.FromHours(2),
@@ -496,7 +485,6 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             PerformedDate = DateTime.Now,
-            MaintenanceType = "Inspection",
             Description = "Completed scheduled maintenance",
             Duration = TimeSpan.FromHours(2)
         };
@@ -521,7 +509,6 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             PerformedDate = DateTime.Now,
-            MaintenanceType = "Inspection",
             Description = "Test",
             Duration = TimeSpan.FromHours(1)
         };
@@ -545,7 +532,6 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             ScheduledDate = DateTime.Now.AddDays(7),
-            MaintenanceType = "Inspection",
             Description = "Test"
         };
 
@@ -578,7 +564,6 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             PerformedDate = DateTime.Now,
-            MaintenanceType = "Inspection",
             Description = "Test",
             Duration = TimeSpan.FromHours(1)
         };
@@ -601,7 +586,6 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             PerformedDate = DateTime.Now,
-            MaintenanceType = "Inspection",
             Description = "Test",
             Duration = TimeSpan.FromHours(1)
         };
@@ -625,7 +609,6 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             ScheduledDate = DateTime.UtcNow.AddDays(1),
-            MaintenanceType = "Inspection",
             Description = "Test"
         };
 
@@ -670,7 +653,6 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             MaintenanceScheduleId = null,
-            MaintenanceType = "Inspection",
             Description = "Test",
             Duration = TimeSpan.FromHours(1)
         };
@@ -717,7 +699,6 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             MaintenanceScheduleId = scheduleId,
-            MaintenanceType = "Inspection",
             Description = "Completed",
             Duration = TimeSpan.FromHours(1)
         };

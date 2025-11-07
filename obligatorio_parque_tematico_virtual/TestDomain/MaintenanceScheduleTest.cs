@@ -13,13 +13,10 @@ namespace TestDomain
                 Id = Guid.NewGuid(),
                 AttractionId = Guid.NewGuid(),
                 ScheduledDate = DateTime.Now.AddDays(7),
-                MaintenanceType = MaintenanceType.Inspection,
                 Description = "Monthly safety inspection",
                 Status = MaintenanceStatus.Pending
             };
 
-            Assert.IsNotNull(schedule);
-            Assert.AreEqual(MaintenanceType.Inspection, schedule.MaintenanceType);
             Assert.AreEqual(MaintenanceStatus.Pending, schedule.Status);
         }
 
@@ -132,25 +129,6 @@ namespace TestDomain
             Assert.AreEqual(MaintenanceStatus.Cancelled, schedule.Status);
         }
 
-        [TestMethod]
-        public void SetMaintenanceType_AllTypes_Success()
-        {
-            MaintenanceSchedule inspection = new MaintenanceSchedule
-            { MaintenanceType = MaintenanceType.Inspection, Description = "Test" };
-            MaintenanceSchedule cleaning = new MaintenanceSchedule
-            { MaintenanceType = MaintenanceType.Cleaning, Description = "Test" };
-            MaintenanceSchedule repair = new MaintenanceSchedule
-            { MaintenanceType = MaintenanceType.Repair, Description = "Test" };
-            MaintenanceSchedule safety = new MaintenanceSchedule
-            { MaintenanceType = MaintenanceType.SafetyCheck, Description = "Test" };
-
-            Assert.AreEqual(MaintenanceType.Inspection, inspection.MaintenanceType);
-            Assert.AreEqual(MaintenanceType.Cleaning, cleaning.MaintenanceType);
-            Assert.AreEqual(MaintenanceType.Repair, repair.MaintenanceType);
-            Assert.AreEqual(MaintenanceType.SafetyCheck, safety.MaintenanceType);
-        }
-
-        [TestMethod]
         public void SetAttractionId_ValidGuid_Success()
         {
             Guid attractionId = Guid.NewGuid();

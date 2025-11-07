@@ -7,7 +7,6 @@ namespace Domain
         public Guid Id { get; set; }
         public Guid AttractionId { get; set; }
         public DateTime ScheduledDate { get; set; }
-        public MaintenanceType MaintenanceType { get; set; }
 
         public string Description
         {

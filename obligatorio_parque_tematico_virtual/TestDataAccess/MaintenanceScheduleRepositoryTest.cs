@@ -55,7 +55,6 @@ namespace TestDataAccess
                 Id = Guid.NewGuid(),
                 AttractionId = attraction.Id,
                 ScheduledDate = DateTime.Now.AddDays(7),
-                MaintenanceType = MaintenanceType.Inspection,
                 Description = "Monthly inspection",
                 Status = MaintenanceStatus.Pending
             };
@@ -431,7 +430,6 @@ namespace TestDataAccess
                 Id = Guid.NewGuid(),
                 AttractionId = attractionId,
                 ScheduledDate = DateTime.Now.AddDays(7),
-                MaintenanceType = MaintenanceType.Inspection,
                 Description = "Test maintenance schedule",
                 Status = MaintenanceStatus.Pending
             };

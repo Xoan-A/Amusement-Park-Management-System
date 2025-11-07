@@ -47,7 +47,6 @@ public class MaintenanceLogicTest
         {
             AttractionId = attractionId,
             ScheduledDate = DateTime.Now.AddDays(7),
-            MaintenanceType = "Inspection",
             Description = "Monthly safety inspection"
         };
 
@@ -68,7 +67,6 @@ public class MaintenanceLogicTest
         {
             AttractionId = Guid.NewGuid(),
             ScheduledDate = DateTime.Now.AddDays(7),
-            MaintenanceType = "Inspection",
             Description = "Monthly safety inspection"
         };
 
@@ -236,7 +234,6 @@ public class MaintenanceLogicTest
         {
             AttractionId = attractionId,
             PerformedDate = DateTime.Now,
-            MaintenanceType = "Inspection",
             Description = "Completed safety inspection",
             Duration = TimeSpan.FromHours(2)
         };
@@ -258,7 +255,6 @@ public class MaintenanceLogicTest
         {
             AttractionId = Guid.NewGuid(),
             PerformedDate = DateTime.Now,
-            MaintenanceType = "Inspection",
             Description = "Test",
             Duration = TimeSpan.FromHours(1)
         };
@@ -416,7 +412,6 @@ public class MaintenanceLogicTest
             MaintenanceScheduleId = scheduleId,
             AttractionId = attractionId,
             PerformedDate = DateTime.Now,
-            MaintenanceType = "Inspection",
             Description = "Completed scheduled inspection",
             Duration = TimeSpan.FromHours(2)
         };
@@ -443,7 +438,6 @@ public class MaintenanceLogicTest
         {
             AttractionId = Guid.NewGuid(),
             PerformedDate = DateTime.Now,
-            MaintenanceType = "Inspection",
             Description = "Test",
             Duration = TimeSpan.FromHours(1)
         };
@@ -467,7 +461,6 @@ public class MaintenanceLogicTest
         {
             AttractionId = attraction.Id,
             PerformedDate = DateTime.Now,
-            MaintenanceType = "Inspection",
             Description = "Test",
             Duration = TimeSpan.FromHours(1)
         };
@@ -505,7 +498,6 @@ public class MaintenanceLogicTest
             AttractionId = attractionId,
             Attraction = attraction,
             ScheduledDate = DateTime.Now.AddDays(7),
-            MaintenanceType = MaintenanceType.Inspection,
             Description = "Test maintenance schedule",
             Status = MaintenanceStatus.Pending,
             CreatedAt = DateTime.UtcNow
@@ -536,70 +528,10 @@ public class MaintenanceLogicTest
             PerformedDate = DateTime.Now,
             PerformedBy = performedBy,
             Operator = operatorUser,
-            MaintenanceType = MaintenanceType.Inspection,
             Description = "Test maintenance record",
             Duration = TimeSpan.FromHours(2),
             CreatedAt = DateTime.UtcNow
         };
-    }
-
-    [TestMethod]
-    public async Task CreateSchedule_WithInvalidMaintenanceType_ThrowsArgumentException()
-    {
-        Guid attractionId = Guid.NewGuid();
-        Attraction attraction = new Attraction
-        {
-            Id = attractionId,
-            Name = "Test Attraction",
-            Description = "Test",
-            Type = AttractionType.RollerCoaster,
-            MaxCapacity = 100
-        };
-
-        MaintenanceScheduleRequest request = new MaintenanceScheduleRequest
-        {
-            AttractionId = attractionId,
-            ScheduledDate = DateTime.UtcNow.AddDays(5),
-            MaintenanceType = "InvalidTypeValue",
-            Description = "Test maintenance"
-        };
-
-        Guid userId = Guid.NewGuid();
-        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
-            async () => await _maintenanceLogic.CreateSchedule(request, userId),
-            "Should throw ArgumentException for invalid MaintenanceType");
-    }
-
-    [TestMethod]
-    public async Task RecordMaintenance_WithInvalidMaintenanceType_ThrowsArgumentException()
-    {
-        Guid attractionId = Guid.NewGuid();
-        Attraction attraction = new Attraction
-        {
-            Id = attractionId,
-            Name = "Test Attraction",
-            Description = "Test",
-            Type = AttractionType.RollerCoaster,
-            MaxCapacity = 100
-        };
-
-        MaintenanceRecordRequest request = new MaintenanceRecordRequest
-        {
-            AttractionId = attractionId,
-            MaintenanceScheduleId = null,
-            MaintenanceType = "BadEnumValue",
-            Description = "Test record",
-            Duration = TimeSpan.FromHours(1)
-        };
-
-        Guid userId = Guid.NewGuid();
-        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
-            async () => await _maintenanceLogic.RecordMaintenance(request, userId),
-            "Should throw ArgumentException for invalid MaintenanceType");
     }
 
     #endregion

@@ -35,11 +35,6 @@ public class MaintenanceLogic : IMaintenanceLogic
             throw new KeyNotFoundException($"Attraction with id {request.AttractionId} not found");
         }
 
-        if (!Enum.TryParse<MaintenanceType>(request.MaintenanceType, out MaintenanceType maintenanceType))
-        {
-            throw new ArgumentException($"Invalid maintenance type: {request.MaintenanceType}");
-        }
-
         DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
 
         MaintenanceSchedule schedule = new MaintenanceSchedule
@@ -47,7 +42,6 @@ public class MaintenanceLogic : IMaintenanceLogic
             Id = Guid.NewGuid(),
             AttractionId = request.AttractionId,
             ScheduledDate = request.ScheduledDate,
-            MaintenanceType = maintenanceType,
             Description = request.Description,
             Status = MaintenanceStatus.Pending,
             CreatedBy = createdBy,
@@ -136,13 +130,8 @@ public class MaintenanceLogic : IMaintenanceLogic
             }
         }
 
-        if (!Enum.TryParse<MaintenanceType>(request.MaintenanceType, out MaintenanceType maintenanceType))
-        {
-            throw new ArgumentException($"Invalid maintenance type: {request.MaintenanceType}");
-        }
-
         DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
-
+        
         MaintenanceRecord record = new MaintenanceRecord
         {
             Id = Guid.NewGuid(),
@@ -150,13 +139,12 @@ public class MaintenanceLogic : IMaintenanceLogic
             AttractionId = request.AttractionId,
             PerformedDate = request.PerformedDate,
             PerformedBy = performedBy,
-            MaintenanceType = maintenanceType,
             Description = request.Description,
             Notes = request.Notes,
             Duration = request.Duration,
             CreatedAt = currentDateTime
         };
-
+    
         await _recordRepository.CreateAsync(record);
         return record.Id;
     }
@@ -253,7 +241,6 @@ public class MaintenanceLogic : IMaintenanceLogic
             AttractionId = schedule.AttractionId,
             AttractionName = schedule.Attraction?.Name ?? "Unknown",
             ScheduledDate = schedule.ScheduledDate,
-            MaintenanceType = schedule.MaintenanceType.ToString(),
             Description = schedule.Description,
             Status = schedule.Status.ToString(),
             CreatedAt = schedule.CreatedAt,
@@ -273,7 +260,6 @@ public class MaintenanceLogic : IMaintenanceLogic
             PerformedBy = record.PerformedBy,
             PerformedByName =
                 record.Operator != null ? $"{record.Operator.Name} {record.Operator.LastName}" : "Unknown",
-            MaintenanceType = record.MaintenanceType.ToString(),
             Description = record.Description,
             Notes = record.Notes,
             Duration = record.Duration,
