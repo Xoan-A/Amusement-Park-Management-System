@@ -23,8 +23,8 @@ namespace TestDataAccess
             _connection.Open();
 
             DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite(_connection)
-                .Options;
+            .UseSqlite(_connection)
+            .Options;
 
             _context = new AppDbContext(options);
             _context.Database.EnsureCreated();
@@ -184,7 +184,7 @@ namespace TestDataAccess
         public async Task GetOverdueSchedules_WhenDateTimeRepositoryReturnsNull_UsesDateTimeNow()
         {
             _mockDateTimeRepository.Setup(x => x.GetConfiguredDateTime()).ReturnsAsync((DateTime?)null);
-            
+
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
 
@@ -326,7 +326,7 @@ namespace TestDataAccess
         public async Task GetUpcomingSchedules_WhenDateTimeRepositoryReturnsNull_UsesDateTimeNow()
         {
             _mockDateTimeRepository.Setup(x => x.GetConfiguredDateTime()).ReturnsAsync((DateTime?)null);
-            
+
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
 
@@ -404,7 +404,7 @@ namespace TestDataAccess
             await _context.SaveChangesAsync();
 
             List<MaintenanceSchedule> results =
-                await _repository.GetByAttractionIdAndDateRangeAsync(attraction1.Id, dateFrom, dateTo);
+            await _repository.GetByAttractionIdAndDateRangeAsync(attraction1.Id, dateFrom, dateTo);
 
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(targetSchedule.Id, results[0].Id);
