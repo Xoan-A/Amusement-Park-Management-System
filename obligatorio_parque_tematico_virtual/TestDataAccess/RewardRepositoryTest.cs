@@ -37,7 +37,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void Create_ValidReward_Success()
+        public async Task Create_ValidReward_Success()
         {
             Reward reward = new Reward
             {
@@ -49,17 +49,16 @@ namespace TestDataAccess
                 RequiredMembershipLevel = MembershipLevel.Premium
             };
 
-            _repository.Create(reward);
-            _context.SaveChanges();
+            await _repository.CreateAsync(reward);
 
-            Reward? retrieved = _context.Rewards.Find(reward.Id);
+            Reward? retrieved = await _context.Rewards.FindAsync(reward.Id);
             Assert.IsNotNull(retrieved);
             Assert.AreEqual("VIP Access", retrieved.Name);
             Assert.AreEqual(500, retrieved.PointsCost);
         }
 
         [TestMethod]
-        public void GetAll_ReturnsAllRewards()
+        public async Task GetAll_ReturnsAllRewards()
         {
             Reward reward1 = new Reward
             {
@@ -81,15 +80,15 @@ namespace TestDataAccess
 
             _context.Rewards.Add(reward1);
             _context.Rewards.Add(reward2);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<Reward> rewards = _repository.GetAll();
+            List<Reward> rewards = await _repository.GetAllAsync();
 
             Assert.AreEqual(2, rewards.Count);
         }
 
         [TestMethod]
-        public void GetById_ExistingReward_ReturnsReward()
+        public async Task GetById_ExistingReward_ReturnsReward()
         {
             Reward reward = new Reward
             {
@@ -101,9 +100,9 @@ namespace TestDataAccess
             };
 
             _context.Rewards.Add(reward);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            Reward? retrieved = _repository.GetById(reward.Id);
+            Reward? retrieved = await _repository.GetByIdAsync(reward.Id);
 
             Assert.IsNotNull(retrieved);
             Assert.AreEqual(reward.Id, retrieved.Id);
@@ -111,15 +110,15 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetById_NonExistingReward_ReturnsNull()
+        public async Task GetById_NonExistingReward_ReturnsNull()
         {
-            Reward? retrieved = _repository.GetById(Guid.NewGuid());
+            Reward? retrieved = await _repository.GetByIdAsync(Guid.NewGuid());
 
             Assert.IsNull(retrieved);
         }
 
         [TestMethod]
-        public void Update_ExistingReward_Success()
+        public async Task Update_ExistingReward_Success()
         {
             Reward reward = new Reward
             {
@@ -131,20 +130,19 @@ namespace TestDataAccess
             };
 
             _context.Rewards.Add(reward);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             reward.Name = "Updated Name";
             reward.PointsCost = 150;
-            _repository.Update(reward);
-            _context.SaveChanges();
+            await _repository.UpdateAsync(reward);
 
-            Reward? updated = _context.Rewards.Find(reward.Id);
+            Reward? updated = await _context.Rewards.FindAsync(reward.Id);
             Assert.AreEqual("Updated Name", updated.Name);
             Assert.AreEqual(150, updated.PointsCost);
         }
 
         [TestMethod]
-        public void Delete_ExistingReward_Success()
+        public async Task Delete_ExistingReward_Success()
         {
             Reward reward = new Reward
             {
@@ -156,17 +154,16 @@ namespace TestDataAccess
             };
 
             _context.Rewards.Add(reward);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            _repository.Delete(reward.Id);
-            _context.SaveChanges();
+            await _repository.DeleteAsync(reward.Id);
 
-            Reward? deleted = _context.Rewards.Find(reward.Id);
+            Reward? deleted = await _context.Rewards.FindAsync(reward.Id);
             Assert.IsNull(deleted);
         }
 
         [TestMethod]
-        public void GetAvailableRewards_ReturnsOnlyRewardsWithQuantity()
+        public async Task GetAvailableRewards_ReturnsOnlyRewardsWithQuantity()
         {
             Reward availableReward1 = new Reward
             {
@@ -196,16 +193,16 @@ namespace TestDataAccess
             };
 
             _context.Rewards.AddRange(availableReward1, availableReward2, unavailableReward);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<Reward> availableRewards = _repository.GetAvailableRewards();
+            List<Reward> availableRewards = await _repository.GetAvailableRewardsAsync();
 
             Assert.AreEqual(2, availableRewards.Count);
             Assert.IsTrue(availableRewards.All(r => r.AvailableQuantity > 0));
         }
 
         [TestMethod]
-        public void GetRewardsByMembershipLevel_NoRequirement_ReturnsAll()
+        public async Task GetRewardsByMembershipLevel_NoRequirement_ReturnsAll()
         {
             Reward reward1 = new Reward
             {
@@ -228,16 +225,16 @@ namespace TestDataAccess
             };
 
             _context.Rewards.AddRange(reward1, reward2);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<Reward> rewards = _repository.GetRewardsByMembershipLevel(null);
+            List<Reward> rewards = await _repository.GetRewardsByMembershipLevelAsync(null);
 
             Assert.AreEqual(1, rewards.Count);
             Assert.AreEqual("No Requirement", rewards[0].Name);
         }
 
         [TestMethod]
-        public void GetRewardsByMembershipLevel_SpecificLevel_ReturnsMatching()
+        public async Task GetRewardsByMembershipLevel_SpecificLevel_ReturnsMatching()
         {
             Reward standardReward = new Reward
             {
@@ -270,16 +267,16 @@ namespace TestDataAccess
             };
 
             _context.Rewards.AddRange(standardReward, premiumReward, vipReward);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<Reward> premiumRewards = _repository.GetRewardsByMembershipLevel(MembershipLevel.Premium);
+            List<Reward> premiumRewards = await _repository.GetRewardsByMembershipLevelAsync(MembershipLevel.Premium);
 
             Assert.AreEqual(1, premiumRewards.Count);
             Assert.AreEqual("Premium", premiumRewards[0].Name);
         }
 
         [TestMethod]
-        public void GetByName_ExistingName_ReturnsReward()
+        public async Task GetByName_ExistingName_ReturnsReward()
         {
             Reward reward = new Reward
             {
@@ -291,18 +288,18 @@ namespace TestDataAccess
             };
 
             _context.Rewards.Add(reward);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            Reward? retrieved = _repository.GetByName("Unique Name");
+            Reward? retrieved = await _repository.GetByNameAsync("Unique Name");
 
             Assert.IsNotNull(retrieved);
             Assert.AreEqual("Unique Name", retrieved.Name);
         }
 
         [TestMethod]
-        public void GetByName_NonExistingName_ReturnsNull()
+        public async Task GetByName_NonExistingName_ReturnsNull()
         {
-            Reward? retrieved = _repository.GetByName("Non Existing");
+            Reward? retrieved = await _repository.GetByNameAsync("Non Existing");
 
             Assert.IsNull(retrieved);
         }
