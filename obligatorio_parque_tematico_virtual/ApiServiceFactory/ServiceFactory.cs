@@ -46,7 +46,7 @@ public static class ServiceFactory
         services.AddScoped<IMaintenanceScheduleRepository, MaintenanceScheduleRepository>();
         services.AddScoped<IMaintenanceRecordRepository, MaintenanceRecordRepository>();
         services.AddScoped<IScoreHistoryRepository, ScoreHistoryRepository>();
-        
+
         services.AddScoped<DailyScoreLogic>();
         services.AddScoped<IDailyScoreLogic>(sp => sp.GetRequiredService<DailyScoreLogic>());
         services.AddScoped<IDateObserver>(sp => sp.GetRequiredService<DailyScoreLogic>());
@@ -54,14 +54,14 @@ public static class ServiceFactory
         {
             IDateTimeRepository dateTimeRepository = serviceProvider.GetRequiredService<IDateTimeRepository>();
             IEnumerable<IDateObserver> observers = serviceProvider.GetServices<IDateObserver>();
-            
+
             DateTimeLogic dateTimeLogic = new DateTimeLogic(dateTimeRepository);
-            
+
             foreach (IDateObserver observer in observers)
             {
                 dateTimeLogic.Attach(observer);
             }
-            
+
             return dateTimeLogic;
         });
     }
