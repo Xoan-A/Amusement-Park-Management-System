@@ -12,17 +12,20 @@ namespace BusinessLogic
         private readonly IUserRepository _userRepository;
         private readonly IRedemptionHistoryRepository _redemptionHistoryRepository;
         private readonly IDateTimeLogic _dateTimeLogic;
+        private readonly IScoreHistoryRepository _scoreHistoryRepository;
 
         public RedemptionLogic(
             IRewardRepository rewardRepository,
             IUserRepository userRepository,
             IRedemptionHistoryRepository redemptionHistoryRepository,
-            IDateTimeLogic dateTimeLogic)
+            IDateTimeLogic dateTimeLogic,
+            IScoreHistoryRepository scoreHistoryRepository)
         {
             _rewardRepository = rewardRepository;
             _userRepository = userRepository;
             _redemptionHistoryRepository = redemptionHistoryRepository;
             _dateTimeLogic = dateTimeLogic;
+            _scoreHistoryRepository = scoreHistoryRepository;
         }
 
         public async Task<RedemptionHistoryModelOut> RedeemReward(Guid visitorId, Guid rewardId)
@@ -58,6 +61,20 @@ namespace BusinessLogic
             await _redemptionHistoryRepository.CreateAsync(redemption);
             await _userRepository.Update(visitor);
             await _rewardRepository.UpdateAsync(reward);
+
+            ScoreHistory scoreHistory = new ScoreHistory
+            {
+                Id = Guid.NewGuid(),
+                VisitorId = visitor.Id,
+                CreatedAt = currentDateTime,
+                Points = -reward.PointsCost,
+                Origin = ScoreOrigin.Redemption,
+                RelatedEntityId = reward.Id,
+                StrategyName = "RedemptionStrategy"
+            };
+
+            await _scoreHistoryRepository.CreateAsync(scoreHistory);
+            
 
             return MapToModelOut(redemption, visitor.Name, reward.Name);
         }
