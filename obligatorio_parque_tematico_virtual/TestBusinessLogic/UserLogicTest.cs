@@ -1636,7 +1636,7 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.IsEmailUnique(email)).ReturnsAsync(true);
             _mockPasswordService.Setup(p => p.HashPassword(password)).Returns(hashedPassword);
-            _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns((Role)null);
+            _mockRoleRepository.Setup(r => r.GetByNameAsync(Role.VISITOR)).ReturnsAsync((Role)null);
 
             User createdUser = null;
             _mockUserRepository.Setup(r => r.Create(It.IsAny<User>()))
@@ -1658,7 +1658,7 @@ namespace TestBusinessLogic
             Assert.IsNotNull(createdUser);
             Assert.AreEqual(0, createdUser.UserRoles.Count, "User should have no roles when visitor role is not found");
 
-            _mockRoleRepository.Verify(r => r.GetByName(Role.VISITOR), Times.Once);
+            _mockRoleRepository.Verify(r => r.GetByNameAsync(Role.VISITOR), Times.Once);
             _mockUserRepository.Verify(r => r.Create(It.IsAny<User>()), Times.Once);
         }
 
@@ -1704,8 +1704,8 @@ namespace TestBusinessLogic
             _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
 
             Role adminRole = new Role { Id = 1, Name = "Admin" };
-            _mockRoleRepository.Setup(r => r.GetByName("Admin")).Returns(adminRole);
-            _mockRoleRepository.Setup(r => r.GetByName("NonExistent")).Returns((Role)null);
+            _mockRoleRepository.Setup(r => r.GetByNameAsync("Admin")).ReturnsAsync(adminRole);
+            _mockRoleRepository.Setup(r => r.GetByNameAsync("NonExistent")).ReturnsAsync((Role)null);
 
             User createdUser = null;
             _mockUserRepository.Setup(r => r.Create(It.IsAny<User>()))

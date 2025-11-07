@@ -4,7 +4,7 @@ namespace IBusinessLogic;
 
 public interface IScoreHistoryLogic
 {
-    List<ScoreHistoryModelOut> GetMyScoreHistory(Guid visitorId);
-    List<ScoreHistoryModelOut> GetVisitorScoreHistory(Guid visitorId, DateTime? dateFrom, DateTime? dateTo);
-    List<ScoreHistoryModelOut> GetAllScoreHistory();
+    Task<List<ScoreHistoryModelOut>> GetMyScoreHistory(Guid visitorId);
+    Task<List<ScoreHistoryModelOut>> GetVisitorScoreHistory(Guid visitorId, DateTime? dateFrom, DateTime? dateTo);
+    Task<List<ScoreHistoryModelOut>> GetAllScoreHistory();
 }

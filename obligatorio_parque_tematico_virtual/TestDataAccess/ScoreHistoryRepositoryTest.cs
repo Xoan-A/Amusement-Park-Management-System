@@ -37,11 +37,11 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void Create_ValidHistory_Success()
+        public async Task Create_ValidHistory_Success()
         {
             User visitor = CreateTestVisitor();
             _context.Users.Add(visitor);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             ScoreHistory history = new ScoreHistory
             {
@@ -53,45 +53,45 @@ namespace TestDataAccess
                 Description = "Visited Roller Coaster"
             };
 
-            _repository.Create(history);
+            await _repository.CreateAsync(history);
 
-            ScoreHistory result = _context.ScoreHistories.Find(history.Id);
+            ScoreHistory result = await _context.ScoreHistories.FindAsync(history.Id);
             Assert.IsNotNull(result);
             Assert.AreEqual(history.Points, result.Points);
         }
 
         [TestMethod]
-        public void GetByVisitor_ReturnsHistoryOrderedByDate()
+        public async Task GetByVisitor_ReturnsHistoryOrderedByDate()
         {
             User visitor = CreateTestVisitor();
             _context.Users.Add(visitor);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             ScoreHistory history1 = CreateTestHistory(visitor.Id);
             ScoreHistory history2 = CreateTestHistory(visitor.Id);
             history2.CreatedAt = DateTime.UtcNow.AddHours(1);
 
             _context.ScoreHistories.AddRange(history1, history2);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<ScoreHistory> results = _repository.GetByVisitor(visitor.Id);
+            List<ScoreHistory> results = await _repository.GetByVisitorAsync(visitor.Id);
 
             Assert.AreEqual(2, results.Count);
             Assert.IsTrue(results[0].CreatedAt >= results[1].CreatedAt);
         }
 
         [TestMethod]
-        public void GetById_WithValidId_ReturnsScoreHistory()
+        public async Task GetById_WithValidId_ReturnsScoreHistory()
         {
             User visitor = CreateTestVisitor();
             _context.Users.Add(visitor);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             ScoreHistory history = CreateTestHistory(visitor.Id);
             _context.ScoreHistories.Add(history);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            ScoreHistory result = _repository.GetById(history.Id);
+            ScoreHistory result = await _repository.GetByIdAsync(history.Id);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(history.Id, result.Id);
@@ -101,19 +101,19 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetById_WithInvalidId_ReturnsNull()
+        public async Task GetById_WithInvalidId_ReturnsNull()
         {
-            ScoreHistory result = _repository.GetById(Guid.NewGuid());
+            ScoreHistory result = await _repository.GetByIdAsync(Guid.NewGuid());
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void GetByVisitorAndDateRange_FiltersCorrectly()
+        public async Task GetByVisitorAndDateRange_FiltersCorrectly()
         {
             User visitor = CreateTestVisitor();
             _context.Users.Add(visitor);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             DateTime dateFrom = DateTime.UtcNow.AddDays(-7);
             DateTime dateTo = DateTime.UtcNow;
@@ -131,9 +131,9 @@ namespace TestDataAccess
             history4.CreatedAt = DateTime.UtcNow.AddDays(1);
 
             _context.ScoreHistories.AddRange(history1, history2, history3, history4);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<ScoreHistory> results = _repository.GetByVisitorAndDateRange(visitor.Id, dateFrom, dateTo);
+            List<ScoreHistory> results = await _repository.GetByVisitorAndDateRangeAsync(visitor.Id, dateFrom, dateTo);
 
             Assert.AreEqual(2, results.Count);
             Assert.IsTrue(results.All(h => h.CreatedAt >= dateFrom && h.CreatedAt <= dateTo));
@@ -141,12 +141,12 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetByOrigin_WithAttractionVisit_ReturnsMatchingHistory()
+        public async Task GetByOrigin_WithAttractionVisit_ReturnsMatchingHistory()
         {
             User visitor1 = CreateTestVisitor();
             User visitor2 = CreateTestVisitor();
             _context.Users.AddRange(visitor1, visitor2);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             ScoreHistory attractionHistory1 = CreateTestHistory(visitor1.Id);
             attractionHistory1.Origin = ScoreOrigin.AttractionVisit;
@@ -158,9 +158,9 @@ namespace TestDataAccess
             eventHistory.Origin = ScoreOrigin.EventParticipation;
 
             _context.ScoreHistories.AddRange(attractionHistory1, attractionHistory2, eventHistory);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<ScoreHistory> results = _repository.GetByOrigin(ScoreOrigin.AttractionVisit);
+            List<ScoreHistory> results = await _repository.GetByOriginAsync(ScoreOrigin.AttractionVisit);
 
             Assert.AreEqual(2, results.Count);
             Assert.IsTrue(results.All(h => h.Origin == ScoreOrigin.AttractionVisit));
@@ -169,12 +169,12 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public void GetAll_ReturnsAllHistoryOrderedByDate()
+        public async Task GetAll_ReturnsAllHistoryOrderedByDate()
         {
             User visitor1 = CreateTestVisitor();
             User visitor2 = CreateTestVisitor();
             _context.Users.AddRange(visitor1, visitor2);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             ScoreHistory history1 = CreateTestHistory(visitor1.Id);
             history1.CreatedAt = DateTime.UtcNow.AddDays(-2);
@@ -186,9 +186,9 @@ namespace TestDataAccess
             history3.CreatedAt = DateTime.UtcNow;
 
             _context.ScoreHistories.AddRange(history1, history2, history3);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            List<ScoreHistory> results = _repository.GetAll();
+            List<ScoreHistory> results = await _repository.GetAllAsync();
 
             Assert.AreEqual(3, results.Count);
             Assert.IsTrue(results[0].CreatedAt >= results[1].CreatedAt);

@@ -4,16 +4,16 @@ namespace IDataAccess
 {
     public interface IMaintenanceScheduleRepository
     {
-        void Create(MaintenanceSchedule schedule);
-        MaintenanceSchedule? GetById(Guid id);
-        List<MaintenanceSchedule> GetAll();
-        List<MaintenanceSchedule> GetByAttractionId(Guid attractionId);
-        List<MaintenanceSchedule> GetByStatus(MaintenanceStatus status);
-        List<MaintenanceSchedule> GetOverdueSchedules();
-        List<MaintenanceSchedule> GetByDateRange(DateTime dateFrom, DateTime dateTo);
-        List<MaintenanceSchedule> GetUpcomingSchedules(int daysAhead);
-        List<MaintenanceSchedule> GetByAttractionIdAndDateRange(Guid attractionId, DateTime dateFrom, DateTime dateTo);
-        void Update(MaintenanceSchedule schedule);
-        void Delete(Guid id);
+        Task CreateAsync(MaintenanceSchedule schedule);
+        Task<MaintenanceSchedule?> GetByIdAsync(Guid id);
+        Task<List<MaintenanceSchedule>> GetAllAsync();
+        Task<List<MaintenanceSchedule>> GetByAttractionIdAsync(Guid attractionId);
+        Task<List<MaintenanceSchedule>> GetByStatusAsync(MaintenanceStatus status);
+        Task<List<MaintenanceSchedule>> GetOverdueSchedulesAsync();
+        Task<List<MaintenanceSchedule>> GetByDateRangeAsync(DateTime dateFrom, DateTime dateTo);
+        Task<List<MaintenanceSchedule>> GetUpcomingSchedulesAsync(int daysAhead);
+        Task<List<MaintenanceSchedule>> GetByAttractionIdAndDateRangeAsync(Guid attractionId, DateTime dateFrom, DateTime dateTo);
+        Task UpdateAsync(MaintenanceSchedule schedule);
+        Task DeleteAsync(Guid id);
     }
 }

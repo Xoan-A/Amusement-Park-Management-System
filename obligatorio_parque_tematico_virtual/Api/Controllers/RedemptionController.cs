@@ -21,34 +21,34 @@ public class RedemptionController : ControllerBase
 
     [HttpPost("redeem")]
     [Authorize(Roles = "Visitor")]
-    public IActionResult RedeemReward([FromBody] RedeemRewardModelIn redeemRequest)
+    public async Task<IActionResult> RedeemReward([FromBody] RedeemRewardModelIn redeemRequest)
     {
         Guid visitorId = GetCurrentUserId();
-        RedemptionHistoryModelOut redemption = _redemptionLogic.RedeemReward(visitorId, redeemRequest.RewardId);
+        RedemptionHistoryModelOut redemption = await _redemptionLogic.RedeemReward(visitorId, redeemRequest.RewardId);
         return CreatedAtAction(nameof(GetMyRedemptionHistory), null, redemption);
     }
 
     [HttpGet("my-history")]
     [Authorize(Roles = "Visitor")]
-    public IActionResult GetMyRedemptionHistory([FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo)
+    public async Task<IActionResult> GetMyRedemptionHistory([FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo)
     {
         Guid visitorId = GetCurrentUserId();
 
         List<RedemptionHistoryModelOut> history = dateFrom.HasValue && dateTo.HasValue
-            ? _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom.Value, dateTo.Value)
-            : _redemptionLogic.GetRedemptionHistory(visitorId);
+            ? await _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom.Value, dateTo.Value)
+            : await _redemptionLogic.GetRedemptionHistory(visitorId);
 
         return Ok(history);
     }
 
     [HttpGet("visitor/{visitorId}/history")]
     [Authorize(Roles = "Administrator")]
-    public IActionResult GetVisitorRedemptionHistory(Guid visitorId, [FromQuery] DateTime? dateFrom,
+    public async Task<IActionResult> GetVisitorRedemptionHistory(Guid visitorId, [FromQuery] DateTime? dateFrom,
         [FromQuery] DateTime? dateTo)
     {
         List<RedemptionHistoryModelOut> history = dateFrom.HasValue && dateTo.HasValue
-            ? _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom.Value, dateTo.Value)
-            : _redemptionLogic.GetRedemptionHistory(visitorId);
+            ? await _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom.Value, dateTo.Value)
+            : await _redemptionLogic.GetRedemptionHistory(visitorId);
 
         return Ok(history);
     }

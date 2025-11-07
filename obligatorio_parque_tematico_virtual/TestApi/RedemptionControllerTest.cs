@@ -122,7 +122,7 @@ public class RedemptionControllerTest
             PointsSpent = 500
         };
 
-        _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId)).Returns(redemption);
+        _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId)).ReturnsAsync(redemption);
 
         RedeemRewardModelIn redeemRequest = new RedeemRewardModelIn
         {
@@ -176,7 +176,7 @@ public class RedemptionControllerTest
     {
         Guid rewardId = Guid.NewGuid();
         _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId))
-            .Throws(new InvalidOperationException("Insufficient points"));
+            .ThrowsAsync(new InvalidOperationException("Insufficient points"));
 
         RedeemRewardModelIn redeemRequest = new RedeemRewardModelIn
         {
@@ -196,7 +196,7 @@ public class RedemptionControllerTest
     {
         Guid rewardId = Guid.NewGuid();
         _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId))
-            .Throws(new KeyNotFoundException("Reward not found"));
+            .ThrowsAsync(new KeyNotFoundException("Reward not found"));
 
         RedeemRewardModelIn redeemRequest = new RedeemRewardModelIn
         {
@@ -234,7 +234,7 @@ public class RedemptionControllerTest
             }
         };
 
-        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(_visitorUserId)).Returns(history);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(_visitorUserId)).ReturnsAsync(history);
 
         HttpResponseMessage response = await _visitorClient.GetAsync("/api/redemptions/my-history");
 
@@ -268,7 +268,7 @@ public class RedemptionControllerTest
             }
         };
 
-        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).Returns(history);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).ReturnsAsync(history);
 
         HttpResponseMessage response = await _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history");
 
@@ -304,7 +304,7 @@ public class RedemptionControllerTest
 
         _mockRedemptionLogic.Setup(s =>
                 s.GetRedemptionHistoryWithDateRange(_visitorUserId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-            .Returns(history);
+            .ReturnsAsync(history);
 
         HttpResponseMessage response =
             await _visitorClient.GetAsync(
@@ -318,7 +318,7 @@ public class RedemptionControllerTest
     {
         Guid visitorId = Guid.NewGuid();
         _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId))
-            .Throws(new KeyNotFoundException("Visitor not found"));
+            .ThrowsAsync(new KeyNotFoundException("Visitor not found"));
 
         HttpResponseMessage response = await _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history");
 
@@ -332,7 +332,7 @@ public class RedemptionControllerTest
         DateTime dateTo = DateTime.Now.AddDays(-7);
         _mockRedemptionLogic.Setup(s =>
                 s.GetRedemptionHistoryWithDateRange(_visitorUserId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-            .Throws(new ArgumentException("Invalid date range"));
+            .ThrowsAsync(new ArgumentException("Invalid date range"));
 
         HttpResponseMessage response =
             await _visitorClient.GetAsync(
@@ -382,7 +382,7 @@ public class RedemptionControllerTest
     {
         DateTime dateFrom = DateTime.Now.AddDays(-7);
         List<RedemptionHistoryModelOut> expectedHistory = new List<RedemptionHistoryModelOut>();
-        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(It.IsAny<Guid>())).Returns(expectedHistory);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(It.IsAny<Guid>())).ReturnsAsync(expectedHistory);
 
         HttpResponseMessage response =
             await _visitorClient.GetAsync($"/api/redemptions/my-history?dateFrom={dateFrom:yyyy-MM-dd}");
@@ -399,7 +399,7 @@ public class RedemptionControllerTest
     {
         DateTime dateTo = DateTime.Now;
         List<RedemptionHistoryModelOut> expectedHistory = new List<RedemptionHistoryModelOut>();
-        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(It.IsAny<Guid>())).Returns(expectedHistory);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(It.IsAny<Guid>())).ReturnsAsync(expectedHistory);
 
         HttpResponseMessage response =
             await _visitorClient.GetAsync($"/api/redemptions/my-history?dateTo={dateTo:yyyy-MM-dd}");
@@ -417,7 +417,7 @@ public class RedemptionControllerTest
         Guid visitorId = Guid.NewGuid();
         DateTime dateFrom = DateTime.Now.AddDays(-7);
         List<RedemptionHistoryModelOut> expectedHistory = new List<RedemptionHistoryModelOut>();
-        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).Returns(expectedHistory);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).ReturnsAsync(expectedHistory);
 
         HttpResponseMessage response =
             await _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history?dateFrom={dateFrom:yyyy-MM-dd}");
@@ -435,7 +435,7 @@ public class RedemptionControllerTest
         Guid visitorId = Guid.NewGuid();
         DateTime dateTo = DateTime.Now;
         List<RedemptionHistoryModelOut> expectedHistory = new List<RedemptionHistoryModelOut>();
-        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).Returns(expectedHistory);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).ReturnsAsync(expectedHistory);
 
         HttpResponseMessage response =
             await _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history?dateTo={dateTo:yyyy-MM-dd}");

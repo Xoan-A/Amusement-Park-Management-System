@@ -64,7 +64,7 @@ namespace BusinessLogic
                 MembershipLevel = MembershipLevel.Standard
             };
 
-            Role visitorRole = _roleRepository.GetByName(Role.VISITOR);
+            Role? visitorRole = await _roleRepository.GetByNameAsync(Role.VISITOR);
             if (visitorRole != null)
             {
                 visitor.UserRoles.Add(new UserRole { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
@@ -118,7 +118,7 @@ namespace BusinessLogic
             {
                 foreach (string roleName in roles)
                 {
-                    Role role = _roleRepository.GetByName(roleName);
+                    Role? role = await _roleRepository.GetByNameAsync(roleName);
                     if (role != null)
                     {
                         user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = role.Id, Role = role });
@@ -248,7 +248,7 @@ namespace BusinessLogic
                 throw new ArgumentException("User not found.");
             }
 
-            Role role = _roleRepository.GetByName(roleName);
+            Role? role = await _roleRepository.GetByNameAsync(roleName);
             if (role == null)
             {
                 throw new ArgumentException("Role not found.");

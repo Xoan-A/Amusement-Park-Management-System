@@ -14,38 +14,39 @@ namespace DataAccess.Repositories
             _context = context;
         }
 
-        public void Create(RedemptionHistory redemptionHistory)
+        public async Task CreateAsync(RedemptionHistory redemptionHistory)
         {
             _context.RedemptionHistories.Add(redemptionHistory);
+            await _context.SaveChangesAsync();
         }
 
-        public List<RedemptionHistory> GetByVisitorId(Guid visitorId)
+        public async Task<List<RedemptionHistory>> GetByVisitorIdAsync(Guid visitorId)
         {
-            return _context.RedemptionHistories
+            return await _context.RedemptionHistories
                 .Include(rh => rh.Visitor)
                 .Include(rh => rh.Reward)
                 .Where(rh => rh.VisitorId == visitorId)
                 .OrderByDescending(rh => rh.RedeemedAt)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<RedemptionHistory> GetByVisitorIdWithDateRange(Guid visitorId, DateTime dateFrom, DateTime dateTo)
+        public async Task<List<RedemptionHistory>> GetByVisitorIdWithDateRangeAsync(Guid visitorId, DateTime dateFrom, DateTime dateTo)
         {
-            return _context.RedemptionHistories
+            return await _context.RedemptionHistories
                 .Include(rh => rh.Visitor)
                 .Include(rh => rh.Reward)
                 .Where(rh => rh.VisitorId == visitorId && rh.RedeemedAt >= dateFrom && rh.RedeemedAt <= dateTo)
                 .OrderByDescending(rh => rh.RedeemedAt)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<RedemptionHistory> GetAll()
+        public async Task<List<RedemptionHistory>> GetAllAsync()
         {
-            return _context.RedemptionHistories
+            return await _context.RedemptionHistories
                 .Include(rh => rh.Visitor)
                 .Include(rh => rh.Reward)
                 .OrderByDescending(rh => rh.RedeemedAt)
-                .ToList();
+                .ToListAsync();
         }
     }
 }
