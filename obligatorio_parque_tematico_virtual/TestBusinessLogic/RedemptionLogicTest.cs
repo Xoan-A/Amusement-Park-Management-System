@@ -15,6 +15,7 @@ namespace TestBusinessLogic
         private Mock<IUserRepository> _mockUserRepository;
         private Mock<IRedemptionHistoryRepository> _mockRedemptionHistoryRepository;
         private Mock<IDateTimeLogic> _mockDateTimeLogic;
+        private Mock<IScoreHistoryRepository> _mockScoreHistoryRepository;
         private RedemptionLogic _redemptionLogic;
 
         [TestInitialize]
@@ -24,13 +25,15 @@ namespace TestBusinessLogic
             _mockUserRepository = new Mock<IUserRepository>();
             _mockRedemptionHistoryRepository = new Mock<IRedemptionHistoryRepository>();
             _mockDateTimeLogic = new Mock<IDateTimeLogic>();
+            _mockScoreHistoryRepository = new Mock<IScoreHistoryRepository>();
             _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(DateTime.Now);
 
             _redemptionLogic = new RedemptionLogic(
                 _mockRewardRepository.Object,
                 _mockUserRepository.Object,
                 _mockRedemptionHistoryRepository.Object,
-                _mockDateTimeLogic.Object
+                _mockDateTimeLogic.Object,
+                _mockScoreHistoryRepository.Object
             );
         }
 
@@ -60,7 +63,8 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
             _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
-            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>())).Returns(Task.CompletedTask);
+            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>()))
+            .Returns(Task.CompletedTask);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
 
@@ -73,7 +77,8 @@ namespace TestBusinessLogic
 
             _mockRedemptionHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<RedemptionHistory>()), Times.Once);
             _mockUserRepository.Verify(r => r.Update(It.Is<User>(u => u.Score == 500)), Times.Once);
-            _mockRewardRepository.Verify(r => r.UpdateAsync(It.Is<Reward>(rw => rw.AvailableQuantity == 9)), Times.Once);
+            _mockRewardRepository.Verify(r => r.UpdateAsync(It.Is<Reward>(rw => rw.AvailableQuantity == 9)),
+                Times.Once);
         }
 
         [TestMethod]
@@ -229,7 +234,8 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
             _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
-            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>())).Returns(Task.CompletedTask);
+            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>()))
+            .Returns(Task.CompletedTask);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
 
@@ -264,7 +270,8 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
             _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
-            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>())).Returns(Task.CompletedTask);
+            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>()))
+            .Returns(Task.CompletedTask);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
 
@@ -317,12 +324,14 @@ namespace TestBusinessLogic
             };
 
             _mockRedemptionHistoryRepository.Setup(r => r.GetByVisitorIdWithDateRangeAsync(visitorId, dateFrom, dateTo))
-                .ReturnsAsync(history);
+            .ReturnsAsync(history);
 
-            List<RedemptionHistoryModelOut> result = await _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom, dateTo);
+            List<RedemptionHistoryModelOut> result =
+            await _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom, dateTo);
 
             Assert.AreEqual(1, result.Count);
-            _mockRedemptionHistoryRepository.Verify(r => r.GetByVisitorIdWithDateRangeAsync(visitorId, dateFrom, dateTo),
+            _mockRedemptionHistoryRepository.Verify(
+                r => r.GetByVisitorIdWithDateRangeAsync(visitorId, dateFrom, dateTo),
                 Times.Once);
         }
 
@@ -358,6 +367,56 @@ namespace TestBusinessLogic
             _mockRewardRepository.Setup(r => r.GetByIdAsync(rewardId)).ReturnsAsync(reward);
 
             await _redemptionLogic.RedeemReward(visitorId, rewardId);
+        }
+
+        [TestMethod]
+        public async Task RedeemReward_CreatesScoreHistoryWithNegativePoints()
+        {
+            DateTime testDateTime = new DateTime(2025, 11, 7, 10, 0, 0);
+            User visitor = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com",
+                Password = "hashedpassword",
+                Score = 1000,
+                MembershipLevel = MembershipLevel.Premium
+            };
+
+            Reward reward = new Reward
+            {
+                Id = Guid.NewGuid(),
+                Name = "VIP Access",
+                Description = "Get VIP access for a day",
+                PointsCost = 500,
+                AvailableQuantity = 10,
+                RequiredMembershipLevel = MembershipLevel.Premium
+            };
+
+            ScoreHistory? capturedScoreHistory = null;
+
+            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
+            _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(testDateTime);
+            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>()))
+            .Returns(Task.CompletedTask);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
+            _mockScoreHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<ScoreHistory>()))
+            .Callback<ScoreHistory>(sh => capturedScoreHistory = sh)
+            .Returns(Task.CompletedTask);
+
+            RedemptionHistoryModelOut result = await _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
+
+            _mockScoreHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<ScoreHistory>()), Times.Once);
+
+            Assert.AreEqual(visitor.Id, capturedScoreHistory.VisitorId);
+            Assert.AreEqual(-500, capturedScoreHistory.Points,
+                "Los puntos deben ser negativos al canjear una recompensa");
+            Assert.AreEqual(ScoreOrigin.Redemption, capturedScoreHistory.Origin);
+            Assert.AreEqual(reward.Id, capturedScoreHistory.RelatedEntityId);
+            Assert.AreEqual(testDateTime, capturedScoreHistory.CreatedAt);
         }
     }
 }
