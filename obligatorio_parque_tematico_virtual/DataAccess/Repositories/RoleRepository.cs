@@ -1,6 +1,7 @@
 using DataAccess.Context;
 using Domain;
 using IDataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories;
 
@@ -13,13 +14,13 @@ public class RoleRepository : IRoleRepository
         _context = context;
     }
 
-    public List<Role> GetAll()
+    public async Task<List<Role>> GetAllAsync()
     {
-        return _context.Roles.ToList();
+        return await _context.Roles.ToListAsync();
     }
 
-    public Role? GetByName(string name)
+    public async Task<Role?> GetByNameAsync(string name)
     {
-        return _context.Roles.FirstOrDefault(r => r.Name == name);
+        return await _context.Roles.FirstOrDefaultAsync(r => r.Name == name);
     }
 }
