@@ -14,100 +14,100 @@ namespace DataAccess.Repositories
             _context = context;
         }
 
-        public void Create(MaintenanceRecord record)
+        public async Task CreateAsync(MaintenanceRecord record)
         {
             _context.MaintenanceRecords.Add(record);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public MaintenanceRecord? GetById(Guid id)
+        public async Task<MaintenanceRecord?> GetByIdAsync(Guid id)
         {
-            return _context.MaintenanceRecords
+            return await _context.MaintenanceRecords
                 .Include(r => r.Attraction)
                 .Include(r => r.MaintenanceSchedule)
                 .Include(r => r.Operator)
-                .FirstOrDefault(r => r.Id == id);
+                .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        public List<MaintenanceRecord> GetAll()
+        public async Task<List<MaintenanceRecord>> GetAllAsync()
         {
-            return _context.MaintenanceRecords
+            return await _context.MaintenanceRecords
                 .Include(r => r.Attraction)
                 .Include(r => r.MaintenanceSchedule)
                 .Include(r => r.Operator)
                 .OrderByDescending(r => r.PerformedDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceRecord> GetByAttractionId(Guid attractionId)
+        public async Task<List<MaintenanceRecord>> GetByAttractionIdAsync(Guid attractionId)
         {
-            return _context.MaintenanceRecords
+            return await _context.MaintenanceRecords
                 .Include(r => r.Attraction)
                 .Include(r => r.MaintenanceSchedule)
                 .Include(r => r.Operator)
                 .Where(r => r.AttractionId == attractionId)
                 .OrderByDescending(r => r.PerformedDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceRecord> GetByScheduleId(Guid scheduleId)
+        public async Task<List<MaintenanceRecord>> GetByScheduleIdAsync(Guid scheduleId)
         {
-            return _context.MaintenanceRecords
+            return await _context.MaintenanceRecords
                 .Include(r => r.Attraction)
                 .Include(r => r.MaintenanceSchedule)
                 .Include(r => r.Operator)
                 .Where(r => r.MaintenanceScheduleId == scheduleId)
                 .OrderByDescending(r => r.PerformedDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceRecord> GetUnscheduledMaintenance()
+        public async Task<List<MaintenanceRecord>> GetUnscheduledMaintenanceAsync()
         {
-            return _context.MaintenanceRecords
+            return await _context.MaintenanceRecords
                 .Include(r => r.Attraction)
                 .Include(r => r.Operator)
                 .Where(r => r.MaintenanceScheduleId == null)
                 .OrderByDescending(r => r.PerformedDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceRecord> GetByOperator(Guid operatorId)
+        public async Task<List<MaintenanceRecord>> GetByOperatorAsync(Guid operatorId)
         {
-            return _context.MaintenanceRecords
+            return await _context.MaintenanceRecords
                 .Include(r => r.Attraction)
                 .Include(r => r.MaintenanceSchedule)
                 .Include(r => r.Operator)
                 .Where(r => r.PerformedBy == operatorId)
                 .OrderByDescending(r => r.PerformedDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceRecord> GetByDateRange(DateTime dateFrom, DateTime dateTo)
+        public async Task<List<MaintenanceRecord>> GetByDateRangeAsync(DateTime dateFrom, DateTime dateTo)
         {
-            return _context.MaintenanceRecords
+            return await _context.MaintenanceRecords
                 .Include(r => r.Attraction)
                 .Include(r => r.MaintenanceSchedule)
                 .Include(r => r.Operator)
                 .Where(r => r.PerformedDate >= dateFrom && r.PerformedDate <= dateTo)
                 .OrderByDescending(r => r.PerformedDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceRecord> GetByMaintenanceType(MaintenanceType type)
+        public async Task<List<MaintenanceRecord>> GetByMaintenanceTypeAsync(MaintenanceType type)
         {
-            return _context.MaintenanceRecords
+            return await _context.MaintenanceRecords
                 .Include(r => r.Attraction)
                 .Include(r => r.MaintenanceSchedule)
                 .Include(r => r.Operator)
                 .Where(r => r.MaintenanceType == type)
                 .OrderByDescending(r => r.PerformedDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<MaintenanceRecord> GetByAttractionIdAndDateRange(Guid attractionId, DateTime dateFrom,
+        public async Task<List<MaintenanceRecord>> GetByAttractionIdAndDateRangeAsync(Guid attractionId, DateTime dateFrom,
             DateTime dateTo)
         {
-            return _context.MaintenanceRecords
+            return await _context.MaintenanceRecords
                 .Include(r => r.Attraction)
                 .Include(r => r.MaintenanceSchedule)
                 .Include(r => r.Operator)
@@ -115,22 +115,22 @@ namespace DataAccess.Repositories
                             r.PerformedDate >= dateFrom &&
                             r.PerformedDate <= dateTo)
                 .OrderByDescending(r => r.PerformedDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public void Update(MaintenanceRecord record)
+        public async Task UpdateAsync(MaintenanceRecord record)
         {
             _context.MaintenanceRecords.Update(record);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void Delete(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
-            MaintenanceRecord? record = _context.MaintenanceRecords.Find(id);
+            MaintenanceRecord? record = await _context.MaintenanceRecords.FindAsync(id);
             if (record != null)
             {
                 _context.MaintenanceRecords.Remove(record);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
     }
