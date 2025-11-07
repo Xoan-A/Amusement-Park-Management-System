@@ -19,26 +19,26 @@ public class ScoreHistoryController : ControllerBase
 
     [HttpGet("my-history")]
     [Authorize(Roles = "Visitor")]
-    public IActionResult GetMyScoreHistory()
+    public async Task<IActionResult> GetMyScoreHistory()
     {
         Guid userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
-        List<ScoreHistoryModelOut> history = _scoreHistoryLogic.GetMyScoreHistory(userId);
+        List<ScoreHistoryModelOut> history = await _scoreHistoryLogic.GetMyScoreHistory(userId);
         return Ok(history);
     }
 
     [HttpGet("visitor/{visitorId}")]
     [Authorize(Roles = "Administrator")]
-    public IActionResult GetVisitorHistory(Guid visitorId, [FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo)
+    public async Task<IActionResult> GetVisitorHistory(Guid visitorId, [FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo)
     {
-        List<ScoreHistoryModelOut> history = _scoreHistoryLogic.GetVisitorScoreHistory(visitorId, dateFrom, dateTo);
+        List<ScoreHistoryModelOut> history = await _scoreHistoryLogic.GetVisitorScoreHistory(visitorId, dateFrom, dateTo);
         return Ok(history);
     }
 
     [HttpGet]
     [Authorize(Roles = "Administrator")]
-    public IActionResult GetAllHistory()
+    public async Task<IActionResult> GetAllHistory()
     {
-        List<ScoreHistoryModelOut> history = _scoreHistoryLogic.GetAllScoreHistory();
+        List<ScoreHistoryModelOut> history = await _scoreHistoryLogic.GetAllScoreHistory();
         return Ok(history);
     }
 }
