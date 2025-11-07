@@ -40,6 +40,7 @@ namespace BusinessLogic
             int score = _activeStrategy.CalculateScore(user, attraction, strategyRequest);
 
             user.Score += score;
+            user.DailyScore += score;
             await _userRepository.Update(user);
 
             var scoreHistory = new ScoreHistory

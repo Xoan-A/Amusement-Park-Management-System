@@ -228,7 +228,8 @@ namespace TestDataAccess
                     Email = $"user{i}@test.com",
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
-                    Score = i * 10
+                    Score = i * 10,
+                    DailyScore = i * 10
                 };
                 _context.Users.Add(visitor);
             }
@@ -239,11 +240,11 @@ namespace TestDataAccess
 
             Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
-            Assert.AreEqual(150, result[0].Score);
-            Assert.AreEqual(60, result[9].Score);
+            Assert.AreEqual(150, result[0].DailyScore);
+            Assert.AreEqual(60, result[9].DailyScore);
             for (int i = 0; i < result.Count - 1; i++)
             {
-                Assert.IsTrue(result[i].Score >= result[i + 1].Score);
+                Assert.IsTrue(result[i].DailyScore >= result[i + 1].DailyScore);
             }
         }
 
@@ -274,7 +275,8 @@ namespace TestDataAccess
                     Email = $"user{i}@test.com",
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
-                    Score = i * 20
+                    Score = i * 20,
+                    DailyScore = i * 20
                 };
                 _context.Users.Add(visitor);
             }
@@ -285,8 +287,8 @@ namespace TestDataAccess
 
             Assert.IsNotNull(result);
             Assert.AreEqual(5, result.Count);
-            Assert.AreEqual(100, result[0].Score);
-            Assert.AreEqual(20, result[4].Score);
+            Assert.AreEqual(100, result[0].DailyScore);
+            Assert.AreEqual(20, result[4].DailyScore);
         }
 
         [TestMethod]
@@ -304,7 +306,8 @@ namespace TestDataAccess
                     Email = $"user{i}@test.com",
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
-                    Score = i * 5
+                    Score = i * 5,
+                    DailyScore = i * 5
                 };
                 _context.Users.Add(visitor);
             }
@@ -315,8 +318,8 @@ namespace TestDataAccess
 
             Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
-            Assert.AreEqual(50, result[0].Score);
-            Assert.AreEqual(5, result[9].Score);
+            Assert.AreEqual(50, result[0].DailyScore);
+            Assert.AreEqual(5, result[9].DailyScore);
         }
 
         [TestMethod]
@@ -334,7 +337,8 @@ namespace TestDataAccess
                     Email = $"user{i}@test.com",
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
-                    Score = i <= 6 ? 100 : 50
+                    Score = i <= 6 ? 100 : 50,
+                    DailyScore = i <= 6 ? 100 : 50
                 };
                 _context.Users.Add(visitor);
             }
@@ -345,9 +349,9 @@ namespace TestDataAccess
 
             Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
-            Assert.AreEqual(100, result[0].Score);
-            Assert.AreEqual(100, result[5].Score);
-            Assert.AreEqual(50, result[6].Score);
+            Assert.AreEqual(100, result[0].DailyScore);
+            Assert.AreEqual(100, result[5].DailyScore);
+            Assert.AreEqual(50, result[6].DailyScore);
         }
 
         [TestMethod]
@@ -365,7 +369,8 @@ namespace TestDataAccess
                     Email = $"user{i}@test.com",
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
-                    Score = i * 20
+                    Score = i * 20,
+                    DailyScore = i * 20
                 };
                 _context.Users.Add(visitor);
             }
@@ -378,7 +383,8 @@ namespace TestDataAccess
             Assert.AreEqual(5, users.Count);
             foreach (User user in users)
             {
-                Assert.AreEqual(0, user.Score);
+                Assert.AreEqual(0, user.DailyScore, "DailyScore debe ser 0 después del reset");
+                Assert.AreNotEqual(0, user.Score, "Score no debe cambiar después del reset");
             }
         }
 
@@ -407,7 +413,8 @@ namespace TestDataAccess
                 Email = "user1@test.com",
                 Password = "password",
                 BirthDate = new DateTime(1990, 1, 1),
-                Score = 100
+                Score = 100,
+                DailyScore = 100
             };
             User user2 = new User
             {
@@ -416,7 +423,8 @@ namespace TestDataAccess
                 Email = "user2@test.com",
                 Password = "password",
                 BirthDate = new DateTime(1990, 1, 1),
-                Score = 200
+                Score = 200,
+                DailyScore = 200
             };
             _context.Users.Add(user1);
             _context.Users.Add(user2);
@@ -427,10 +435,10 @@ namespace TestDataAccess
             User? retrievedUser1 = _context.Users.FirstOrDefault(u => u.Email == "user1@test.com");
             User? retrievedUser2 = _context.Users.FirstOrDefault(u => u.Email == "user2@test.com");
 
-            Assert.IsNotNull(retrievedUser1);
-            Assert.IsNotNull(retrievedUser2);
-            Assert.AreEqual(0, retrievedUser1.Score);
-            Assert.AreEqual(0, retrievedUser2.Score);
+            Assert.AreEqual(0, retrievedUser1.DailyScore);
+            Assert.AreEqual(0, retrievedUser2.DailyScore);
+            Assert.AreEqual(100, retrievedUser1.Score, "Score no debe cambiar");
+            Assert.AreEqual(200, retrievedUser2.Score, "Score no debe cambiar");
         }
 
         [TestMethod]
@@ -447,6 +455,7 @@ namespace TestDataAccess
                 Password = "password",
                 BirthDate = new DateTime(1990, 5, 15),
                 Score = 500,
+                DailyScore = 500,
                 MembershipLevel = MembershipLevel.Premium
             };
             _context.Users.Add(user);
@@ -457,7 +466,8 @@ namespace TestDataAccess
             User? retrievedUser = _context.Users.FirstOrDefault(u => u.Email == "test@test.com");
 
             Assert.IsNotNull(retrievedUser);
-            Assert.AreEqual(0, retrievedUser.Score);
+            Assert.AreEqual(0, retrievedUser.DailyScore);
+            Assert.AreEqual(500, retrievedUser.Score, "Score no debe cambiar");
             Assert.AreEqual("TestUser", retrievedUser.Name);
             Assert.AreEqual("LastName", retrievedUser.LastName);
             Assert.AreEqual("test@test.com", retrievedUser.Email);
@@ -482,7 +492,8 @@ namespace TestDataAccess
                     Email = $"user{i}@test.com",
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
-                    Score = scores[i]
+                    Score = scores[i],
+                    DailyScore = scores[i]
                 };
                 _context.Users.Add(visitor);
             }
@@ -493,7 +504,8 @@ namespace TestDataAccess
 
             List<User> users = _context.Users.ToList();
             Assert.AreEqual(scores.Length, users.Count);
-            Assert.IsTrue(users.All(u => u.Score == 0));
+            Assert.IsTrue(users.All(u => u.DailyScore == 0), "Todos los DailyScore deben ser 0");
+            Assert.IsFalse(users.All(u => u.Score == 0), "Los Score NO deben ser todos 0");
         }
 
         [TestMethod]
@@ -506,7 +518,8 @@ namespace TestDataAccess
                 Email = "original@test.com",
                 Password = "password",
                 BirthDate = new DateTime(1990, 1, 1),
-                Score = 50
+                Score = 50,
+                DailyScore = 50
             };
             _context.Users.Add(user);
             _context.SaveChanges();
@@ -514,6 +527,7 @@ namespace TestDataAccess
             user.Name = "Updated";
             user.LastName = "NewName";
             user.Score = 100;
+            user.DailyScore = 100;
 
             await _userRepository.Update(user);
 
@@ -521,6 +535,7 @@ namespace TestDataAccess
             Assert.AreEqual("Updated", updatedUser.Name);
             Assert.AreEqual("NewName", updatedUser.LastName);
             Assert.AreEqual(100, updatedUser.Score);
+            Assert.AreEqual(100, updatedUser.DailyScore);
         }
 
         [TestMethod]

@@ -48,6 +48,7 @@ namespace TestBusinessLogic
                 Email = "john@test.com",
                 Password = "hashedpassword",
                 Score = 1000,
+                DailyScore = 800,
                 MembershipLevel = MembershipLevel.Premium
             };
 
@@ -75,7 +76,7 @@ namespace TestBusinessLogic
             Assert.AreEqual(500, redemption.PointsSpent);
 
             _mockRedemptionHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<RedemptionHistory>()), Times.Once);
-            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u => u.Score == 500)), Times.Once);
+            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u => u.Score == 500 && u.DailyScore == 800)), Times.Once);
             _mockRewardRepository.Verify(r => r.UpdateAsync(It.Is<Reward>(rw => rw.AvailableQuantity == 9)), Times.Once);
         }
 
@@ -102,7 +103,8 @@ namespace TestBusinessLogic
                 LastName = "Doe",
                 Email = "john@test.com",
                 Password = "hashedpassword",
-                Score = 1000
+                Score = 1000,
+                DailyScore = 500
             };
 
             Guid rewardId = Guid.NewGuid();
@@ -124,6 +126,7 @@ namespace TestBusinessLogic
                 LastName = "Doe",
                 Email = "john@test.com",
                 Password = "hashedpassword",
+                DailyScore = 200,
                 Score = 300,
                 MembershipLevel = MembershipLevel.Premium
             };
@@ -154,6 +157,7 @@ namespace TestBusinessLogic
                 Name = "John",
                 LastName = "Doe",
                 Email = "john@test.com",
+                DailyScore = 700,
                 Password = "hashedpassword",
                 Score = 1000,
                 MembershipLevel = MembershipLevel.Premium
@@ -184,6 +188,7 @@ namespace TestBusinessLogic
                 Id = Guid.NewGuid(),
                 Name = "John",
                 LastName = "Doe",
+                DailyScore = 600,
                 Email = "john@test.com",
                 Password = "hashedpassword",
                 Score = 1000,
@@ -214,6 +219,7 @@ namespace TestBusinessLogic
                 Id = Guid.NewGuid(),
                 Name = "John",
                 LastName = "Doe",
+                DailyScore = 150,
                 Email = "john@test.com",
                 Password = "hashedpassword",
                 Score = 200,
@@ -249,6 +255,7 @@ namespace TestBusinessLogic
                 Id = Guid.NewGuid(),
                 Name = "John",
                 LastName = "Doe",
+                DailyScore = 300,
                 Email = "john@test.com",
                 Password = "hashedpassword",
                 Score = 500,
@@ -341,6 +348,7 @@ namespace TestBusinessLogic
                 Id = visitorId,
                 Name = "John",
                 LastName = "Doe",
+                DailyScore = 400,
                 Email = "john@test.com",
                 Password = "pass",
                 Score = 1000,
@@ -373,6 +381,7 @@ namespace TestBusinessLogic
                 Name = "John",
                 LastName = "Doe",
                 Email = "john@test.com",
+                DailyScore = 750,
                 Password = "hashedpassword",
                 Score = 1000,
                 MembershipLevel = MembershipLevel.Premium
