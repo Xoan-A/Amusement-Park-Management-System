@@ -468,7 +468,7 @@ public class MaintenanceLogicTest
         Guid scheduleId = Guid.NewGuid();
         Guid attractionId = Guid.NewGuid();
         Guid performedBy = Guid.NewGuid();
-        
+
         MaintenanceSchedule schedule = new MaintenanceSchedule
         {
             Id = scheduleId,
@@ -495,7 +495,7 @@ public class MaintenanceLogicTest
         );
 
         _mockScheduleRepository.Verify(r => r.UpdateAsync(It.IsAny<MaintenanceSchedule>()), Times.Never);
-        
+
         _mockAttractionLogic.Verify(x => x.RemoveIncident(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
     }
 
@@ -534,10 +534,11 @@ public class MaintenanceLogicTest
 
         Mock<IDateSubject> mockSubject = new Mock<IDateSubject>();
         mockSubject.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(currentDateTime);
-        
+
         _mockScheduleRepository.Setup(x => x.GetAllAsync()).ReturnsAsync(allSchedules);
         _mockScheduleRepository.Setup(x => x.UpdateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
-        _mockAttractionLogic.Setup(x => x.AddIncident(It.IsAny<Guid>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+        _mockAttractionLogic.Setup(x => x.AddIncident(It.IsAny<Guid>(), It.IsAny<string>()))
+        .Returns(Task.CompletedTask);
 
         IDateObserver observer = (IDateObserver)_maintenanceLogic;
         await observer.DateUpdated(mockSubject.Object);
@@ -576,7 +577,7 @@ public class MaintenanceLogicTest
 
         Mock<IDateSubject> mockSubject = new Mock<IDateSubject>();
         mockSubject.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(currentDateTime);
-        
+
         _mockScheduleRepository.Setup(x => x.GetAllAsync()).ReturnsAsync(allSchedules);
         _mockScheduleRepository.Setup(x => x.UpdateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
 
@@ -614,7 +615,7 @@ public class MaintenanceLogicTest
 
         Mock<IDateSubject> mockSubject = new Mock<IDateSubject>();
         mockSubject.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(currentDateTime);
-        
+
         _mockScheduleRepository.Setup(x => x.GetAllAsync()).ReturnsAsync(allSchedules);
 
 
@@ -655,7 +656,7 @@ public class MaintenanceLogicTest
 
         Mock<IDateSubject> mockSubject = new Mock<IDateSubject>();
         mockSubject.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(currentDateTime);
-        
+
         _mockScheduleRepository.Setup(x => x.GetAllAsync()).ReturnsAsync(allSchedules);
         _mockScheduleRepository.Setup(x => x.UpdateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
 
@@ -684,10 +685,11 @@ public class MaintenanceLogicTest
 
         Mock<IDateSubject> mockSubject = new Mock<IDateSubject>();
         mockSubject.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(currentDateTime);
-        
+
         _mockScheduleRepository.Setup(x => x.GetAllAsync()).ReturnsAsync(allSchedules);
         _mockScheduleRepository.Setup(x => x.UpdateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
-        _mockAttractionLogic.Setup(x => x.AddIncident(It.IsAny<Guid>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+        _mockAttractionLogic.Setup(x => x.AddIncident(It.IsAny<Guid>(), It.IsAny<string>()))
+        .Returns(Task.CompletedTask);
 
         IDateObserver observer = (IDateObserver)_maintenanceLogic;
         await observer.DateUpdated(mockSubject.Object);
@@ -704,7 +706,7 @@ public class MaintenanceLogicTest
         Guid scheduleId = Guid.NewGuid();
         Guid attractionId = Guid.NewGuid();
         Guid performedBy = Guid.NewGuid();
-        
+
         Attraction attraction = CreateTestAttraction(attractionId);
         MaintenanceSchedule schedule = CreateTestSchedule(scheduleId, attractionId, attraction);
         schedule.Status = MaintenanceStatus.InProgress;
@@ -722,7 +724,8 @@ public class MaintenanceLogicTest
         _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
         _mockScheduleRepository.Setup(r => r.UpdateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
         _mockRecordRepository.Setup(r => r.CreateAsync(It.IsAny<MaintenanceRecord>())).Returns(Task.CompletedTask);
-        _mockAttractionLogic.Setup(x => x.RemoveIncident(It.IsAny<Guid>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+        _mockAttractionLogic.Setup(x => x.RemoveIncident(It.IsAny<Guid>(), It.IsAny<string>()))
+        .Returns(Task.CompletedTask);
 
         await _maintenanceLogic.CompleteMaintenance(scheduleId, request, performedBy);
 
@@ -763,7 +766,7 @@ public class MaintenanceLogicTest
 
         Mock<IDateSubject> mockSubject = new Mock<IDateSubject>();
         mockSubject.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(currentDateTime);
-        
+
         _mockScheduleRepository.Setup(x => x.GetAllAsync()).ReturnsAsync(allSchedules);
         _mockScheduleRepository.Setup(x => x.UpdateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
 

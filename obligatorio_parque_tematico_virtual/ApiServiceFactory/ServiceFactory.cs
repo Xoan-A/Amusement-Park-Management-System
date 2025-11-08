@@ -49,11 +49,11 @@ public static class ServiceFactory
         services.AddScoped<DailyScoreLogic>();
         services.AddScoped<IDailyScoreLogic>(sp => sp.GetRequiredService<DailyScoreLogic>());
         services.AddScoped<IDateObserver>(sp => sp.GetRequiredService<DailyScoreLogic>());
-        
+
         services.AddScoped<MaintenanceLogic>();
         services.AddScoped<IMaintenanceLogic>(sp => sp.GetRequiredService<MaintenanceLogic>());
         services.AddScoped<IDateObserver>(sp => sp.GetRequiredService<MaintenanceLogic>());
-        
+
         services.AddScoped<IDateTimeLogic>(serviceProvider =>
         {
             IDateTimeRepository dateTimeRepository = serviceProvider.GetRequiredService<IDateTimeRepository>();
