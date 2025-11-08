@@ -57,11 +57,9 @@ namespace DataAccess.Repositories
 
         public async Task<List<MaintenanceSchedule>> GetOverdueSchedulesAsync()
         {
-            DateTime now = _dateTimeRepository.GetConfiguredDateTime().Result ?? DateTime.Now;
             return await _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
-                .Where(s => s.ScheduledDate < now &&
-                            (s.Status == MaintenanceStatus.Pending || s.Status == MaintenanceStatus.InProgress))
+                .Where(s => s.IsOverdue)
                 .OrderBy(s => s.ScheduledDate)
                 .ToListAsync();
         }

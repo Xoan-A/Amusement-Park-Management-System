@@ -11,7 +11,6 @@ namespace Domain
         public Guid AttractionId { get; set; }
         public DateTime PerformedDate { get; set; }
         public Guid PerformedBy { get; set; }
-        public MaintenanceType MaintenanceType { get; set; }
 
         public string Description
         {

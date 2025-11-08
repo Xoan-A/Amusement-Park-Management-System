@@ -6,9 +6,8 @@ public class MaintenanceScheduleResponse
     public Guid AttractionId { get; set; }
     public string AttractionName { get; set; }
     public DateTime ScheduledDate { get; set; }
-    public string MaintenanceType { get; set; }
     public string Description { get; set; }
+    public int EstimatedDuration { get; set; }
     public string Status { get; set; }
-    public DateTime CreatedAt { get; set; }
     public bool IsOverdue { get; set; }
 }

@@ -13,13 +13,10 @@ namespace TestDomain
                 Id = Guid.NewGuid(),
                 AttractionId = Guid.NewGuid(),
                 ScheduledDate = DateTime.Now.AddDays(7),
-                MaintenanceType = MaintenanceType.Inspection,
                 Description = "Monthly safety inspection",
                 Status = MaintenanceStatus.Pending
             };
 
-            Assert.IsNotNull(schedule);
-            Assert.AreEqual(MaintenanceType.Inspection, schedule.MaintenanceType);
             Assert.AreEqual(MaintenanceStatus.Pending, schedule.Status);
         }
 
@@ -133,24 +130,6 @@ namespace TestDomain
         }
 
         [TestMethod]
-        public void SetMaintenanceType_AllTypes_Success()
-        {
-            MaintenanceSchedule inspection = new MaintenanceSchedule
-            { MaintenanceType = MaintenanceType.Inspection, Description = "Test" };
-            MaintenanceSchedule cleaning = new MaintenanceSchedule
-            { MaintenanceType = MaintenanceType.Cleaning, Description = "Test" };
-            MaintenanceSchedule repair = new MaintenanceSchedule
-            { MaintenanceType = MaintenanceType.Repair, Description = "Test" };
-            MaintenanceSchedule safety = new MaintenanceSchedule
-            { MaintenanceType = MaintenanceType.SafetyCheck, Description = "Test" };
-
-            Assert.AreEqual(MaintenanceType.Inspection, inspection.MaintenanceType);
-            Assert.AreEqual(MaintenanceType.Cleaning, cleaning.MaintenanceType);
-            Assert.AreEqual(MaintenanceType.Repair, repair.MaintenanceType);
-            Assert.AreEqual(MaintenanceType.SafetyCheck, safety.MaintenanceType);
-        }
-
-        [TestMethod]
         public void SetAttractionId_ValidGuid_Success()
         {
             Guid attractionId = Guid.NewGuid();
@@ -166,67 +145,47 @@ namespace TestDomain
         }
 
         [TestMethod]
-        public void IsOverdue_PastScheduledDate_ReturnsTrue()
+        public void IsOverdue_DefaultValue_IsFalse()
         {
-            DateTime currentDateTime = DateTime.Now;
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-                ScheduledDate = currentDateTime.AddDays(-1),
+                ScheduledDate = DateTime.Now.AddDays(7),
                 Status = MaintenanceStatus.Pending,
                 Description = "Test"
             };
 
-            bool isOverdue = schedule.IsOverdue(currentDateTime);
-
-            Assert.IsTrue(isOverdue);
+            Assert.IsFalse(schedule.IsOverdue);
         }
 
         [TestMethod]
-        public void IsOverdue_FutureScheduledDate_ReturnsFalse()
+        public void IsOverdue_CanBeSetToTrue()
         {
-            DateTime currentDateTime = DateTime.Now;
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-                ScheduledDate = currentDateTime.AddDays(7),
+                ScheduledDate = DateTime.Now.AddDays(-1),
                 Status = MaintenanceStatus.Pending,
                 Description = "Test"
             };
 
-            bool isOverdue = schedule.IsOverdue(currentDateTime);
+            schedule.IsOverdue = true;
 
-            Assert.IsFalse(isOverdue);
+            Assert.IsTrue(schedule.IsOverdue);
         }
 
         [TestMethod]
-        public void IsOverdue_CompletedStatus_ReturnsFalse()
+        public void IsOverdue_CanBeSetToFalse()
         {
-            DateTime currentDateTime = DateTime.Now;
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
-                ScheduledDate = currentDateTime.AddDays(-1),
-                Status = MaintenanceStatus.Completed,
-                Description = "Test"
+                ScheduledDate = DateTime.Now.AddDays(-1),
+                Status = MaintenanceStatus.Pending,
+                Description = "Test",
+                IsOverdue = true
             };
 
-            bool isOverdue = schedule.IsOverdue(currentDateTime);
+            schedule.IsOverdue = false;
 
-            Assert.IsFalse(isOverdue);
-        }
-
-        [TestMethod]
-        public void IsOverdue_CancelledStatus_ReturnsFalse()
-        {
-            DateTime currentDateTime = DateTime.Now;
-            MaintenanceSchedule schedule = new MaintenanceSchedule
-            {
-                ScheduledDate = currentDateTime.AddDays(-1),
-                Status = MaintenanceStatus.Cancelled,
-                Description = "Test"
-            };
-
-            bool isOverdue = schedule.IsOverdue(currentDateTime);
-
-            Assert.IsFalse(isOverdue);
+            Assert.IsFalse(schedule.IsOverdue);
         }
 
         [TestMethod]
@@ -283,6 +242,40 @@ namespace TestDomain
             bool canComplete = schedule.CanComplete();
 
             Assert.IsFalse(canComplete);
+        }
+
+        [TestMethod]
+        public void SetEstimatedDuration_ValidValue_Success()
+        {
+            MaintenanceSchedule schedule = new MaintenanceSchedule
+            {
+                Description = "Test",
+                EstimatedDuration = 120
+            };
+
+            Assert.AreEqual(120, schedule.EstimatedDuration);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void SetEstimatedDuration_ZeroValue_ThrowsException()
+        {
+            MaintenanceSchedule schedule = new MaintenanceSchedule
+            {
+                Description = "Test",
+                EstimatedDuration = 0
+            };
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void SetEstimatedDuration_NegativeValue_ThrowsException()
+        {
+            MaintenanceSchedule schedule = new MaintenanceSchedule
+            {
+                Description = "Test",
+                EstimatedDuration = -10
+            };
         }
     }
 }
