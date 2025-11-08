@@ -43,23 +43,14 @@ namespace Domain
         }
 
         public MaintenanceStatus Status { get; set; }
+        public bool IsOverdue { get; set; }
 
         public virtual Attraction? Attraction { get; set; }
 
         public MaintenanceSchedule()
         {
             Status = MaintenanceStatus.Pending;
-        }
-
-        public bool IsOverdue(DateTime currentDateTime)
-        {
-            if (Status == MaintenanceStatus.Pending && ScheduledDate <= currentDateTime
-                || Status == MaintenanceStatus.InProgress &&
-                ScheduledDate.AddHours(EstimatedDuration) <= currentDateTime)
-            {
-                return true;
-            }
-            return false;
+            IsOverdue = false;
         }
 
         public bool CanComplete()

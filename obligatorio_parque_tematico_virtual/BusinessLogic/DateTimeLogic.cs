@@ -41,7 +41,6 @@ namespace BusinessLogic
             return _previousDateTime;
         }
 
-
         public async Task<DateTime> GetCurrentDateTime()
         {
             return await _dateTimeRepository.GetConfiguredDateTime() ?? DateTime.Now;

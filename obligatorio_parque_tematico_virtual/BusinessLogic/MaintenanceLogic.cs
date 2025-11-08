@@ -6,23 +6,52 @@ using Models.Out;
 
 namespace BusinessLogic;
 
-public class MaintenanceLogic : IMaintenanceLogic
+public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
 {
     private readonly IMaintenanceScheduleRepository _scheduleRepository;
     private readonly IMaintenanceRecordRepository _recordRepository;
     private readonly IAttractionRepository _attractionRepository;
-    private readonly IDateTimeLogic _dateTimeLogic;
 
     public MaintenanceLogic(
         IMaintenanceScheduleRepository scheduleRepository,
         IMaintenanceRecordRepository recordRepository,
-        IAttractionRepository attractionRepository,
-        IDateTimeLogic dateTimeLogic)
+        IAttractionRepository attractionRepository)
     {
         _scheduleRepository = scheduleRepository;
         _recordRepository = recordRepository;
         _attractionRepository = attractionRepository;
-        _dateTimeLogic = dateTimeLogic;
+    }
+
+    public async Task DateUpdated(IDateSubject subject)
+    {
+        DateTime currentDateTime = await subject.GetCurrentDateTime();
+
+        List<MaintenanceSchedule> allSchedules = await _scheduleRepository.GetAllAsync();
+
+        foreach (var schedule in allSchedules)
+        {
+            bool wasUpdated = false;
+
+            if (schedule.Status == MaintenanceStatus.Pending && schedule.ScheduledDate <= currentDateTime)
+            {
+                schedule.Status = MaintenanceStatus.InProgress;
+                wasUpdated = true;
+            }
+
+            bool isOverdue = schedule.Status == MaintenanceStatus.InProgress &&
+                             schedule.ScheduledDate.AddHours(schedule.EstimatedDuration) <= currentDateTime;
+
+            if (schedule.IsOverdue != isOverdue)
+            {
+                schedule.IsOverdue = isOverdue;
+                wasUpdated = true;
+            }
+
+            if (wasUpdated)
+            {
+                await _scheduleRepository.UpdateAsync(schedule);
+            }
+        }
     }
 
     #region Schedule Management
@@ -34,8 +63,6 @@ public class MaintenanceLogic : IMaintenanceLogic
         {
             throw new KeyNotFoundException($"Attraction with id {request.AttractionId} not found");
         }
-
-        DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
 
         MaintenanceSchedule schedule = new MaintenanceSchedule
         {
@@ -129,7 +156,6 @@ public class MaintenanceLogic : IMaintenanceLogic
             }
         }
 
-        DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
 
         MaintenanceRecord record = new MaintenanceRecord
         {
@@ -141,7 +167,6 @@ public class MaintenanceLogic : IMaintenanceLogic
             Description = request.Description,
             Notes = request.Notes,
             Duration = request.Duration,
-            CreatedAt = currentDateTime
         };
 
         await _recordRepository.CreateAsync(record);
@@ -232,8 +257,6 @@ public class MaintenanceLogic : IMaintenanceLogic
 
     private MaintenanceScheduleResponse MapToScheduleResponse(MaintenanceSchedule schedule)
     {
-        DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime().Result;
-
         return new MaintenanceScheduleResponse
         {
             Id = schedule.Id,
@@ -243,7 +266,7 @@ public class MaintenanceLogic : IMaintenanceLogic
             Description = schedule.Description,
             EstimatedDuration = schedule.EstimatedDuration,
             Status = schedule.Status.ToString(),
-            IsOverdue = schedule.IsOverdue(currentDateTime)
+            IsOverdue = schedule.IsOverdue
         };
     }
 
