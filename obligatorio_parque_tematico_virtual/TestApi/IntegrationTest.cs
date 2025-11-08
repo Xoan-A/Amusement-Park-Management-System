@@ -209,6 +209,9 @@ namespace ApiTests
 
                 IDailyScoreLogic? dailyScoreLogic = scope.ServiceProvider.GetService<IDailyScoreLogic>();
                 Assert.IsNotNull(dailyScoreLogic, "IDailyScoreLogic debería estar registrado como observador");
+
+                IMaintenanceLogic? maintenanceLogic = scope.ServiceProvider.GetService<IMaintenanceLogic>();
+                Assert.IsNotNull(maintenanceLogic, "IMaintenanceLogic debería estar registrado");
             }
 
             client.Dispose();

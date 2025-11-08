@@ -52,7 +52,6 @@ namespace TestDataAccess
                 AttractionId = attraction.Id,
                 PerformedDate = DateTime.Now,
                 PerformedBy = operatorUser.Id,
-                MaintenanceType = MaintenanceType.Inspection,
                 Description = "Routine safety inspection completed",
                 Duration = TimeSpan.FromHours(2),
                 Notes = "All systems operational"
@@ -85,7 +84,6 @@ namespace TestDataAccess
                 AttractionId = attraction.Id,
                 PerformedDate = DateTime.Now,
                 PerformedBy = operatorUser.Id,
-                MaintenanceType = MaintenanceType.Inspection,
                 Description = "Scheduled maintenance completed",
                 Duration = TimeSpan.FromHours(1.5)
             };
@@ -278,29 +276,6 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task GetByMaintenanceType_FiltersByType_ReturnsMatchingRecords()
-        {
-            Attraction attraction = CreateTestAttraction();
-            User operatorUser = CreateTestOperator();
-            _context.Attractions.Add(attraction);
-            _context.Users.Add(operatorUser);
-
-            MaintenanceRecord inspectionRecord = CreateTestRecord(attraction.Id, operatorUser.Id);
-            inspectionRecord.MaintenanceType = MaintenanceType.Inspection;
-
-            MaintenanceRecord repairRecord = CreateTestRecord(attraction.Id, operatorUser.Id);
-            repairRecord.MaintenanceType = MaintenanceType.Repair;
-
-            _context.MaintenanceRecords.AddRange(inspectionRecord, repairRecord);
-            await _context.SaveChangesAsync();
-
-            List<MaintenanceRecord> results = await _repository.GetByMaintenanceTypeAsync(MaintenanceType.Inspection);
-
-            Assert.AreEqual(1, results.Count);
-            Assert.AreEqual(MaintenanceType.Inspection, results[0].MaintenanceType);
-        }
-
-        [TestMethod]
         public async Task Update_ExistingRecord_UpdatesSuccessfully()
         {
             Attraction attraction = CreateTestAttraction();
@@ -405,7 +380,6 @@ namespace TestDataAccess
                 Id = Guid.NewGuid(),
                 AttractionId = attractionId,
                 ScheduledDate = DateTime.Now.AddDays(7),
-                MaintenanceType = MaintenanceType.Inspection,
                 Description = "Test maintenance schedule",
                 Status = MaintenanceStatus.Pending
             };
@@ -419,7 +393,6 @@ namespace TestDataAccess
                 AttractionId = attractionId,
                 PerformedDate = DateTime.Now,
                 PerformedBy = operatorId,
-                MaintenanceType = MaintenanceType.Inspection,
                 Description = "Test maintenance record",
                 Duration = TimeSpan.FromHours(2)
             };

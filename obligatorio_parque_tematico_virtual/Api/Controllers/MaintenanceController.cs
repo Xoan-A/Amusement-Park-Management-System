@@ -24,8 +24,7 @@ public class MaintenanceController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> CreateSchedule([FromBody] MaintenanceScheduleRequest request)
     {
-        Guid userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
-        Guid scheduleId = await _maintenanceLogic.CreateSchedule(request, userId);
+        Guid scheduleId = await _maintenanceLogic.CreateSchedule(request);
 
         return CreatedAtAction(nameof(GetScheduleById), new { id = scheduleId },
             new { id = scheduleId, message = "Schedule created successfully" });
@@ -148,7 +147,7 @@ public class MaintenanceController : ControllerBase
         [FromQuery] DateTime dateTo)
     {
         List<MaintenanceRecordResponse> records =
-            await _maintenanceLogic.GetMaintenanceHistory(attractionId, dateFrom, dateTo);
+        await _maintenanceLogic.GetMaintenanceHistory(attractionId, dateFrom, dateTo);
         return Ok(records);
     }
 

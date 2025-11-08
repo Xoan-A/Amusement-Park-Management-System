@@ -55,7 +55,6 @@ namespace TestDataAccess
                 Id = Guid.NewGuid(),
                 AttractionId = attraction.Id,
                 ScheduledDate = DateTime.Now.AddDays(7),
-                MaintenanceType = MaintenanceType.Inspection,
                 Description = "Monthly inspection",
                 Status = MaintenanceStatus.Pending
             };
@@ -161,14 +160,17 @@ namespace TestDataAccess
             MaintenanceSchedule overdueSchedule = CreateTestSchedule(attraction.Id);
             overdueSchedule.ScheduledDate = DateTime.Now.AddDays(-1);
             overdueSchedule.Status = MaintenanceStatus.Pending;
+            overdueSchedule.IsOverdue = true;
 
             MaintenanceSchedule futureSchedule = CreateTestSchedule(attraction.Id);
             futureSchedule.ScheduledDate = DateTime.Now.AddDays(7);
             futureSchedule.Status = MaintenanceStatus.Pending;
+            futureSchedule.IsOverdue = false;
 
             MaintenanceSchedule completedOverdue = CreateTestSchedule(attraction.Id);
             completedOverdue.ScheduledDate = DateTime.Now.AddDays(-1);
             completedOverdue.Status = MaintenanceStatus.Completed;
+            completedOverdue.IsOverdue = false;
 
             _context.MaintenanceSchedules.AddRange(overdueSchedule, futureSchedule, completedOverdue);
             await _context.SaveChangesAsync();
@@ -176,39 +178,12 @@ namespace TestDataAccess
             List<MaintenanceSchedule> results = await _repository.GetOverdueSchedulesAsync();
 
             Assert.AreEqual(1, results.Count);
-            Assert.IsTrue(results[0].ScheduledDate < DateTime.Now);
-            Assert.AreEqual(MaintenanceStatus.Pending, results[0].Status);
-        }
-
-        [TestMethod]
-        public async Task GetOverdueSchedules_WhenDateTimeRepositoryReturnsNull_UsesDateTimeNow()
-        {
-            _mockDateTimeRepository.Setup(x => x.GetConfiguredDateTime()).ReturnsAsync((DateTime?)null);
-
-            Attraction attraction = CreateTestAttraction();
-            _context.Attractions.Add(attraction);
-
-            MaintenanceSchedule overdueSchedule = CreateTestSchedule(attraction.Id);
-            overdueSchedule.ScheduledDate = DateTime.Now.AddDays(-2);
-            overdueSchedule.Status = MaintenanceStatus.Pending;
-
-            MaintenanceSchedule futureSchedule = CreateTestSchedule(attraction.Id);
-            futureSchedule.ScheduledDate = DateTime.Now.AddDays(5);
-            futureSchedule.Status = MaintenanceStatus.Pending;
-
-            _context.MaintenanceSchedules.AddRange(overdueSchedule, futureSchedule);
-            await _context.SaveChangesAsync();
-
-            List<MaintenanceSchedule> results = await _repository.GetOverdueSchedulesAsync();
-
-            Assert.AreEqual(1, results.Count);
-            Assert.IsTrue(results[0].ScheduledDate < DateTime.Now);
-            Assert.AreEqual(MaintenanceStatus.Pending, results[0].Status);
+            Assert.IsTrue(results[0].IsOverdue);
             Assert.AreEqual(overdueSchedule.Id, results[0].Id);
         }
 
         [TestMethod]
-        public async Task GetOverdueSchedules_ReturnsInProgressPastDueSchedules()
+        public async Task GetOverdueSchedules_ReturnsMultipleOverdueSchedules()
         {
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
@@ -216,23 +191,30 @@ namespace TestDataAccess
             MaintenanceSchedule overdueInProgress = CreateTestSchedule(attraction.Id);
             overdueInProgress.ScheduledDate = DateTime.Now.AddDays(-3);
             overdueInProgress.Status = MaintenanceStatus.InProgress;
+            overdueInProgress.IsOverdue = true;
 
             MaintenanceSchedule overduePending = CreateTestSchedule(attraction.Id);
             overduePending.ScheduledDate = DateTime.Now.AddDays(-1);
             overduePending.Status = MaintenanceStatus.Pending;
+            overduePending.IsOverdue = true;
 
-            MaintenanceSchedule completedOverdue = CreateTestSchedule(attraction.Id);
-            completedOverdue.ScheduledDate = DateTime.Now.AddDays(-2);
-            completedOverdue.Status = MaintenanceStatus.Completed;
+            MaintenanceSchedule completedNotOverdue = CreateTestSchedule(attraction.Id);
+            completedNotOverdue.ScheduledDate = DateTime.Now.AddDays(-2);
+            completedNotOverdue.Status = MaintenanceStatus.Completed;
+            completedNotOverdue.IsOverdue = false;
 
-            _context.MaintenanceSchedules.AddRange(overdueInProgress, overduePending, completedOverdue);
+            MaintenanceSchedule notOverdueYet = CreateTestSchedule(attraction.Id);
+            notOverdueYet.ScheduledDate = DateTime.Now.AddDays(1);
+            notOverdueYet.Status = MaintenanceStatus.Pending;
+            notOverdueYet.IsOverdue = false;
+
+            _context.MaintenanceSchedules.AddRange(overdueInProgress, overduePending, completedNotOverdue, notOverdueYet);
             await _context.SaveChangesAsync();
 
             List<MaintenanceSchedule> results = await _repository.GetOverdueSchedulesAsync();
 
             Assert.AreEqual(2, results.Count);
-            Assert.IsTrue(results.Any(r => r.Status == MaintenanceStatus.InProgress));
-            Assert.IsTrue(results.Any(r => r.Status == MaintenanceStatus.Pending));
+            Assert.IsTrue(results.All(r => r.IsOverdue));
         }
 
         [TestMethod]
@@ -431,7 +413,6 @@ namespace TestDataAccess
                 Id = Guid.NewGuid(),
                 AttractionId = attractionId,
                 ScheduledDate = DateTime.Now.AddDays(7),
-                MaintenanceType = MaintenanceType.Inspection,
                 Description = "Test maintenance schedule",
                 Status = MaintenanceStatus.Pending
             };
