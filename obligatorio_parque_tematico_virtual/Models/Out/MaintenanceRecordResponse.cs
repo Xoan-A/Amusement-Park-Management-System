@@ -9,7 +9,6 @@ public class MaintenanceRecordResponse
     public DateTime PerformedDate { get; set; }
     public Guid PerformedBy { get; set; }
     public string PerformedByName { get; set; }
-    public string MaintenanceType { get; set; }
     public string Description { get; set; }
     public string? Notes { get; set; }
     public TimeSpan Duration { get; set; }

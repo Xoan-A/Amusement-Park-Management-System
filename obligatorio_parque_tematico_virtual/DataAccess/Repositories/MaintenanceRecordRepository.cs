@@ -93,17 +93,6 @@ namespace DataAccess.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<MaintenanceRecord>> GetByMaintenanceTypeAsync(MaintenanceType type)
-        {
-            return await _context.MaintenanceRecords
-                .Include(r => r.Attraction)
-                .Include(r => r.MaintenanceSchedule)
-                .Include(r => r.Operator)
-                .Where(r => r.MaintenanceType == type)
-                .OrderByDescending(r => r.PerformedDate)
-                .ToListAsync();
-        }
-
         public async Task<List<MaintenanceRecord>> GetByAttractionIdAndDateRangeAsync(Guid attractionId, DateTime dateFrom,
             DateTime dateTo)
         {

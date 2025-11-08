@@ -6,28 +6,68 @@ using Models.Out;
 
 namespace BusinessLogic;
 
-public class MaintenanceLogic : IMaintenanceLogic
+public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
 {
     private readonly IMaintenanceScheduleRepository _scheduleRepository;
     private readonly IMaintenanceRecordRepository _recordRepository;
     private readonly IAttractionRepository _attractionRepository;
-    private readonly IDateTimeLogic _dateTimeLogic;
+    private readonly IAttractionLogic _attractionLogic;
 
     public MaintenanceLogic(
         IMaintenanceScheduleRepository scheduleRepository,
         IMaintenanceRecordRepository recordRepository,
         IAttractionRepository attractionRepository,
-        IDateTimeLogic dateTimeLogic)
+        IAttractionLogic attractionLogic)
     {
         _scheduleRepository = scheduleRepository;
         _recordRepository = recordRepository;
         _attractionRepository = attractionRepository;
-        _dateTimeLogic = dateTimeLogic;
+        _attractionLogic = attractionLogic;
+    }
+
+    public async Task DateUpdated(IDateSubject subject)
+    {
+        DateTime currentDateTime = await subject.GetCurrentDateTime();
+
+        List<MaintenanceSchedule> allSchedules = await _scheduleRepository.GetAllAsync();
+
+        foreach (MaintenanceSchedule schedule in allSchedules)
+        {
+            bool wasUpdated = false;
+            bool statusChangedToInProgress = false;
+
+            if (schedule.Status == MaintenanceStatus.Pending && schedule.ScheduledDate <= currentDateTime)
+            {
+                schedule.Status = MaintenanceStatus.InProgress;
+                statusChangedToInProgress = true;
+                wasUpdated = true;
+            }
+
+            bool isOverdue = schedule.Status == MaintenanceStatus.InProgress &&
+                             schedule.ScheduledDate.AddHours(schedule.EstimatedDuration) <= currentDateTime;
+
+            if (schedule.IsOverdue != isOverdue)
+            {
+                schedule.IsOverdue = isOverdue;
+                wasUpdated = true;
+            }
+
+            if (wasUpdated)
+            {
+                await _scheduleRepository.UpdateAsync(schedule);
+            }
+
+            if (statusChangedToInProgress)
+            {
+                string incidentMessage = $"Mantenimiento programado: {schedule.Description}";
+                await _attractionLogic.AddIncident(schedule.AttractionId, incidentMessage);
+            }
+        }
     }
 
     #region Schedule Management
 
-    public async Task<Guid> CreateSchedule(MaintenanceScheduleRequest request, Guid createdBy)
+    public async Task<Guid> CreateSchedule(MaintenanceScheduleRequest request)
     {
         Attraction attraction = await _attractionRepository.GetById(request.AttractionId);
         if (attraction == null)
@@ -35,23 +75,14 @@ public class MaintenanceLogic : IMaintenanceLogic
             throw new KeyNotFoundException($"Attraction with id {request.AttractionId} not found");
         }
 
-        if (!Enum.TryParse<MaintenanceType>(request.MaintenanceType, out MaintenanceType maintenanceType))
-        {
-            throw new ArgumentException($"Invalid maintenance type: {request.MaintenanceType}");
-        }
-
-        DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
-
         MaintenanceSchedule schedule = new MaintenanceSchedule
         {
             Id = Guid.NewGuid(),
             AttractionId = request.AttractionId,
             ScheduledDate = request.ScheduledDate,
-            MaintenanceType = maintenanceType,
             Description = request.Description,
+            EstimatedDuration = request.EstimatedDuration,
             Status = MaintenanceStatus.Pending,
-            CreatedBy = createdBy,
-            CreatedAt = currentDateTime
         };
 
         await _scheduleRepository.CreateAsync(schedule);
@@ -136,12 +167,6 @@ public class MaintenanceLogic : IMaintenanceLogic
             }
         }
 
-        if (!Enum.TryParse<MaintenanceType>(request.MaintenanceType, out MaintenanceType maintenanceType))
-        {
-            throw new ArgumentException($"Invalid maintenance type: {request.MaintenanceType}");
-        }
-
-        DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
 
         MaintenanceRecord record = new MaintenanceRecord
         {
@@ -150,11 +175,9 @@ public class MaintenanceLogic : IMaintenanceLogic
             AttractionId = request.AttractionId,
             PerformedDate = request.PerformedDate,
             PerformedBy = performedBy,
-            MaintenanceType = maintenanceType,
             Description = request.Description,
             Notes = request.Notes,
             Duration = request.Duration,
-            CreatedAt = currentDateTime
         };
 
         await _recordRepository.CreateAsync(record);
@@ -200,7 +223,7 @@ public class MaintenanceLogic : IMaintenanceLogic
         DateTime dateTo)
     {
         List<MaintenanceRecord> records =
-            await _recordRepository.GetByAttractionIdAndDateRangeAsync(attractionId, dateFrom, dateTo);
+        await _recordRepository.GetByAttractionIdAndDateRangeAsync(attractionId, dateFrom, dateTo);
         return records.Select(MapToRecordResponse).ToList();
     }
 
@@ -229,6 +252,9 @@ public class MaintenanceLogic : IMaintenanceLogic
             throw new KeyNotFoundException($"Attraction with id {schedule.AttractionId} not found");
         }
 
+        string incidentMessage = $"Mantenimiento programado: {schedule.Description}";
+        await _attractionLogic.RemoveIncident(schedule.AttractionId, incidentMessage);
+
         schedule.Status = MaintenanceStatus.Completed;
         await _scheduleRepository.UpdateAsync(schedule);
 
@@ -245,19 +271,16 @@ public class MaintenanceLogic : IMaintenanceLogic
 
     private MaintenanceScheduleResponse MapToScheduleResponse(MaintenanceSchedule schedule)
     {
-        DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime().Result;
-
         return new MaintenanceScheduleResponse
         {
             Id = schedule.Id,
             AttractionId = schedule.AttractionId,
             AttractionName = schedule.Attraction?.Name ?? "Unknown",
             ScheduledDate = schedule.ScheduledDate,
-            MaintenanceType = schedule.MaintenanceType.ToString(),
             Description = schedule.Description,
+            EstimatedDuration = schedule.EstimatedDuration,
             Status = schedule.Status.ToString(),
-            CreatedAt = schedule.CreatedAt,
-            IsOverdue = schedule.IsOverdue(currentDateTime)
+            IsOverdue = schedule.IsOverdue
         };
     }
 
@@ -272,8 +295,7 @@ public class MaintenanceLogic : IMaintenanceLogic
             PerformedDate = record.PerformedDate,
             PerformedBy = record.PerformedBy,
             PerformedByName =
-                record.Operator != null ? $"{record.Operator.Name} {record.Operator.LastName}" : "Unknown",
-            MaintenanceType = record.MaintenanceType.ToString(),
+            record.Operator != null ? $"{record.Operator.Name} {record.Operator.LastName}" : "Unknown",
             Description = record.Description,
             Notes = record.Notes,
             Duration = record.Duration,

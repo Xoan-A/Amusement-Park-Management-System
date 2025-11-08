@@ -3,11 +3,11 @@ namespace Domain
     public class MaintenanceSchedule
     {
         private string _description = string.Empty;
+        private int _estimatedDuration;
 
         public Guid Id { get; set; }
         public Guid AttractionId { get; set; }
         public DateTime ScheduledDate { get; set; }
-        public MaintenanceType MaintenanceType { get; set; }
 
         public string Description
         {
@@ -28,25 +28,29 @@ namespace Domain
             }
         }
 
+        public int EstimatedDuration
+        {
+            get => _estimatedDuration;
+            set
+            {
+                if (value <= 0)
+                {
+                    throw new ArgumentException("Estimated duration must be greater than 0");
+                }
+
+                _estimatedDuration = value;
+            }
+        }
+
         public MaintenanceStatus Status { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public Guid? CreatedBy { get; set; }
+        public bool IsOverdue { get; set; }
 
         public virtual Attraction? Attraction { get; set; }
 
         public MaintenanceSchedule()
         {
             Status = MaintenanceStatus.Pending;
-        }
-
-        public bool IsOverdue(DateTime currentDateTime)
-        {
-            if (Status == MaintenanceStatus.Completed || Status == MaintenanceStatus.Cancelled)
-            {
-                return false;
-            }
-
-            return ScheduledDate < currentDateTime;
+            IsOverdue = false;
         }
 
         public bool CanComplete()

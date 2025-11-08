@@ -12,7 +12,6 @@ namespace IDataAccess
         Task<List<MaintenanceRecord>> GetUnscheduledMaintenanceAsync();
         Task<List<MaintenanceRecord>> GetByOperatorAsync(Guid operatorId);
         Task<List<MaintenanceRecord>> GetByDateRangeAsync(DateTime dateFrom, DateTime dateTo);
-        Task<List<MaintenanceRecord>> GetByMaintenanceTypeAsync(MaintenanceType type);
         Task<List<MaintenanceRecord>> GetByAttractionIdAndDateRangeAsync(Guid attractionId, DateTime dateFrom, DateTime dateTo);
         Task UpdateAsync(MaintenanceRecord record);
         Task DeleteAsync(Guid id);

@@ -25,7 +25,6 @@ public static class ServiceFactory
         services.AddScoped<IEventLogic, EventLogic>();
         services.AddScoped<IRewardLogic, RewardLogic>();
         services.AddScoped<IRedemptionLogic, RedemptionLogic>();
-        services.AddScoped<IMaintenanceLogic, MaintenanceLogic>();
         services.AddScoped<IScoreHistoryLogic, ScoreHistoryLogic>();
 
         string pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
@@ -50,6 +49,11 @@ public static class ServiceFactory
         services.AddScoped<DailyScoreLogic>();
         services.AddScoped<IDailyScoreLogic>(sp => sp.GetRequiredService<DailyScoreLogic>());
         services.AddScoped<IDateObserver>(sp => sp.GetRequiredService<DailyScoreLogic>());
+
+        services.AddScoped<MaintenanceLogic>();
+        services.AddScoped<IMaintenanceLogic>(sp => sp.GetRequiredService<MaintenanceLogic>());
+        services.AddScoped<IDateObserver>(sp => sp.GetRequiredService<MaintenanceLogic>());
+
         services.AddScoped<IDateTimeLogic>(serviceProvider =>
         {
             IDateTimeRepository dateTimeRepository = serviceProvider.GetRequiredService<IDateTimeRepository>();
