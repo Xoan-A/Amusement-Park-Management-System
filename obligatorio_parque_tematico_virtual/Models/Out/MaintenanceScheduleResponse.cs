@@ -8,6 +8,5 @@ public class MaintenanceScheduleResponse
     public DateTime ScheduledDate { get; set; }
     public string Description { get; set; }
     public string Status { get; set; }
-    public DateTime CreatedAt { get; set; }
     public bool IsOverdue { get; set; }
 }

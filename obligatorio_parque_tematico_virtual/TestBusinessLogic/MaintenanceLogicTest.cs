@@ -499,8 +499,7 @@ public class MaintenanceLogicTest
             Attraction = attraction,
             ScheduledDate = DateTime.Now.AddDays(7),
             Description = "Test maintenance schedule",
-            Status = MaintenanceStatus.Pending,
-            CreatedAt = DateTime.UtcNow
+            Status = MaintenanceStatus.Pending
         };
     }
 

@@ -44,8 +44,7 @@ public class MaintenanceLogic : IMaintenanceLogic
             ScheduledDate = request.ScheduledDate,
             Description = request.Description,
             Status = MaintenanceStatus.Pending,
-            CreatedBy = createdBy,
-            CreatedAt = currentDateTime
+            CreatedBy = createdBy
         };
 
         await _scheduleRepository.CreateAsync(schedule);
@@ -243,7 +242,6 @@ public class MaintenanceLogic : IMaintenanceLogic
             ScheduledDate = schedule.ScheduledDate,
             Description = schedule.Description,
             Status = schedule.Status.ToString(),
-            CreatedAt = schedule.CreatedAt,
             IsOverdue = schedule.IsOverdue(currentDateTime)
         };
     }

@@ -173,7 +173,6 @@ public class MaintenanceControllerTest
                 ScheduledDate = DateTime.Now.AddDays(7),
                 Description = "Monthly inspection",
                 Status = "Pending",
-                CreatedAt = DateTime.UtcNow,
                 IsOverdue = false
             }
         };
@@ -199,7 +198,6 @@ public class MaintenanceControllerTest
             ScheduledDate = DateTime.Now.AddDays(7),
             Description = "Monthly inspection",
             Status = "Pending",
-            CreatedAt = DateTime.UtcNow,
             IsOverdue = false
         };
 
@@ -223,7 +221,6 @@ public class MaintenanceControllerTest
                 ScheduledDate = DateTime.Now.AddDays(-1),
                 Description = "Overdue inspection",
                 Status = "Pending",
-                CreatedAt = DateTime.UtcNow,
                 IsOverdue = true
             }
         };
@@ -260,11 +257,9 @@ public class MaintenanceControllerTest
                 ScheduledDate = DateTime.Now.AddDays(3),
                 Description = "Routine inspection",
                 Status = "Pending",
-                CreatedAt = DateTime.UtcNow,
                 IsOverdue = false
             }
         };
-
         _mockMaintenanceLogic.Setup(m => m.GetSchedulesByAttraction(attractionId)).ReturnsAsync(schedules);
 
         HttpResponseMessage response =
