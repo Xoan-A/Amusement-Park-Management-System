@@ -11,15 +11,18 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
     private readonly IMaintenanceScheduleRepository _scheduleRepository;
     private readonly IMaintenanceRecordRepository _recordRepository;
     private readonly IAttractionRepository _attractionRepository;
+    private readonly IAttractionLogic _attractionLogic;
 
     public MaintenanceLogic(
         IMaintenanceScheduleRepository scheduleRepository,
         IMaintenanceRecordRepository recordRepository,
-        IAttractionRepository attractionRepository)
+        IAttractionRepository attractionRepository,
+        IAttractionLogic attractionLogic)
     {
         _scheduleRepository = scheduleRepository;
         _recordRepository = recordRepository;
         _attractionRepository = attractionRepository;
+        _attractionLogic = attractionLogic;
     }
 
     public async Task DateUpdated(IDateSubject subject)
@@ -28,13 +31,15 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
 
         List<MaintenanceSchedule> allSchedules = await _scheduleRepository.GetAllAsync();
 
-        foreach (var schedule in allSchedules)
+        foreach (MaintenanceSchedule schedule in allSchedules)
         {
             bool wasUpdated = false;
+            bool statusChangedToInProgress = false;
 
             if (schedule.Status == MaintenanceStatus.Pending && schedule.ScheduledDate <= currentDateTime)
             {
                 schedule.Status = MaintenanceStatus.InProgress;
+                statusChangedToInProgress = true;
                 wasUpdated = true;
             }
 
@@ -50,6 +55,12 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
             if (wasUpdated)
             {
                 await _scheduleRepository.UpdateAsync(schedule);
+            }
+
+            if (statusChangedToInProgress)
+            {
+                string incidentMessage = $"Mantenimiento programado: {schedule.Description}";
+                await _attractionLogic.AddIncident(schedule.AttractionId, incidentMessage);
             }
         }
     }
@@ -240,6 +251,9 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
         {
             throw new KeyNotFoundException($"Attraction with id {schedule.AttractionId} not found");
         }
+
+        string incidentMessage = $"Mantenimiento programado: {schedule.Description}";
+        await _attractionLogic.RemoveIncident(schedule.AttractionId, incidentMessage);
 
         schedule.Status = MaintenanceStatus.Completed;
         await _scheduleRepository.UpdateAsync(schedule);

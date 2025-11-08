@@ -14,6 +14,7 @@ public class MaintenanceLogicTest
     private Mock<IMaintenanceScheduleRepository> _mockScheduleRepository;
     private Mock<IMaintenanceRecordRepository> _mockRecordRepository;
     private Mock<IAttractionRepository> _mockAttractionRepository;
+    private Mock<IAttractionLogic> _mockAttractionLogic;
     private IMaintenanceLogic _maintenanceLogic;
 
     [TestInitialize]
@@ -22,11 +23,13 @@ public class MaintenanceLogicTest
         _mockScheduleRepository = new Mock<IMaintenanceScheduleRepository>();
         _mockRecordRepository = new Mock<IMaintenanceRecordRepository>();
         _mockAttractionRepository = new Mock<IAttractionRepository>();
+        _mockAttractionLogic = new Mock<IAttractionLogic>();
 
         _maintenanceLogic = new MaintenanceLogic(
             _mockScheduleRepository.Object,
             _mockRecordRepository.Object,
-            _mockAttractionRepository.Object
+            _mockAttractionRepository.Object,
+            _mockAttractionLogic.Object
         );
     }
 
@@ -459,6 +462,43 @@ public class MaintenanceLogicTest
         );
     }
 
+    [TestMethod]
+    public async Task CompleteMaintenance_AttractionNotFound_ThrowsKeyNotFoundException()
+    {
+        Guid scheduleId = Guid.NewGuid();
+        Guid attractionId = Guid.NewGuid();
+        Guid performedBy = Guid.NewGuid();
+        
+        MaintenanceSchedule schedule = new MaintenanceSchedule
+        {
+            Id = scheduleId,
+            AttractionId = attractionId,
+            ScheduledDate = DateTime.Now.AddDays(-1),
+            Description = "Test maintenance",
+            EstimatedDuration = 2,
+            Status = MaintenanceStatus.InProgress
+        };
+
+        MaintenanceRecordRequest request = new MaintenanceRecordRequest
+        {
+            AttractionId = attractionId,
+            PerformedDate = DateTime.Now,
+            Description = "Completed test maintenance",
+            Duration = TimeSpan.FromHours(2)
+        };
+
+        _mockScheduleRepository.Setup(r => r.GetByIdAsync(scheduleId)).ReturnsAsync(schedule);
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync((Attraction)null);
+
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
+            () => _maintenanceLogic.CompleteMaintenance(scheduleId, request, performedBy)
+        );
+
+        _mockScheduleRepository.Verify(r => r.UpdateAsync(It.IsAny<MaintenanceSchedule>()), Times.Never);
+        
+        _mockAttractionLogic.Verify(x => x.RemoveIncident(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
+    }
+
     #endregion
 
     #region Observer Pattern Tests
@@ -497,7 +537,7 @@ public class MaintenanceLogicTest
         
         _mockScheduleRepository.Setup(x => x.GetAllAsync()).ReturnsAsync(allSchedules);
         _mockScheduleRepository.Setup(x => x.UpdateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
-
+        _mockAttractionLogic.Setup(x => x.AddIncident(It.IsAny<Guid>(), It.IsAny<string>())).Returns(Task.CompletedTask);
 
         IDateObserver observer = (IDateObserver)_maintenanceLogic;
         await observer.DateUpdated(mockSubject.Object);
@@ -505,6 +545,11 @@ public class MaintenanceLogicTest
         _mockScheduleRepository.Verify(x => x.UpdateAsync(It.Is<MaintenanceSchedule>(
             s => s.Id == pendingSchedulePast.Id && s.Status == MaintenanceStatus.InProgress
         )), Times.Once);
+
+        _mockAttractionLogic.Verify(x => x.AddIncident(
+            attractionId,
+            It.Is<string>(msg => msg.Contains("Mantenimiento programado"))
+        ), Times.Once);
 
         _mockScheduleRepository.Verify(x => x.UpdateAsync(It.Is<MaintenanceSchedule>(
             s => s.Id == pendingScheduleFuture.Id
@@ -620,6 +665,75 @@ public class MaintenanceLogicTest
         _mockScheduleRepository.Verify(x => x.UpdateAsync(It.Is<MaintenanceSchedule>(
             s => s.Status == MaintenanceStatus.InProgress
         )), Times.Exactly(3));
+    }
+
+    [TestMethod]
+    public async Task DateUpdated_CreatesIncidentWhenMaintenanceStarts()
+    {
+        DateTime currentDateTime = new DateTime(2025, 11, 7, 10, 0, 0);
+        Guid attractionId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(attractionId);
+
+        MaintenanceSchedule pendingSchedule = CreateTestSchedule(Guid.NewGuid(), attractionId, attraction);
+        pendingSchedule.ScheduledDate = currentDateTime.AddDays(-1);
+        pendingSchedule.Status = MaintenanceStatus.Pending;
+        pendingSchedule.IsOverdue = false;
+        pendingSchedule.Description = "Safety inspection";
+
+        List<MaintenanceSchedule> allSchedules = new List<MaintenanceSchedule> { pendingSchedule };
+
+        Mock<IDateSubject> mockSubject = new Mock<IDateSubject>();
+        mockSubject.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(currentDateTime);
+        
+        _mockScheduleRepository.Setup(x => x.GetAllAsync()).ReturnsAsync(allSchedules);
+        _mockScheduleRepository.Setup(x => x.UpdateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
+        _mockAttractionLogic.Setup(x => x.AddIncident(It.IsAny<Guid>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+
+        IDateObserver observer = (IDateObserver)_maintenanceLogic;
+        await observer.DateUpdated(mockSubject.Object);
+
+        _mockAttractionLogic.Verify(x => x.AddIncident(
+            attractionId,
+            "Mantenimiento programado: Safety inspection"
+        ), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task CompleteMaintenance_RemovesIncidentWhenCompleted()
+    {
+        Guid scheduleId = Guid.NewGuid();
+        Guid attractionId = Guid.NewGuid();
+        Guid performedBy = Guid.NewGuid();
+        
+        Attraction attraction = CreateTestAttraction(attractionId);
+        MaintenanceSchedule schedule = CreateTestSchedule(scheduleId, attractionId, attraction);
+        schedule.Status = MaintenanceStatus.InProgress;
+        schedule.Description = "Safety inspection";
+
+        MaintenanceRecordRequest request = new MaintenanceRecordRequest
+        {
+            AttractionId = attractionId,
+            PerformedDate = DateTime.Now,
+            Description = "Completed safety inspection",
+            Duration = TimeSpan.FromHours(2)
+        };
+
+        _mockScheduleRepository.Setup(r => r.GetByIdAsync(scheduleId)).ReturnsAsync(schedule);
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+        _mockScheduleRepository.Setup(r => r.UpdateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
+        _mockRecordRepository.Setup(r => r.CreateAsync(It.IsAny<MaintenanceRecord>())).Returns(Task.CompletedTask);
+        _mockAttractionLogic.Setup(x => x.RemoveIncident(It.IsAny<Guid>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+
+        await _maintenanceLogic.CompleteMaintenance(scheduleId, request, performedBy);
+
+        _mockAttractionLogic.Verify(x => x.RemoveIncident(
+            attractionId,
+            "Mantenimiento programado: Safety inspection"
+        ), Times.Once);
+
+        _mockScheduleRepository.Verify(r => r.UpdateAsync(It.Is<MaintenanceSchedule>(
+            s => s.Id == scheduleId && s.Status == MaintenanceStatus.Completed
+        )), Times.Once);
     }
 
     [TestMethod]
