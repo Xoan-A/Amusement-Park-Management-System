@@ -28,7 +28,6 @@ namespace Domain
         }
 
         public MaintenanceStatus Status { get; set; }
-        public Guid? CreatedBy { get; set; }
 
         public virtual Attraction? Attraction { get; set; }
 

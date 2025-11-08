@@ -27,7 +27,7 @@ public class MaintenanceLogic : IMaintenanceLogic
 
     #region Schedule Management
 
-    public async Task<Guid> CreateSchedule(MaintenanceScheduleRequest request, Guid createdBy)
+    public async Task<Guid> CreateSchedule(MaintenanceScheduleRequest request)
     {
         Attraction attraction = await _attractionRepository.GetById(request.AttractionId);
         if (attraction == null)
@@ -44,7 +44,6 @@ public class MaintenanceLogic : IMaintenanceLogic
             ScheduledDate = request.ScheduledDate,
             Description = request.Description,
             Status = MaintenanceStatus.Pending,
-            CreatedBy = createdBy
         };
 
         await _scheduleRepository.CreateAsync(schedule);
@@ -130,7 +129,7 @@ public class MaintenanceLogic : IMaintenanceLogic
         }
 
         DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
-        
+
         MaintenanceRecord record = new MaintenanceRecord
         {
             Id = Guid.NewGuid(),
@@ -143,7 +142,7 @@ public class MaintenanceLogic : IMaintenanceLogic
             Duration = request.Duration,
             CreatedAt = currentDateTime
         };
-    
+
         await _recordRepository.CreateAsync(record);
         return record.Id;
     }
@@ -187,7 +186,7 @@ public class MaintenanceLogic : IMaintenanceLogic
         DateTime dateTo)
     {
         List<MaintenanceRecord> records =
-            await _recordRepository.GetByAttractionIdAndDateRangeAsync(attractionId, dateFrom, dateTo);
+        await _recordRepository.GetByAttractionIdAndDateRangeAsync(attractionId, dateFrom, dateTo);
         return records.Select(MapToRecordResponse).ToList();
     }
 
@@ -257,7 +256,7 @@ public class MaintenanceLogic : IMaintenanceLogic
             PerformedDate = record.PerformedDate,
             PerformedBy = record.PerformedBy,
             PerformedByName =
-                record.Operator != null ? $"{record.Operator.Name} {record.Operator.LastName}" : "Unknown",
+            record.Operator != null ? $"{record.Operator.Name} {record.Operator.LastName}" : "Unknown",
             Description = record.Description,
             Notes = record.Notes,
             Duration = record.Duration,

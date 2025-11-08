@@ -5,7 +5,7 @@ namespace IBusinessLogic;
 
 public interface IMaintenanceLogic
 {
-    Task<Guid> CreateSchedule(MaintenanceScheduleRequest request, Guid createdBy);
+    Task<Guid> CreateSchedule(MaintenanceScheduleRequest request);
     Task<MaintenanceScheduleResponse> GetScheduleById(Guid id);
     Task<List<MaintenanceScheduleResponse>> GetAllSchedules();
     Task<List<MaintenanceScheduleResponse>> GetSchedulesByAttraction(Guid attractionId);
