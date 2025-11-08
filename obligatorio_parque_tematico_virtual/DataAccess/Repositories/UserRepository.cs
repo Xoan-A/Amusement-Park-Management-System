@@ -60,7 +60,7 @@ namespace DataAccess.Repositories
         public Task<List<User>> GetTopTen()
         {
             return _context.Users
-                .OrderByDescending(u => u.Score)
+                .OrderByDescending(u => u.DailyScore)
                 .Take(10)
                 .ToListAsync();
         }
@@ -70,7 +70,7 @@ namespace DataAccess.Repositories
             List<User> users = await _context.Users.ToListAsync();
             foreach (User user in users)
             {
-                user.Score = 0;
+                user.DailyScore = 0;
             }
 
             await _context.SaveChangesAsync();

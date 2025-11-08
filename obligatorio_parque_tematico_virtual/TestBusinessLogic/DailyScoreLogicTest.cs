@@ -60,11 +60,13 @@ namespace TestBusinessLogic
             Guid attractionId = Guid.NewGuid();
             int calculatedScore = 50;
             int initialScore = 100;
+            int initialDailyScore = 80;
 
             User user = new User
             {
                 Id = userId,
-                Score = initialScore
+                Score = initialScore,
+                DailyScore = initialDailyScore
             };
 
             Attraction attraction = new Attraction
@@ -81,7 +83,8 @@ namespace TestBusinessLogic
 
             await _dailyScoreLogic.AddScoreToUser(user, attraction);
 
-            Assert.AreEqual(initialScore + calculatedScore, user.Score);
+            Assert.AreEqual(initialScore + calculatedScore, user.Score, "Score debe incrementarse");
+            Assert.AreEqual(initialDailyScore + calculatedScore, user.DailyScore, "DailyScore debe incrementarse");
             _mockUserRepository.Verify(r => r.Update(user), Times.Once);
         }
 
