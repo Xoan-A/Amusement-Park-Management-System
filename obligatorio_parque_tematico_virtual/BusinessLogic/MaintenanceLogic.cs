@@ -43,6 +43,7 @@ public class MaintenanceLogic : IMaintenanceLogic
             AttractionId = request.AttractionId,
             ScheduledDate = request.ScheduledDate,
             Description = request.Description,
+            EstimatedDuration = request.EstimatedDuration,
             Status = MaintenanceStatus.Pending,
         };
 
@@ -240,6 +241,7 @@ public class MaintenanceLogic : IMaintenanceLogic
             AttractionName = schedule.Attraction?.Name ?? "Unknown",
             ScheduledDate = schedule.ScheduledDate,
             Description = schedule.Description,
+            EstimatedDuration = schedule.EstimatedDuration,
             Status = schedule.Status.ToString(),
             IsOverdue = schedule.IsOverdue(currentDateTime)
         };

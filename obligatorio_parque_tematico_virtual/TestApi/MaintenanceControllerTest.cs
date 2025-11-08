@@ -128,7 +128,8 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             ScheduledDate = DateTime.Now.AddDays(7),
-            Description = "Monthly safety inspection"
+            Description = "Monthly safety inspection",
+            EstimatedDuration = 120
         };
 
         _mockMaintenanceLogic.Setup(m => m.CreateSchedule(It.IsAny<MaintenanceScheduleRequest>()))
@@ -150,7 +151,8 @@ public class MaintenanceControllerTest
         {
             AttractionId = Guid.NewGuid(),
             ScheduledDate = DateTime.Now.AddDays(7),
-            Description = "Monthly safety inspection"
+            Description = "Monthly safety inspection",
+            EstimatedDuration = 120
         };
 
         StringContent content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
@@ -172,6 +174,7 @@ public class MaintenanceControllerTest
                 AttractionName = "Roller Coaster",
                 ScheduledDate = DateTime.Now.AddDays(7),
                 Description = "Monthly inspection",
+                EstimatedDuration = 120,
                 Status = "Pending",
                 IsOverdue = false
             }
@@ -197,6 +200,7 @@ public class MaintenanceControllerTest
             AttractionName = "Roller Coaster",
             ScheduledDate = DateTime.Now.AddDays(7),
             Description = "Monthly inspection",
+            EstimatedDuration = 120,
             Status = "Pending",
             IsOverdue = false
         };
@@ -220,6 +224,7 @@ public class MaintenanceControllerTest
                 AttractionName = "Roller Coaster",
                 ScheduledDate = DateTime.Now.AddDays(-1),
                 Description = "Overdue inspection",
+                EstimatedDuration = 60,
                 Status = "Pending",
                 IsOverdue = true
             }
@@ -256,6 +261,7 @@ public class MaintenanceControllerTest
                 AttractionName = "Roller Coaster",
                 ScheduledDate = DateTime.Now.AddDays(3),
                 Description = "Routine inspection",
+                EstimatedDuration = 90,
                 Status = "Pending",
                 IsOverdue = false
             }

@@ -262,5 +262,39 @@ namespace TestDomain
 
             Assert.IsFalse(canComplete);
         }
+
+        [TestMethod]
+        public void SetEstimatedDuration_ValidValue_Success()
+        {
+            MaintenanceSchedule schedule = new MaintenanceSchedule
+            {
+                Description = "Test",
+                EstimatedDuration = 120
+            };
+
+            Assert.AreEqual(120, schedule.EstimatedDuration);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void SetEstimatedDuration_ZeroValue_ThrowsException()
+        {
+            MaintenanceSchedule schedule = new MaintenanceSchedule
+            {
+                Description = "Test",
+                EstimatedDuration = 0
+            };
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void SetEstimatedDuration_NegativeValue_ThrowsException()
+        {
+            MaintenanceSchedule schedule = new MaintenanceSchedule
+            {
+                Description = "Test",
+                EstimatedDuration = -10
+            };
+        }
     }
 }

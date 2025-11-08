@@ -3,6 +3,7 @@ namespace Domain
     public class MaintenanceSchedule
     {
         private string _description = string.Empty;
+        private int _estimatedDuration;
 
         public Guid Id { get; set; }
         public Guid AttractionId { get; set; }
@@ -24,6 +25,20 @@ namespace Domain
                 }
 
                 _description = value;
+            }
+        }
+
+        public int EstimatedDuration
+        {
+            get => _estimatedDuration;
+            set
+            {
+                if (value <= 0)
+                {
+                    throw new ArgumentException("Estimated duration must be greater than 0");
+                }
+
+                _estimatedDuration = value;
             }
         }
 

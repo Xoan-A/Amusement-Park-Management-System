@@ -46,7 +46,8 @@ public class MaintenanceLogicTest
         {
             AttractionId = attractionId,
             ScheduledDate = DateTime.Now.AddDays(7),
-            Description = "Monthly safety inspection"
+            Description = "Monthly safety inspection",
+            EstimatedDuration = 120
         };
 
         _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
@@ -56,7 +57,9 @@ public class MaintenanceLogicTest
 
         Assert.IsNotNull(result);
         Assert.AreNotEqual(Guid.Empty, result);
-        _mockScheduleRepository.Verify(r => r.CreateAsync(It.IsAny<MaintenanceSchedule>()), Times.Once);
+        _mockScheduleRepository.Verify(r => r.CreateAsync(It.Is<MaintenanceSchedule>(
+            s => s.EstimatedDuration == 120
+        )), Times.Once);
     }
 
     [TestMethod]
@@ -66,7 +69,8 @@ public class MaintenanceLogicTest
         {
             AttractionId = Guid.NewGuid(),
             ScheduledDate = DateTime.Now.AddDays(7),
-            Description = "Monthly safety inspection"
+            Description = "Monthly safety inspection",
+            EstimatedDuration = 120
         };
 
         _mockAttractionRepository.Setup(r => r.GetById(It.IsAny<Guid>())).ReturnsAsync((Attraction)null);
@@ -90,6 +94,7 @@ public class MaintenanceLogicTest
         Assert.AreEqual(scheduleId, result.Id);
         Assert.AreEqual(attraction.Name, result.AttractionName);
         Assert.AreEqual(schedule.Description, result.Description);
+        Assert.AreEqual(schedule.EstimatedDuration, result.EstimatedDuration);
     }
 
     [TestMethod]
@@ -485,6 +490,7 @@ public class MaintenanceLogicTest
             Id = id,
             AttractionId = attractionId,
             Attraction = attraction,
+            EstimatedDuration = 120,
             ScheduledDate = DateTime.Now.AddDays(7),
             Description = "Test maintenance schedule",
             Status = MaintenanceStatus.Pending
