@@ -129,6 +129,7 @@ namespace TestDomain
             Assert.AreEqual(MaintenanceStatus.Cancelled, schedule.Status);
         }
 
+        [TestMethod]
         public void SetAttractionId_ValidGuid_Success()
         {
             Guid attractionId = Guid.NewGuid();
@@ -205,6 +206,23 @@ namespace TestDomain
             bool isOverdue = schedule.IsOverdue(currentDateTime);
 
             Assert.IsFalse(isOverdue);
+        }
+        
+        [TestMethod]
+        public void IsOverdue_InProgressStatus_WithPastEstimatedDuration_ReturnsTrue()
+        {
+            DateTime currentDateTime = DateTime.Now;
+            MaintenanceSchedule schedule = new MaintenanceSchedule
+            {
+                ScheduledDate = currentDateTime.AddDays(-1),
+                Status = MaintenanceStatus.InProgress,
+                Description = "Test",
+                EstimatedDuration = 24
+            };
+            
+            bool isOverdue = schedule.IsOverdue(currentDateTime);
+            
+            Assert.IsTrue(isOverdue);
         }
 
         [TestMethod]

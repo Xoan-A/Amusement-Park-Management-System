@@ -53,12 +53,13 @@ namespace Domain
 
         public bool IsOverdue(DateTime currentDateTime)
         {
-            if (Status == MaintenanceStatus.Completed || Status == MaintenanceStatus.Cancelled)
+            if (Status == MaintenanceStatus.Pending && ScheduledDate <= currentDateTime
+                || Status == MaintenanceStatus.InProgress &&
+                ScheduledDate.AddHours(EstimatedDuration) <= currentDateTime)
             {
-                return false;
+                return true;
             }
-
-            return ScheduledDate < currentDateTime;
+            return false;
         }
 
         public bool CanComplete()
