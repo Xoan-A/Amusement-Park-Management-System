@@ -10,12 +10,14 @@ namespace BusinessLogic
         private readonly IUserRepository _userRepository;
         private readonly IActiveStrategy _activeStrategy;
         private readonly IScoreHistoryRepository _scoreHistoryRepository;
+        private readonly IDateTimeLogic _dateTimeLogic;
 
-        public DailyScoreLogic(IUserRepository userRepository, IActiveStrategy activeStrategy, IScoreHistoryRepository scoreHistoryRepository)
+        public DailyScoreLogic(IUserRepository userRepository, IActiveStrategy activeStrategy, IScoreHistoryRepository scoreHistoryRepository, IDateTimeLogic dateTimeLogic)
         {
             _userRepository = userRepository;
             _activeStrategy = activeStrategy;
             _scoreHistoryRepository = scoreHistoryRepository;
+            _dateTimeLogic = dateTimeLogic;
         }
 
         public async Task DateUpdated(IDateSubject subject)
@@ -50,7 +52,7 @@ namespace BusinessLogic
             {
                 Id = Guid.NewGuid(),
                 VisitorId = user.Id,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = await _dateTimeLogic.GetCurrentDateTime(),
                 Points = score,
                 Origin = attractionEvent != null ? ScoreOrigin.EventParticipation : ScoreOrigin.AttractionVisit,
                 RelatedEntityId = attractionEvent?.Id ?? attraction.Id,
