@@ -516,6 +516,16 @@ public class AttractionLogicTest
     }
 
     [TestMethod]
+    public async Task GetCapacity_ShouldThrowException_WhenAttractionNotFound()
+    {
+        Guid attractionId = Guid.NewGuid();
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync((Attraction)null);
+
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
+            await _attractionLogic.GetCapacity(attractionId));
+    }
+
+    [TestMethod]
     public async Task GetAllAttractionsVisits_ShouldReturnAttractionsWithVisitCounts_WhenReportsExist()
     {
         DateTime startDate = new DateTime(2025, 10, 1);
