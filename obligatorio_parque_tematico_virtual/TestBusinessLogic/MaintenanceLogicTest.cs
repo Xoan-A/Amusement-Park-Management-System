@@ -15,6 +15,7 @@ public class MaintenanceLogicTest
     private Mock<IMaintenanceRecordRepository> _mockRecordRepository;
     private Mock<IAttractionRepository> _mockAttractionRepository;
     private Mock<IAttractionLogic> _mockAttractionLogic;
+    private Mock<IDateTimeLogic> _mockDateTimeLogic;
     private IMaintenanceLogic _maintenanceLogic;
 
     [TestInitialize]
@@ -24,12 +25,16 @@ public class MaintenanceLogicTest
         _mockRecordRepository = new Mock<IMaintenanceRecordRepository>();
         _mockAttractionRepository = new Mock<IAttractionRepository>();
         _mockAttractionLogic = new Mock<IAttractionLogic>();
+        _mockDateTimeLogic = new Mock<IDateTimeLogic>();
+
+        _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(new DateTime(2025, 11, 7, 12, 0, 0));
 
         _maintenanceLogic = new MaintenanceLogic(
             _mockScheduleRepository.Object,
             _mockRecordRepository.Object,
             _mockAttractionRepository.Object,
-            _mockAttractionLogic.Object
+            _mockAttractionLogic.Object,
+            _mockDateTimeLogic.Object
         );
     }
 
@@ -76,6 +81,90 @@ public class MaintenanceLogicTest
         await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
             () => _maintenanceLogic.CreateSchedule(request)
         );
+    }
+
+    [TestMethod]
+    public async Task CreateSchedule_ScheduledDateInPast_ThrowsArgumentException()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(attractionId);
+        DateTime currentDateTime = new DateTime(2025, 11, 7, 12, 0, 0);
+
+        _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDateTime);
+
+        MaintenanceScheduleRequest request = new MaintenanceScheduleRequest
+        {
+            AttractionId = attractionId,
+            ScheduledDate = currentDateTime.AddDays(-1),
+            Description = "Past maintenance",
+            EstimatedDuration = 120
+        };
+
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+
+        ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
+            () => _maintenanceLogic.CreateSchedule(request)
+        );
+
+        Assert.AreEqual("The schedule date cannot be earlier than now", exception.Message);
+        _mockScheduleRepository.Verify(r => r.CreateAsync(It.IsAny<MaintenanceSchedule>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task CreateSchedule_ScheduledDateAtCurrentTime_CreatesSuccessfully()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(attractionId);
+        DateTime currentDateTime = new DateTime(2025, 11, 7, 12, 0, 0);
+
+        _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDateTime);
+
+        MaintenanceScheduleRequest request = new MaintenanceScheduleRequest
+        {
+            AttractionId = attractionId,
+            ScheduledDate = currentDateTime,
+            Description = "Immediate maintenance",
+            EstimatedDuration = 120
+        };
+
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+        _mockScheduleRepository.Setup(r => r.CreateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
+
+        Guid result = await _maintenanceLogic.CreateSchedule(request);
+
+        Assert.AreNotEqual(Guid.Empty, result);
+        _mockScheduleRepository.Verify(r => r.CreateAsync(It.Is<MaintenanceSchedule>(
+            s => s.ScheduledDate == currentDateTime && s.Status == MaintenanceStatus.Pending
+        )), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task CreateSchedule_ScheduledDateInFuture_CreatesSuccessfully()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(attractionId);
+        DateTime currentDateTime = new DateTime(2025, 11, 7, 12, 0, 0);
+        DateTime futureDateTime = currentDateTime.AddDays(5);
+
+        _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDateTime);
+
+        MaintenanceScheduleRequest request = new MaintenanceScheduleRequest
+        {
+            AttractionId = attractionId,
+            ScheduledDate = futureDateTime,
+            Description = "Future maintenance",
+            EstimatedDuration = 120
+        };
+
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+        _mockScheduleRepository.Setup(r => r.CreateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
+
+        Guid result = await _maintenanceLogic.CreateSchedule(request);
+
+        Assert.AreNotEqual(Guid.Empty, result);
+        _mockScheduleRepository.Verify(r => r.CreateAsync(It.Is<MaintenanceSchedule>(
+            s => s.ScheduledDate == futureDateTime && s.Status == MaintenanceStatus.Pending
+        )), Times.Once);
     }
 
     [TestMethod]
