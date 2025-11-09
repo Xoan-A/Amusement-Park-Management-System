@@ -147,6 +147,10 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
         }
 
         schedule.Status = maintenanceStatus;
+        if (schedule.Status == MaintenanceStatus.Completed)
+        {
+            schedule.IsOverdue = false;
+        }
         await _scheduleRepository.UpdateAsync(schedule);
     }
 
