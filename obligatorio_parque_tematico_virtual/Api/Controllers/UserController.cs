@@ -54,7 +54,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> ModifyUser(Guid userId, [FromBody] ModifyUserRequest request)
     {
         string? actorSubClaim = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-        
+
         UserResponse updated = await _userLogic.ModifyUser(userId, actorSubClaim, request);
         return Ok(updated);
     }

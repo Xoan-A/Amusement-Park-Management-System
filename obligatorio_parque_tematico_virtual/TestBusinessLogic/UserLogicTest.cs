@@ -626,8 +626,8 @@ namespace TestBusinessLogic
             };
 
             _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
-                .ReturnsAsync(enterDate)
-                .ReturnsAsync(exitDate);
+            .ReturnsAsync(enterDate)
+            .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
@@ -729,8 +729,8 @@ namespace TestBusinessLogic
             };
 
             _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
-                .ReturnsAsync(enterDate)
-                .ReturnsAsync(exitDate);
+            .ReturnsAsync(enterDate)
+            .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
@@ -783,8 +783,8 @@ namespace TestBusinessLogic
             };
 
             _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
-                .ReturnsAsync(enterDate)
-                .ReturnsAsync(exitDate);
+            .ReturnsAsync(enterDate)
+            .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
@@ -837,8 +837,8 @@ namespace TestBusinessLogic
             };
 
             _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
-                .ReturnsAsync(enterDate)
-                .ReturnsAsync(exitDate);
+            .ReturnsAsync(enterDate)
+            .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
@@ -1162,8 +1162,8 @@ namespace TestBusinessLogic
             };
 
             _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
-                .ReturnsAsync(enterDate1)
-                .ReturnsAsync(enterDate2);
+            .ReturnsAsync(enterDate1)
+            .ReturnsAsync(enterDate2);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).ReturnsAsync(attraction1);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).ReturnsAsync(attraction2);
@@ -1510,22 +1510,22 @@ namespace TestBusinessLogic
 
             await _userLogic.ModifyUser(userId, actorSub, request);
         }
-        
+
         [TestMethod]
         public async Task ModifyUser_OnlyUpdatesName_WhenOnlyNameProvided()
         {
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
-            User originalUser = new User 
-            { 
-                Id = userId, 
-                Name = "OldName", 
-                LastName = "OldLastName", 
+            User originalUser = new User
+            {
+                Id = userId,
+                Name = "OldName",
+                LastName = "OldLastName",
                 Email = "old@example.com",
                 Password = "oldHashedPassword",
                 UserRoles = new List<UserRole>()
             };
-            
+
             ModifyUserRequest request = new ModifyUserRequest
             {
                 Name = "NewName"
@@ -1539,11 +1539,11 @@ namespace TestBusinessLogic
             Assert.AreEqual("NewName", response.Name);
             Assert.AreEqual("OldLastName", response.LastName);
             Assert.AreEqual("old@example.com", response.Email);
-            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u => 
-                u.Name == "NewName" && 
-                u.LastName == "OldLastName" && 
-                u.Email == "old@example.com" &&
-                u.Password == "oldHashedPassword"
+            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u =>
+            u.Name == "NewName" &&
+            u.LastName == "OldLastName" &&
+            u.Email == "old@example.com" &&
+            u.Password == "oldHashedPassword"
             )), Times.Once);
         }
 
@@ -1552,16 +1552,16 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
-            User originalUser = new User 
-            { 
-                Id = userId, 
-                Name = "OldName", 
-                LastName = "OldLastName", 
+            User originalUser = new User
+            {
+                Id = userId,
+                Name = "OldName",
+                LastName = "OldLastName",
                 Email = "old@example.com",
                 Password = "oldHashedPassword",
                 UserRoles = new List<UserRole>()
             };
-            
+
             ModifyUserRequest request = new ModifyUserRequest
             {
                 Email = "new@example.com"
@@ -1576,11 +1576,11 @@ namespace TestBusinessLogic
             Assert.AreEqual("OldName", response.Name);
             Assert.AreEqual("OldLastName", response.LastName);
             Assert.AreEqual("new@example.com", response.Email);
-            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u => 
-                u.Name == "OldName" && 
-                u.LastName == "OldLastName" && 
-                u.Email == "new@example.com" &&
-                u.Password == "oldHashedPassword"
+            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u =>
+            u.Name == "OldName" &&
+            u.LastName == "OldLastName" &&
+            u.Email == "new@example.com" &&
+            u.Password == "oldHashedPassword"
             )), Times.Once);
         }
 
@@ -1589,16 +1589,16 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
-            User originalUser = new User 
-            { 
-                Id = userId, 
-                Name = "OldName", 
-                LastName = "OldLastName", 
+            User originalUser = new User
+            {
+                Id = userId,
+                Name = "OldName",
+                LastName = "OldLastName",
                 Email = "old@example.com",
                 Password = "oldHashedPassword",
                 UserRoles = new List<UserRole>()
             };
-            
+
             ModifyUserRequest request = new ModifyUserRequest
             {
                 Password = "newPassword123"
@@ -1613,11 +1613,11 @@ namespace TestBusinessLogic
             Assert.AreEqual("OldName", response.Name);
             Assert.AreEqual("OldLastName", response.LastName);
             Assert.AreEqual("old@example.com", response.Email);
-            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u => 
-                u.Name == "OldName" && 
-                u.LastName == "OldLastName" && 
-                u.Email == "old@example.com" &&
-                u.Password == "newHashedPassword"
+            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u =>
+            u.Name == "OldName" &&
+            u.LastName == "OldLastName" &&
+            u.Email == "old@example.com" &&
+            u.Password == "newHashedPassword"
             )), Times.Once);
         }
 
@@ -1626,16 +1626,16 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
-            User originalUser = new User 
-            { 
-                Id = userId, 
-                Name = "OldName", 
-                LastName = "OldLastName", 
+            User originalUser = new User
+            {
+                Id = userId,
+                Name = "OldName",
+                LastName = "OldLastName",
                 Email = "old@example.com",
                 Password = "oldHashedPassword",
                 UserRoles = new List<UserRole>()
             };
-            
+
             ModifyUserRequest request = new ModifyUserRequest();
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
@@ -1646,11 +1646,11 @@ namespace TestBusinessLogic
             Assert.AreEqual("OldName", response.Name);
             Assert.AreEqual("OldLastName", response.LastName);
             Assert.AreEqual("old@example.com", response.Email);
-            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u => 
-                u.Name == "OldName" && 
-                u.LastName == "OldLastName" && 
-                u.Email == "old@example.com" &&
-                u.Password == "oldHashedPassword"
+            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u =>
+            u.Name == "OldName" &&
+            u.LastName == "OldLastName" &&
+            u.Email == "old@example.com" &&
+            u.Password == "oldHashedPassword"
             )), Times.Once);
         }
 
@@ -1661,15 +1661,15 @@ namespace TestBusinessLogic
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
             DateTime currentDate = DateTime.Now;
-            User originalUser = new User 
-            { 
-                Id = userId, 
-                Name = "Old", 
-                LastName = "Name", 
+            User originalUser = new User
+            {
+                Id = userId,
+                Name = "Old",
+                LastName = "Name",
                 Email = "old@example.com",
                 UserRoles = new List<UserRole>()
             };
-            
+
             ModifyUserRequest request = new ModifyUserRequest
             {
                 BirthDate = currentDate.AddDays(1)
@@ -1846,8 +1846,8 @@ namespace TestBusinessLogic
             };
 
             _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
-                .ReturnsAsync(enterDate)
-                .ReturnsAsync(exitDate);
+            .ReturnsAsync(enterDate)
+            .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
