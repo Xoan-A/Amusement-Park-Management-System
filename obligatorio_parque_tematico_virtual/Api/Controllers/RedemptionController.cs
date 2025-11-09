@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
 using Microsoft.AspNetCore.Authorization;
-using Models.In;
 using System.Security.Claims;
-using Domain;
 using Models.Out;
 
 namespace Api.Controllers;
@@ -19,12 +17,12 @@ public class RedemptionController : ControllerBase
         _redemptionLogic = redemptionLogic;
     }
 
-    [HttpPost("redeem")]
+    [HttpPost("redeem/{rewardId}")]
     [Authorize(Roles = "Visitor")]
-    public async Task<IActionResult> RedeemReward([FromBody] RedeemRewardModelIn redeemRequest)
+    public async Task<IActionResult> RedeemReward(Guid rewardId)
     {
         Guid visitorId = GetCurrentUserId();
-        RedemptionHistoryModelOut redemption = await _redemptionLogic.RedeemReward(visitorId, redeemRequest.RewardId);
+        RedemptionHistoryModelOut redemption = await _redemptionLogic.RedeemReward(visitorId, rewardId);
         return CreatedAtAction(nameof(GetMyRedemptionHistory), null, redemption);
     }
 
