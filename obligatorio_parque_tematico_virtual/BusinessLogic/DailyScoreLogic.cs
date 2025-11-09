@@ -1,5 +1,6 @@
 using Domain;
 using IBusinessLogic;
+using IBusinessLogic.Strategy;
 using IDataAccess;
 
 namespace BusinessLogic
@@ -42,6 +43,8 @@ namespace BusinessLogic
             user.Score += score;
             user.DailyScore += score;
             await _userRepository.Update(user);
+            
+            IConcreteStrategy currentStrategy = await _activeStrategy.GetStrategy();
 
             var scoreHistory = new ScoreHistory
             {
@@ -51,7 +54,7 @@ namespace BusinessLogic
                 Points = score,
                 Origin = attractionEvent != null ? ScoreOrigin.EventParticipation : ScoreOrigin.AttractionVisit,
                 RelatedEntityId = attractionEvent?.Id ?? attraction.Id,
-                StrategyName = _activeStrategy.GetType().Name,
+                StrategyName = currentStrategy.Name,
             };
 
             await _scoreHistoryRepository.CreateAsync(scoreHistory);
