@@ -111,6 +111,10 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
     public async Task<CapacityResponse> GetCapacity(Guid id)
     {
         Attraction attraction = await _attractionRepository.GetById(id);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
+        }
         return new CapacityResponse()
         {
             Id = attraction.Id,
