@@ -1,6 +1,7 @@
 using Moq;
 using Domain;
 using IBusinessLogic;
+using IBusinessLogic.Strategy;
 using IDataAccess;
 using BusinessLogic;
 
@@ -13,6 +14,7 @@ namespace TestBusinessLogic
         private Mock<IUserRepository> _mockUserRepository;
         private Mock<IActiveStrategy> _mockActiveStrategy;
         private Mock<IScoreHistoryRepository> _mockScoreHistoryRepository;
+        private Mock<IConcreteStrategy> _mockConcreteStrategy;
 
         [TestInitialize]
         public void Setup()
@@ -20,6 +22,11 @@ namespace TestBusinessLogic
             _mockUserRepository = new Mock<IUserRepository>();
             _mockActiveStrategy = new Mock<IActiveStrategy>();
             _mockScoreHistoryRepository = new Mock<IScoreHistoryRepository>();
+            _mockConcreteStrategy = new Mock<IConcreteStrategy>();
+
+            _mockConcreteStrategy.Setup(s => s.Name).Returns("TestStrategy");
+            _mockActiveStrategy.Setup(s => s.GetStrategy()).ReturnsAsync(_mockConcreteStrategy.Object);
+
             _dailyScoreLogic = new DailyScoreLogic(_mockUserRepository.Object, _mockActiveStrategy.Object, _mockScoreHistoryRepository.Object);
         }
 
