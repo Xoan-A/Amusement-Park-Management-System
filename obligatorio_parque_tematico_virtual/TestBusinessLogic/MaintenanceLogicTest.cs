@@ -294,6 +294,63 @@ public class MaintenanceLogicTest
     }
 
     [TestMethod]
+    public async Task UpdateScheduleStatus_ToCompleted_SetsIsOverdueToFalse()
+    {
+        Guid scheduleId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        MaintenanceSchedule schedule = CreateTestSchedule(scheduleId, attraction.Id, attraction);
+        schedule.Status = MaintenanceStatus.InProgress;
+        schedule.IsOverdue = true;
+
+        _mockScheduleRepository.Setup(r => r.GetByIdAsync(scheduleId)).ReturnsAsync(schedule);
+        _mockScheduleRepository.Setup(r => r.UpdateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
+
+        await _maintenanceLogic.UpdateScheduleStatus(scheduleId, "Completed");
+
+        _mockScheduleRepository.Verify(r => r.UpdateAsync(It.Is<MaintenanceSchedule>(
+            s => s.Id == scheduleId && s.Status == MaintenanceStatus.Completed && s.IsOverdue == false
+        )), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task UpdateScheduleStatus_ToCompletedWhenNotOverdue_KeepsIsOverdueFalse()
+    {
+        Guid scheduleId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        MaintenanceSchedule schedule = CreateTestSchedule(scheduleId, attraction.Id, attraction);
+        schedule.Status = MaintenanceStatus.InProgress;
+        schedule.IsOverdue = false;
+
+        _mockScheduleRepository.Setup(r => r.GetByIdAsync(scheduleId)).ReturnsAsync(schedule);
+        _mockScheduleRepository.Setup(r => r.UpdateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
+
+        await _maintenanceLogic.UpdateScheduleStatus(scheduleId, "Completed");
+
+        _mockScheduleRepository.Verify(r => r.UpdateAsync(It.Is<MaintenanceSchedule>(
+            s => s.Id == scheduleId && s.Status == MaintenanceStatus.Completed && s.IsOverdue == false
+        )), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task UpdateScheduleStatus_ToInProgress_DoesNotModifyIsOverdue()
+    {
+        Guid scheduleId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        MaintenanceSchedule schedule = CreateTestSchedule(scheduleId, attraction.Id, attraction);
+        schedule.Status = MaintenanceStatus.Pending;
+        schedule.IsOverdue = true;
+
+        _mockScheduleRepository.Setup(r => r.GetByIdAsync(scheduleId)).ReturnsAsync(schedule);
+        _mockScheduleRepository.Setup(r => r.UpdateAsync(It.IsAny<MaintenanceSchedule>())).Returns(Task.CompletedTask);
+
+        await _maintenanceLogic.UpdateScheduleStatus(scheduleId, "InProgress");
+
+        _mockScheduleRepository.Verify(r => r.UpdateAsync(It.Is<MaintenanceSchedule>(
+            s => s.Id == scheduleId && s.Status == MaintenanceStatus.InProgress && s.IsOverdue == true
+        )), Times.Once);
+    }
+
+    [TestMethod]
     public async Task DeleteSchedule_ExistingSchedule_DeletesSuccessfully()
     {
         Guid scheduleId = Guid.NewGuid();
