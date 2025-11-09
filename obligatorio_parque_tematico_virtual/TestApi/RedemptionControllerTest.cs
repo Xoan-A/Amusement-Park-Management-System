@@ -2,11 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using System.Text;
-using System.Text.Json;
 using Domain;
 using IBusinessLogic;
-using Models.In;
 using Models.Out;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
@@ -124,15 +121,7 @@ public class RedemptionControllerTest
 
         _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId)).ReturnsAsync(redemption);
 
-        RedeemRewardModelIn redeemRequest = new RedeemRewardModelIn
-        {
-            RewardId = rewardId
-        };
-
-        string json = JsonSerializer.Serialize(redeemRequest);
-        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        HttpResponseMessage response = await _visitorClient.PostAsync("/api/redemptions/redeem", content);
+        HttpResponseMessage response = await _visitorClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
 
         Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
     }
@@ -141,15 +130,8 @@ public class RedemptionControllerTest
     public async Task RedeemReward_AsAdmin_ReturnsForbidden()
     {
         Guid rewardId = Guid.NewGuid();
-        RedeemRewardModelIn redeemRequest = new RedeemRewardModelIn
-        {
-            RewardId = rewardId
-        };
 
-        string json = JsonSerializer.Serialize(redeemRequest);
-        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        HttpResponseMessage response = await _adminClient.PostAsync("/api/redemptions/redeem", content);
+        HttpResponseMessage response = await _adminClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
 
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -158,15 +140,8 @@ public class RedemptionControllerTest
     public async Task RedeemReward_Unauthenticated_ReturnsUnauthorized()
     {
         Guid rewardId = Guid.NewGuid();
-        RedeemRewardModelIn redeemRequest = new RedeemRewardModelIn
-        {
-            RewardId = rewardId
-        };
 
-        string json = JsonSerializer.Serialize(redeemRequest);
-        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        HttpResponseMessage response = await _client.PostAsync("/api/redemptions/redeem", content);
+        HttpResponseMessage response = await _client.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
 
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -178,15 +153,7 @@ public class RedemptionControllerTest
         _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId))
             .ThrowsAsync(new InvalidOperationException("Insufficient points"));
 
-        RedeemRewardModelIn redeemRequest = new RedeemRewardModelIn
-        {
-            RewardId = rewardId
-        };
-
-        string json = JsonSerializer.Serialize(redeemRequest);
-        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        HttpResponseMessage response = await _visitorClient.PostAsync("/api/redemptions/redeem", content);
+        HttpResponseMessage response = await _visitorClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
 
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -198,15 +165,7 @@ public class RedemptionControllerTest
         _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId))
             .ThrowsAsync(new KeyNotFoundException("Reward not found"));
 
-        RedeemRewardModelIn redeemRequest = new RedeemRewardModelIn
-        {
-            RewardId = rewardId
-        };
-
-        string json = JsonSerializer.Serialize(redeemRequest);
-        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        HttpResponseMessage response = await _visitorClient.PostAsync("/api/redemptions/redeem", content);
+        HttpResponseMessage response = await _visitorClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
 
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -348,15 +307,7 @@ public class RedemptionControllerTest
         _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId))
             .Throws(new ArgumentException("Reward is not available"));
 
-        RedeemRewardModelIn redeemRequest = new RedeemRewardModelIn
-        {
-            RewardId = rewardId
-        };
-
-        string json = JsonSerializer.Serialize(redeemRequest);
-        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        HttpResponseMessage response = await _visitorClient.PostAsync("/api/redemptions/redeem", content);
+        HttpResponseMessage response = await _visitorClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
 
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -464,7 +415,7 @@ public class RedemptionControllerTest
                 Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
         };
         SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
-        String tokenString = tokenHandler.WriteToken(token);
+        string tokenString = tokenHandler.WriteToken(token);
 
         HttpClient client = _factory.CreateClient();
         client.DefaultRequestHeaders.Authorization =
@@ -492,20 +443,14 @@ public class RedemptionControllerTest
                 SecurityAlgorithms.HmacSha256Signature)
         };
         SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
-        String tokenString = tokenHandler.WriteToken(token);
+        string tokenString = tokenHandler.WriteToken(token);
 
         HttpClient client = _factory.CreateClient();
         client.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
 
-        RedeemRewardModelIn redeemRequest = new RedeemRewardModelIn
-        {
-            RewardId = Guid.NewGuid()
-        };
-        String json = JsonSerializer.Serialize(redeemRequest);
-        StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        HttpResponseMessage response = await client.PostAsync("/api/redemptions/redeem", content);
+        Guid rewardId = Guid.NewGuid();
+        HttpResponseMessage response = await client.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
 
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }
