@@ -755,5 +755,170 @@ namespace ApiTests
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             _mockUserLogic.Verify(l => l.ModifyUser(userId, string.Empty, It.IsAny<ModifyUserRequest>()), Times.Once);
         }
+
+        [TestMethod]
+        public async Task ChangeMembershipLevel_WithAdminRole_ReturnsOk()
+        {
+            Guid userId = Guid.NewGuid();
+            ChangeMembershipLevelRequest request = new ChangeMembershipLevelRequest
+            {
+                MembershipLevel = 1
+            };
+
+            UserResponse expectedResponse = new UserResponse
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@example.com",
+                BirthDate = new DateTime(1990, 1, 1),
+                MembershipLevel = 1,
+                UserRoles = new List<string> { Role.VISITOR },
+                Score = 100
+            };
+
+            _mockUserLogic.Setup(u => u.ChangeMembershipLevel(userId, 1))
+                .ReturnsAsync(expectedResponse);
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _adminClient.PutAsync($"/api/users/{userId}/membership", content);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            string responseContent = await response.Content.ReadAsStringAsync();
+            UserResponse? userResponse = JsonSerializer.Deserialize<UserResponse>(responseContent,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            Assert.AreEqual(userId, userResponse.Id);
+            Assert.AreEqual(1, userResponse.MembershipLevel);
+            Assert.AreEqual("John", userResponse.Name);
+
+            _mockUserLogic.Verify(u => u.ChangeMembershipLevel(userId, 1), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task ChangeMembershipLevel_WithoutAuthentication_ReturnsUnauthorized()
+        {
+            Guid userId = Guid.NewGuid();
+            ChangeMembershipLevelRequest request = new ChangeMembershipLevelRequest
+            {
+                MembershipLevel = 2
+            };
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _client.PutAsync($"/api/users/{userId}/membership", content);
+
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+            _mockUserLogic.Verify(u => u.ChangeMembershipLevel(It.IsAny<Guid>(), It.IsAny<int>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task ChangeMembershipLevel_WithOperatorRole_ReturnsForbidden()
+        {
+            Guid userId = Guid.NewGuid();
+            ChangeMembershipLevelRequest request = new ChangeMembershipLevelRequest
+            {
+                MembershipLevel = 1
+            };
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _operatorClient.PutAsync($"/api/users/{userId}/membership", content);
+
+            Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+            _mockUserLogic.Verify(u => u.ChangeMembershipLevel(It.IsAny<Guid>(), It.IsAny<int>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task ChangeMembershipLevel_UserNotFound_ReturnsNotFound()
+        {
+            Guid userId = Guid.NewGuid();
+            ChangeMembershipLevelRequest request = new ChangeMembershipLevelRequest
+            {
+                MembershipLevel = 2
+            };
+
+            _mockUserLogic.Setup(u => u.ChangeMembershipLevel(userId, 2))
+                .ThrowsAsync(new KeyNotFoundException("User not found."));
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _adminClient.PutAsync($"/api/users/{userId}/membership", content);
+
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+            _mockUserLogic.Verify(u => u.ChangeMembershipLevel(userId, 2), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task ChangeMembershipLevel_InvalidMembershipLevel_ReturnsBadRequest()
+        {
+            Guid userId = Guid.NewGuid();
+            ChangeMembershipLevelRequest request = new ChangeMembershipLevelRequest
+            {
+                MembershipLevel = 999
+            };
+
+            _mockUserLogic.Setup(u => u.ChangeMembershipLevel(userId, 999))
+                .ThrowsAsync(new ArgumentException("Invalid membership level."));
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _adminClient.PutAsync($"/api/users/{userId}/membership", content);
+
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            _mockUserLogic.Verify(u => u.ChangeMembershipLevel(userId, 999), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task ChangeMembershipLevel_ToStandard_ReturnsOk()
+        {
+            Guid userId = Guid.NewGuid();
+            ChangeMembershipLevelRequest request = new ChangeMembershipLevelRequest
+            {
+                MembershipLevel = 0
+            };
+
+            UserResponse expectedResponse = new UserResponse
+            {
+                Id = userId,
+                Name = "Jane",
+                LastName = "Smith",
+                Email = "jane@example.com",
+                MembershipLevel = 0,
+                UserRoles = new List<string> { Role.VISITOR },
+                Score = 50
+            };
+
+            _mockUserLogic.Setup(u => u.ChangeMembershipLevel(userId, 0))
+                .ReturnsAsync(expectedResponse);
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _adminClient.PutAsync($"/api/users/{userId}/membership", content);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            string responseContent = await response.Content.ReadAsStringAsync();
+            UserResponse? userResponse = JsonSerializer.Deserialize<UserResponse>(responseContent,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            Assert.AreEqual(0, userResponse.MembershipLevel);
+
+            _mockUserLogic.Verify(u => u.ChangeMembershipLevel(userId, 0), Times.Once);
+        }
     }
 }

@@ -53,8 +53,17 @@ public class UserController : ControllerBase
     [Authorize]
     public async Task<IActionResult> ModifyUser(Guid userId, [FromBody] ModifyUserRequest request)
     {
-        string actorSubClaim = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? string.Empty;
+        string? actorSubClaim = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        
         UserResponse updated = await _userLogic.ModifyUser(userId, actorSubClaim, request);
+        return Ok(updated);
+    }
+
+    [HttpPut("{userId}/membership")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> ChangeMembershipLevel(Guid userId, [FromBody] ChangeMembershipLevelRequest request)
+    {
+        UserResponse updated = await _userLogic.ChangeMembershipLevel(userId, request.MembershipLevel);
         return Ok(updated);
     }
 }
