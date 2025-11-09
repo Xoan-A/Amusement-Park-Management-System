@@ -15,6 +15,7 @@ namespace TestBusinessLogic
         private Mock<IActiveStrategy> _mockActiveStrategy;
         private Mock<IScoreHistoryRepository> _mockScoreHistoryRepository;
         private Mock<IConcreteStrategy> _mockConcreteStrategy;
+        private Mock<IDateTimeLogic> _mockDateTimeLogic;
 
         [TestInitialize]
         public void Setup()
@@ -23,11 +24,13 @@ namespace TestBusinessLogic
             _mockActiveStrategy = new Mock<IActiveStrategy>();
             _mockScoreHistoryRepository = new Mock<IScoreHistoryRepository>();
             _mockConcreteStrategy = new Mock<IConcreteStrategy>();
+            _mockDateTimeLogic = new Mock<IDateTimeLogic>();
 
             _mockConcreteStrategy.Setup(s => s.Name).Returns("TestStrategy");
             _mockActiveStrategy.Setup(s => s.GetStrategy()).ReturnsAsync(_mockConcreteStrategy.Object);
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(new DateTime(2025, 9, 1, 12, 0, 0));
 
-            _dailyScoreLogic = new DailyScoreLogic(_mockUserRepository.Object, _mockActiveStrategy.Object, _mockScoreHistoryRepository.Object);
+            _dailyScoreLogic = new DailyScoreLogic(_mockUserRepository.Object, _mockActiveStrategy.Object, _mockScoreHistoryRepository.Object, _mockDateTimeLogic.Object);
         }
 
         [TestMethod]
