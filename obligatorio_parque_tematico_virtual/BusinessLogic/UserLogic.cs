@@ -165,9 +165,9 @@ namespace BusinessLogic
         {
             Guid? qr = request.Qr;
             Guid? nfc = request.NFC;
-            DateTime enterDate = request.EnterDate;
             Guid userId = request.UserId;
             Guid? eventId = request.EventId;
+            DateTime enterDate = await _dateTimeLogic.GetCurrentDateTime();
 
             if (qr == null && nfc == null)
                 throw new ArgumentException("QR code or NFC must be provided.");
@@ -188,6 +188,8 @@ namespace BusinessLogic
             {
                 user.RegisterEntry(attraction, enterDate);
                 attraction.CurrentCapacity++;
+                await _userRepository.Update(user);
+                await _attractionRepository.Update(attraction);
             }
             else
                 throw new ArgumentException("Attraction is at full capacity.");
@@ -200,7 +202,7 @@ namespace BusinessLogic
         public async Task RegisterExit(Guid attractionId, RegisterExitRequest request)
         {
             Guid userId = request.userId;
-            DateTime exitDate = request.exitDate;
+            DateTime exitDate = await _dateTimeLogic.GetCurrentDateTime();
 
             User user = await _userRepository.GetById(userId);
             if (user == null)
@@ -211,6 +213,7 @@ namespace BusinessLogic
                 throw new ArgumentException("Attraction not found.");
 
             user.RegisterExit(attraction, exitDate);
+            await _userRepository.Update(user);
 
             if (attraction.CurrentCapacity > 0)
             {
@@ -280,28 +283,32 @@ namespace BusinessLogic
                 throw new KeyNotFoundException("User not found");
             }
 
-            if (string.IsNullOrWhiteSpace(request.Name))
-                throw new ArgumentException("Name cannot be empty");
-            user.Name = request.Name;
-
-            if (string.IsNullOrWhiteSpace(request.LastName))
-                throw new ArgumentException("Last name cannot be empty");
-            user.LastName = request.LastName;
-
-            if (string.IsNullOrWhiteSpace(request.Email))
-                throw new ArgumentException("Email cannot be empty");
-            if (!string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(request.Name))
             {
-                bool unique = await _userRepository.IsEmailUnique(request.Email);
-                if (!unique)
-                    throw new ArgumentException("Email must be unique");
-                user.Email = request.Email;
+                user.Name = request.Name;
             }
 
-            if (string.IsNullOrWhiteSpace(request.Password))
-                throw new ArgumentException("Password cannot be empty");
-            string hashedPassword = _passwordLogic.HashPassword(request.Password);
-            user.Password = hashedPassword;
+            if (!string.IsNullOrWhiteSpace(request.LastName))
+            {
+                user.LastName = request.LastName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Email))
+            {
+                if (!string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    bool unique = await _userRepository.IsEmailUnique(request.Email);
+                    if (!unique)
+                        throw new ArgumentException("Email must be unique");
+                    user.Email = request.Email;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Password))
+            {
+                string hashedPassword = _passwordLogic.HashPassword(request.Password);
+                user.Password = hashedPassword;
+            }
 
             if (request.BirthDate.HasValue)
             {
@@ -311,6 +318,31 @@ namespace BusinessLogic
                 user.BirthDate = request.BirthDate.Value;
             }
 
+            await _userRepository.Update(user);
+
+            return new UserResponse
+            {
+                Id = user.Id,
+                Name = user.Name,
+                LastName = user.LastName,
+                Email = user.Email,
+                BirthDate = user.BirthDate,
+                MembershipLevel = (int?)user.MembershipLevel,
+                UserRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                Score = user.Score
+            };
+        }
+
+        public async Task<UserResponse> ChangeMembershipLevel(Guid userId, int membershipLevel)
+        {
+            if (!Enum.IsDefined(typeof(MembershipLevel), membershipLevel))
+                throw new ArgumentException("Invalid membership level.");
+
+            User user = await _userRepository.GetByIdWithRoles(userId);
+            if (user == null)
+                throw new KeyNotFoundException("User not found.");
+
+            user.MembershipLevel = (MembershipLevel)membershipLevel;
             await _userRepository.Update(user);
 
             return new UserResponse

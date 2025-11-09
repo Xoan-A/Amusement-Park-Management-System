@@ -268,12 +268,10 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = null,
                 NFC = null,
                 EventId = null
@@ -291,14 +289,13 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(false);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
-                NFC = null,
                 EventId = null
             };
 
@@ -330,14 +327,16 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -359,8 +358,7 @@ namespace TestBusinessLogic
             Guid attractionId1 = Guid.NewGuid();
             Guid attractionId2 = Guid.NewGuid();
             Guid qrCode = Guid.NewGuid();
-            DateTime enterDate1 = new DateTime(2025, 10, 1, 10, 0, 0);
-            DateTime enterDate2 = new DateTime(2025, 10, 1, 14, 0, 0);
+            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
             User visitor = new User
             {
@@ -388,16 +386,17 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).ReturnsAsync(attraction1);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).ReturnsAsync(attraction2);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate1, null)).ReturnsAsync(true);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate2, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate1,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -419,13 +418,13 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync((User)null);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -451,6 +450,7 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync((Attraction)null);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
@@ -458,7 +458,6 @@ namespace TestBusinessLogic
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -492,14 +491,16 @@ namespace TestBusinessLogic
                 CurrentCapacity = 5
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -536,6 +537,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 10
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
@@ -543,13 +545,12 @@ namespace TestBusinessLogic
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
             };
 
-            await _userLogic.RegisterEntry(userId, request);
+            await _userLogic.RegisterEntry(attractionId, request);
         }
 
         [TestMethod]
@@ -577,14 +578,16 @@ namespace TestBusinessLogic
                 CurrentCapacity = 9
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -622,14 +625,18 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
+            _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
+            .ReturnsAsync(enterDate)
+            .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
             RegisterEntryRequest entryRequest = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -637,8 +644,7 @@ namespace TestBusinessLogic
 
             RegisterExitRequest exitRequest = new RegisterExitRequest
             {
-                userId = userId,
-                exitDate = exitDate
+                userId = userId
             };
 
             await _userLogic.RegisterEntry(attractionId, entryRequest);
@@ -657,12 +663,12 @@ namespace TestBusinessLogic
             Guid attractionId = Guid.NewGuid();
             DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync((User)null);
 
             RegisterExitRequest request = new RegisterExitRequest
             {
-                userId = userId,
-                exitDate = exitDate
+                userId = userId
             };
 
             await _userLogic.RegisterExit(attractionId, request);
@@ -684,13 +690,13 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync((Attraction)null);
 
             RegisterExitRequest request = new RegisterExitRequest
             {
-                userId = userId,
-                exitDate = exitDate
+                userId = userId
             };
 
             await _userLogic.RegisterExit(attractionId, request);
@@ -722,14 +728,18 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
+            _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
+            .ReturnsAsync(enterDate)
+            .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
             RegisterEntryRequest entryRequest = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -737,8 +747,7 @@ namespace TestBusinessLogic
 
             RegisterExitRequest exitRequest = new RegisterExitRequest
             {
-                userId = userId,
-                exitDate = exitDate
+                userId = userId
             };
 
             await _userLogic.RegisterEntry(attractionId, entryRequest);
@@ -773,14 +782,18 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
+            _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
+            .ReturnsAsync(enterDate)
+            .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
             RegisterEntryRequest entryRequest = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -788,8 +801,7 @@ namespace TestBusinessLogic
 
             RegisterExitRequest exitRequest = new RegisterExitRequest
             {
-                userId = userId,
-                exitDate = exitDate
+                userId = userId
             };
 
             await _userLogic.RegisterEntry(attractionId, entryRequest);
@@ -824,14 +836,18 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
+            _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
+            .ReturnsAsync(enterDate)
+            .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
             RegisterEntryRequest entryRequest = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -839,8 +855,7 @@ namespace TestBusinessLogic
 
             RegisterExitRequest exitRequest = new RegisterExitRequest
             {
-                userId = userId,
-                exitDate = exitDate
+                userId = userId
             };
 
             await _userLogic.RegisterEntry(attractionId, entryRequest);
@@ -873,14 +888,16 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(null, userId, enterDate, null)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = null,
                 NFC = userId,
                 EventId = null
@@ -919,14 +936,16 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = eventId
@@ -965,14 +984,16 @@ namespace TestBusinessLogic
                 CurrentCapacity = 5
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = eventId
@@ -1027,16 +1048,18 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
             .ReturnsAsync((Event)null);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -1079,17 +1102,19 @@ namespace TestBusinessLogic
                 Date = enterDate
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, specialEvent.Id))
             .ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
             .ReturnsAsync(specialEvent);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = specialEvent.Id
@@ -1136,18 +1161,22 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
+            _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
+            .ReturnsAsync(enterDate1)
+            .ReturnsAsync(enterDate2);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).ReturnsAsync(attraction1);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).ReturnsAsync(attraction2);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, It.IsAny<DateTime>(), null))
             .ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(It.IsAny<Guid>(), It.IsAny<DateTime>()))
             .ReturnsAsync((Event)null);
 
             RegisterEntryRequest entryRequest = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate1,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -1156,7 +1185,6 @@ namespace TestBusinessLogic
             RegisterEntryRequest entryRequest2 = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate2,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -1195,16 +1223,18 @@ namespace TestBusinessLogic
                 CurrentCapacity = 0
             };
 
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
             .ReturnsAsync((Event)null);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -1482,83 +1512,146 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public async Task ModifyUser_WhenNameEmpty_ThrowsArgument()
+        public async Task ModifyUser_OnlyUpdatesName_WhenOnlyNameProvided()
         {
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
-            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            User originalUser = new User
+            {
+                Id = userId,
+                Name = "OldName",
+                LastName = "OldLastName",
+                Email = "old@example.com",
+                Password = "oldHashedPassword",
+                UserRoles = new List<UserRole>()
+            };
+
             ModifyUserRequest request = new ModifyUserRequest
             {
-                Name = "",
-                LastName = "B",
-                Email = "new@example.com",
-                Password = "p"
+                Name = "NewName"
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
 
-            await _userLogic.ModifyUser(userId, actorSub, request);
+            UserResponse response = await _userLogic.ModifyUser(userId, actorSub, request);
+
+            Assert.AreEqual("NewName", response.Name);
+            Assert.AreEqual("OldLastName", response.LastName);
+            Assert.AreEqual("old@example.com", response.Email);
+            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u =>
+            u.Name == "NewName" &&
+            u.LastName == "OldLastName" &&
+            u.Email == "old@example.com" &&
+            u.Password == "oldHashedPassword"
+            )), Times.Once);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public async Task ModifyUser_WhenLastNameEmpty_ThrowsArgument()
+        public async Task ModifyUser_OnlyUpdatesEmail_WhenOnlyEmailProvided()
         {
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
-            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            User originalUser = new User
+            {
+                Id = userId,
+                Name = "OldName",
+                LastName = "OldLastName",
+                Email = "old@example.com",
+                Password = "oldHashedPassword",
+                UserRoles = new List<UserRole>()
+            };
+
             ModifyUserRequest request = new ModifyUserRequest
             {
-                Name = "A",
-                LastName = "",
-                Email = "new@example.com",
-                Password = "p"
+                Email = "new@example.com"
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+            _mockUserRepository.Setup(r => r.IsEmailUnique("new@example.com")).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
 
-            await _userLogic.ModifyUser(userId, actorSub, request);
+            UserResponse response = await _userLogic.ModifyUser(userId, actorSub, request);
+
+            Assert.AreEqual("OldName", response.Name);
+            Assert.AreEqual("OldLastName", response.LastName);
+            Assert.AreEqual("new@example.com", response.Email);
+            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u =>
+            u.Name == "OldName" &&
+            u.LastName == "OldLastName" &&
+            u.Email == "new@example.com" &&
+            u.Password == "oldHashedPassword"
+            )), Times.Once);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public async Task ModifyUser_WhenEmailEmpty_ThrowsArgument()
+        public async Task ModifyUser_OnlyUpdatesPassword_WhenOnlyPasswordProvided()
         {
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
-            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            User originalUser = new User
+            {
+                Id = userId,
+                Name = "OldName",
+                LastName = "OldLastName",
+                Email = "old@example.com",
+                Password = "oldHashedPassword",
+                UserRoles = new List<UserRole>()
+            };
+
             ModifyUserRequest request = new ModifyUserRequest
             {
-                Name = "A",
-                LastName = "B",
-                Email = "",
-                Password = "p"
+                Password = "newPassword123"
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+            _mockPasswordService.Setup(p => p.HashPassword("newPassword123")).Returns("newHashedPassword");
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
 
-            await _userLogic.ModifyUser(userId, actorSub, request);
+            UserResponse response = await _userLogic.ModifyUser(userId, actorSub, request);
+
+            Assert.AreEqual("OldName", response.Name);
+            Assert.AreEqual("OldLastName", response.LastName);
+            Assert.AreEqual("old@example.com", response.Email);
+            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u =>
+            u.Name == "OldName" &&
+            u.LastName == "OldLastName" &&
+            u.Email == "old@example.com" &&
+            u.Password == "newHashedPassword"
+            )), Times.Once);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public async Task ModifyUser_WhenPasswordEmpty_ThrowsArgument()
+        public async Task ModifyUser_DoesNotUpdateAnything_WhenAllFieldsAreNull()
         {
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
-            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
-            ModifyUserRequest request = new ModifyUserRequest
+            User originalUser = new User
             {
-                Name = "A",
-                LastName = "B",
-                Email = "x@y.com",
-                Password = ""
+                Id = userId,
+                Name = "OldName",
+                LastName = "OldLastName",
+                Email = "old@example.com",
+                Password = "oldHashedPassword",
+                UserRoles = new List<UserRole>()
             };
 
-            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+            ModifyUserRequest request = new ModifyUserRequest();
 
-            await _userLogic.ModifyUser(userId, actorSub, request);
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+
+            UserResponse response = await _userLogic.ModifyUser(userId, actorSub, request);
+
+            Assert.AreEqual("OldName", response.Name);
+            Assert.AreEqual("OldLastName", response.LastName);
+            Assert.AreEqual("old@example.com", response.Email);
+            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u =>
+            u.Name == "OldName" &&
+            u.LastName == "OldLastName" &&
+            u.Email == "old@example.com" &&
+            u.Password == "oldHashedPassword"
+            )), Times.Once);
         }
 
         [TestMethod]
@@ -1567,17 +1660,23 @@ namespace TestBusinessLogic
         {
             Guid userId = Guid.NewGuid();
             string actorSub = userId.ToString();
-            User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
+            DateTime currentDate = DateTime.Now;
+            User originalUser = new User
+            {
+                Id = userId,
+                Name = "Old",
+                LastName = "Name",
+                Email = "old@example.com",
+                UserRoles = new List<UserRole>()
+            };
+
             ModifyUserRequest request = new ModifyUserRequest
             {
-                Name = "A",
-                LastName = "B",
-                Email = "x@y.com",
-                Password = "p",
-                BirthDate = DateTime.Now.AddDays(1)
+                BirthDate = currentDate.AddDays(1)
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(originalUser);
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
 
             await _userLogic.ModifyUser(userId, actorSub, request);
         }
@@ -1746,14 +1845,18 @@ namespace TestBusinessLogic
                 VisitorReports = new List<VisitorReport>()
             };
 
+            _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
+            .ReturnsAsync(enterDate)
+            .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
 
             RegisterEntryRequest entryRequest = new RegisterEntryRequest
             {
                 UserId = userId,
-                EnterDate = enterDate,
                 Qr = qrCode,
                 NFC = null,
                 EventId = null
@@ -1761,8 +1864,7 @@ namespace TestBusinessLogic
 
             RegisterExitRequest exitRequest = new RegisterExitRequest
             {
-                userId = userId,
-                exitDate = exitDate
+                userId = userId
             };
 
             await _userLogic.RegisterEntry(attractionId, entryRequest);
@@ -1855,6 +1957,145 @@ namespace TestBusinessLogic
             };
 
             await _userLogic.ModifyUser(userId, "not-a-valid-guid", request);
+        }
+
+        [TestMethod]
+        public async Task ChangeMembershipLevel_ValidLevel_UpdatesUserMembership()
+        {
+            Guid userId = Guid.NewGuid();
+            int newMembershipLevel = 1;
+
+            User user = new User
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com",
+                Password = "hashed",
+                MembershipLevel = MembershipLevel.Standard,
+                Score = 100
+            };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(user);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+
+            UserResponse result = await _userLogic.ChangeMembershipLevel(userId, newMembershipLevel);
+
+            Assert.AreEqual(userId, result.Id);
+            Assert.AreEqual(1, result.MembershipLevel);
+            Assert.AreEqual(MembershipLevel.Premium, user.MembershipLevel);
+            _mockUserRepository.Verify(r => r.GetByIdWithRoles(userId), Times.Once);
+            _mockUserRepository.Verify(r => r.Update(user), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task ChangeMembershipLevel_ToVIP_UpdatesCorrectly()
+        {
+            Guid userId = Guid.NewGuid();
+            int newMembershipLevel = 2;
+
+            User user = new User
+            {
+                Id = userId,
+                Name = "Jane",
+                LastName = "Smith",
+                Email = "jane@test.com",
+                Password = "hashed",
+                MembershipLevel = MembershipLevel.Premium,
+                Score = 500
+            };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(user);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+
+            UserResponse result = await _userLogic.ChangeMembershipLevel(userId, newMembershipLevel);
+
+            Assert.AreEqual(2, result.MembershipLevel);
+            Assert.AreEqual(MembershipLevel.VIP, user.MembershipLevel);
+            _mockUserRepository.Verify(r => r.Update(user), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task ChangeMembershipLevel_ToStandard_UpdatesCorrectly()
+        {
+            Guid userId = Guid.NewGuid();
+            int newMembershipLevel = 0;
+
+            User user = new User
+            {
+                Id = userId,
+                Name = "Bob",
+                LastName = "Johnson",
+                Email = "bob@test.com",
+                Password = "hashed",
+                MembershipLevel = MembershipLevel.VIP,
+                Score = 300
+            };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(user);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+
+            UserResponse result = await _userLogic.ChangeMembershipLevel(userId, newMembershipLevel);
+
+            Assert.AreEqual(0, result.MembershipLevel);
+            Assert.AreEqual(MembershipLevel.Standard, user.MembershipLevel);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task ChangeMembershipLevel_InvalidLevel_ThrowsArgumentException()
+        {
+            Guid userId = Guid.NewGuid();
+            int invalidMembershipLevel = 999;
+
+            await _userLogic.ChangeMembershipLevel(userId, invalidMembershipLevel);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task ChangeMembershipLevel_NegativeLevel_ThrowsArgumentException()
+        {
+            Guid userId = Guid.NewGuid();
+            int negativeMembershipLevel = -1;
+
+            await _userLogic.ChangeMembershipLevel(userId, negativeMembershipLevel);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(KeyNotFoundException))]
+        public async Task ChangeMembershipLevel_UserNotFound_ThrowsKeyNotFoundException()
+        {
+            Guid userId = Guid.NewGuid();
+            int newMembershipLevel = 1;
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync((User)null);
+
+            await _userLogic.ChangeMembershipLevel(userId, newMembershipLevel);
+        }
+
+        [TestMethod]
+        public async Task ChangeMembershipLevel_CallsRepositoryMethods_InCorrectOrder()
+        {
+            Guid userId = Guid.NewGuid();
+            int newMembershipLevel = 1;
+
+            User user = new User
+            {
+                Id = userId,
+                Name = "Test",
+                LastName = "User",
+                Email = "test@test.com",
+                Password = "hashed",
+                MembershipLevel = MembershipLevel.Standard
+            };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(user);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+
+            await _userLogic.ChangeMembershipLevel(userId, newMembershipLevel);
+
+            _mockUserRepository.Verify(r => r.GetByIdWithRoles(userId), Times.Once);
+            _mockUserRepository.Verify(r => r.Update(user), Times.Once);
         }
     }
 }

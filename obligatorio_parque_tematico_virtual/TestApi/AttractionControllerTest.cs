@@ -365,12 +365,9 @@ public class AttractionControllerTest
     {
         Guid attractionId = Guid.NewGuid();
         Guid userId = Guid.NewGuid();
-        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            EnterDate = enterDate,
             UserId = userId
         };
 
@@ -401,11 +398,9 @@ public class AttractionControllerTest
     {
         Guid attractionId = Guid.NewGuid();
         Guid userId = Guid.NewGuid();
-        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            EnterDate = enterDate,
             UserId = userId
         };
 
@@ -424,11 +419,9 @@ public class AttractionControllerTest
         Guid attractionId = Guid.NewGuid();
         Guid userId = Guid.NewGuid();
         Guid qrCode = Guid.NewGuid();
-        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            EnterDate = enterDate,
             UserId = userId,
             Qr = qrCode
         };
@@ -459,11 +452,9 @@ public class AttractionControllerTest
     {
         Guid attractionId = Guid.NewGuid();
         Guid userId = Guid.NewGuid();
-        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            EnterDate = enterDate,
             UserId = userId,
             NFC = userId
         };
@@ -496,11 +487,9 @@ public class AttractionControllerTest
         Guid userId = Guid.NewGuid();
         Guid qrCode = Guid.NewGuid();
         Guid eventId = Guid.NewGuid();
-        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            EnterDate = enterDate,
             UserId = userId,
             Qr = qrCode,
             EventId = eventId
@@ -533,11 +522,9 @@ public class AttractionControllerTest
         Guid attractionId = Guid.NewGuid();
         Guid userId = Guid.NewGuid();
         Guid eventId = Guid.NewGuid();
-        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            EnterDate = enterDate,
             UserId = userId,
             NFC = userId,
             EventId = eventId
@@ -570,11 +557,9 @@ public class AttractionControllerTest
         Guid attractionId = Guid.NewGuid();
         Guid userId = Guid.NewGuid();
         Guid qrCode = Guid.NewGuid();
-        DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            EnterDate = enterDate,
             UserId = userId,
             Qr = qrCode
         };
@@ -596,12 +581,9 @@ public class AttractionControllerTest
     {
         Guid attractionId = Guid.NewGuid();
         Guid userId = Guid.NewGuid();
-        DateTime exitDate = new DateTime(2025, 10, 1, 12, 0, 0);
-
 
         RegisterExitRequest requestBody = new RegisterExitRequest
         {
-            exitDate = exitDate,
             userId = userId
         };
 
@@ -630,11 +612,9 @@ public class AttractionControllerTest
     {
         Guid attractionId = Guid.NewGuid();
         Guid userId = Guid.NewGuid();
-        DateTime exitDate = new DateTime(2025, 10, 1, 12, 0, 0);
 
         RegisterExitRequest requestBody = new RegisterExitRequest
         {
-            exitDate = exitDate,
             userId = userId
         };
 
@@ -822,7 +802,6 @@ public class AttractionControllerTest
         Guid attractionId = Guid.NewGuid();
         RegisterEntryRequest request = new RegisterEntryRequest
         {
-            EnterDate = DateTime.Now,
             UserId = Guid.NewGuid(),
             Qr = Guid.NewGuid()
         };
@@ -841,7 +820,6 @@ public class AttractionControllerTest
         Guid attractionId = Guid.NewGuid();
         RegisterExitRequest request = new RegisterExitRequest
         {
-            exitDate = DateTime.Now,
             userId = Guid.NewGuid()
         };
 
