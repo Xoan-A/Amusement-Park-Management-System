@@ -96,7 +96,7 @@ public class MaintenanceController : ControllerBase
     [Authorize(Roles = "Administrator,Operator")]
     public async Task<IActionResult> RecordMaintenance([FromBody] MaintenanceRecordRequest request)
     {
-        Guid userId = _claimsLogic.GetCurrentUserId(User);
+        Guid userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
         Guid recordId = await _maintenanceLogic.RecordMaintenance(request, userId);
 
         return CreatedAtAction(nameof(GetRecordById), new { id = recordId },
@@ -159,10 +159,10 @@ public class MaintenanceController : ControllerBase
 
     [HttpPost("schedules/{scheduleId}/complete")]
     [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> CompleteMaintenance(Guid scheduleId, [FromBody] MaintenanceRecordRequest request)
+    public async Task<IActionResult> CompleteMaintenance(Guid scheduleId)
     {
         Guid userId = _claimsLogic.GetCurrentUserId(User);
-        Guid recordId = await _maintenanceLogic.CompleteMaintenance(scheduleId, request, userId);
+        Guid recordId = await _maintenanceLogic.CompleteMaintenance(scheduleId,userId);
 
         return Ok(new { recordId, message = "Maintenance completed and recorded successfully" });
     }
