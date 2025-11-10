@@ -418,6 +418,27 @@ public class AttractionLogicTest
     }
 
     [TestMethod]
+    public async Task UpdateAttraction_ShouldThrowException_WhenAttractionNotFound()
+    {
+        Guid attractionId = Guid.NewGuid();
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "ValidName",
+            Description = "Valid description",
+            Type = AttractionType.RollerCoaster.ToString(),
+            MinAge = 10,
+            MaxCapacity = 100,
+            CurrentCapacity = 0
+        };
+
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync((Attraction)null);
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
+
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
+            await _attractionLogic.UpdateAttraction(attractionId, request));
+    }
+
+    [TestMethod]
     public async Task GetAttractionById_ShouldThrowException_WhenIdDoesNotExist()
     {
         Guid newId = Guid.NewGuid();

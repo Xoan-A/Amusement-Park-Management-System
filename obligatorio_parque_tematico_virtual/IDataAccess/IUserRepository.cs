@@ -5,7 +5,6 @@ namespace IDataAccess
     public interface IUserRepository
     {
         Task<User> Create(User user);
-        Task<User?> GetByEmail(string email);
         Task<User?> GetById(Guid id);
         Task<User?> GetByIdWithRoles(Guid id);
         Task<User?> GetByEmailWithRoles(string email);

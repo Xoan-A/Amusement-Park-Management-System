@@ -42,12 +42,5 @@ namespace DataAccess.Repositories
                 .Include(t => t.Visitor)
                 .FirstOrDefaultAsync(t => t.QRCode == qrCode);
         }
-
-        public async Task<IEnumerable<Ticket>> GetByVisitDateAsync(DateTime visitDate)
-        {
-            return await _context.Tickets
-                .Where(t => t.VisitDate.Date == visitDate.Date)
-                .ToListAsync();
-        }
     }
 }

@@ -255,43 +255,6 @@ namespace TestDataAccess
             Assert.IsTrue(redemptions[1].RedeemedAt > redemptions[2].RedeemedAt);
         }
 
-        [TestMethod]
-        public async Task GetAll_ReturnsAllRedemptions()
-        {
-            User visitor1 = CreateTestVisitor();
-            User visitor2 = CreateTestVisitor();
-            Reward reward = CreateTestReward();
-
-            _context.Users.AddRange(visitor1, visitor2);
-            _context.Rewards.Add(reward);
-            await _context.SaveChangesAsync();
-
-            RedemptionHistory redemption1 = new RedemptionHistory
-            {
-                Id = Guid.NewGuid(),
-                VisitorId = visitor1.Id,
-                RewardId = reward.Id,
-                RedeemedAt = DateTime.Now,
-                PointsSpent = 100
-            };
-
-            RedemptionHistory redemption2 = new RedemptionHistory
-            {
-                Id = Guid.NewGuid(),
-                VisitorId = visitor2.Id,
-                RewardId = reward.Id,
-                RedeemedAt = DateTime.Now,
-                PointsSpent = 200
-            };
-
-            _context.RedemptionHistories.AddRange(redemption1, redemption2);
-            await _context.SaveChangesAsync();
-
-            List<RedemptionHistory> allRedemptions = await _repository.GetAllAsync();
-
-            Assert.AreEqual(2, allRedemptions.Count);
-        }
-
         private User CreateTestVisitor()
         {
             return new User

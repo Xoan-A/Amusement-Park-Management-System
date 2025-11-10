@@ -348,6 +348,20 @@ public class MaintenanceLogicTest
     }
 
     [TestMethod]
+    public async Task UpdateScheduleStatus_NonExistentSchedule_ThrowsKeyNotFoundException()
+    {
+        Guid scheduleId = Guid.NewGuid();
+
+        _mockScheduleRepository.Setup(r => r.GetByIdAsync(scheduleId)).ReturnsAsync((MaintenanceSchedule)null);
+
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
+            () => _maintenanceLogic.UpdateScheduleStatus(scheduleId, "Completed")
+        );
+
+        _mockScheduleRepository.Verify(r => r.UpdateAsync(It.IsAny<MaintenanceSchedule>()), Times.Never);
+    }
+
+    [TestMethod]
     public async Task DeleteSchedule_ExistingSchedule_DeletesSuccessfully()
     {
         Guid scheduleId = Guid.NewGuid();

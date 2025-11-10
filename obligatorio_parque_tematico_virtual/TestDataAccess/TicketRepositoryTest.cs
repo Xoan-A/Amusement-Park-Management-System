@@ -146,49 +146,6 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task TestGetByVisitDateAsync()
-        {
-            DateTime visitDate = DateTime.Now.Date.AddDays(7);
-
-            Ticket ticket1 = new Ticket
-            {
-                VisitorId = _visitorId,
-                PurchaseDate = DateTime.Now,
-                VisitDate = visitDate,
-                Type = TicketType.General,
-                QRCode = Guid.NewGuid()
-            };
-
-            Ticket ticket2 = new Ticket
-            {
-                VisitorId = _visitorId,
-                PurchaseDate = DateTime.Now,
-                VisitDate = visitDate,
-                Type = TicketType.EventSpecial,
-                QRCode = Guid.NewGuid()
-            };
-
-            Ticket ticket3 = new Ticket
-            {
-                VisitorId = _visitorId,
-                PurchaseDate = DateTime.Now,
-                VisitDate = visitDate.AddDays(1),
-                Type = TicketType.General,
-                QRCode = Guid.NewGuid()
-            };
-
-            await _ticketRepository.AddAsync(ticket1);
-            await _ticketRepository.AddAsync(ticket2);
-            await _ticketRepository.AddAsync(ticket3);
-
-            IEnumerable<Ticket> ticketsForDate = await _ticketRepository.GetByVisitDateAsync(visitDate);
-
-            Assert.IsNotNull(ticketsForDate);
-            Assert.AreEqual(2, ticketsForDate.Count());
-            Assert.IsTrue(ticketsForDate.All(t => t.VisitDate.Date == visitDate.Date));
-        }
-
-        [TestMethod]
         public async Task TestGetByIdAsync_ReturnsNullForNonExistentId()
         {
             Ticket ticket = await _ticketRepository.GetByIdAsync(Guid.NewGuid());

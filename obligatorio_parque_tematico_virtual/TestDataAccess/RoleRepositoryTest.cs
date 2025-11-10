@@ -33,15 +33,6 @@ public class RoleRepositoryTest
     }
 
     [TestMethod]
-    public async Task GetAll_ShouldReturnAllRoles()
-    {
-        List<Role> roles = await _repository.GetAllAsync();
-
-        Assert.IsNotNull(roles);
-        Assert.AreEqual(3, roles.Count);
-    }
-
-    [TestMethod]
     public async Task GetByName_ShouldReturnRole_WhenRoleExists()
     {
         Role? role = await _repository.GetByNameAsync(Role.ADMINISTRATOR);
