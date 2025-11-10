@@ -10,9 +10,14 @@ namespace BusinessLogic
         private DateTime _previousDateTime;
         private DateTime _currentDateTime;
 
-        public DateTimeLogic(IDateTimeRepository dateTimeRepository)
+        public DateTimeLogic(IDateTimeRepository dateTimeRepository, IEnumerable<IDateObserver> observers)
         {
             _dateTimeRepository = dateTimeRepository;
+            
+            foreach (var observer in observers)
+            {
+                Attach(observer);
+            }
         }
 
         public void Attach(IDateObserver observer)

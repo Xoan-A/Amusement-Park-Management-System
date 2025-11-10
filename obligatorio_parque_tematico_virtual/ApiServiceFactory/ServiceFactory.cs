@@ -44,33 +44,11 @@ public static class ServiceFactory
         services.AddScoped<IRewardRepository, RewardRepository>();
         services.AddScoped<IRedemptionHistoryRepository, RedemptionHistoryRepository>();
         services.AddScoped<IMaintenanceScheduleRepository, MaintenanceScheduleRepository>();
-        services.AddScoped<IScoreHistoryRepository, ScoreHistoryRepository>();
-        services.AddScoped<IDateTimeLogic, DateTimeLogic>();
+        services.AddScoped<IScoreHistoryRepository, ScoreHistoryRepository>();        
         services.AddScoped<IDailyScoreLogic, DailyScoreLogic>();
-        services.AddScoped<IMaintenanceLogic, MaintenanceLogic>();
-        services.AddScoped<IDateObserver>(sp => sp.GetRequiredService<IDailyScoreLogic>() as IDateObserver);
-        services.AddScoped<IDateObserver>(sp => sp.GetRequiredService<IMaintenanceLogic>() as IDateObserver);
-    }
-
-    public static void ConfigureObservers(IServiceProvider serviceProvider)
-    {
-        using (IServiceScope scope = serviceProvider.CreateScope())
-        {
-            IDateSubject dateTimeLogic = scope.ServiceProvider.GetRequiredService<IDateTimeLogic>() as IDateSubject;
-            IDateObserver dailyScoreLogic =
-                scope.ServiceProvider.GetRequiredService<IDailyScoreLogic>() as IDateObserver;
-            IDateObserver maintenanceLogic =
-                scope.ServiceProvider.GetRequiredService<IMaintenanceLogic>() as IDateObserver;
-
-            if (dateTimeLogic != null && dailyScoreLogic != null)
-            {
-                dateTimeLogic.Attach(dailyScoreLogic);
-            }
-
-            if (dateTimeLogic != null && maintenanceLogic != null)
-            {
-                dateTimeLogic.Attach(maintenanceLogic);
-            }
-        }
+        services.AddScoped<IMaintenanceLogic, MaintenanceLogic>();        
+        services.AddScoped<IDateObserver, DailyScoreLogic>();
+        services.AddScoped<IDateObserver, MaintenanceLogic>();
+        services.AddScoped<IDateTimeLogic, DateTimeLogic>();
     }
 }
