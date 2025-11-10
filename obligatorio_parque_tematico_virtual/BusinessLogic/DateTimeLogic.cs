@@ -13,7 +13,7 @@ namespace BusinessLogic
         public DateTimeLogic(IDateTimeRepository dateTimeRepository, IEnumerable<IDateObserver> observers)
         {
             _dateTimeRepository = dateTimeRepository;
-            
+
             foreach (var observer in observers)
             {
                 Attach(observer);

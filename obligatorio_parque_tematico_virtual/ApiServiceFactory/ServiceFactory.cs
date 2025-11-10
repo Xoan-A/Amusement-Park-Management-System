@@ -33,7 +33,7 @@ public static class ServiceFactory
 
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(connectionString));
+        options.UseSqlServer(connectionString));
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
@@ -44,9 +44,9 @@ public static class ServiceFactory
         services.AddScoped<IRewardRepository, RewardRepository>();
         services.AddScoped<IRedemptionHistoryRepository, RedemptionHistoryRepository>();
         services.AddScoped<IMaintenanceScheduleRepository, MaintenanceScheduleRepository>();
-        services.AddScoped<IScoreHistoryRepository, ScoreHistoryRepository>();        
+        services.AddScoped<IScoreHistoryRepository, ScoreHistoryRepository>();
         services.AddScoped<IDailyScoreLogic, DailyScoreLogic>();
-        services.AddScoped<IMaintenanceLogic, MaintenanceLogic>();        
+        services.AddScoped<IMaintenanceLogic, MaintenanceLogic>();
         services.AddScoped<IDateObserver, DailyScoreLogic>();
         services.AddScoped<IDateObserver, MaintenanceLogic>();
         services.AddScoped<IDateTimeLogic, DateTimeLogic>();
