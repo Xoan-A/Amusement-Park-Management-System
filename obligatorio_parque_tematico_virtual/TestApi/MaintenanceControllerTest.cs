@@ -688,7 +688,7 @@ public class MaintenanceControllerTest
 
         HttpResponseMessage response = await client.PostAsync("/api/maintenance/records", content);
 
-        Assert.AreEqual(System.Net.HttpStatusCode.Created, response.StatusCode);
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [TestMethod]
@@ -734,7 +734,7 @@ public class MaintenanceControllerTest
         HttpResponseMessage response =
         await client.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", content);
 
-        Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     #endregion

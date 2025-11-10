@@ -11,17 +11,19 @@ namespace Api.Controllers;
 public class RedemptionController : ControllerBase
 {
     private readonly IRedemptionLogic _redemptionLogic;
+    private readonly IClaimsLogic _claimsLogic;
 
-    public RedemptionController(IRedemptionLogic redemptionLogic)
+    public RedemptionController(IRedemptionLogic redemptionLogic, IClaimsLogic claimsLogic)
     {
         _redemptionLogic = redemptionLogic;
+        _claimsLogic = claimsLogic;
     }
 
     [HttpPost("redeem/{rewardId}")]
     [Authorize(Roles = "Visitor")]
     public async Task<IActionResult> RedeemReward(Guid rewardId)
     {
-        Guid visitorId = GetCurrentUserId();
+        Guid visitorId = _claimsLogic.GetCurrentUserId(User);
         RedemptionHistoryModelOut redemption = await _redemptionLogic.RedeemReward(visitorId, rewardId);
         return CreatedAtAction(nameof(GetMyRedemptionHistory), null, redemption);
     }
@@ -30,8 +32,7 @@ public class RedemptionController : ControllerBase
     [Authorize(Roles = "Visitor")]
     public async Task<IActionResult> GetMyRedemptionHistory([FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo)
     {
-        Guid visitorId = GetCurrentUserId();
-
+        Guid visitorId = _claimsLogic.GetCurrentUserId(User);
         List<RedemptionHistoryModelOut> history = dateFrom.HasValue && dateTo.HasValue
             ? await _redemptionLogic.GetRedemptionHistoryWithDateRange(visitorId, dateFrom.Value, dateTo.Value)
             : await _redemptionLogic.GetRedemptionHistory(visitorId);
@@ -49,16 +50,5 @@ public class RedemptionController : ControllerBase
             : await _redemptionLogic.GetRedemptionHistory(visitorId);
 
         return Ok(history);
-    }
-
-    private Guid GetCurrentUserId()
-    {
-        string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim))
-        {
-            throw new UnauthorizedAccessException("User ID not found in token");
-        }
-
-        return Guid.Parse(userIdClaim);
     }
 }

@@ -12,10 +12,12 @@ namespace Api.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IUserLogic _userLogic;
+    private readonly IClaimsLogic _claimsLogic;
 
-    public UserController(IUserLogic userLogic)
+    public UserController(IUserLogic userLogic, IClaimsLogic claimsLogic)
     {
         _userLogic = userLogic;
+        _claimsLogic = claimsLogic;
     }
 
     [HttpGet("{userId}")]
@@ -52,9 +54,8 @@ public class UserController : ControllerBase
     [Authorize]
     public async Task<IActionResult> ModifyUser(Guid userId, [FromBody] ModifyUserRequest request)
     {
-        string? actorSubClaim = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-
-        UserResponse updated = await _userLogic.ModifyUser(userId, actorSubClaim, request);
+        Guid userTokenId = _claimsLogic.GetCurrentUserId(User);
+        UserResponse updated = await _userLogic.ModifyUser(userId, userTokenId, request);
         return Ok(updated);
     }
 

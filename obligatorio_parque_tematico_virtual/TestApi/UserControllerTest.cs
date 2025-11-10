@@ -27,12 +27,17 @@ namespace ApiTests
         private HttpClient _adminClient = null!;
         private HttpClient _operatorClient = null!;
         private Mock<IUserLogic> _mockUserLogic = null!;
+        private Mock<IClaimsLogic> _mockClaimsLogic = null!;
         private SqliteConnection _connection = null!;
 
         [TestInitialize]
         public void Setup()
         {
             _mockUserLogic = new Mock<IUserLogic>();
+            _mockClaimsLogic = new Mock<IClaimsLogic>();
+            
+            _mockClaimsLogic.Setup(c => c.GetCurrentUserId(It.IsAny<ClaimsPrincipal>()))
+                .Returns(Guid.NewGuid());
 
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
@@ -52,6 +57,7 @@ namespace ApiTests
                         options.UseSqlite(_connection));
 
                     services.AddSingleton(_mockUserLogic.Object);
+                    services.AddSingleton(_mockClaimsLogic.Object);
                 });
             });
 
@@ -110,6 +116,10 @@ namespace ApiTests
             _factory?.Dispose();
             _connection?.Close();
             _connection?.Dispose();
+            
+            _mockClaimsLogic?.Reset();
+            _mockClaimsLogic?.Setup(c => c.GetCurrentUserId(It.IsAny<ClaimsPrincipal>()))
+                .Returns(Guid.NewGuid());
         }
 
         [TestMethod]
@@ -340,7 +350,7 @@ namespace ApiTests
 
             _mockUserLogic
                 .Setup(l => l.ModifyUser(
-                    It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
+                    It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
                 .ReturnsAsync(expected);
 
             string json = JsonSerializer.Serialize(request);
@@ -360,7 +370,7 @@ namespace ApiTests
             Assert.AreEqual(expected.Id, parsed.Id);
             Assert.AreEqual(expected.Email, parsed.Email);
             _mockUserLogic.Verify(
-                l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()), Times.Once);
+                l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()), Times.Once);
         }
 
         [TestMethod]
@@ -381,7 +391,7 @@ namespace ApiTests
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
             _mockUserLogic.Verify(
-                l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()), Times.Never);
+                l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()), Times.Never);
         }
 
         [TestMethod]
@@ -420,7 +430,7 @@ namespace ApiTests
             };
 
             _mockUserLogic
-                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
+                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
                 .ThrowsAsync(new ForbiddenException("You cannot modify another user"));
 
             string json = JsonSerializer.Serialize(request);
@@ -430,7 +440,7 @@ namespace ApiTests
 
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
             _mockUserLogic.Verify(
-                l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()), Times.Once);
+                l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()), Times.Once);
         }
 
         [TestMethod]
@@ -469,7 +479,7 @@ namespace ApiTests
             };
 
             _mockUserLogic
-                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
+                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
                 .ThrowsAsync(new UnauthorizedException("Invalid token"));
 
             string json = JsonSerializer.Serialize(request);
@@ -516,7 +526,7 @@ namespace ApiTests
             };
 
             _mockUserLogic
-                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
+                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
                 .ThrowsAsync(new KeyNotFoundException("User not found"));
 
             string json = JsonSerializer.Serialize(request);
@@ -563,7 +573,7 @@ namespace ApiTests
             };
 
             _mockUserLogic
-                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<ModifyUserRequest>()))
+                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
                 .ThrowsAsync(new ArgumentException("Name cannot be empty"));
 
             string json = JsonSerializer.Serialize(request);
@@ -613,9 +623,8 @@ namespace ApiTests
                 Password = "p"
             };
 
-            _mockUserLogic
-                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), string.Empty, It.IsAny<ModifyUserRequest>()))
-                .ThrowsAsync(new UnauthorizedException("Invalid token: missing user identifier"));
+            _mockClaimsLogic.Setup(c => c.GetCurrentUserId(It.IsAny<ClaimsPrincipal>()))
+                .Throws(new UnauthorizedException("User ID not found in token"));
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -623,8 +632,8 @@ namespace ApiTests
             HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), string.Empty, It.IsAny<ModifyUserRequest>()),
-                Times.Once);
+            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()),
+                Times.Never);
         }
 
         [TestMethod]
@@ -668,9 +677,8 @@ namespace ApiTests
                 Password = "p"
             };
 
-            _mockUserLogic
-                .Setup(l => l.ModifyUser(It.IsAny<Guid>(), string.Empty, It.IsAny<ModifyUserRequest>()))
-                .ThrowsAsync(new UnauthorizedException("Invalid token: missing user identifier"));
+            _mockClaimsLogic.Setup(c => c.GetCurrentUserId(It.IsAny<ClaimsPrincipal>()))
+                .Throws(new UnauthorizedException("User ID not found in token"));
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -678,8 +686,8 @@ namespace ApiTests
             HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), string.Empty, It.IsAny<ModifyUserRequest>()),
-                Times.Once);
+            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()),
+                Times.Never);
         }
 
         [TestMethod]
@@ -735,25 +743,17 @@ namespace ApiTests
 
             Guid userId = Guid.NewGuid();
             ModifyUserRequest request = new ModifyUserRequest { Name = "Updated Name" };
-            UserResponse expectedResponse = new UserResponse
-            {
-                Id = userId,
-                Name = "Updated Name",
-                LastName = "Test",
-                Email = "test@test.com",
-                UserRoles = new List<string> { "Administrator" }
-            };
 
-            _mockUserLogic.Setup(l => l.ModifyUser(userId, string.Empty, It.IsAny<ModifyUserRequest>()))
-                .ReturnsAsync(expectedResponse);
+            _mockClaimsLogic.Setup(c => c.GetCurrentUserId(It.IsAny<ClaimsPrincipal>()))
+                .Throws(new UnauthorizedException("User ID not found in token"));
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
             HttpResponseMessage response = await client.PutAsync($"/api/users/{userId}", content);
 
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-            _mockUserLogic.Verify(l => l.ModifyUser(userId, string.Empty, It.IsAny<ModifyUserRequest>()), Times.Once);
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()), Times.Never);
         }
 
         [TestMethod]

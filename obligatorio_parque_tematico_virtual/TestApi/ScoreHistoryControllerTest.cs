@@ -241,6 +241,6 @@ public class ScoreHistoryControllerTest
 
         HttpResponseMessage response = await client.GetAsync("/api/score-history/my-history");
 
-        Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }

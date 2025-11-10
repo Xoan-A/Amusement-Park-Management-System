@@ -26,6 +26,7 @@ public static class ServiceFactory
         services.AddScoped<IRewardLogic, RewardLogic>();
         services.AddScoped<IRedemptionLogic, RedemptionLogic>();
         services.AddScoped<IScoreHistoryLogic, ScoreHistoryLogic>();
+        services.AddScoped<IClaimsLogic, ClaimsLogic>();
 
         string pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
         services.AddSingleton<IPluginLoader>(new BusinessLogic.Plugins.PluginLoader(pluginsPath));
