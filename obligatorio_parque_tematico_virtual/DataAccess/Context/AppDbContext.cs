@@ -18,7 +18,6 @@ namespace DataAccess.Context
         public virtual DbSet<Reward> Rewards { get; set; }
         public virtual DbSet<RedemptionHistory> RedemptionHistories { get; set; }
         public virtual DbSet<MaintenanceSchedule> MaintenanceSchedules { get; set; }
-        public virtual DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
         public virtual DbSet<ScoreHistory> ScoreHistories { get; set; }
 
         public AppDbContext()
@@ -117,24 +116,6 @@ namespace DataAccess.Context
                 .HasOne(ms => ms.Attraction)
                 .WithMany()
                 .HasForeignKey(ms => ms.AttractionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<MaintenanceRecord>()
-                .HasOne(mr => mr.Attraction)
-                .WithMany()
-                .HasForeignKey(mr => mr.AttractionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<MaintenanceRecord>()
-                .HasOne(mr => mr.MaintenanceSchedule)
-                .WithMany()
-                .HasForeignKey(mr => mr.MaintenanceScheduleId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            modelBuilder.Entity<MaintenanceRecord>()
-                .HasOne(mr => mr.Operator)
-                .WithMany()
-                .HasForeignKey(mr => mr.PerformedBy)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<EventAttraction>()

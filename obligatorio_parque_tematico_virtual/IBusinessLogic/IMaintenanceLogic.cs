@@ -14,13 +14,5 @@ public interface IMaintenanceLogic
     Task UpdateScheduleStatus(Guid id, string status);
     Task DeleteSchedule(Guid id);
 
-    Task<Guid> RecordMaintenance(MaintenanceRecordRequest request, Guid performedBy);
-    Task<MaintenanceRecordResponse> GetRecordById(Guid id);
-    Task<List<MaintenanceRecordResponse>> GetAllRecords();
-    Task<List<MaintenanceRecordResponse>> GetRecordsByAttraction(Guid attractionId);
-    Task<List<MaintenanceRecordResponse>> GetRecordsByOperator(Guid operatorId);
-    Task<List<MaintenanceRecordResponse>> GetUnscheduledMaintenance();
-    Task<List<MaintenanceRecordResponse>> GetMaintenanceHistory(Guid attractionId, DateTime dateFrom, DateTime dateTo);
-
     Task<Guid> CompleteMaintenance(Guid scheduleId, Guid performedBy);
 }

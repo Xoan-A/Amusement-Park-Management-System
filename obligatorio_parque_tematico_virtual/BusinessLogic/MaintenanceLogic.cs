@@ -9,20 +9,17 @@ namespace BusinessLogic;
 public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
 {
     private readonly IMaintenanceScheduleRepository _scheduleRepository;
-    private readonly IMaintenanceRecordRepository _recordRepository;
     private readonly IAttractionRepository _attractionRepository;
     private readonly IAttractionLogic _attractionLogic;
     private readonly IDateTimeLogic _dateTimeLogic;
 
     public MaintenanceLogic(
         IMaintenanceScheduleRepository scheduleRepository,
-        IMaintenanceRecordRepository recordRepository,
         IAttractionRepository attractionRepository,
         IAttractionLogic attractionLogic,
         IDateTimeLogic dateTimeLogic)
     {
         _scheduleRepository = scheduleRepository;
-        _recordRepository = recordRepository;
         _attractionRepository = attractionRepository;
         _attractionLogic = attractionLogic;
         _dateTimeLogic = dateTimeLogic;
@@ -161,87 +158,6 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
 
     #endregion
 
-    #region Record Management
-
-    public async Task<Guid> RecordMaintenance(MaintenanceRecordRequest request, Guid performedBy)
-    {
-        Attraction attraction = await _attractionRepository.GetById(request.AttractionId);
-        if (attraction == null)
-        {
-            throw new KeyNotFoundException($"Attraction with id {request.AttractionId} not found");
-        }
-
-        if (request.MaintenanceScheduleId.HasValue)
-        {
-            MaintenanceSchedule? schedule = await _scheduleRepository.GetByIdAsync(request.MaintenanceScheduleId.Value);
-            if (schedule == null)
-            {
-                throw new KeyNotFoundException($"Schedule with id {request.MaintenanceScheduleId} not found");
-            }
-        }
-
-
-        MaintenanceRecord record = new MaintenanceRecord
-        {
-            Id = Guid.NewGuid(),
-            MaintenanceScheduleId = request.MaintenanceScheduleId,
-            AttractionId = request.AttractionId,
-            PerformedDate = request.PerformedDate,
-            PerformedBy = performedBy,
-            Description = request.Description,
-            Notes = request.Notes,
-            Duration = request.Duration,
-        };
-
-        await _recordRepository.CreateAsync(record);
-        return record.Id;
-    }
-
-    public async Task<MaintenanceRecordResponse> GetRecordById(Guid id)
-    {
-        MaintenanceRecord? record = await _recordRepository.GetByIdAsync(id);
-        if (record == null)
-        {
-            throw new KeyNotFoundException($"Record with id {id} not found");
-        }
-
-        return MapToRecordResponse(record);
-    }
-
-    public async Task<List<MaintenanceRecordResponse>> GetAllRecords()
-    {
-        List<MaintenanceRecord> records = await _recordRepository.GetAllAsync();
-        return records.Select(MapToRecordResponse).ToList();
-    }
-
-    public async Task<List<MaintenanceRecordResponse>> GetRecordsByAttraction(Guid attractionId)
-    {
-        List<MaintenanceRecord> records = await _recordRepository.GetByAttractionIdAsync(attractionId);
-        return records.Select(MapToRecordResponse).ToList();
-    }
-
-    public async Task<List<MaintenanceRecordResponse>> GetRecordsByOperator(Guid operatorId)
-    {
-        List<MaintenanceRecord> records = await _recordRepository.GetByOperatorAsync(operatorId);
-        return records.Select(MapToRecordResponse).ToList();
-    }
-
-    public async Task<List<MaintenanceRecordResponse>> GetUnscheduledMaintenance()
-    {
-        List<MaintenanceRecord> records = await _recordRepository.GetUnscheduledMaintenanceAsync();
-        return records.Select(MapToRecordResponse).ToList();
-    }
-
-    public async Task<List<MaintenanceRecordResponse>> GetMaintenanceHistory(Guid attractionId, DateTime dateFrom,
-        DateTime dateTo)
-    {
-        List<MaintenanceRecord> records =
-        await _recordRepository.GetByAttractionIdAndDateRangeAsync(attractionId, dateFrom, dateTo);
-        return records.Select(MapToRecordResponse).ToList();
-    }
-
-    #endregion
-
     #region Business Operations
 
     public async Task<Guid> CompleteMaintenance(Guid scheduleId, Guid performedBy)
@@ -271,21 +187,7 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
         schedule.IsOverdue = false;
         await _scheduleRepository.UpdateAsync(schedule);
 
-        DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
-        MaintenanceRecord record = new MaintenanceRecord
-        {
-            Id = Guid.NewGuid(),
-            MaintenanceScheduleId = scheduleId,
-            AttractionId = schedule.AttractionId,
-            PerformedDate = currentDateTime,
-            PerformedBy = performedBy,
-            Description = schedule.Description,
-            Notes = null,
-            Duration = TimeSpan.FromHours(schedule.EstimatedDuration),
-        };
-
-        await _recordRepository.CreateAsync(record);
-        return record.Id;
+        return scheduleId;
     }
 
     #endregion
@@ -304,25 +206,6 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
             EstimatedDuration = schedule.EstimatedDuration,
             Status = schedule.Status.ToString(),
             IsOverdue = schedule.IsOverdue
-        };
-    }
-
-    private MaintenanceRecordResponse MapToRecordResponse(MaintenanceRecord record)
-    {
-        return new MaintenanceRecordResponse
-        {
-            Id = record.Id,
-            MaintenanceScheduleId = record.MaintenanceScheduleId,
-            AttractionId = record.AttractionId,
-            AttractionName = record.Attraction?.Name ?? "Unknown",
-            PerformedDate = record.PerformedDate,
-            PerformedBy = record.PerformedBy,
-            PerformedByName =
-            record.Operator != null ? $"{record.Operator.Name} {record.Operator.LastName}" : "Unknown",
-            Description = record.Description,
-            Notes = record.Notes,
-            Duration = record.Duration,
-            CreatedAt = record.CreatedAt
         };
     }
 
