@@ -22,5 +22,5 @@ public interface IMaintenanceLogic
     Task<List<MaintenanceRecordResponse>> GetUnscheduledMaintenance();
     Task<List<MaintenanceRecordResponse>> GetMaintenanceHistory(Guid attractionId, DateTime dateFrom, DateTime dateTo);
 
-    Task<Guid> CompleteMaintenance(Guid scheduleId, MaintenanceRecordRequest recordRequest, Guid performedBy);
+    Task<Guid> CompleteMaintenance(Guid scheduleId, Guid performedBy);
 }

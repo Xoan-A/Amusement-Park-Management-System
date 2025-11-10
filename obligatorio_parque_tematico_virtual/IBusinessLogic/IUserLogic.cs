@@ -12,7 +12,7 @@ namespace IBusinessLogic
         Task<TopTenResponse> GetTopTenUsers();
         Task AddRoleToUser(Guid userId, string role);
         Task<UserResponse> GetUserResponseById(Guid userId);
-        Task<UserResponse> ModifyUser(Guid userId, string? actorSubClaim, ModifyUserRequest request);
+        Task<UserResponse> ModifyUser(Guid userId, Guid userTokenId, ModifyUserRequest request);
         Task<UserResponse> ChangeMembershipLevel(Guid userId, int membershipLevel);
     }
 }

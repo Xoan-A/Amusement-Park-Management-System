@@ -1358,7 +1358,7 @@ namespace TestBusinessLogic
         public async Task ModifyUser_ShouldUpdateAndReturnResponse_WhenDataIsValid()
         {
             Guid userId = Guid.NewGuid();
-            string actorSub = userId.ToString();
+            Guid actorSub = userId;
             User originalUser = new User
             {
                 Id = userId,
@@ -1409,7 +1409,7 @@ namespace TestBusinessLogic
         public async Task ModifyUser_WhenEmailNotChanged_DoesNotCheckUniqueness()
         {
             Guid userId = Guid.NewGuid();
-            string actorSub = userId.ToString();
+            Guid actorSub = userId;
             User originalUser = new User
             {
                 Id = userId,
@@ -1439,8 +1439,8 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        [ExpectedException(typeof(UnauthorizedException))]
-        public async Task ModifyUser_WhenActorSubIsNull_ThrowsUnauthorized()
+        [ExpectedException(typeof(ForbiddenException))]
+        public async Task ModifyUser_WhenActorSubIsGuidEmpty_ThrowsForbidden()
         {
             Guid userId = Guid.NewGuid();
             ModifyUserRequest request = new ModifyUserRequest
@@ -1451,7 +1451,7 @@ namespace TestBusinessLogic
                 Password = "p"
             };
 
-            await _userLogic.ModifyUser(userId, null, request);
+            await _userLogic.ModifyUser(userId, Guid.Empty, request);
         }
 
         [TestMethod]
@@ -1459,7 +1459,7 @@ namespace TestBusinessLogic
         public async Task ModifyUser_WhenActorIsDifferentUser_ThrowsForbidden()
         {
             Guid userId = Guid.NewGuid();
-            string actorSub = Guid.NewGuid().ToString();
+            Guid actorSub = Guid.NewGuid();
             ModifyUserRequest request = new ModifyUserRequest
             {
                 Name = "A",
@@ -1476,7 +1476,7 @@ namespace TestBusinessLogic
         public async Task ModifyUser_WhenUserNotFound_ThrowsNotFound()
         {
             Guid userId = Guid.NewGuid();
-            string actorSub = userId.ToString();
+            Guid actorSub = userId;
             ModifyUserRequest request = new ModifyUserRequest
             {
                 Name = "A",
@@ -1495,7 +1495,7 @@ namespace TestBusinessLogic
         public async Task ModifyUser_WhenEmailNotUnique_ThrowsArgument()
         {
             Guid userId = Guid.NewGuid();
-            string actorSub = userId.ToString();
+            Guid actorSub = userId;
             User originalUser = new User { Id = userId, Name = "Old", LastName = "Name", Email = "old@example.com" };
             ModifyUserRequest request = new ModifyUserRequest
             {
@@ -1515,7 +1515,7 @@ namespace TestBusinessLogic
         public async Task ModifyUser_OnlyUpdatesName_WhenOnlyNameProvided()
         {
             Guid userId = Guid.NewGuid();
-            string actorSub = userId.ToString();
+            Guid actorSub = userId;
             User originalUser = new User
             {
                 Id = userId,
@@ -1551,7 +1551,7 @@ namespace TestBusinessLogic
         public async Task ModifyUser_OnlyUpdatesEmail_WhenOnlyEmailProvided()
         {
             Guid userId = Guid.NewGuid();
-            string actorSub = userId.ToString();
+            Guid actorSub = userId;
             User originalUser = new User
             {
                 Id = userId,
@@ -1588,7 +1588,7 @@ namespace TestBusinessLogic
         public async Task ModifyUser_OnlyUpdatesPassword_WhenOnlyPasswordProvided()
         {
             Guid userId = Guid.NewGuid();
-            string actorSub = userId.ToString();
+            Guid actorSub = userId;
             User originalUser = new User
             {
                 Id = userId,
@@ -1625,7 +1625,7 @@ namespace TestBusinessLogic
         public async Task ModifyUser_DoesNotUpdateAnything_WhenAllFieldsAreNull()
         {
             Guid userId = Guid.NewGuid();
-            string actorSub = userId.ToString();
+            Guid actorSub = userId;
             User originalUser = new User
             {
                 Id = userId,
@@ -1659,7 +1659,7 @@ namespace TestBusinessLogic
         public async Task ModifyUser_WhenBirthDateInFuture_ThrowsArgument()
         {
             Guid userId = Guid.NewGuid();
-            string actorSub = userId.ToString();
+            Guid actorSub = userId;
             DateTime currentDate = DateTime.Now;
             User originalUser = new User
             {
@@ -1878,7 +1878,7 @@ namespace TestBusinessLogic
         public async Task ModifyUser_WhenBirthDateNotProvided_DoesNotUpdateBirthDate()
         {
             Guid userId = Guid.NewGuid();
-            string actorSubClaim = userId.ToString();
+            Guid actorSubClaim = userId;
             DateTime originalBirthDate = new DateTime(1990, 5, 15);
 
             User originalUser = new User
@@ -1911,53 +1911,6 @@ namespace TestBusinessLogic
             Assert.AreEqual("Jane", originalUser.Name);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(UnauthorizedException))]
-        public async Task ModifyUser_WhenActorSubIsEmptyString_ThrowsUnauthorized()
-        {
-            Guid userId = Guid.NewGuid();
-            ModifyUserRequest request = new ModifyUserRequest
-            {
-                Name = "A",
-                LastName = "B",
-                Email = "a@b.com",
-                Password = "p"
-            };
-
-            await _userLogic.ModifyUser(userId, "", request);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(UnauthorizedException))]
-        public async Task ModifyUser_WhenActorSubIsWhitespace_ThrowsUnauthorized()
-        {
-            Guid userId = Guid.NewGuid();
-            ModifyUserRequest request = new ModifyUserRequest
-            {
-                Name = "A",
-                LastName = "B",
-                Email = "a@b.com",
-                Password = "p"
-            };
-
-            await _userLogic.ModifyUser(userId, "   ", request);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(UnauthorizedException))]
-        public async Task ModifyUser_WhenActorSubIsInvalidGuid_ThrowsUnauthorized()
-        {
-            Guid userId = Guid.NewGuid();
-            ModifyUserRequest request = new ModifyUserRequest
-            {
-                Name = "A",
-                LastName = "B",
-                Email = "a@b.com",
-                Password = "p"
-            };
-
-            await _userLogic.ModifyUser(userId, "not-a-valid-guid", request);
-        }
 
         [TestMethod]
         public async Task ChangeMembershipLevel_ValidLevel_UpdatesUserMembership()

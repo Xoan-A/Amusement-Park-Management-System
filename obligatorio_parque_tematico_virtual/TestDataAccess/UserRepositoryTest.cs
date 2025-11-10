@@ -16,8 +16,8 @@ namespace TestDataAccess
         public void Setup()
         {
             DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite("DataSource=:memory:")
-                .Options;
+            .UseSqlite("DataSource=:memory:")
+            .Options;
             _context = new AppDbContext(options);
             _context.Database.OpenConnection();
             _context.Database.EnsureDeleted();
@@ -219,6 +219,8 @@ namespace TestDataAccess
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+
             for (int i = 1; i <= 15; i++)
             {
                 User visitor = new User
@@ -229,7 +231,11 @@ namespace TestDataAccess
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
                     Score = i * 10,
-                    DailyScore = i * 10
+                    DailyScore = i * 10,
+                    UserRoles = new List<UserRole>
+                    {
+                        new UserRole { RoleId = visitorRole.Id }
+                    }
                 };
                 _context.Users.Add(visitor);
             }
@@ -238,7 +244,6 @@ namespace TestDataAccess
 
             List<User> result = await _userRepository.GetTopTen();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
             Assert.AreEqual(150, result[0].DailyScore);
             Assert.AreEqual(60, result[9].DailyScore);
@@ -256,7 +261,6 @@ namespace TestDataAccess
 
             List<User> result = await _userRepository.GetTopTen();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
         }
 
@@ -265,6 +269,8 @@ namespace TestDataAccess
         {
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
+
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
 
             for (int i = 1; i <= 5; i++)
             {
@@ -276,7 +282,11 @@ namespace TestDataAccess
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
                     Score = i * 20,
-                    DailyScore = i * 20
+                    DailyScore = i * 20,
+                    UserRoles = new List<UserRole>
+                    {
+                        new UserRole { RoleId = visitorRole.Id }
+                    }
                 };
                 _context.Users.Add(visitor);
             }
@@ -285,7 +295,6 @@ namespace TestDataAccess
 
             List<User> result = await _userRepository.GetTopTen();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(5, result.Count);
             Assert.AreEqual(100, result[0].DailyScore);
             Assert.AreEqual(20, result[4].DailyScore);
@@ -297,6 +306,8 @@ namespace TestDataAccess
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+
             for (int i = 1; i <= 10; i++)
             {
                 User visitor = new User
@@ -307,7 +318,11 @@ namespace TestDataAccess
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
                     Score = i * 5,
-                    DailyScore = i * 5
+                    DailyScore = i * 5,
+                    UserRoles = new List<UserRole>
+                    {
+                        new UserRole { RoleId = visitorRole.Id }
+                    }
                 };
                 _context.Users.Add(visitor);
             }
@@ -316,7 +331,6 @@ namespace TestDataAccess
 
             List<User> result = await _userRepository.GetTopTen();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
             Assert.AreEqual(50, result[0].DailyScore);
             Assert.AreEqual(5, result[9].DailyScore);
@@ -328,6 +342,8 @@ namespace TestDataAccess
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+
             for (int i = 1; i <= 12; i++)
             {
                 User visitor = new User
@@ -338,7 +354,11 @@ namespace TestDataAccess
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
                     Score = i <= 6 ? 100 : 50,
-                    DailyScore = i <= 6 ? 100 : 50
+                    DailyScore = i <= 6 ? 100 : 50,
+                    UserRoles = new List<UserRole>
+                    {
+                        new UserRole { RoleId = visitorRole.Id }
+                    }
                 };
                 _context.Users.Add(visitor);
             }
@@ -347,11 +367,57 @@ namespace TestDataAccess
 
             List<User> result = await _userRepository.GetTopTen();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
             Assert.AreEqual(100, result[0].DailyScore);
             Assert.AreEqual(100, result[5].DailyScore);
             Assert.AreEqual(50, result[6].DailyScore);
+        }
+
+        [TestMethod]
+        public async Task GetTopTen_ShouldOnlyReturnUsersWithVisitorRole()
+        {
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+            Role adminRole = _context.Roles.First(r => r.Name == Role.ADMINISTRATOR);
+
+            User visitorWithRole = new User
+            {
+                Name = "VisitorWithRole",
+                LastName = "Test",
+                Email = "withvisitor@test.com",
+                Password = "password",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 100,
+                DailyScore = 100,
+                UserRoles = new List<UserRole>
+                {
+                    new UserRole { RoleId = visitorRole.Id }
+                }
+            };
+            _context.Users.Add(visitorWithRole);
+
+            User userWithoutVisitorRole = new User
+            {
+                Name = "UserWithoutVisitor",
+                LastName = "Test",
+                Email = "withoutvisitor@test.com",
+                Password = "password",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 200,
+                DailyScore = 200,
+                UserRoles = new List<UserRole>
+                {
+                    new UserRole { RoleId = adminRole.Id }
+                }
+            };
+            _context.Users.Add(userWithoutVisitorRole);
+
+            _context.SaveChanges();
+
+            List<User> result = await _userRepository.GetTopTen();
+
+            Assert.AreEqual(1, result.Count, "Solo debe devolver el usuario con rol Visitor");
+            Assert.AreEqual("VisitorWithRole", result[0].Name);
+            Assert.AreEqual(100, result[0].DailyScore);
         }
 
         [TestMethod]

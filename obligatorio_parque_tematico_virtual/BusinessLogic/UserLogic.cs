@@ -265,13 +265,8 @@ namespace BusinessLogic
             await _userRepository.Update(user);
         }
 
-        public async Task<UserResponse> ModifyUser(Guid userId, string? actorSubClaim, ModifyUserRequest request)
+        public async Task<UserResponse> ModifyUser(Guid userId, Guid actorUserId, ModifyUserRequest request)
         {
-            if (string.IsNullOrWhiteSpace(actorSubClaim) || !Guid.TryParse(actorSubClaim, out Guid actorUserId))
-            {
-                throw new UnauthorizedException("Invalid token");
-            }
-
             if (actorUserId != userId)
             {
                 throw new ForbiddenException("You cannot modify another user");

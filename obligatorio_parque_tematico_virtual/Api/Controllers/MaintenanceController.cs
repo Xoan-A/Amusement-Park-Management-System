@@ -12,10 +12,12 @@ namespace Api.Controllers;
 public class MaintenanceController : ControllerBase
 {
     private readonly IMaintenanceLogic _maintenanceLogic;
+    private readonly IClaimsLogic _claimsLogic;
 
-    public MaintenanceController(IMaintenanceLogic maintenanceLogic)
+    public MaintenanceController(IMaintenanceLogic maintenanceLogic, IClaimsLogic claimsLogic)
     {
         _maintenanceLogic = maintenanceLogic;
+        _claimsLogic = claimsLogic;
     }
 
     #region Schedule Endpoints
@@ -157,10 +159,10 @@ public class MaintenanceController : ControllerBase
 
     [HttpPost("schedules/{scheduleId}/complete")]
     [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> CompleteMaintenance(Guid scheduleId, [FromBody] MaintenanceRecordRequest request)
+    public async Task<IActionResult> CompleteMaintenance(Guid scheduleId)
     {
-        Guid userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
-        Guid recordId = await _maintenanceLogic.CompleteMaintenance(scheduleId, request, userId);
+        Guid userId = _claimsLogic.GetCurrentUserId(User);
+        Guid recordId = await _maintenanceLogic.CompleteMaintenance(scheduleId, userId);
 
         return Ok(new { recordId, message = "Maintenance completed and recorded successfully" });
     }

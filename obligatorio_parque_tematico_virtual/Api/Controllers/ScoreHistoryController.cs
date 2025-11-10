@@ -11,17 +11,19 @@ namespace Api.Controllers;
 public class ScoreHistoryController : ControllerBase
 {
     private readonly IScoreHistoryLogic _scoreHistoryLogic;
+    private readonly IClaimsLogic _claimsLogic;
 
-    public ScoreHistoryController(IScoreHistoryLogic scoreHistoryLogic)
+    public ScoreHistoryController(IScoreHistoryLogic scoreHistoryLogic, IClaimsLogic claimsLogic)
     {
         _scoreHistoryLogic = scoreHistoryLogic;
+        _claimsLogic = claimsLogic;
     }
 
     [HttpGet("my-history")]
     [Authorize(Roles = "Visitor")]
     public async Task<IActionResult> GetMyScoreHistory()
     {
-        Guid userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
+        Guid userId = _claimsLogic.GetCurrentUserId(User);
         List<ScoreHistoryModelOut> history = await _scoreHistoryLogic.GetMyScoreHistory(userId);
         return Ok(history);
     }

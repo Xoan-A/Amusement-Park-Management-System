@@ -1,5 +1,6 @@
 using Domain;
 using IBusinessLogic;
+using IBusinessLogic.Strategy;
 using IDataAccess;
 
 namespace BusinessLogic
@@ -9,12 +10,15 @@ namespace BusinessLogic
         private readonly IUserRepository _userRepository;
         private readonly IActiveStrategy _activeStrategy;
         private readonly IScoreHistoryRepository _scoreHistoryRepository;
+        private readonly IDateTimeLogic _dateTimeLogic;
 
-        public DailyScoreLogic(IUserRepository userRepository, IActiveStrategy activeStrategy, IScoreHistoryRepository scoreHistoryRepository)
+        public DailyScoreLogic(IUserRepository userRepository, IActiveStrategy activeStrategy,
+            IScoreHistoryRepository scoreHistoryRepository, IDateTimeLogic dateTimeLogic)
         {
             _userRepository = userRepository;
             _activeStrategy = activeStrategy;
             _scoreHistoryRepository = scoreHistoryRepository;
+            _dateTimeLogic = dateTimeLogic;
         }
 
         public async Task DateUpdated(IDateSubject subject)
@@ -43,15 +47,17 @@ namespace BusinessLogic
             user.DailyScore += score;
             await _userRepository.Update(user);
 
+            IConcreteStrategy currentStrategy = await _activeStrategy.GetStrategy();
+
             var scoreHistory = new ScoreHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = user.Id,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = await _dateTimeLogic.GetCurrentDateTime(),
                 Points = score,
                 Origin = attractionEvent != null ? ScoreOrigin.EventParticipation : ScoreOrigin.AttractionVisit,
                 RelatedEntityId = attractionEvent?.Id ?? attraction.Id,
-                StrategyName = _activeStrategy.GetType().Name,
+                StrategyName = currentStrategy.Name,
             };
 
             await _scoreHistoryRepository.CreateAsync(scoreHistory);

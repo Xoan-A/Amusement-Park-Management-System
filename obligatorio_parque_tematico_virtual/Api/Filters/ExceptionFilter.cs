@@ -8,7 +8,7 @@ public class ExceptionFilter : IExceptionFilter
 {
     public void OnException(ExceptionContext context)
     {
-        if (context.Exception is UnauthorizedException)
+        if (context.Exception is UnauthorizedException || context.Exception is UnauthorizedAccessException)
         {
             context.Result = new ObjectResult(new { Message = context.Exception.Message })
             {

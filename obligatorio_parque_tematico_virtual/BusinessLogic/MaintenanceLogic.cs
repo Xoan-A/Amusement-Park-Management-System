@@ -12,17 +12,20 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
     private readonly IMaintenanceRecordRepository _recordRepository;
     private readonly IAttractionRepository _attractionRepository;
     private readonly IAttractionLogic _attractionLogic;
+    private readonly IDateTimeLogic _dateTimeLogic;
 
     public MaintenanceLogic(
         IMaintenanceScheduleRepository scheduleRepository,
         IMaintenanceRecordRepository recordRepository,
         IAttractionRepository attractionRepository,
-        IAttractionLogic attractionLogic)
+        IAttractionLogic attractionLogic,
+        IDateTimeLogic dateTimeLogic)
     {
         _scheduleRepository = scheduleRepository;
         _recordRepository = recordRepository;
         _attractionRepository = attractionRepository;
         _attractionLogic = attractionLogic;
+        _dateTimeLogic = dateTimeLogic;
     }
 
     public async Task DateUpdated(IDateSubject subject)
@@ -73,6 +76,12 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
         if (attraction == null)
         {
             throw new KeyNotFoundException($"Attraction with id {request.AttractionId} not found");
+        }
+
+        DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+        if (request.ScheduledDate < currentDateTime)
+        {
+            throw new ArgumentException("The schedule date cannot be earlier than now");
         }
 
         MaintenanceSchedule schedule = new MaintenanceSchedule
@@ -138,6 +147,10 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
         }
 
         schedule.Status = maintenanceStatus;
+        if (schedule.Status == MaintenanceStatus.Completed)
+        {
+            schedule.IsOverdue = false;
+        }
         await _scheduleRepository.UpdateAsync(schedule);
     }
 
@@ -231,8 +244,7 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
 
     #region Business Operations
 
-    public async Task<Guid> CompleteMaintenance(Guid scheduleId, MaintenanceRecordRequest recordRequest,
-        Guid performedBy)
+    public async Task<Guid> CompleteMaintenance(Guid scheduleId, Guid performedBy)
     {
         MaintenanceSchedule? schedule = await _scheduleRepository.GetByIdAsync(scheduleId);
         if (schedule == null)
@@ -256,13 +268,24 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
         await _attractionLogic.RemoveIncident(schedule.AttractionId, incidentMessage);
 
         schedule.Status = MaintenanceStatus.Completed;
+        schedule.IsOverdue = false;
         await _scheduleRepository.UpdateAsync(schedule);
 
-        recordRequest.MaintenanceScheduleId = scheduleId;
-        recordRequest.AttractionId = schedule.AttractionId;
-        Guid recordId = await RecordMaintenance(recordRequest, performedBy);
+        DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+        MaintenanceRecord record = new MaintenanceRecord
+        {
+            Id = Guid.NewGuid(),
+            MaintenanceScheduleId = scheduleId,
+            AttractionId = schedule.AttractionId,
+            PerformedDate = currentDateTime,
+            PerformedBy = performedBy,
+            Description = schedule.Description,
+            Notes = null,
+            Duration = TimeSpan.FromHours(schedule.EstimatedDuration),
+        };
 
-        return recordId;
+        await _recordRepository.CreateAsync(record);
+        return record.Id;
     }
 
     #endregion

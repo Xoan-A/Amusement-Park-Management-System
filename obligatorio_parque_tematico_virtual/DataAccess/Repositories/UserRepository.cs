@@ -60,6 +60,7 @@ namespace DataAccess.Repositories
         public Task<List<User>> GetTopTen()
         {
             return _context.Users
+                .Where(u => u.UserRoles.Any(ur => ur.Role.Name == Role.VISITOR))
                 .OrderByDescending(u => u.DailyScore)
                 .Take(10)
                 .ToListAsync();
