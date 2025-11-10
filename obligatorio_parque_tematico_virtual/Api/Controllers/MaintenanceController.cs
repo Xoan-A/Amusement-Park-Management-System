@@ -162,7 +162,7 @@ public class MaintenanceController : ControllerBase
     public async Task<IActionResult> CompleteMaintenance(Guid scheduleId)
     {
         Guid userId = _claimsLogic.GetCurrentUserId(User);
-        Guid recordId = await _maintenanceLogic.CompleteMaintenance(scheduleId,userId);
+        Guid recordId = await _maintenanceLogic.CompleteMaintenance(scheduleId, userId);
 
         return Ok(new { recordId, message = "Maintenance completed and recorded successfully" });
     }

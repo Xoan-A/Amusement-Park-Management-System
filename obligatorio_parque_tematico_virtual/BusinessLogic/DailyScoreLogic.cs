@@ -12,7 +12,8 @@ namespace BusinessLogic
         private readonly IScoreHistoryRepository _scoreHistoryRepository;
         private readonly IDateTimeLogic _dateTimeLogic;
 
-        public DailyScoreLogic(IUserRepository userRepository, IActiveStrategy activeStrategy, IScoreHistoryRepository scoreHistoryRepository, IDateTimeLogic dateTimeLogic)
+        public DailyScoreLogic(IUserRepository userRepository, IActiveStrategy activeStrategy,
+            IScoreHistoryRepository scoreHistoryRepository, IDateTimeLogic dateTimeLogic)
         {
             _userRepository = userRepository;
             _activeStrategy = activeStrategy;
@@ -45,7 +46,7 @@ namespace BusinessLogic
             user.Score += score;
             user.DailyScore += score;
             await _userRepository.Update(user);
-            
+
             IConcreteStrategy currentStrategy = await _activeStrategy.GetStrategy();
 
             var scoreHistory = new ScoreHistory

@@ -16,8 +16,8 @@ namespace TestDataAccess
         public void Setup()
         {
             DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite("DataSource=:memory:")
-                .Options;
+            .UseSqlite("DataSource=:memory:")
+            .Options;
             _context = new AppDbContext(options);
             _context.Database.OpenConnection();
             _context.Database.EnsureDeleted();
@@ -307,7 +307,7 @@ namespace TestDataAccess
             _context.SaveChanges();
 
             Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
-            
+
             for (int i = 1; i <= 10; i++)
             {
                 User visitor = new User
