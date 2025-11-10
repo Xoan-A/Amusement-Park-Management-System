@@ -90,71 +90,6 @@ public class MaintenanceController : ControllerBase
 
     #endregion
 
-    #region Record Endpoints
-
-    [HttpPost("records")]
-    [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> RecordMaintenance([FromBody] MaintenanceRecordRequest request)
-    {
-        Guid userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
-        Guid recordId = await _maintenanceLogic.RecordMaintenance(request, userId);
-
-        return CreatedAtAction(nameof(GetRecordById), new { id = recordId },
-            new { id = recordId, message = "Maintenance record created successfully" });
-    }
-
-    [HttpGet("records")]
-    [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> GetAllRecords()
-    {
-        List<MaintenanceRecordResponse> records = await _maintenanceLogic.GetAllRecords();
-        return Ok(records);
-    }
-
-    [HttpGet("records/{id}")]
-    [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> GetRecordById(Guid id)
-    {
-        MaintenanceRecordResponse record = await _maintenanceLogic.GetRecordById(id);
-        return Ok(record);
-    }
-
-    [HttpGet("records/attraction/{attractionId}")]
-    [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> GetRecordsByAttraction(Guid attractionId)
-    {
-        List<MaintenanceRecordResponse> records = await _maintenanceLogic.GetRecordsByAttraction(attractionId);
-        return Ok(records);
-    }
-
-    [HttpGet("records/operator/{operatorId}")]
-    [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetRecordsByOperator(Guid operatorId)
-    {
-        List<MaintenanceRecordResponse> records = await _maintenanceLogic.GetRecordsByOperator(operatorId);
-        return Ok(records);
-    }
-
-    [HttpGet("records/unscheduled")]
-    [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> GetUnscheduledMaintenance()
-    {
-        List<MaintenanceRecordResponse> records = await _maintenanceLogic.GetUnscheduledMaintenance();
-        return Ok(records);
-    }
-
-    [HttpGet("records/history/{attractionId}")]
-    [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> GetMaintenanceHistory(Guid attractionId, [FromQuery] DateTime dateFrom,
-        [FromQuery] DateTime dateTo)
-    {
-        List<MaintenanceRecordResponse> records =
-        await _maintenanceLogic.GetMaintenanceHistory(attractionId, dateFrom, dateTo);
-        return Ok(records);
-    }
-
-    #endregion
-
     #region Business Operations
 
     [HttpPost("schedules/{scheduleId}/complete")]
@@ -162,9 +97,9 @@ public class MaintenanceController : ControllerBase
     public async Task<IActionResult> CompleteMaintenance(Guid scheduleId)
     {
         Guid userId = _claimsLogic.GetCurrentUserId(User);
-        Guid recordId = await _maintenanceLogic.CompleteMaintenance(scheduleId, userId);
+        Guid completedScheduleId = await _maintenanceLogic.CompleteMaintenance(scheduleId, userId);
 
-        return Ok(new { recordId, message = "Maintenance completed and recorded successfully" });
+        return Ok(new { scheduleId = completedScheduleId, message = "Maintenance completed successfully" });
     }
 
     #endregion
