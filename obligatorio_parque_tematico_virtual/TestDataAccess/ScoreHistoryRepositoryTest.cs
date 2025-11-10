@@ -80,34 +80,6 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task GetById_WithValidId_ReturnsScoreHistory()
-        {
-            User visitor = CreateTestVisitor();
-            _context.Users.Add(visitor);
-            await _context.SaveChangesAsync();
-
-            ScoreHistory history = CreateTestHistory(visitor.Id);
-            _context.ScoreHistories.Add(history);
-            await _context.SaveChangesAsync();
-
-            ScoreHistory result = await _repository.GetByIdAsync(history.Id);
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(history.Id, result.Id);
-            Assert.AreEqual(history.Points, result.Points);
-            Assert.IsNotNull(result.Visitor);
-            Assert.AreEqual(visitor.Name, result.Visitor.Name);
-        }
-
-        [TestMethod]
-        public async Task GetById_WithInvalidId_ReturnsNull()
-        {
-            ScoreHistory result = await _repository.GetByIdAsync(Guid.NewGuid());
-
-            Assert.IsNull(result);
-        }
-
-        [TestMethod]
         public async Task GetByVisitorAndDateRange_FiltersCorrectly()
         {
             User visitor = CreateTestVisitor();
@@ -136,34 +108,6 @@ namespace TestDataAccess
 
             Assert.AreEqual(2, results.Count);
             Assert.IsTrue(results.All(h => h.CreatedAt >= dateFrom && h.CreatedAt <= dateTo));
-            Assert.IsTrue(results[0].CreatedAt >= results[1].CreatedAt);
-        }
-
-        [TestMethod]
-        public async Task GetByOrigin_WithAttractionVisit_ReturnsMatchingHistory()
-        {
-            User visitor1 = CreateTestVisitor();
-            User visitor2 = CreateTestVisitor();
-            _context.Users.AddRange(visitor1, visitor2);
-            await _context.SaveChangesAsync();
-
-            ScoreHistory attractionHistory1 = CreateTestHistory(visitor1.Id);
-            attractionHistory1.Origin = ScoreOrigin.AttractionVisit;
-
-            ScoreHistory attractionHistory2 = CreateTestHistory(visitor2.Id);
-            attractionHistory2.Origin = ScoreOrigin.AttractionVisit;
-
-            ScoreHistory eventHistory = CreateTestHistory(visitor1.Id);
-            eventHistory.Origin = ScoreOrigin.EventParticipation;
-
-            _context.ScoreHistories.AddRange(attractionHistory1, attractionHistory2, eventHistory);
-            await _context.SaveChangesAsync();
-
-            List<ScoreHistory> results = await _repository.GetByOriginAsync(ScoreOrigin.AttractionVisit);
-
-            Assert.AreEqual(2, results.Count);
-            Assert.IsTrue(results.All(h => h.Origin == ScoreOrigin.AttractionVisit));
-            Assert.IsNotNull(results[0].Visitor);
             Assert.IsTrue(results[0].CreatedAt >= results[1].CreatedAt);
         }
 

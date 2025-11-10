@@ -321,31 +321,5 @@ namespace TestBusinessLogic
             Assert.IsTrue(result.All(r => r.AvailableQuantity > 0));
             _mockRewardRepository.Verify(r => r.GetAvailableRewardsAsync(), Times.Once);
         }
-
-        [TestMethod]
-        public async Task GetRewardsByMembershipLevel_FiltersCorrectly()
-        {
-            List<Reward> premiumRewards = new List<Reward>
-            {
-                new Reward
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Premium Reward",
-                    Description = "Premium only",
-                    PointsCost = 500,
-                    AvailableQuantity = 5,
-                    RequiredMembershipLevel = MembershipLevel.Premium
-                }
-            };
-
-            _mockRewardRepository.Setup(r => r.GetRewardsByMembershipLevelAsync(MembershipLevel.Premium))
-                .ReturnsAsync(premiumRewards);
-
-            List<RewardModelOut> result = await _rewardLogic.GetRewardsByMembershipLevel(MembershipLevel.Premium);
-
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(MembershipLevel.Premium, result[0].RequiredMembershipLevel);
-            _mockRewardRepository.Verify(r => r.GetRewardsByMembershipLevelAsync(MembershipLevel.Premium), Times.Once);
-        }
     }
 }

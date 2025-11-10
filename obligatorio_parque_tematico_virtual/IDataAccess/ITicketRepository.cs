@@ -11,6 +11,5 @@ namespace IDataAccess
         Task<Ticket> GetByIdAsync(Guid id);
         Task<IEnumerable<Ticket>> GetByVisitorIdAsync(Guid visitorId);
         Task<Ticket> GetByQRCodeAsync(Guid qrCode);
-        Task<IEnumerable<Ticket>> GetByVisitDateAsync(DateTime visitDate);
     }
 }

@@ -21,11 +21,6 @@ namespace DataAccess.Repositories
             return user;
         }
 
-        public Task<User?> GetByEmail(string email)
-        {
-            return _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-        }
-
         public Task<User?> GetById(Guid id)
         {
             return _context.Users.Include(u =>

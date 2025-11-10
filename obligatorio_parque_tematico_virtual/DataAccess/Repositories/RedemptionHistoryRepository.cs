@@ -39,14 +39,5 @@ namespace DataAccess.Repositories
                 .OrderByDescending(rh => rh.RedeemedAt)
                 .ToListAsync();
         }
-
-        public async Task<List<RedemptionHistory>> GetAllAsync()
-        {
-            return await _context.RedemptionHistories
-                .Include(rh => rh.Visitor)
-                .Include(rh => rh.Reward)
-                .OrderByDescending(rh => rh.RedeemedAt)
-                .ToListAsync();
-        }
     }
 }

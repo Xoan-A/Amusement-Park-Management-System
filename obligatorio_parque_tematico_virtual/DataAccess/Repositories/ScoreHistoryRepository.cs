@@ -20,13 +20,6 @@ namespace DataAccess.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ScoreHistory?> GetByIdAsync(Guid id)
-        {
-            return await _context.ScoreHistories
-                .Include(h => h.Visitor)
-                .FirstOrDefaultAsync(h => h.Id == id);
-        }
-
         public async Task<List<ScoreHistory>> GetByVisitorAsync(Guid visitorId)
         {
             return await _context.ScoreHistories
@@ -43,15 +36,6 @@ namespace DataAccess.Repositories
                 .Where(h => h.VisitorId == visitorId &&
                            h.CreatedAt >= dateFrom &&
                            h.CreatedAt <= dateTo)
-                .OrderByDescending(h => h.CreatedAt)
-                .ToListAsync();
-        }
-
-        public async Task<List<ScoreHistory>> GetByOriginAsync(ScoreOrigin origin)
-        {
-            return await _context.ScoreHistories
-                .Include(h => h.Visitor)
-                .Where(h => h.Origin == origin)
                 .OrderByDescending(h => h.CreatedAt)
                 .ToListAsync();
         }

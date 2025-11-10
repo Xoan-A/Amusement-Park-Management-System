@@ -53,13 +53,6 @@ namespace DataAccess.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<Reward>> GetRewardsByMembershipLevelAsync(MembershipLevel? level)
-        {
-            return await _context.Rewards
-                .Where(r => r.RequiredMembershipLevel == level)
-                .ToListAsync();
-        }
-
         public async Task<Reward?> GetByNameAsync(string name)
         {
             return await _context.Rewards
