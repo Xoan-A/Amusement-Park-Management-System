@@ -101,13 +101,7 @@ namespace BusinessLogic
             List<Reward> rewards = await _rewardRepository.GetAvailableRewardsAsync();
             return rewards.Select(MapToModelOut).ToList();
         }
-
-        public async Task<List<RewardModelOut>> GetRewardsByMembershipLevel(MembershipLevel? level)
-        {
-            List<Reward> rewards = await _rewardRepository.GetRewardsByMembershipLevelAsync(level);
-            return rewards.Select(MapToModelOut).ToList();
-        }
-
+        
         private RewardModelOut MapToModelOut(Reward reward)
         {
             return new RewardModelOut

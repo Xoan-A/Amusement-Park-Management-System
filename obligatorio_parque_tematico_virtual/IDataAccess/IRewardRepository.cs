@@ -10,7 +10,6 @@ namespace IDataAccess
         Task UpdateAsync(Reward reward);
         Task DeleteAsync(Guid id);
         Task<List<Reward>> GetAvailableRewardsAsync();
-        Task<List<Reward>> GetRewardsByMembershipLevelAsync(MembershipLevel? level);
         Task<Reward?> GetByNameAsync(string name);
     }
 }

@@ -12,6 +12,5 @@ namespace IBusinessLogic
         Task<RewardModelOut> UpdateReward(Guid id, RewardModelIn reward);
         Task DeleteReward(Guid id);
         Task<List<RewardModelOut>> GetAvailableRewards();
-        Task<List<RewardModelOut>> GetRewardsByMembershipLevel(MembershipLevel? level);
     }
 }

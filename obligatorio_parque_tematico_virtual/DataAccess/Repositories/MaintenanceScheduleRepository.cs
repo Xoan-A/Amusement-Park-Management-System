@@ -46,29 +46,11 @@ namespace DataAccess.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<MaintenanceSchedule>> GetByStatusAsync(MaintenanceStatus status)
-        {
-            return await _context.MaintenanceSchedules
-                .Include(s => s.Attraction)
-                .Where(s => s.Status == status)
-                .OrderBy(s => s.ScheduledDate)
-                .ToListAsync();
-        }
-
         public async Task<List<MaintenanceSchedule>> GetOverdueSchedulesAsync()
         {
             return await _context.MaintenanceSchedules
                 .Include(s => s.Attraction)
                 .Where(s => s.IsOverdue)
-                .OrderBy(s => s.ScheduledDate)
-                .ToListAsync();
-        }
-
-        public async Task<List<MaintenanceSchedule>> GetByDateRangeAsync(DateTime dateFrom, DateTime dateTo)
-        {
-            return await _context.MaintenanceSchedules
-                .Include(s => s.Attraction)
-                .Where(s => s.ScheduledDate >= dateFrom && s.ScheduledDate <= dateTo)
                 .OrderBy(s => s.ScheduledDate)
                 .ToListAsync();
         }
@@ -83,18 +65,6 @@ namespace DataAccess.Repositories
                 .Where(s => s.ScheduledDate >= now &&
                             s.ScheduledDate <= futureDate &&
                             s.Status == MaintenanceStatus.Pending)
-                .OrderBy(s => s.ScheduledDate)
-                .ToListAsync();
-        }
-
-        public async Task<List<MaintenanceSchedule>> GetByAttractionIdAndDateRangeAsync(Guid attractionId, DateTime dateFrom,
-            DateTime dateTo)
-        {
-            return await _context.MaintenanceSchedules
-                .Include(s => s.Attraction)
-                .Where(s => s.AttractionId == attractionId &&
-                            s.ScheduledDate >= dateFrom &&
-                            s.ScheduledDate <= dateTo)
                 .OrderBy(s => s.ScheduledDate)
                 .ToListAsync();
         }
