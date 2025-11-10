@@ -1067,7 +1067,7 @@ namespace TestBusinessLogic
 
             await _userLogic.RegisterEntry(attractionId, request);
 
-            _mockDailyScoreLogic.Verify(s => s.AddScoreToUser(visitor, attraction, null), Times.Once);
+            _mockDailyScoreLogic.Verify(s => s.AddScoreToUser(visitor, attraction, enterDate, null), Times.Once);
         }
 
         [TestMethod]
@@ -1122,7 +1122,7 @@ namespace TestBusinessLogic
 
             await _userLogic.RegisterEntry(attractionId, request);
 
-            _mockDailyScoreLogic.Verify(s => s.AddScoreToUser(visitor, attraction, specialEvent), Times.Once);
+            _mockDailyScoreLogic.Verify(s => s.AddScoreToUser(visitor, attraction, enterDate, specialEvent), Times.Once);
         }
 
         [TestMethod]
@@ -1194,7 +1194,7 @@ namespace TestBusinessLogic
             await _userLogic.RegisterEntry(attractionId2, entryRequest2);
 
             _mockDailyScoreLogic.Verify(
-                s => s.AddScoreToUser(It.IsAny<User>(), It.IsAny<Attraction>(), null),
+                s => s.AddScoreToUser(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<DateTime>(), null),
                 Times.Exactly(2));
         }
 
@@ -1242,7 +1242,7 @@ namespace TestBusinessLogic
 
             await _userLogic.RegisterEntry(attractionId, request);
 
-            _mockDailyScoreLogic.Verify(s => s.AddScoreToUser(visitor, attraction, null), Times.Once);
+            _mockDailyScoreLogic.Verify(s => s.AddScoreToUser(visitor, attraction, enterDate, null), Times.Once);
         }
 
         [TestMethod]

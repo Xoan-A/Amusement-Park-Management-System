@@ -67,8 +67,6 @@ using (Microsoft.Extensions.DependencyInjection.IServiceScope scope = app.Servic
     }
 }
 
-ServiceFactory.ConfigureObservers(app.Services);
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

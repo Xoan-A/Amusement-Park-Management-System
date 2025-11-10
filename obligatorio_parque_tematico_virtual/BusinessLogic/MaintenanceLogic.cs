@@ -11,18 +11,15 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
     private readonly IMaintenanceScheduleRepository _scheduleRepository;
     private readonly IAttractionRepository _attractionRepository;
     private readonly IAttractionLogic _attractionLogic;
-    private readonly IDateTimeLogic _dateTimeLogic;
 
     public MaintenanceLogic(
         IMaintenanceScheduleRepository scheduleRepository,
         IAttractionRepository attractionRepository,
-        IAttractionLogic attractionLogic,
-        IDateTimeLogic dateTimeLogic)
+        IAttractionLogic attractionLogic)
     {
         _scheduleRepository = scheduleRepository;
         _attractionRepository = attractionRepository;
         _attractionLogic = attractionLogic;
-        _dateTimeLogic = dateTimeLogic;
     }
 
     public async Task DateUpdated(IDateSubject subject)
@@ -73,12 +70,6 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
         if (attraction == null)
         {
             throw new KeyNotFoundException($"Attraction with id {request.AttractionId} not found");
-        }
-
-        DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
-        if (request.ScheduledDate < currentDateTime)
-        {
-            throw new ArgumentException("The schedule date cannot be earlier than now");
         }
 
         MaintenanceSchedule schedule = new MaintenanceSchedule

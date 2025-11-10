@@ -196,7 +196,7 @@ namespace BusinessLogic
 
             Event even = await _eventRepository.GetEventByAttractionAndDate(attractionId, enterDate.Date);
 
-            await _dailyScoreLogic.AddScoreToUser(user, attraction, even);
+            await _dailyScoreLogic.AddScoreToUser(user, attraction, enterDate, even);
         }
 
         public async Task RegisterExit(Guid attractionId, RegisterExitRequest request)

@@ -15,7 +15,7 @@ namespace TestBusinessLogic
         public void Setup()
         {
             _mockDateTimeRepository = new Mock<IDateTimeRepository>();
-            _dateTimeLogic = new DateTimeLogic(_mockDateTimeRepository.Object);
+            _dateTimeLogic = new DateTimeLogic(_mockDateTimeRepository.Object, new List<IDateObserver>());
         }
 
         [TestMethod]

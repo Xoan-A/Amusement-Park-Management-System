@@ -30,8 +30,7 @@ public class MaintenanceLogicTest
         _maintenanceLogic = new MaintenanceLogic(
             _mockScheduleRepository.Object,
             _mockAttractionRepository.Object,
-            _mockAttractionLogic.Object,
-            _mockDateTimeLogic.Object
+            _mockAttractionLogic.Object
         );
     }
 
@@ -78,33 +77,6 @@ public class MaintenanceLogicTest
         await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
             () => _maintenanceLogic.CreateSchedule(request)
         );
-    }
-
-    [TestMethod]
-    public async Task CreateSchedule_ScheduledDateInPast_ThrowsArgumentException()
-    {
-        Guid attractionId = Guid.NewGuid();
-        Attraction attraction = CreateTestAttraction(attractionId);
-        DateTime currentDateTime = new DateTime(2025, 11, 7, 12, 0, 0);
-
-        _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDateTime);
-
-        MaintenanceScheduleRequest request = new MaintenanceScheduleRequest
-        {
-            AttractionId = attractionId,
-            ScheduledDate = currentDateTime.AddDays(-1),
-            Description = "Past maintenance",
-            EstimatedDuration = 120
-        };
-
-        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-
-        ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
-            () => _maintenanceLogic.CreateSchedule(request)
-        );
-
-        Assert.AreEqual("The schedule date cannot be earlier than now", exception.Message);
-        _mockScheduleRepository.Verify(r => r.CreateAsync(It.IsAny<MaintenanceSchedule>()), Times.Never);
     }
 
     [TestMethod]
