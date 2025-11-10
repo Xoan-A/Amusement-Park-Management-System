@@ -482,22 +482,13 @@ public class MaintenanceControllerTest
     {
         Guid scheduleId = Guid.NewGuid();
         Guid recordId = Guid.NewGuid();
-        MaintenanceRecordRequest request = new MaintenanceRecordRequest
-        {
-            AttractionId = Guid.NewGuid(),
-            PerformedDate = DateTime.Now,
-            Description = "Completed scheduled maintenance",
-            Duration = TimeSpan.FromHours(2)
-        };
 
         _mockMaintenanceLogic.Setup(m =>
-        m.CompleteMaintenance(scheduleId, It.IsAny<MaintenanceRecordRequest>(), It.IsAny<Guid>()))
+        m.CompleteMaintenance(scheduleId, It.IsAny<Guid>()))
         .ReturnsAsync(recordId);
 
-        StringContent content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
         HttpResponseMessage response =
-        await _operatorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", content);
+        await _operatorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", null);
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
@@ -506,18 +497,9 @@ public class MaintenanceControllerTest
     public async Task CompleteMaintenance_AsVisitor_ReturnsForbidden()
     {
         Guid scheduleId = Guid.NewGuid();
-        MaintenanceRecordRequest request = new MaintenanceRecordRequest
-        {
-            AttractionId = Guid.NewGuid(),
-            PerformedDate = DateTime.Now,
-            Description = "Test",
-            Duration = TimeSpan.FromHours(1)
-        };
-
-        StringContent content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
         HttpResponseMessage response =
-        await _visitorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", content);
+        await _visitorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", null);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -583,22 +565,13 @@ public class MaintenanceControllerTest
     public async Task CompleteMaintenance_NonExistentSchedule_ReturnsNotFound()
     {
         Guid scheduleId = Guid.NewGuid();
-        MaintenanceRecordRequest request = new MaintenanceRecordRequest
-        {
-            AttractionId = Guid.NewGuid(),
-            PerformedDate = DateTime.Now,
-            Description = "Test",
-            Duration = TimeSpan.FromHours(1)
-        };
 
         _mockMaintenanceLogic.Setup(m =>
-        m.CompleteMaintenance(scheduleId, It.IsAny<MaintenanceRecordRequest>(), It.IsAny<Guid>()))
+        m.CompleteMaintenance(scheduleId, It.IsAny<Guid>()))
         .ThrowsAsync(new KeyNotFoundException("Schedule not found"));
 
-        StringContent content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
         HttpResponseMessage response =
-        await _operatorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", content);
+        await _operatorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", null);
 
         Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -647,64 +620,12 @@ public class MaintenanceControllerTest
     }
 
     [TestMethod]
-    public async Task RecordMaintenance_WithMissingNameIdentifierClaim_UsesEmptyGuid()
-    {
-        MaintenanceRecordRequest request = new MaintenanceRecordRequest
-        {
-            AttractionId = Guid.NewGuid(),
-            MaintenanceScheduleId = null,
-            Description = "Test",
-            Duration = TimeSpan.FromHours(1)
-        };
-
-        _mockMaintenanceLogic.Setup(m => m.RecordMaintenance(
-            It.IsAny<MaintenanceRecordRequest>(),
-            It.IsAny<Guid>()))
-        .ReturnsAsync(Guid.NewGuid());
-
-        JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-        byte[] key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
-        SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new System.Security.Claims.ClaimsIdentity(new[]
-            {
-                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Operator")
-            }),
-            Expires = DateTime.UtcNow.AddHours(1),
-            Issuer = "ParqueTematico",
-            Audience = "ParqueTematico",
-            SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
-                new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
-                Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
-        };
-        SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
-        String tokenString = tokenHandler.WriteToken(token);
-
-        HttpClient client = _factory.CreateClient();
-        client.DefaultRequestHeaders.Authorization =
-        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
-
-        StringContent content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
-        HttpResponseMessage response = await client.PostAsync("/api/maintenance/records", content);
-
-        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
-    }
-
-    [TestMethod]
     public async Task CompleteMaintenance_WithMissingNameIdentifierClaim_UsesEmptyGuid()
     {
         Guid scheduleId = Guid.NewGuid();
-        MaintenanceRecordRequest request = new MaintenanceRecordRequest
-        {
-            AttractionId = Guid.NewGuid(),
-            MaintenanceScheduleId = scheduleId,
-            Description = "Completed",
-            Duration = TimeSpan.FromHours(1)
-        };
 
         _mockMaintenanceLogic.Setup(m =>
-        m.CompleteMaintenance(scheduleId, It.IsAny<MaintenanceRecordRequest>(), It.IsAny<Guid>()))
+        m.CompleteMaintenance(scheduleId, It.IsAny<Guid>()))
         .ReturnsAsync(Guid.NewGuid());
 
         JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
@@ -729,10 +650,8 @@ public class MaintenanceControllerTest
         client.DefaultRequestHeaders.Authorization =
         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
 
-        StringContent content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
         HttpResponseMessage response =
-        await client.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", content);
+        await client.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", null);
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
