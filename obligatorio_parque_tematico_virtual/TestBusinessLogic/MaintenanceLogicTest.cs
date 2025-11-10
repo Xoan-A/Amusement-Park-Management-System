@@ -351,6 +351,20 @@ public class MaintenanceLogicTest
     }
 
     [TestMethod]
+    public async Task UpdateScheduleStatus_NonExistentSchedule_ThrowsKeyNotFoundException()
+    {
+        Guid scheduleId = Guid.NewGuid();
+
+        _mockScheduleRepository.Setup(r => r.GetByIdAsync(scheduleId)).ReturnsAsync((MaintenanceSchedule)null);
+
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
+            () => _maintenanceLogic.UpdateScheduleStatus(scheduleId, "Completed")
+        );
+
+        _mockScheduleRepository.Verify(r => r.UpdateAsync(It.IsAny<MaintenanceSchedule>()), Times.Never);
+    }
+
+    [TestMethod]
     public async Task DeleteSchedule_ExistingSchedule_DeletesSuccessfully()
     {
         Guid scheduleId = Guid.NewGuid();
@@ -405,6 +419,91 @@ public class MaintenanceLogicTest
         await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
             () => _maintenanceLogic.RecordMaintenance(request, Guid.NewGuid())
         );
+    }
+
+    [TestMethod]
+    public async Task RecordMaintenance_WithNonExistentSchedule_ThrowsKeyNotFoundException()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Guid scheduleId = Guid.NewGuid();
+        Guid performedBy = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(attractionId);
+
+        MaintenanceRecordRequest request = new MaintenanceRecordRequest
+        {
+            AttractionId = attractionId,
+            MaintenanceScheduleId = scheduleId,
+            PerformedDate = DateTime.Now,
+            Description = "Completed maintenance",
+            Duration = TimeSpan.FromHours(2)
+        };
+
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+        _mockScheduleRepository.Setup(r => r.GetByIdAsync(scheduleId)).ReturnsAsync((MaintenanceSchedule)null);
+
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
+            () => _maintenanceLogic.RecordMaintenance(request, performedBy)
+        );
+
+        _mockRecordRepository.Verify(r => r.CreateAsync(It.IsAny<MaintenanceRecord>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task RecordMaintenance_WithValidSchedule_CreatesRecordSuccessfully()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Guid scheduleId = Guid.NewGuid();
+        Guid performedBy = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(attractionId);
+        MaintenanceSchedule schedule = CreateTestSchedule(scheduleId, attractionId, attraction);
+
+        MaintenanceRecordRequest request = new MaintenanceRecordRequest
+        {
+            AttractionId = attractionId,
+            MaintenanceScheduleId = scheduleId,
+            PerformedDate = DateTime.Now,
+            Description = "Completed scheduled maintenance",
+            Duration = TimeSpan.FromHours(2)
+        };
+
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+        _mockScheduleRepository.Setup(r => r.GetByIdAsync(scheduleId)).ReturnsAsync(schedule);
+        _mockRecordRepository.Setup(r => r.CreateAsync(It.IsAny<MaintenanceRecord>())).Returns(Task.CompletedTask);
+
+        Guid result = await _maintenanceLogic.RecordMaintenance(request, performedBy);
+
+        Assert.AreNotEqual(Guid.Empty, result);
+        _mockRecordRepository.Verify(r => r.CreateAsync(It.Is<MaintenanceRecord>(
+            rec => rec.MaintenanceScheduleId == scheduleId && rec.AttractionId == attractionId
+        )), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task RecordMaintenance_WithoutScheduleId_CreatesRecordSuccessfully()
+    {
+        Guid attractionId = Guid.NewGuid();
+        Guid performedBy = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(attractionId);
+
+        MaintenanceRecordRequest request = new MaintenanceRecordRequest
+        {
+            AttractionId = attractionId,
+            MaintenanceScheduleId = null,
+            PerformedDate = DateTime.Now,
+            Description = "Unscheduled maintenance",
+            Duration = TimeSpan.FromHours(1)
+        };
+
+        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+        _mockRecordRepository.Setup(r => r.CreateAsync(It.IsAny<MaintenanceRecord>())).Returns(Task.CompletedTask);
+
+        Guid result = await _maintenanceLogic.RecordMaintenance(request, performedBy);
+
+        Assert.AreNotEqual(Guid.Empty, result);
+        _mockScheduleRepository.Verify(r => r.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
+        _mockRecordRepository.Verify(r => r.CreateAsync(It.Is<MaintenanceRecord>(
+            rec => rec.MaintenanceScheduleId == null && rec.AttractionId == attractionId
+        )), Times.Once);
     }
 
     [TestMethod]

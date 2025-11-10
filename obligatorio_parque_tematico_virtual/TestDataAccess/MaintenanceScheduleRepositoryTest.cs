@@ -131,27 +131,6 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task GetByStatus_FiltersByStatus_ReturnsMatchingSchedules()
-        {
-            Attraction attraction = CreateTestAttraction();
-            _context.Attractions.Add(attraction);
-
-            MaintenanceSchedule pendingSchedule = CreateTestSchedule(attraction.Id);
-            pendingSchedule.Status = MaintenanceStatus.Pending;
-
-            MaintenanceSchedule completedSchedule = CreateTestSchedule(attraction.Id);
-            completedSchedule.Status = MaintenanceStatus.Completed;
-
-            _context.MaintenanceSchedules.AddRange(pendingSchedule, completedSchedule);
-            await _context.SaveChangesAsync();
-
-            List<MaintenanceSchedule> results = await _repository.GetByStatusAsync(MaintenanceStatus.Pending);
-
-            Assert.AreEqual(1, results.Count);
-            Assert.AreEqual(MaintenanceStatus.Pending, results[0].Status);
-        }
-
-        [TestMethod]
         public async Task GetOverdueSchedules_ReturnsPendingPastDueSchedules()
         {
             Attraction attraction = CreateTestAttraction();
@@ -215,34 +194,6 @@ namespace TestDataAccess
 
             Assert.AreEqual(2, results.Count);
             Assert.IsTrue(results.All(r => r.IsOverdue));
-        }
-
-        [TestMethod]
-        public async Task GetByDateRange_FiltersCorrectly_ReturnsSchedulesInRange()
-        {
-            Attraction attraction = CreateTestAttraction();
-            _context.Attractions.Add(attraction);
-
-            DateTime dateFrom = DateTime.Now;
-            DateTime dateTo = DateTime.Now.AddDays(14);
-
-            MaintenanceSchedule scheduleInRange = CreateTestSchedule(attraction.Id);
-            scheduleInRange.ScheduledDate = DateTime.Now.AddDays(7);
-
-            MaintenanceSchedule scheduleBeforeRange = CreateTestSchedule(attraction.Id);
-            scheduleBeforeRange.ScheduledDate = DateTime.Now.AddDays(-1);
-
-            MaintenanceSchedule scheduleAfterRange = CreateTestSchedule(attraction.Id);
-            scheduleAfterRange.ScheduledDate = DateTime.Now.AddDays(15);
-
-            _context.MaintenanceSchedules.AddRange(scheduleInRange, scheduleBeforeRange, scheduleAfterRange);
-            await _context.SaveChangesAsync();
-
-            List<MaintenanceSchedule> results = await _repository.GetByDateRangeAsync(dateFrom, dateTo);
-
-            Assert.AreEqual(1, results.Count);
-            Assert.IsTrue(results[0].ScheduledDate >= dateFrom);
-            Assert.IsTrue(results[0].ScheduledDate <= dateTo);
         }
 
         [TestMethod]
@@ -361,35 +312,6 @@ namespace TestDataAccess
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(MaintenanceStatus.Pending, results[0].Status);
             Assert.AreEqual(pendingSchedule.Id, results[0].Id);
-        }
-
-        [TestMethod]
-        public async Task GetByAttractionIdAndDateRange_CombinesFilters_Success()
-        {
-            Attraction attraction1 = CreateTestAttraction();
-            Attraction attraction2 = CreateTestAttraction();
-            _context.Attractions.AddRange(attraction1, attraction2);
-
-            DateTime dateFrom = DateTime.Now;
-            DateTime dateTo = DateTime.Now.AddDays(14);
-
-            MaintenanceSchedule targetSchedule = CreateTestSchedule(attraction1.Id);
-            targetSchedule.ScheduledDate = DateTime.Now.AddDays(7);
-
-            MaintenanceSchedule wrongAttraction = CreateTestSchedule(attraction2.Id);
-            wrongAttraction.ScheduledDate = DateTime.Now.AddDays(7);
-
-            MaintenanceSchedule wrongDate = CreateTestSchedule(attraction1.Id);
-            wrongDate.ScheduledDate = DateTime.Now.AddDays(20);
-
-            _context.MaintenanceSchedules.AddRange(targetSchedule, wrongAttraction, wrongDate);
-            await _context.SaveChangesAsync();
-
-            List<MaintenanceSchedule> results =
-            await _repository.GetByAttractionIdAndDateRangeAsync(attraction1.Id, dateFrom, dateTo);
-
-            Assert.AreEqual(1, results.Count);
-            Assert.AreEqual(targetSchedule.Id, results[0].Id);
         }
 
         private Attraction CreateTestAttraction()

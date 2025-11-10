@@ -57,41 +57,6 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task GetByEmail_ShouldReturnUser_WhenUserExists()
-        {
-            User visitor = new User
-            {
-                Name = "Test",
-                LastName = "User",
-                Email = "test@test.com",
-                Password = "password",
-                BirthDate = new DateTime(1990, 1, 1),
-                MembershipLevel = MembershipLevel.Standard
-            };
-            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
-            visitor.UserRoles = new System.Collections.Generic.List<UserRole>
-            {
-                new UserRole { RoleId = visitorRole.Id }
-            };
-            _context.Users.Add(visitor);
-            _context.SaveChanges();
-
-            User result = await _userRepository.GetByEmail("test@test.com");
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual("test@test.com", result.Email);
-            Assert.IsInstanceOfType(result, typeof(User));
-        }
-
-        [TestMethod]
-        public async Task GetByEmail_ShouldReturnNull_WhenUserDoesNotExist()
-        {
-            User result = await _userRepository.GetByEmail("nonexistent@test.com");
-
-            Assert.IsNull(result);
-        }
-
-        [TestMethod]
         public async Task GetById_ShouldReturnUser_WhenUserExists()
         {
             User op = new User

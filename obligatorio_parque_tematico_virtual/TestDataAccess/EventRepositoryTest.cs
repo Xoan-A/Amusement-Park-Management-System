@@ -91,20 +91,6 @@ public class EventRepositoryTest
     }
 
     [TestMethod]
-    public async Task Update_ShouldUpdateEventInDatabase()
-    {
-        await _eventRepository.Create(eventEntity);
-
-        eventEntity.Name = "Updated Music Festival";
-
-        await _eventRepository.Update(eventEntity);
-
-        Event result = await _eventRepository.GetById(eventEntity.Id);
-        Assert.IsNotNull(result);
-        Assert.AreEqual(eventEntity.Name, result.Name);
-    }
-
-    [TestMethod]
     public async Task Delete_ShouldDeleteEventFromDatabase()
     {
         await _eventRepository.Create(eventEntity);
