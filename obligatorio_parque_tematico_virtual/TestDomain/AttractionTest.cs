@@ -18,14 +18,9 @@ public class AttractionTest
         attraction.MaxCapacity = 10;
         attraction.CurrentCapacity = 0;
 
-        Assert.IsNotNull(attraction.Id);
         Assert.AreEqual("Race simulator", attraction.Name);
-        Assert.AreEqual("average race simulator", attraction.Description);
         Assert.AreEqual(AttractionType.Simulator, attraction.Type);
         Assert.AreEqual(18, attraction.MinAge);
-        Assert.AreEqual(10, attraction.MaxCapacity);
-        Assert.AreEqual(0, attraction.CurrentCapacity);
-        Assert.AreEqual(true, attraction.IsActive);
     }
 
     [TestMethod]

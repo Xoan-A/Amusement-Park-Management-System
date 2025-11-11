@@ -66,7 +66,6 @@ public class UserLogicRoleTest
 
         UserResponse result = await _userLogic.RegisterVisitor(request);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(email, result.Email);
         _mockRoleRepository.Verify(r => r.GetByNameAsync(Role.VISITOR), Times.Once);
     }
@@ -100,7 +99,6 @@ public class UserLogicRoleTest
 
         UserResponse result = await _userLogic.CreateUser(request);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(2, result.UserRoles.Count);
     }
 
@@ -208,7 +206,6 @@ public class UserLogicRoleTest
 
         UserResponse result = await _userLogic.CreateUser(request);
 
-        Assert.IsNotNull(result);
         _mockPasswordService.Verify(p => p.HashPassword(plainPassword), Times.Once);
     }
 
@@ -230,7 +227,6 @@ public class UserLogicRoleTest
 
         UserResponse result = await _userLogic.CreateUser(request);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(0, result.UserRoles.Count);
     }
 
@@ -252,7 +248,6 @@ public class UserLogicRoleTest
 
         UserResponse result = await _userLogic.CreateUser(request);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(0, result.UserRoles.Count);
     }
 
@@ -275,7 +270,6 @@ public class UserLogicRoleTest
 
         UserResponse result = await _userLogic.CreateUser(request);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(0, result.UserRoles.Count);
     }
 
@@ -300,7 +294,6 @@ public class UserLogicRoleTest
 
         UserResponse result = await _userLogic.CreateUser(request);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(1, result.UserRoles.Count);
         Assert.AreEqual(Role.VISITOR, result.UserRoles.First());
     }

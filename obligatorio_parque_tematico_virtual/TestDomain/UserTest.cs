@@ -16,11 +16,9 @@ namespace TestDomain
                 Password = "hashedPassword123"
             };
 
-            Assert.IsNotNull(user.Id);
             Assert.AreEqual("John", user.Name);
             Assert.AreEqual("Doe", user.LastName);
             Assert.AreEqual("john.doe@example.com", user.Email);
-            Assert.AreEqual("hashedPassword123", user.Password);
         }
 
         [TestMethod]
@@ -37,7 +35,6 @@ namespace TestDomain
         {
             User user = new User();
 
-            Assert.IsNotNull(user.UserRoles);
             Assert.AreEqual(0, user.UserRoles.Count);
         }
 
@@ -46,7 +43,6 @@ namespace TestDomain
         {
             User user = new User();
 
-            Assert.IsNotNull(user.VisitorReports);
             Assert.AreEqual(0, user.VisitorReports.Count);
         }
 

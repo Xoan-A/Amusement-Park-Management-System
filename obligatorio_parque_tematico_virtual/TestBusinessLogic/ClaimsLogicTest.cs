@@ -7,7 +7,7 @@ namespace TestBusinessLogic
     [TestClass]
     public class ClaimsLogicTest
     {
-        private IClaimsLogic _claimsLogic;
+        private IClaimsLogic _claimsLogic = null!;
 
         [TestInitialize]
         public void Setup()

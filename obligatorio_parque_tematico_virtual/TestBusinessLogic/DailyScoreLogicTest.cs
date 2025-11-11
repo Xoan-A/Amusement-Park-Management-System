@@ -19,10 +19,10 @@ namespace TestBusinessLogic
         [TestInitialize]
         public void Setup()
         {
-            _mockUserRepository = new Mock<IUserRepository>();
-            _mockActiveStrategy = new Mock<IActiveStrategy>();
-            _mockScoreHistoryRepository = new Mock<IScoreHistoryRepository>();
-            _mockConcreteStrategy = new Mock<IConcreteStrategy>();
+            _mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
+            _mockActiveStrategy = new Mock<IActiveStrategy>(MockBehavior.Strict);
+            _mockScoreHistoryRepository = new Mock<IScoreHistoryRepository>(MockBehavior.Strict);
+            _mockConcreteStrategy = new Mock<IConcreteStrategy>(MockBehavior.Strict);
 
             _mockConcreteStrategy.Setup(s => s.Name).Returns("TestStrategy");
             _mockActiveStrategy.Setup(s => s.GetStrategy()).ReturnsAsync(_mockConcreteStrategy.Object);
@@ -36,13 +36,16 @@ namespace TestBusinessLogic
             DateTime previousDate = new DateTime(2025, 9, 1, 23, 59, 0);
             DateTime currentDate = new DateTime(2025, 9, 2, 0, 1, 0);
 
-            Mock<IDateSubject> mockSubject = new Mock<IDateSubject>();
+            Mock<IDateSubject> mockSubject = new Mock<IDateSubject>(MockBehavior.Strict);
             mockSubject.Setup(s => s.GetPreviousDateTime()).Returns(previousDate);
             mockSubject.Setup(s => s.GetCurrentDateTime()).ReturnsAsync(currentDate);
+            _mockUserRepository.Setup(r => r.ResetScores()).Returns(Task.CompletedTask);
 
             await _dailyScoreLogic.DateUpdated(mockSubject.Object);
 
             _mockUserRepository.Verify(r => r.ResetScores(), Times.Once);
+            mockSubject.Verify(s => s.GetPreviousDateTime(), Times.Once);
+            mockSubject.Verify(s => s.GetCurrentDateTime(), Times.Once);
         }
 
         [TestMethod]
@@ -51,17 +54,19 @@ namespace TestBusinessLogic
             DateTime previousDate = new DateTime(2025, 9, 1, 10, 0, 0);
             DateTime currentDate = new DateTime(2025, 9, 1, 14, 30, 0);
 
-            Mock<IDateSubject> mockSubject = new Mock<IDateSubject>();
+            Mock<IDateSubject> mockSubject = new Mock<IDateSubject>(MockBehavior.Strict);
             mockSubject.Setup(s => s.GetPreviousDateTime()).Returns(previousDate);
             mockSubject.Setup(s => s.GetCurrentDateTime()).ReturnsAsync(currentDate);
 
             await _dailyScoreLogic.DateUpdated(mockSubject.Object);
 
             _mockUserRepository.Verify(r => r.ResetScores(), Times.Never);
+            mockSubject.Verify(s => s.GetPreviousDateTime(), Times.Once);
+            mockSubject.Verify(s => s.GetCurrentDateTime(), Times.Once);
         }
 
         [TestMethod]
-        public async Task AddScoreToUser_ShouldCalculateAndAddScore()
+        public async Task AddScoreToUser_ShouldIncrementScore()
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
@@ -87,27 +92,76 @@ namespace TestBusinessLogic
                 It.IsAny<Attraction>(),
                 It.IsAny<StrategyRequest>()
             )).Returns(calculatedScore);
+            _mockUserRepository.Setup(r => r.Update(user)).Returns(Task.CompletedTask);
+            _mockScoreHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<ScoreHistory>())).Returns(Task.CompletedTask);
 
             DateTime testDate = new DateTime(2025, 9, 1, 12, 0, 0);
             await _dailyScoreLogic.AddScoreToUser(user, attraction, testDate);
 
-            Assert.AreEqual(initialScore + calculatedScore, user.Score, "Score debe incrementarse");
-            Assert.AreEqual(initialDailyScore + calculatedScore, user.DailyScore, "DailyScore debe incrementarse");
+            Assert.AreEqual(initialScore + calculatedScore, user.Score);
+            _mockActiveStrategy.Verify(s => s.CalculateScore(
+                It.IsAny<User>(),
+                It.IsAny<Attraction>(),
+                It.IsAny<StrategyRequest>()
+            ), Times.Once);
             _mockUserRepository.Verify(r => r.Update(user), Times.Once);
+            _mockScoreHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<ScoreHistory>()), Times.Once);
         }
 
         [TestMethod]
-        public async Task AddScoreToUser_ShouldPassCorrectStrategyRequest()
+        public async Task AddScoreToUser_ShouldIncrementDailyScore()
         {
             Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
-            bool isSpecialEvent = true;
+            int calculatedScore = 50;
+            int initialScore = 100;
+            int initialDailyScore = 80;
+
+            User user = new User
+            {
+                Id = userId,
+                Score = initialScore,
+                DailyScore = initialDailyScore
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster"
+            };
+
+            _mockActiveStrategy.Setup(s => s.CalculateScore(
+                It.IsAny<User>(),
+                It.IsAny<Attraction>(),
+                It.IsAny<StrategyRequest>()
+            )).Returns(calculatedScore);
+            _mockUserRepository.Setup(r => r.Update(user)).Returns(Task.CompletedTask);
+            _mockScoreHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<ScoreHistory>())).Returns(Task.CompletedTask);
+
+            DateTime testDate = new DateTime(2025, 9, 1, 12, 0, 0);
+            await _dailyScoreLogic.AddScoreToUser(user, attraction, testDate);
+
+            Assert.AreEqual(initialDailyScore + calculatedScore, user.DailyScore);
+            _mockActiveStrategy.Verify(s => s.CalculateScore(
+                It.IsAny<User>(),
+                It.IsAny<Attraction>(),
+                It.IsAny<StrategyRequest>()
+            ), Times.Once);
+            _mockUserRepository.Verify(r => r.Update(user), Times.Once);
+            _mockScoreHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<ScoreHistory>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task AddScoreToUser_ShouldPassCorrectUserId()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
 
             User user = new User { Id = userId, Score = 0 };
             Attraction attraction = new Attraction { Id = attractionId };
             Event attractionEvent = new Event();
 
-            StrategyRequest capturedRequest = null;
+            StrategyRequest? capturedRequest = null;
 
             _mockActiveStrategy.Setup(s => s.CalculateScore(
                 It.IsAny<User>(),
@@ -115,13 +169,54 @@ namespace TestBusinessLogic
                 It.IsAny<StrategyRequest>()
             )).Callback<User, Attraction, StrategyRequest>((u, a, sr) => capturedRequest = sr)
               .Returns(10);
+            _mockUserRepository.Setup(r => r.Update(user)).Returns(Task.CompletedTask);
+            _mockScoreHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<ScoreHistory>())).Returns(Task.CompletedTask);
 
             DateTime testDate = new DateTime(2025, 9, 1, 12, 0, 0);
             await _dailyScoreLogic.AddScoreToUser(user, attraction, testDate, attractionEvent);
 
-            Assert.AreEqual(userId, capturedRequest.UserId);
-            Assert.AreEqual(attractionId, capturedRequest.AttractionId);
-            Assert.AreEqual(isSpecialEvent, capturedRequest.IsSpecialEvent);
+            Assert.AreEqual(userId, capturedRequest!.UserId);
+            _mockActiveStrategy.Verify(s => s.CalculateScore(
+                It.IsAny<User>(),
+                It.IsAny<Attraction>(),
+                It.IsAny<StrategyRequest>()
+            ), Times.Once);
+            _mockUserRepository.Verify(r => r.Update(user), Times.Once);
+            _mockScoreHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<ScoreHistory>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task AddScoreToUser_ShouldPassCorrectAttractionId()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+
+            User user = new User { Id = userId, Score = 0 };
+            Attraction attraction = new Attraction { Id = attractionId };
+            Event attractionEvent = new Event();
+
+            StrategyRequest? capturedRequest = null;
+
+            _mockActiveStrategy.Setup(s => s.CalculateScore(
+                It.IsAny<User>(),
+                It.IsAny<Attraction>(),
+                It.IsAny<StrategyRequest>()
+            )).Callback<User, Attraction, StrategyRequest>((u, a, sr) => capturedRequest = sr)
+              .Returns(10);
+            _mockUserRepository.Setup(r => r.Update(user)).Returns(Task.CompletedTask);
+            _mockScoreHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<ScoreHistory>())).Returns(Task.CompletedTask);
+
+            DateTime testDate = new DateTime(2025, 9, 1, 12, 0, 0);
+            await _dailyScoreLogic.AddScoreToUser(user, attraction, testDate, attractionEvent);
+
+            Assert.AreEqual(attractionId, capturedRequest!.AttractionId);
+            _mockActiveStrategy.Verify(s => s.CalculateScore(
+                It.IsAny<User>(),
+                It.IsAny<Attraction>(),
+                It.IsAny<StrategyRequest>()
+            ), Times.Once);
+            _mockUserRepository.Verify(r => r.Update(user), Times.Once);
+            _mockScoreHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<ScoreHistory>()), Times.Once);
         }
 
         [TestMethod]
@@ -131,7 +226,7 @@ namespace TestBusinessLogic
             Attraction attraction = new Attraction { Id = Guid.NewGuid() };
             Event attractionEvent = new Event();
 
-            StrategyRequest capturedRequest = null;
+            StrategyRequest? capturedRequest = null;
 
             _mockActiveStrategy.Setup(s => s.CalculateScore(
                 It.IsAny<User>(),
@@ -139,11 +234,20 @@ namespace TestBusinessLogic
                 It.IsAny<StrategyRequest>()
             )).Callback<User, Attraction, StrategyRequest>((u, a, sr) => capturedRequest = sr)
               .Returns(20);
+            _mockUserRepository.Setup(r => r.Update(user)).Returns(Task.CompletedTask);
+            _mockScoreHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<ScoreHistory>())).Returns(Task.CompletedTask);
 
             DateTime testDate = new DateTime(2025, 9, 1, 12, 0, 0);
             await _dailyScoreLogic.AddScoreToUser(user, attraction, testDate, attractionEvent);
 
-            Assert.IsTrue(capturedRequest.IsSpecialEvent);
+            Assert.IsTrue(capturedRequest!.IsSpecialEvent);
+            _mockActiveStrategy.Verify(s => s.CalculateScore(
+                It.IsAny<User>(),
+                It.IsAny<Attraction>(),
+                It.IsAny<StrategyRequest>()
+            ), Times.Once);
+            _mockUserRepository.Verify(r => r.Update(user), Times.Once);
+            _mockScoreHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<ScoreHistory>()), Times.Once);
         }
 
         [TestMethod]
@@ -152,7 +256,7 @@ namespace TestBusinessLogic
             User user = new User { Id = Guid.NewGuid(), Score = 0 };
             Attraction attraction = new Attraction { Id = Guid.NewGuid() };
 
-            StrategyRequest capturedRequest = null;
+            StrategyRequest? capturedRequest = null;
 
             _mockActiveStrategy.Setup(s => s.CalculateScore(
                 It.IsAny<User>(),
@@ -160,11 +264,20 @@ namespace TestBusinessLogic
                 It.IsAny<StrategyRequest>()
             )).Callback<User, Attraction, StrategyRequest>((u, a, sr) => capturedRequest = sr)
               .Returns(15);
+            _mockUserRepository.Setup(r => r.Update(user)).Returns(Task.CompletedTask);
+            _mockScoreHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<ScoreHistory>())).Returns(Task.CompletedTask);
 
             DateTime testDate = new DateTime(2025, 9, 1, 12, 0, 0);
             await _dailyScoreLogic.AddScoreToUser(user, attraction, testDate);
 
-            Assert.IsFalse(capturedRequest.IsSpecialEvent);
+            Assert.IsFalse(capturedRequest!.IsSpecialEvent);
+            _mockActiveStrategy.Verify(s => s.CalculateScore(
+                It.IsAny<User>(),
+                It.IsAny<Attraction>(),
+                It.IsAny<StrategyRequest>()
+            ), Times.Once);
+            _mockUserRepository.Verify(r => r.Update(user), Times.Once);
+            _mockScoreHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<ScoreHistory>()), Times.Once);
         }
 
         [TestMethod]
@@ -178,6 +291,8 @@ namespace TestBusinessLogic
                 It.IsAny<Attraction>(),
                 It.IsAny<StrategyRequest>()
             )).Returns(25);
+            _mockUserRepository.Setup(r => r.Update(user)).Returns(Task.CompletedTask);
+            _mockScoreHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<ScoreHistory>())).Returns(Task.CompletedTask);
 
             DateTime testDate = new DateTime(2025, 9, 1, 12, 0, 0);
             await _dailyScoreLogic.AddScoreToUser(user, attraction, testDate);

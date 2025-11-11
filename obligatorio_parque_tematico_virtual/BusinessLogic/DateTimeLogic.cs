@@ -14,7 +14,7 @@ namespace BusinessLogic
         {
             _dateTimeRepository = dateTimeRepository;
 
-            foreach (var observer in observers)
+            foreach (IDateObserver observer in observers)
             {
                 Attach(observer);
             }
@@ -35,7 +35,7 @@ namespace BusinessLogic
 
         public async Task NotifyDateChange()
         {
-            foreach (var observer in _observers)
+            foreach (IDateObserver observer in _observers)
             {
                 await observer.DateUpdated(this);
             }

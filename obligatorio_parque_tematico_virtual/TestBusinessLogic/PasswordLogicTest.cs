@@ -6,7 +6,7 @@ namespace TestBusinessLogic
     [TestClass]
     public class PasswordLogicTest
     {
-        private IPasswordLogic _passwordLogic;
+        private IPasswordLogic _passwordLogic = null!;
 
         [TestInitialize]
         public void Setup()
@@ -15,14 +15,22 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void HashPassword_ShouldReturnHashedPassword()
+        public void HashPassword_ShouldReturnDifferentValueThanPlainText()
         {
             string plainPassword = "myPassword123";
 
             string hashedPassword = _passwordLogic.HashPassword(plainPassword);
 
-            Assert.IsNotNull(hashedPassword);
             Assert.AreNotEqual(plainPassword, hashedPassword);
+        }
+
+        [TestMethod]
+        public void HashPassword_ShouldReturnLongHash()
+        {
+            string plainPassword = "myPassword123";
+
+            string hashedPassword = _passwordLogic.HashPassword(plainPassword);
+
             Assert.IsTrue(hashedPassword.Length > 50);
         }
 
@@ -77,9 +85,18 @@ namespace TestBusinessLogic
             string complexPassword = "P@ssw0rd!#$%&*()";
 
             string hashedPassword = _passwordLogic.HashPassword(complexPassword);
-            bool isValid = _passwordLogic.VerifyPassword(complexPassword, hashedPassword);
 
             Assert.IsNotNull(hashedPassword);
+        }
+
+        [TestMethod]
+        public void VerifyPassword_ShouldVerifyHashWithSpecialCharacters()
+        {
+            string complexPassword = "P@ssw0rd!#$%&*()";
+
+            string hashedPassword = _passwordLogic.HashPassword(complexPassword);
+            bool isValid = _passwordLogic.VerifyPassword(complexPassword, hashedPassword);
+
             Assert.IsTrue(isValid);
         }
 

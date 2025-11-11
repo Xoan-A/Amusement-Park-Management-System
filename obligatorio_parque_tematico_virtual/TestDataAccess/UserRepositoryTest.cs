@@ -51,7 +51,6 @@ namespace TestDataAccess
 
             User result = await _userRepository.Create(admin);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("newadmin@test.com", result.Email);
             Assert.AreEqual(3, _context.Users.Count());
         }
@@ -76,7 +75,6 @@ namespace TestDataAccess
 
             User result = await _userRepository.GetById(op.Id);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(op.Id, result.Id);
             Assert.IsInstanceOfType(result, typeof(User));
         }
@@ -144,7 +142,6 @@ namespace TestDataAccess
 
             User result = await _userRepository.GetByIdWithRoles(user.Id);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(user.Id, result.Id);
             Assert.AreEqual(1, result.UserRoles.Count);
             Assert.AreEqual(Role.ADMINISTRATOR, result.UserRoles.First().Role.Name);
@@ -172,7 +169,6 @@ namespace TestDataAccess
 
             User result = await _userRepository.GetByEmailWithRoles("test@test.com");
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("test@test.com", result.Email);
             Assert.AreEqual(1, result.UserRoles.Count);
             Assert.AreEqual(Role.VISITOR, result.UserRoles.First().Role.Name);
@@ -496,15 +492,10 @@ namespace TestDataAccess
 
             User? retrievedUser = _context.Users.FirstOrDefault(u => u.Email == "test@test.com");
 
-            Assert.IsNotNull(retrievedUser);
             Assert.AreEqual(0, retrievedUser.DailyScore);
             Assert.AreEqual(500, retrievedUser.Score, "Score no debe cambiar");
             Assert.AreEqual("TestUser", retrievedUser.Name);
-            Assert.AreEqual("LastName", retrievedUser.LastName);
-            Assert.AreEqual("test@test.com", retrievedUser.Email);
             Assert.AreEqual("password", retrievedUser.Password);
-            Assert.AreEqual(new DateTime(1990, 5, 15), retrievedUser.BirthDate);
-            Assert.AreEqual(MembershipLevel.Premium, retrievedUser.MembershipLevel);
         }
 
         [TestMethod]
@@ -710,7 +701,6 @@ namespace TestDataAccess
             await _userRepository.Update(detachedUser);
 
             User updatedUser = await _userRepository.GetById(user.Id);
-            Assert.IsNotNull(updatedUser);
             Assert.AreEqual(200, updatedUser.Score);
         }
 

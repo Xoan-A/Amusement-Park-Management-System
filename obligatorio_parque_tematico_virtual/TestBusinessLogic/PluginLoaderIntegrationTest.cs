@@ -40,9 +40,7 @@ public class PluginLoaderIntegrationTest
 
         Assert.AreEqual(1, plugins.Count);
         Assert.AreEqual("PuntuacionPorHora", plugins[0].Name);
-        Assert.IsNotNull(plugins[0].Description);
         Assert.IsTrue(plugins[0].Description.Contains("hour"));
-        Assert.IsNotNull(plugins[0].Author);
         Assert.AreEqual("Theme Park Team", plugins[0].Author);
     }
 
@@ -55,7 +53,6 @@ public class PluginLoaderIntegrationTest
 
         PluginInfoResponse? plugin = pluginLoader.GetPluginByName("PuntuacionPorHora");
 
-        Assert.IsNotNull(plugin);
         Assert.AreEqual("PuntuacionPorHora", plugin.Name);
         Assert.IsTrue(plugin.Description.Contains("hour"));
         Assert.AreEqual("Theme Park Team", plugin.Author);
@@ -70,7 +67,6 @@ public class PluginLoaderIntegrationTest
 
         IConcreteStrategy strategy = pluginLoader.CreateStrategyInstance("PuntuacionPorHora");
 
-        Assert.IsNotNull(strategy);
         Assert.IsInstanceOfType(strategy, typeof(IConcreteStrategy));
         Assert.AreEqual("PuntuacionPorHora", strategy.Name);
     }
@@ -85,7 +81,6 @@ public class PluginLoaderIntegrationTest
 
         Assert.IsTrue(plugins.Any());
         PluginInfoResponse plugin = plugins.First();
-        Assert.IsNotNull(plugin.Description);
         Assert.IsTrue(plugin.Description.Length > 0);
         Assert.IsTrue(plugin.Description.Contains("hour") || plugin.Description.Contains("peak"));
     }
@@ -100,7 +95,6 @@ public class PluginLoaderIntegrationTest
 
         Assert.IsTrue(plugins.Any());
         PluginInfoResponse plugin = plugins.First();
-        Assert.IsNotNull(plugin.Author);
         Assert.AreEqual("Theme Park Team", plugin.Author);
     }
 

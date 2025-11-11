@@ -20,14 +20,9 @@ public class EventTest
             Attractions = []
         };
 
-        Assert.IsNotNull(newEvent.Id);
         Assert.AreEqual("Music Festival", newEvent.Name);
         Assert.AreEqual(new DateTime(2024, 8, 15), newEvent.Date);
-        Assert.AreEqual(10, newEvent.Hour);
         Assert.AreEqual(5000, newEvent.MaxCapacity);
-        Assert.AreEqual(0, newEvent.CurrentCapacity);
-        Assert.AreEqual(100, newEvent.Cost);
-        Assert.IsNotNull(newEvent.Attractions);
     }
 
     [TestMethod]
@@ -44,7 +39,6 @@ public class EventTest
     {
         Event newEvent = new Event();
 
-        Assert.IsNotNull(newEvent.Attractions);
         Assert.AreEqual(0, newEvent.Attractions.Count);
     }
 

@@ -150,7 +150,6 @@ namespace ApiTests
             TicketResponse result = JsonSerializer.Deserialize<TicketResponse>(responseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(result);
             Assert.IsNull(result.VisitorName);
             Assert.IsNull(result.VisitorLastName);
 
@@ -279,7 +278,6 @@ namespace ApiTests
             TicketResponse result = JsonSerializer.Deserialize<TicketResponse>(responseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(result);
             Assert.IsNull(result.VisitorName);
             Assert.IsNull(result.VisitorLastName);
 
@@ -409,7 +407,6 @@ namespace ApiTests
             TicketResponse result = JsonSerializer.Deserialize<TicketResponse>(responseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(result);
             Assert.IsNull(result.VisitorName);
             Assert.IsNull(result.VisitorLastName);
 
@@ -542,7 +539,6 @@ namespace ApiTests
             List<TicketResponse> result = JsonSerializer.Deserialize<List<TicketResponse>>(responseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
             Assert.IsNull(result[0].VisitorName);
             Assert.IsNull(result[0].VisitorLastName);

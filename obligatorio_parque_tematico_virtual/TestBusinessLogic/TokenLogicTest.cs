@@ -39,7 +39,6 @@ namespace TestBusinessLogic
 
             string token = _tokenLogic.GenerateToken(admin);
 
-            Assert.IsNotNull(token);
             Assert.IsTrue(token.Length > 50);
 
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -64,7 +63,6 @@ namespace TestBusinessLogic
 
             string token = _tokenLogic.GenerateToken(op);
 
-            Assert.IsNotNull(token);
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
 
@@ -88,7 +86,6 @@ namespace TestBusinessLogic
 
             string token = _tokenLogic.GenerateToken(visitor);
 
-            Assert.IsNotNull(token);
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
 
@@ -150,7 +147,6 @@ namespace TestBusinessLogic
 
             string token = _tokenLogic.GenerateToken(user);
 
-            Assert.IsNotNull(token);
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
 
@@ -174,7 +170,6 @@ namespace TestBusinessLogic
 
             string token = _tokenLogic.GenerateToken(user);
 
-            Assert.IsNotNull(token);
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
 
@@ -197,7 +192,6 @@ namespace TestBusinessLogic
 
             string token = _tokenLogic.GenerateToken(user);
 
-            Assert.IsNotNull(token);
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
 

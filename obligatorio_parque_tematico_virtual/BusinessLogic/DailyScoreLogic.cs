@@ -21,8 +21,8 @@ namespace BusinessLogic
 
         public async Task DateUpdated(IDateSubject subject)
         {
-            var previousDate = subject.GetPreviousDateTime().Date;
-            var currentDate = (await subject.GetCurrentDateTime()).Date;
+            DateTime previousDate = subject.GetPreviousDateTime().Date;
+            DateTime currentDate = (await subject.GetCurrentDateTime()).Date;
 
             if (previousDate != currentDate)
             {
@@ -47,7 +47,7 @@ namespace BusinessLogic
 
             IConcreteStrategy currentStrategy = await _activeStrategy.GetStrategy();
 
-            var scoreHistory = new ScoreHistory
+            ScoreHistory scoreHistory = new ScoreHistory
             {
                 Id = Guid.NewGuid(),
                 VisitorId = user.Id,

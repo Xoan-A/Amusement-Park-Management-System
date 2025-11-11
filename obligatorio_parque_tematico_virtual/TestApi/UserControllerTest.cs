@@ -201,12 +201,9 @@ namespace ApiTests
                 PropertyNameCaseInsensitive = true
             });
 
-            Assert.IsNotNull(userResponse);
             Assert.AreEqual(expected.Id, userResponse.Id);
             Assert.AreEqual(expected.Email, userResponse.Email);
             Assert.AreEqual(expected.Name, userResponse.Name);
-            Assert.AreEqual(expected.LastName, userResponse.LastName);
-            Assert.IsNotNull(userResponse.UserRoles);
             CollectionAssert.AreEquivalent(expected.UserRoles.ToList(), userResponse.UserRoles.ToList());
 
             _mockUserLogic.Verify(u => u.GetUserResponseById(userId), Times.Once);

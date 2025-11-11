@@ -128,7 +128,6 @@ namespace ApiTests
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(strategyResponse);
             Assert.AreEqual("PerAttraction", strategyResponse.Name);
         }
 
@@ -175,7 +174,6 @@ namespace ApiTests
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(messageResponse);
             Assert.AreEqual("Strategy set successfully", messageResponse.Message);
 
             _mockActiveStrategy.Verify(x => x.SetStrategy(It.Is<SetStrategyRequest>(
@@ -204,7 +202,6 @@ namespace ApiTests
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(messageResponse);
             Assert.AreEqual("Strategy set successfully", messageResponse.Message);
 
             _mockActiveStrategy.Verify(x => x.SetStrategy(It.Is<SetStrategyRequest>(
@@ -234,7 +231,6 @@ namespace ApiTests
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(messageResponse);
             Assert.AreEqual("Strategy set successfully", messageResponse.Message);
 
             _mockActiveStrategy.Verify(x => x.SetStrategy(It.Is<SetStrategyRequest>(
@@ -337,7 +333,6 @@ namespace ApiTests
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(strategyResponse);
             Assert.AreEqual("Combo", strategyResponse.Name);
         }
 
@@ -402,8 +397,6 @@ namespace ApiTests
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.TopTenUsers);
             Assert.AreEqual(10, result.TopTenUsers.Count);
             Assert.AreEqual(100, result.TopTenUsers[0].Score);
             Assert.AreEqual(10, result.TopTenUsers[9].Score);
@@ -437,8 +430,6 @@ namespace ApiTests
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.TopTenUsers);
             Assert.AreEqual(0, result.TopTenUsers.Count);
         }
 
@@ -475,8 +466,6 @@ namespace ApiTests
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.TopTenUsers);
             Assert.AreEqual(3, result.TopTenUsers.Count);
             Assert.AreEqual(50, result.TopTenUsers[0].Score);
             Assert.AreEqual(30, result.TopTenUsers[2].Score);
@@ -515,8 +504,6 @@ namespace ApiTests
                 responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.TopTenUsers);
             for (int i = 0; i < result.TopTenUsers.Count - 1; i++)
             {
                 Assert.IsTrue(result.TopTenUsers[i].Score >= result.TopTenUsers[i + 1].Score);

@@ -37,7 +37,6 @@ namespace TestBusinessLogic
 
             IConcreteStrategy result = await activeStrategy.GetStrategy();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("PerAttraction", result.Name);
         }
 
@@ -49,7 +48,6 @@ namespace TestBusinessLogic
 
             IConcreteStrategy result = await activeStrategy.GetStrategy();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("PerAttraction", result.Name);
         }
 
@@ -67,7 +65,6 @@ namespace TestBusinessLogic
 
             IConcreteStrategy result = await activeStrategy.GetStrategy();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("Combo", result.Name);
             Assert.IsInstanceOfType(result, typeof(Combo));
             Assert.AreEqual(30, ((Combo)result).N);
@@ -362,7 +359,6 @@ namespace TestBusinessLogic
 
             IConcreteStrategy result = await activeStrategy.GetStrategy();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("PerAttraction", result.Name);
         }
 
@@ -504,7 +500,6 @@ namespace TestBusinessLogic
                 StrategyName = "PerEvent",
             });
 
-            Assert.IsNotNull(_storedConfig);
             Assert.AreEqual("PerEvent", _storedConfig.StrategyName);
             _mockRepo.Verify(x => x.Update(It.IsAny<StrategyConfiguration>()), Times.Once);
         }
@@ -522,7 +517,6 @@ namespace TestBusinessLogic
 
             IConcreteStrategy result = await activeStrategy.GetStrategy();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("PerEvent", result.Name);
         }
 
@@ -539,7 +533,6 @@ namespace TestBusinessLogic
 
             IConcreteStrategy result = await activeStrategy.GetStrategy();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("Combo", result.Name);
             Assert.IsInstanceOfType(result, typeof(Combo));
             Assert.AreEqual(50, ((Combo)result).N);
@@ -558,7 +551,6 @@ namespace TestBusinessLogic
 
             IConcreteStrategy result = await activeStrategy.GetStrategy();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("PerAttraction", result.Name);
         }
 

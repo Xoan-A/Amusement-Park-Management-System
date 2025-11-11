@@ -138,7 +138,6 @@ public class EventControllerTest
         JsonSerializerOptions options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         List<EventResponse>? eventsResponse = JsonSerializer.Deserialize<List<EventResponse>>(responseString, options);
 
-        Assert.IsNotNull(eventsResponse);
         Assert.AreEqual(2, eventsResponse.Count);
         Assert.AreEqual("Event 1", eventsResponse[0].Name);
         Assert.AreEqual("Event 2", eventsResponse[1].Name);
@@ -177,7 +176,6 @@ public class EventControllerTest
         JsonSerializerOptions options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         EventResponse? eventResponse = JsonSerializer.Deserialize<EventResponse>(responseString, options);
 
-        Assert.IsNotNull(eventResponse);
         Assert.AreEqual("Event 1", eventResponse.Name);
     }
 
@@ -216,7 +214,6 @@ public class EventControllerTest
         JsonSerializerOptions options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         CreateEventResponse? createResponse = JsonSerializer.Deserialize<CreateEventResponse>(responseString, options);
 
-        Assert.IsNotNull(createResponse);
         Assert.AreEqual(newEventId, createResponse.Id);
         Assert.AreEqual("Event created successfully", createResponse.Message);
     }

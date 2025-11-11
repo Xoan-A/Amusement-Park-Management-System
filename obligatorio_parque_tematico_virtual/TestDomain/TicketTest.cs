@@ -94,7 +94,6 @@ namespace TestDomain
                 Visitor = visitor
             };
 
-            Assert.IsNotNull(ticket.Visitor);
             Assert.AreEqual(visitorGuid, ticket.VisitorId);
             Assert.AreEqual("John", ticket.Visitor.Name);
         }

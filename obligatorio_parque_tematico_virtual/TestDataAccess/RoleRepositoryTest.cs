@@ -37,7 +37,6 @@ public class RoleRepositoryTest
     {
         Role? role = await _repository.GetByNameAsync(Role.ADMINISTRATOR);
 
-        Assert.IsNotNull(role);
         Assert.AreEqual(Role.ADMINISTRATOR, role.Name);
     }
 
@@ -54,7 +53,6 @@ public class RoleRepositoryTest
     {
         Role? role = await _repository.GetByNameAsync(Role.ADMINISTRATOR);
 
-        Assert.IsNotNull(role);
         Assert.AreEqual("Administrator", role.Name);
     }
 
@@ -63,7 +61,6 @@ public class RoleRepositoryTest
     {
         Role? role = await _repository.GetByNameAsync(Role.OPERATOR);
 
-        Assert.IsNotNull(role);
         Assert.AreEqual("Operator", role.Name);
     }
 
@@ -72,7 +69,6 @@ public class RoleRepositoryTest
     {
         Role? role = await _repository.GetByNameAsync(Role.VISITOR);
 
-        Assert.IsNotNull(role);
         Assert.AreEqual("Visitor", role.Name);
     }
 }

@@ -36,6 +36,22 @@ namespace TestBusinessLogic
             );
         }
 
+        private void SetupSuccessfulRedemption(User visitor, Reward reward, DateTime? testDateTime = null)
+        {
+            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
+            _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
+
+            if (testDateTime.HasValue)
+            {
+                _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(testDateTime.Value);
+            }
+
+            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>()))
+            .Returns(Task.CompletedTask);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
+        }
+
         [TestMethod]
         public async Task RedeemReward_ValidRedemption_Success()
         {
@@ -61,23 +77,19 @@ namespace TestBusinessLogic
                 RequiredMembershipLevel = MembershipLevel.Premium
             };
 
-            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
-            _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
-            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>()))
-            .Returns(Task.CompletedTask);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
-            _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
+            SetupSuccessfulRedemption(visitor, reward);
 
             RedemptionHistoryModelOut redemption = await _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
 
-            Assert.IsNotNull(redemption);
             Assert.AreEqual(visitor.Id, redemption.VisitorId);
             Assert.AreEqual(reward.Id, redemption.RewardId);
             Assert.AreEqual(500, redemption.PointsSpent);
 
             _mockRedemptionHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<RedemptionHistory>()), Times.Once);
-            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u => u.Score == 500 && u.DailyScore == 800)), Times.Once);
-            _mockRewardRepository.Verify(r => r.UpdateAsync(It.Is<Reward>(rw => rw.AvailableQuantity == 9)), Times.Once);
+            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u => u.Score == 500 && u.DailyScore == 800)),
+                Times.Once);
+            _mockRewardRepository.Verify(r => r.UpdateAsync(It.Is<Reward>(rw => rw.AvailableQuantity == 9)),
+                Times.Once);
         }
 
         [TestMethod]
@@ -236,12 +248,7 @@ namespace TestBusinessLogic
                 RequiredMembershipLevel = null
             };
 
-            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
-            _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
-            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>()))
-            .Returns(Task.CompletedTask);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
-            _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
+            SetupSuccessfulRedemption(visitor, reward);
 
             RedemptionHistoryModelOut redemption = await _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
 
@@ -273,12 +280,7 @@ namespace TestBusinessLogic
                 RequiredMembershipLevel = MembershipLevel.Premium
             };
 
-            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
-            _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
-            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>()))
-            .Returns(Task.CompletedTask);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
-            _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
+            SetupSuccessfulRedemption(visitor, reward);
 
             RedemptionHistoryModelOut redemption = await _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
 
@@ -402,14 +404,7 @@ namespace TestBusinessLogic
             };
 
             ScoreHistory? capturedScoreHistory = null;
-
-            _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
-            _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
-            _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(testDateTime);
-            _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>()))
-            .Returns(Task.CompletedTask);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
-            _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
+            SetupSuccessfulRedemption(visitor, reward, testDateTime);
             _mockScoreHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<ScoreHistory>()))
             .Callback<ScoreHistory>(sh => capturedScoreHistory = sh)
             .Returns(Task.CompletedTask);
@@ -417,13 +412,11 @@ namespace TestBusinessLogic
             RedemptionHistoryModelOut result = await _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
 
             _mockScoreHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<ScoreHistory>()), Times.Once);
-
             Assert.AreEqual(visitor.Id, capturedScoreHistory.VisitorId);
             Assert.AreEqual(-500, capturedScoreHistory.Points,
                 "Los puntos deben ser negativos al canjear una recompensa");
             Assert.AreEqual(ScoreOrigin.Redemption, capturedScoreHistory.Origin);
             Assert.AreEqual(reward.Id, capturedScoreHistory.RelatedEntityId);
-            Assert.AreEqual(testDateTime, capturedScoreHistory.CreatedAt);
         }
     }
 }

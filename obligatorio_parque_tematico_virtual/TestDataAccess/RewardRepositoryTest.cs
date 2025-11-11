@@ -52,7 +52,7 @@ namespace TestDataAccess
             await _repository.CreateAsync(reward);
 
             Reward? retrieved = await _context.Rewards.FindAsync(reward.Id);
-            Assert.IsNotNull(retrieved);
+
             Assert.AreEqual("VIP Access", retrieved.Name);
             Assert.AreEqual(500, retrieved.PointsCost);
         }
@@ -104,7 +104,6 @@ namespace TestDataAccess
 
             Reward? retrieved = await _repository.GetByIdAsync(reward.Id);
 
-            Assert.IsNotNull(retrieved);
             Assert.AreEqual(reward.Id, retrieved.Id);
             Assert.AreEqual("Test Reward", retrieved.Name);
         }
@@ -218,7 +217,6 @@ namespace TestDataAccess
 
             Reward? retrieved = await _repository.GetByNameAsync("Unique Name");
 
-            Assert.IsNotNull(retrieved);
             Assert.AreEqual("Unique Name", retrieved.Name);
         }
 

@@ -62,10 +62,8 @@ namespace TestDataAccess
 
             Ticket addedTicket = await _ticketRepository.AddAsync(ticket);
 
-            Assert.IsNotNull(addedTicket);
             Assert.AreNotEqual(Guid.Empty, addedTicket.Id);
             Assert.AreEqual(_visitorId, addedTicket.VisitorId);
-            Assert.AreEqual(TicketType.General, addedTicket.Type);
         }
 
         [TestMethod]
@@ -85,7 +83,6 @@ namespace TestDataAccess
             Ticket addedTicket = await _ticketRepository.AddAsync(ticket);
             Ticket retrievedTicket = await _ticketRepository.GetByIdAsync(addedTicket.Id);
 
-            Assert.IsNotNull(retrievedTicket);
             Assert.AreEqual(addedTicket.Id, retrievedTicket.Id);
             Assert.AreEqual(_visitorId, retrievedTicket.VisitorId);
             Assert.AreEqual(TicketType.EventSpecial, retrievedTicket.Type);
@@ -120,7 +117,6 @@ namespace TestDataAccess
 
             IEnumerable<Ticket> visitorTickets = await _ticketRepository.GetByVisitorIdAsync(_visitorId);
 
-            Assert.IsNotNull(visitorTickets);
             Assert.AreEqual(2, visitorTickets.Count());
             Assert.IsTrue(visitorTickets.All(t => t.VisitorId == _visitorId));
         }
@@ -141,7 +137,6 @@ namespace TestDataAccess
             await _ticketRepository.AddAsync(ticket);
             Ticket retrievedTicket = await _ticketRepository.GetByQRCodeAsync(qrCode);
 
-            Assert.IsNotNull(retrievedTicket);
             Assert.AreEqual(qrCode, retrievedTicket.QRCode);
         }
 

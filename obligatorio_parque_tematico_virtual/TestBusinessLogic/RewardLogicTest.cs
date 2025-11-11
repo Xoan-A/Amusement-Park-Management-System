@@ -37,7 +37,6 @@ namespace TestBusinessLogic
 
             RewardModelOut createdReward = await _rewardLogic.CreateReward(rewardModelIn);
 
-            Assert.IsNotNull(createdReward);
             Assert.AreNotEqual(Guid.Empty, createdReward.Id);
             _mockRewardRepository.Verify(r => r.CreateAsync(It.IsAny<Reward>()), Times.Once);
         }
@@ -123,7 +122,6 @@ namespace TestBusinessLogic
 
             RewardModelOut result = await _rewardLogic.GetRewardById(rewardId);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(rewardId, result.Id);
             Assert.AreEqual("Test Reward", result.Name);
             _mockRewardRepository.Verify(r => r.GetByIdAsync(rewardId), Times.Once);
@@ -166,7 +164,6 @@ namespace TestBusinessLogic
 
             RewardModelOut result = await _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("Updated Name", result.Name);
             Assert.AreEqual(150, result.PointsCost);
             _mockRewardRepository.Verify(r => r.UpdateAsync(It.IsAny<Reward>()), Times.Once);
@@ -254,7 +251,6 @@ namespace TestBusinessLogic
 
             RewardModelOut result = await _rewardLogic.UpdateReward(rewardId, updatedRewardModelIn);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("Same Name", result.Name);
             _mockRewardRepository.Verify(r => r.UpdateAsync(It.IsAny<Reward>()), Times.Once);
         }

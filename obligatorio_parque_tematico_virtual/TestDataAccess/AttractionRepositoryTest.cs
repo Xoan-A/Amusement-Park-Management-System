@@ -50,7 +50,6 @@ public class AttractionRepositoryTest
 
         Attraction result = await _attractionRepository.GetById(attraction.Id);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(attraction.Id, result.Id);
     }
 
@@ -70,7 +69,6 @@ public class AttractionRepositoryTest
         await _attractionRepository.Create(attraction);
         Attraction result = await _attractionRepository.GetById(attraction.Id);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual("Race simulator", result.Name);
         Assert.AreEqual(1, await _context.Attractions.CountAsync());
     }
@@ -83,7 +81,6 @@ public class AttractionRepositoryTest
 
         Attraction result = await _attractionRepository.GetByName("Race simulator");
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(attraction.Name, result.Name);
     }
 
@@ -132,7 +129,6 @@ public class AttractionRepositoryTest
         await _context.SaveChangesAsync();
         List<Attraction> result = await _attractionRepository.GetAll();
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Count);
     }
 
@@ -147,7 +143,6 @@ public class AttractionRepositoryTest
 
         Attraction result = await _attractionRepository.GetById(attraction.Id);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual("Updated Name", result.Name);
     }
 
