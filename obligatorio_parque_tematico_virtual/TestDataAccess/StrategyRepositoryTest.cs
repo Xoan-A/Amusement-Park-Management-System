@@ -55,7 +55,6 @@ public class StrategyRepositoryTest
 
         StrategyConfiguration? result = await _strategyRepository.Get();
 
-        Assert.IsNotNull(result);
         Assert.AreEqual("Combo", result.StrategyName);
     }
 
@@ -74,7 +73,6 @@ public class StrategyRepositoryTest
 
         StrategyConfiguration? result = await _strategyRepository.Get();
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Id);
         Assert.AreEqual("Combo", result.StrategyName);
         Assert.AreEqual(5, result.N);
@@ -98,7 +96,6 @@ public class StrategyRepositoryTest
 
         StrategyConfiguration? result = await _strategyRepository.Get();
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Id);
         Assert.AreEqual("PerEvent", result.StrategyName);
         Assert.IsNull(result.N);
@@ -119,7 +116,6 @@ public class StrategyRepositoryTest
 
         StrategyConfiguration? result = await _strategyRepository.Get();
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Id);
         Assert.AreEqual("PerAttraction", result.StrategyName);
     }

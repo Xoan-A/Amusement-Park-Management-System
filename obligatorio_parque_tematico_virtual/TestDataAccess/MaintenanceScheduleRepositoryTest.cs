@@ -62,7 +62,6 @@ namespace TestDataAccess
             await _repository.CreateAsync(schedule);
 
             MaintenanceSchedule? result = await _context.MaintenanceSchedules.FindAsync(schedule.Id);
-            Assert.IsNotNull(result);
             Assert.AreEqual(schedule.Description, result.Description);
             Assert.AreEqual(MaintenanceStatus.Pending, result.Status);
         }
@@ -79,7 +78,6 @@ namespace TestDataAccess
 
             MaintenanceSchedule? result = await _repository.GetByIdAsync(schedule.Id);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(schedule.Id, result.Id);
             Assert.AreEqual(schedule.Description, result.Description);
         }
@@ -211,7 +209,7 @@ namespace TestDataAccess
             await _repository.UpdateAsync(schedule);
 
             MaintenanceSchedule? result = await _context.MaintenanceSchedules.FindAsync(schedule.Id);
-            Assert.IsNotNull(result);
+
             Assert.AreEqual(MaintenanceStatus.Completed, result.Status);
             Assert.AreEqual("Updated description", result.Description);
         }

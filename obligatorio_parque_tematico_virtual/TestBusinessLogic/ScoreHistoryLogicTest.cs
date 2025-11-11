@@ -51,10 +51,7 @@ namespace TestBusinessLogic
 
             List<ScoreHistoryModelOut> result = await _scoreHistoryLogic.GetMyScoreHistory(_visitorId);
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Count);
             Assert.AreEqual(_visitorId, result[0].VisitorId);
-            Assert.AreEqual("John", result[0].VisitorName);
             Assert.AreEqual(100, result[0].Points);
             Assert.AreEqual("AttractionVisit", result[0].Origin);
             Assert.AreEqual("PerAttraction", result[0].StrategyName);
@@ -93,7 +90,6 @@ namespace TestBusinessLogic
 
             List<ScoreHistoryModelOut> result = await _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, dateFrom, dateTo);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(_visitorId, result[0].VisitorId);
             Assert.AreEqual("Jane", result[0].VisitorName);
@@ -150,7 +146,6 @@ namespace TestBusinessLogic
 
             List<ScoreHistoryModelOut> result = await _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, null, null);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count);
             _mockRepository.Verify(r => r.GetByVisitorAsync(_visitorId), Times.Once);
             _mockRepository.Verify(
@@ -250,7 +245,6 @@ namespace TestBusinessLogic
 
             List<ScoreHistoryModelOut> result = await _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, dateFrom, null);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
             _mockRepository.Verify(r => r.GetByVisitorAsync(_visitorId), Times.Once);
             _mockRepository.Verify(

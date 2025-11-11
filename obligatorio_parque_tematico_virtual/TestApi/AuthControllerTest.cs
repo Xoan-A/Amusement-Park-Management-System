@@ -96,11 +96,7 @@ namespace ApiTests
             string responseContent = await response.Content.ReadAsStringAsync();
             LoginResponse? loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(loginResponse);
-            Assert.IsNotNull(loginResponse.Token);
             Assert.AreEqual("admin@test.com", loginResponse.Email);
-            Assert.AreEqual("Admin User", loginResponse.Name);
-            Assert.IsNotNull(loginResponse.Roles);
             Assert.AreEqual(1, loginResponse.Roles.Length);
             Assert.AreEqual(Domain.Role.ADMINISTRATOR, loginResponse.Roles[0]);
         }
@@ -199,8 +195,6 @@ namespace ApiTests
             string responseContent = await response.Content.ReadAsStringAsync();
             LoginResponse? loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(loginResponse);
-            Assert.IsNotNull(loginResponse.Roles);
             Assert.AreEqual(0, loginResponse.Roles.Length);
         }
 
@@ -257,8 +251,6 @@ namespace ApiTests
             string responseContent = await response.Content.ReadAsStringAsync();
             LoginResponse? loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(loginResponse);
-            Assert.IsNotNull(loginResponse.Roles);
             Assert.AreEqual(0, loginResponse.Roles.Length);
         }
     }

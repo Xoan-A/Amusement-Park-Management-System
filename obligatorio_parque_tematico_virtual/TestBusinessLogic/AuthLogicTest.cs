@@ -155,7 +155,6 @@ namespace TestBusinessLogic
 
             UserResponse result = await _authLogic.Login(email, password);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(visitor.Email, result.Email);
         }
 
@@ -225,7 +224,6 @@ namespace TestBusinessLogic
 
             UserResponse result = await _authLogic.Login(email, password);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(user.Email, result.Email);
             _mockUserRepository.Verify(r => r.GetByEmailWithRoles(email), Times.Once);
         }

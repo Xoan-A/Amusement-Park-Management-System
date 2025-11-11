@@ -34,7 +34,6 @@ public class PluginLoaderTest
     {
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        Assert.IsNotNull(plugins);
         Assert.AreEqual(0, plugins.Count);
     }
 
@@ -60,7 +59,6 @@ public class PluginLoaderTest
 
         List<PluginInfoResponse> plugins = loader.LoadPlugins();
 
-        Assert.IsNotNull(plugins);
         Assert.AreEqual(0, plugins.Count);
     }
 
@@ -69,7 +67,6 @@ public class PluginLoaderTest
     {
         List<string> pluginNames = _pluginLoader.GetAvailablePluginNames();
 
-        Assert.IsNotNull(pluginNames);
         Assert.AreEqual(0, pluginNames.Count);
     }
 
@@ -81,7 +78,6 @@ public class PluginLoaderTest
 
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        Assert.IsNotNull(plugins);
         Assert.AreEqual(0, plugins.Count);
     }
 
@@ -133,7 +129,6 @@ public class PluginLoaderTest
 
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        Assert.IsNotNull(plugins);
         Assert.AreEqual(0, plugins.Count);
     }
 }

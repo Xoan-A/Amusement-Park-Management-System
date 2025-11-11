@@ -92,7 +92,6 @@ namespace TestDomain
                 StrategyName = "PerAttraction",
             };
 
-            Assert.IsNotNull(history.Visitor);
             Assert.AreEqual(visitor.Id, history.Visitor.Id);
         }
 

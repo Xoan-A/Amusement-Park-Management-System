@@ -55,7 +55,7 @@ namespace TestDataAccess
             await _repository.CreateAsync(history);
 
             ScoreHistory result = await _context.ScoreHistories.FindAsync(history.Id);
-            Assert.IsNotNull(result);
+
             Assert.AreEqual(history.Points, result.Points);
         }
 
@@ -136,9 +136,6 @@ namespace TestDataAccess
             Assert.AreEqual(3, results.Count);
             Assert.IsTrue(results[0].CreatedAt >= results[1].CreatedAt);
             Assert.IsTrue(results[1].CreatedAt >= results[2].CreatedAt);
-            Assert.IsNotNull(results[0].Visitor);
-            Assert.IsNotNull(results[1].Visitor);
-            Assert.IsNotNull(results[2].Visitor);
         }
 
         private User CreateTestVisitor()

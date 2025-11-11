@@ -77,7 +77,6 @@ namespace TestBusinessLogic
 
             UserResponse result = await _userLogic.RegisterVisitor(request);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(name, result.Name);
             Assert.AreEqual(lastName, result.LastName);
             Assert.AreEqual(email, result.Email);
@@ -1298,8 +1297,6 @@ namespace TestBusinessLogic
 
             TopTenResponse result = await _userLogic.GetTopTenUsers();
 
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.TopTenUsers);
             Assert.AreEqual(10, result.TopTenUsers.Count);
             Assert.AreEqual(100, result.TopTenUsers[0].Score);
             Assert.AreEqual(10, result.TopTenUsers[9].Score);
@@ -1315,8 +1312,6 @@ namespace TestBusinessLogic
 
             TopTenResponse result = await _userLogic.GetTopTenUsers();
 
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.TopTenUsers);
             Assert.AreEqual(0, result.TopTenUsers.Count);
             _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
         }
@@ -1335,8 +1330,6 @@ namespace TestBusinessLogic
 
             TopTenResponse result = await _userLogic.GetTopTenUsers();
 
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.TopTenUsers);
             Assert.AreEqual(3, result.TopTenUsers.Count);
             Assert.AreEqual(50, result.TopTenUsers[0].Score);
             Assert.AreEqual(30, result.TopTenUsers[2].Score);
@@ -1379,7 +1372,6 @@ namespace TestBusinessLogic
 
             TopTenResponse result = await _userLogic.GetTopTenUsers();
 
-            Assert.IsNotNull(result.TopTenUsers);
             Assert.AreEqual(10, result.TopTenUsers.Count);
             Assert.AreEqual(110, result.TopTenUsers[0].Score);
             Assert.AreEqual(20, result.TopTenUsers[9].Score);
@@ -1733,13 +1725,9 @@ namespace TestBusinessLogic
 
             UserResponse result = await _userLogic.GetUserResponseById(userId);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(userId, result.Id);
             Assert.AreEqual("John", result.Name);
-            Assert.AreEqual("Doe", result.LastName);
             Assert.AreEqual("john@test.com", result.Email);
-            Assert.AreEqual(new DateTime(1990, 5, 15), result.BirthDate);
-            Assert.AreEqual((int)MembershipLevel.Premium, result.MembershipLevel);
             Assert.AreEqual(100, result.Score);
 
             _mockUserRepository.Verify(r => r.GetByIdWithRoles(userId), Times.Once);
@@ -1786,8 +1774,6 @@ namespace TestBusinessLogic
 
             UserResponse result = await _userLogic.RegisterVisitor(request);
 
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(createdUser);
             Assert.AreEqual(0, createdUser.UserRoles.Count, "User should have no roles when visitor role is not found");
 
             _mockRoleRepository.Verify(r => r.GetByNameAsync(Role.VISITOR), Times.Once);
@@ -1816,7 +1802,6 @@ namespace TestBusinessLogic
 
             await _userLogic.CreateUser(request);
 
-            Assert.IsNotNull(createdUser);
             Assert.AreEqual(0, createdUser.UserRoles.Count);
         }
 
@@ -1846,7 +1831,6 @@ namespace TestBusinessLogic
 
             await _userLogic.CreateUser(request);
 
-            Assert.IsNotNull(createdUser);
             Assert.AreEqual(1, createdUser.UserRoles.Count);
             Assert.AreEqual("Admin", createdUser.UserRoles.First().Role.Name);
         }

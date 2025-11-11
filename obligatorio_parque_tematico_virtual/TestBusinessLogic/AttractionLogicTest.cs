@@ -39,7 +39,7 @@ public class AttractionLogicTest
         };
         _mockAttractionRepository.Setup(r => r.GetById(expectedAttraction.Id)).ReturnsAsync(expectedAttraction);
         AttractionResponse result = await _attractionLogic.GetAttractionById(expectedAttraction.Id);
-        Assert.IsNotNull(result);
+
         Assert.AreEqual(expectedAttraction.Name, result.Name);
         _mockAttractionRepository.Verify(r => r.GetById(expectedAttraction.Id), Times.Once);
     }
@@ -70,7 +70,7 @@ public class AttractionLogicTest
         };
         _mockAttractionRepository.Setup(r => r.GetAll()).ReturnsAsync(expectedAttractions);
         List<AttractionResponse> result = await _attractionLogic.GetAllAttractions();
-        Assert.IsNotNull(result);
+
         Assert.AreEqual(2, result.Count);
         _mockAttractionRepository.Verify(r => r.GetAll(), Times.Once);
     }
@@ -174,7 +174,7 @@ public class AttractionLogicTest
         };
         _mockAttractionRepository.Setup(r => r.GetById(expectedAttraction.Id)).ReturnsAsync(expectedAttraction);
         Attraction result = await _attractionLogicEntity.GetAttractionEntityById(expectedAttraction.Id);
-        Assert.IsNotNull(result);
+
         Assert.AreEqual(expectedAttraction.Name, result.Name);
         _mockAttractionRepository.Verify(r => r.GetById(expectedAttraction.Id), Times.Once);
     }
@@ -529,7 +529,7 @@ public class AttractionLogicTest
         };
         _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(expectedAttraction);
         CapacityResponse result = await _attractionLogic.GetCapacity(attractionId);
-        Assert.IsNotNull(result);
+
         Assert.AreEqual(attractionId, result.Id);
         Assert.AreEqual(50, result.Capacity);
         Assert.AreEqual(20, result.CurrentCapacity);
@@ -636,7 +636,6 @@ public class AttractionLogicTest
 
         AttractionsVisitResponse result = await _attractionLogic.GetAllAttractionsVisits(request);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(2, result.AttractionsVisits.Count);
 
         AttractionVisitDetail attraction1Result =

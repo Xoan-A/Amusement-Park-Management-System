@@ -52,7 +52,6 @@ public class EventRepositoryTest
 
         Event result = await _eventRepository.GetById(eventEntity.Id);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(eventEntity.Id, result.Id);
         Assert.AreEqual(eventEntity.Name, result.Name);
     }
@@ -72,7 +71,6 @@ public class EventRepositoryTest
 
         Event result = await _context.Events.FindAsync(eventEntity.Id);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(eventEntity.Name, result.Name);
     }
 
@@ -84,7 +82,6 @@ public class EventRepositoryTest
 
         List<Event> events = await _eventRepository.GetAll();
 
-        Assert.IsNotNull(events);
         Assert.IsTrue(events.Any());
         Assert.AreEqual(1, events.Count());
         Assert.AreEqual(eventEntity.Name, events.First().Name);
@@ -128,7 +125,6 @@ public class EventRepositoryTest
 
         Event? result = await _eventRepository.GetEventByAttractionAndDate(attraction.Id, eventEntity.Date);
 
-        Assert.IsNotNull(result);
         Assert.AreEqual(eventEntity.Id, result.Id);
         Assert.IsTrue(result.Attractions.Any(ea => ea.AttractionId == attraction.Id));
     }

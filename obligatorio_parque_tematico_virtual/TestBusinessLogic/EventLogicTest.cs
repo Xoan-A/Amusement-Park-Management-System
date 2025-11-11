@@ -54,7 +54,6 @@ public class EventLogicTest
     {
         _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
         EventResponse result = await _eventLogic.GetEventById(baseEvent.Id);
-        Assert.IsNotNull(result);
         Assert.AreEqual(baseEvent.Name, result.Name);
         _mockEventRepository.Verify(r => r.GetById(baseEvent.Id), Times.Once);
     }

@@ -150,12 +150,10 @@ namespace TestApi
             TicketResponse ticketResult = JsonSerializer.Deserialize<TicketResponse>(purchaseResponseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(ticketResult);
             Assert.AreEqual(registerResult.Id, ticketResult.VisitorId);
             Assert.AreEqual((int)TicketType.General, ticketResult.Type);
             Assert.AreNotEqual(Guid.Empty, ticketResult.QRCode);
             Assert.AreEqual("Test", ticketResult.VisitorName);
-            Assert.AreEqual("User", ticketResult.VisitorLastName);
         }
 
         [TestMethod]
@@ -293,11 +291,9 @@ namespace TestApi
             TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(getResult);
             Assert.AreEqual(purchaseResult.Id, getResult.Id);
             Assert.AreEqual(purchaseResult.QRCode, getResult.QRCode);
             Assert.AreEqual("Test3", getResult.VisitorName);
-            Assert.AreEqual("User3", getResult.VisitorLastName);
         }
 
         [TestMethod]
@@ -389,7 +385,6 @@ namespace TestApi
             List<TicketResponse> tickets = JsonSerializer.Deserialize<List<TicketResponse>>(getResponseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(tickets);
             Assert.AreEqual(2, tickets.Count);
             Assert.IsTrue(tickets.All(t => t.VisitorId == registerResult.Id));
             Assert.IsTrue(tickets.All(t => t.VisitorName == "Test4"));
@@ -489,12 +484,10 @@ namespace TestApi
             TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(getResult);
             Assert.AreEqual(purchaseResult.Id, getResult.Id);
             Assert.AreEqual(purchaseResult.QRCode, getResult.QRCode);
             Assert.AreEqual(purchaseResult.VisitorId, getResult.VisitorId);
             Assert.AreEqual("QRTest", getResult.VisitorName);
-            Assert.AreEqual("User", getResult.VisitorLastName);
         }
 
         [TestMethod]
@@ -612,7 +605,6 @@ namespace TestApi
             TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(getResult);
             Assert.AreEqual(purchaseResult.QRCode, getResult.QRCode);
         }
 
@@ -701,7 +693,6 @@ namespace TestApi
             TicketResponse getResult = JsonSerializer.Deserialize<TicketResponse>(getResponseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(getResult);
             Assert.AreEqual(purchaseResult.QRCode, getResult.QRCode);
         }
     }

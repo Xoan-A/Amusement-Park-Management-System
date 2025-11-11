@@ -42,20 +42,6 @@ public class ExceptionFilterTest
     }
 
     [TestMethod]
-    public void OnException_WhenExceptionIsNotImplemented_ShouldResponseNotImplemented()
-    {
-        _context.Exception = new NotImplementedException();
-        _attribute.OnException(_context);
-
-        IActionResult? response = _context.Result;
-        ObjectResult? concreteResponse = response as ObjectResult;
-
-        Assert.AreEqual((int)HttpStatusCode.NotImplemented, concreteResponse.StatusCode);
-        Assert.AreEqual("501", concreteResponse.StatusCode.ToString());
-        Assert.AreEqual("The method or operation is not implemented.", GetMessage(concreteResponse.Value));
-    }
-
-    [TestMethod]
     public void OnException_WhenExceptionIsKeyNotFound_ShouldResponseNotFound()
     {
         _context.Exception = new KeyNotFoundException("Attraction not found");

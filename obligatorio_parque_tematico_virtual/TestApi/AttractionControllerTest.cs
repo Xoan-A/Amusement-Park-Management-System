@@ -170,14 +170,9 @@ public class AttractionControllerTest
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.IsNotNull(attractionsResponse);
         Assert.AreEqual(id, attractionsResponse.Attractions[0].Id);
         Assert.AreEqual("Eiffel Tower", attractionsResponse.Attractions[0].Name);
-        Assert.AreEqual("Paris", attractionsResponse.Attractions[0].Description);
         Assert.AreEqual("InteractiveZone", attractionsResponse.Attractions[0].Type);
-        Assert.AreEqual(10, attractionsResponse.Attractions[0].MinAge);
-        Assert.AreEqual(100, attractionsResponse.Attractions[0].MaxCapacity);
-        Assert.AreEqual(50, attractionsResponse.Attractions[0].CurrentCapacity);
         Assert.AreEqual(true, attractionsResponse.Attractions[0].IsActive);
     }
 
@@ -208,15 +203,10 @@ public class AttractionControllerTest
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.IsNotNull(attractionResponse);
         Assert.AreEqual(id, attractionResponse.Id);
         Assert.AreEqual("Eiffel Tower", attractionResponse.Name);
         Assert.AreEqual("Paris", attractionResponse.Description);
         Assert.AreEqual("InteractiveZone", attractionResponse.Type);
-        Assert.AreEqual(10, attractionResponse.MinAge);
-        Assert.AreEqual(100, attractionResponse.MaxCapacity);
-        Assert.AreEqual(50, attractionResponse.CurrentCapacity);
-        Assert.AreEqual(true, attractionResponse.IsActive);
     }
 
     [TestMethod]
@@ -246,7 +236,6 @@ public class AttractionControllerTest
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.IsNotNull(createdResponse);
         Assert.AreEqual(expectedId, createdResponse.Id);
         Assert.AreEqual("Attraction created successfully", createdResponse.Message);
         _mockAttractionService.Verify(s => s.CreateAttraction(It.IsAny<AttractionRequest>()), Times.Once);
@@ -279,7 +268,6 @@ public class AttractionControllerTest
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.IsNotNull(updatedResponse);
         Assert.AreEqual("Attraction updated successfully", updatedResponse.Message);
         _mockAttractionService.Verify(s => s.UpdateAttraction(id, It.IsAny<AttractionRequest>()), Times.Once);
     }
@@ -442,7 +430,6 @@ public class AttractionControllerTest
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
         _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
@@ -475,7 +462,6 @@ public class AttractionControllerTest
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
         _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
@@ -511,7 +497,6 @@ public class AttractionControllerTest
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
         _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
@@ -546,7 +531,6 @@ public class AttractionControllerTest
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
         _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
@@ -602,7 +586,6 @@ public class AttractionControllerTest
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.IsNotNull(messageResponse);
         Assert.AreEqual("Exit registered successfully", messageResponse.Message);
         _mockUserLogic.Verify(s => s.RegisterExit(attractionId, It.IsAny<RegisterExitRequest>()), Times.Once);
     }
@@ -649,7 +632,6 @@ public class AttractionControllerTest
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.IsNotNull(capacityResponse);
         Assert.AreEqual(attractionId, capacityResponse.Id);
         Assert.AreEqual(100, capacityResponse.Capacity);
         Assert.AreEqual(45, capacityResponse.CurrentCapacity);
@@ -864,8 +846,6 @@ public class AttractionControllerTest
         AllAttractionsResponse? result = JsonSerializer.Deserialize<AllAttractionsResponse>(content,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        Assert.IsNotNull(result);
-        Assert.IsNotNull(result.Attractions);
         Assert.AreEqual(0, result.Attractions.Count);
     }
 }

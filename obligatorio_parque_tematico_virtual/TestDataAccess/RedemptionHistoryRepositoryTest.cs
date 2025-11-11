@@ -57,7 +57,7 @@ namespace TestDataAccess
             await _repository.CreateAsync(redemption);
 
             RedemptionHistory? retrieved = await _context.RedemptionHistories.FindAsync(redemption.Id);
-            Assert.IsNotNull(retrieved);
+
             Assert.AreEqual(visitor.Id, retrieved.VisitorId);
             Assert.AreEqual(reward.Id, retrieved.RewardId);
             Assert.AreEqual(500, retrieved.PointsSpent);
@@ -148,8 +148,6 @@ namespace TestDataAccess
             List<RedemptionHistory> redemptions = await _repository.GetByVisitorIdAsync(visitor.Id);
 
             Assert.AreEqual(1, redemptions.Count);
-            Assert.IsNotNull(redemptions[0].Visitor);
-            Assert.IsNotNull(redemptions[0].Reward);
             Assert.AreEqual(visitor.Name, redemptions[0].Visitor.Name);
             Assert.AreEqual(reward.Name, redemptions[0].Reward.Name);
         }

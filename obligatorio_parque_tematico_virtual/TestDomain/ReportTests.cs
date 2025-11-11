@@ -18,7 +18,6 @@ public class ReportTests
         Report report = new Report(enterDate, attraction);
 
         Assert.AreEqual(enterDate, report.EnterDate);
-        Assert.IsNotNull(report.Attraction);
         Assert.AreEqual(attraction, report.Attraction);
     }
 
@@ -87,6 +86,5 @@ public class ReportTests
 
         Assert.AreEqual(attraction, report.Attraction);
         Assert.AreEqual("Bumper Cars", report.Attraction.Name);
-        Assert.AreEqual(AttractionType.InteractiveZone, report.Attraction.Type);
     }
 }

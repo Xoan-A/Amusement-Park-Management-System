@@ -20,7 +20,6 @@ public class VisitorReportTests
         VisitorReport visitorReport = new VisitorReport(date, report);
 
         Assert.AreEqual(date, visitorReport.Date);
-        Assert.IsNotNull(visitorReport.Reports);
         Assert.AreEqual(1, visitorReport.Reports.Count);
         Assert.AreEqual(report, visitorReport.Reports[0]);
     }
