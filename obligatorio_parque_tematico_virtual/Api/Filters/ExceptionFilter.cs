@@ -43,13 +43,6 @@ public class ExceptionFilter : IExceptionFilter
                 StatusCode = 400
             };
         }
-        else if (context.Exception is NotImplementedException)
-        {
-            context.Result = new ObjectResult(new { Message = context.Exception.Message })
-            {
-                StatusCode = 501
-            };
-        }
         else
         {
             context.Result = new ObjectResult(new { Message = context.Exception.Message })
