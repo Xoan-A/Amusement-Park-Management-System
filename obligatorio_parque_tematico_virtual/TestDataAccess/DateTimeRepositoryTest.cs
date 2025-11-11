@@ -16,8 +16,8 @@ namespace TestDataAccess
         public void Setup()
         {
             DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite("DataSource=:memory:")
-                .Options;
+            .UseSqlite("DataSource=:memory:")
+            .Options;
             _context = new AppDbContext(options);
             _context.Database.OpenConnection();
             _context.Database.EnsureDeleted();
@@ -61,7 +61,7 @@ namespace TestDataAccess
             _dateTimeRepository.SetConfiguredDateTime(configuredTime);
 
             DateTimeConfiguration? configuration = _context.DateTimeConfigurations.FirstOrDefault();
-            
+
             Assert.AreEqual(configuredTime, configuration.CurrentDateTime);
             Assert.AreEqual(1, _context.DateTimeConfigurations.Count());
         }
@@ -77,7 +77,7 @@ namespace TestDataAccess
             _dateTimeRepository.SetConfiguredDateTime(updatedTime);
 
             DateTimeConfiguration? configuration = _context.DateTimeConfigurations.FirstOrDefault();
-            
+
             Assert.AreEqual(updatedTime, configuration.CurrentDateTime);
             Assert.AreEqual(1, _context.DateTimeConfigurations.Count());
         }
@@ -95,7 +95,7 @@ namespace TestDataAccess
 
             Assert.AreEqual(1, _context.DateTimeConfigurations.Count());
             DateTimeConfiguration? configuration = _context.DateTimeConfigurations.FirstOrDefault();
-            
+
             Assert.AreEqual(time3, configuration.CurrentDateTime);
         }
 

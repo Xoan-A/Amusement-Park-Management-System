@@ -40,17 +40,17 @@ namespace TestBusinessLogic
         {
             _mockUserRepository.Setup(r => r.GetById(visitor.Id)).ReturnsAsync(visitor);
             _mockRewardRepository.Setup(r => r.GetByIdAsync(reward.Id)).ReturnsAsync(reward);
-            
+
             if (testDateTime.HasValue)
             {
                 _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(testDateTime.Value);
             }
-            
+
             _mockRedemptionHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<RedemptionHistory>()))
-                .Returns(Task.CompletedTask);
+            .Returns(Task.CompletedTask);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockRewardRepository.Setup(r => r.UpdateAsync(It.IsAny<Reward>())).Returns(Task.CompletedTask);
-        }        
+        }
 
         [TestMethod]
         public async Task RedeemReward_ValidRedemption_Success()
@@ -86,8 +86,10 @@ namespace TestBusinessLogic
             Assert.AreEqual(500, redemption.PointsSpent);
 
             _mockRedemptionHistoryRepository.Verify(r => r.CreateAsync(It.IsAny<RedemptionHistory>()), Times.Once);
-            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u => u.Score == 500 && u.DailyScore == 800)), Times.Once);
-            _mockRewardRepository.Verify(r => r.UpdateAsync(It.Is<Reward>(rw => rw.AvailableQuantity == 9)), Times.Once);
+            _mockUserRepository.Verify(r => r.Update(It.Is<User>(u => u.Score == 500 && u.DailyScore == 800)),
+                Times.Once);
+            _mockRewardRepository.Verify(r => r.UpdateAsync(It.Is<Reward>(rw => rw.AvailableQuantity == 9)),
+                Times.Once);
         }
 
         [TestMethod]
@@ -404,8 +406,8 @@ namespace TestBusinessLogic
             ScoreHistory? capturedScoreHistory = null;
             SetupSuccessfulRedemption(visitor, reward, testDateTime);
             _mockScoreHistoryRepository.Setup(r => r.CreateAsync(It.IsAny<ScoreHistory>()))
-                .Callback<ScoreHistory>(sh => capturedScoreHistory = sh)
-                .Returns(Task.CompletedTask);
+            .Callback<ScoreHistory>(sh => capturedScoreHistory = sh)
+            .Returns(Task.CompletedTask);
 
             RedemptionHistoryModelOut result = await _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
 
