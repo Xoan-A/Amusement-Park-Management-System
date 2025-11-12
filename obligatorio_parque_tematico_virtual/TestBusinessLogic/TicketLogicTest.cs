@@ -225,11 +225,49 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
+        public async Task TestPurchaseTicketAsync_EventSpecialWithMismatchingDate_ThrowsException()
+        {
+            Guid visitorId = Guid.NewGuid();
+            Guid eventId = Guid.NewGuid();
+            DateTime currentDate = new DateTime(2025, 1, 1, 10, 0, 0);
+            DateTime eventDate = new DateTime(2025, 1, 15, 14, 0, 0);
+            DateTime visitDate = new DateTime(2025, 1, 20, 0, 0, 0);
+
+            Event eventEntity = new Event
+            {
+                Id = eventId,
+                Name = "Special Event",
+                Date = eventDate,
+                MaxCapacity = 100,
+                CurrentCapacity = 10,
+                Cost = 50
+            };
+
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
+            _mockEventRepository.Setup(e => e.GetById(eventId)).ReturnsAsync(eventEntity);
+
+            PurchaseTicketRequest request = new PurchaseTicketRequest
+            {
+                VisitorId = visitorId,
+                VisitDate = visitDate,
+                TicketType = (int)TicketType.EventSpecial,
+                EventId = eventId
+            };
+
+            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
+                async () => await _ticketLogic.PurchaseTicketAsync(request)
+            );
+
+            Assert.IsTrue(exception.Message.Contains("Visit date must match the event date"));
+            _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
+        }
+
+        [TestMethod]
         public async Task TestPurchaseTicketAsync_EventSpecialType()
         {
             Guid visitorId = Guid.NewGuid();
             DateTime currentDate = new DateTime(2025, 1, 1, 10, 0, 0);
-            DateTime visitDate = new DateTime(2025, 1, 20, 0, 0, 0);
+            DateTime visitDate = new DateTime(2025, 1, 20, 14, 0, 0);
             Guid eventId = Guid.NewGuid();
 
             User visitor = new User

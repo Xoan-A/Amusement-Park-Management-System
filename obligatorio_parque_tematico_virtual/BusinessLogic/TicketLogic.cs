@@ -47,6 +47,11 @@ namespace BusinessLogic
                 {
                     throw new KeyNotFoundException($"Event with ID {eventId} not found");
                 }
+
+                if (ticketEvent.Date.Date != visitDate.Date)
+                {
+                    throw new ArgumentException($"Visit date must match the event date ({ticketEvent.Date.Date:yyyy-MM-dd})");
+                }
             }
 
             User visitor = await _userRepository.GetById(visitorId);
