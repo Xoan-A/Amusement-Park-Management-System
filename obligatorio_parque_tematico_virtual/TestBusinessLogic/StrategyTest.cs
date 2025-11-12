@@ -4,6 +4,7 @@ using IBusinessLogic.Strategy;
 using Models.In;
 using Moq;
 using IDataAccess;
+using IBusinessLogic;
 
 namespace TestBusinessLogic
 {
@@ -11,6 +12,7 @@ namespace TestBusinessLogic
     public class StrategyTest
     {
         private Mock<IStrategyRepository> _mockRepo;
+        private Mock<IPluginLoader> _mockPluginLoader;
         private StrategyConfiguration? _storedConfig;
 
         [TestInitialize]
@@ -18,17 +20,27 @@ namespace TestBusinessLogic
         {
             _storedConfig = null;
             _mockRepo = new Mock<IStrategyRepository>();
+            _mockPluginLoader = new Mock<IPluginLoader>();
 
             _mockRepo.Setup(x => x.Get()).ReturnsAsync(() => _storedConfig);
             _mockRepo.Setup(x => x.Update(It.IsAny<StrategyConfiguration>()))
                 .Callback<StrategyConfiguration>(config => _storedConfig = config)
                 .Returns(Task.CompletedTask);
+
+            _mockPluginLoader.Setup(x => x.CreateStrategyInstance("PerAttraction", null))
+                .Returns(new PerAttraction());
+            _mockPluginLoader.Setup(x => x.CreateStrategyInstance("PerEvent", null))
+                .Returns(new PerEvent());
+            _mockPluginLoader.Setup(x => x.CreateStrategyInstance("Combo", It.IsAny<Dictionary<string, object>>()))
+                .Returns((string name, Dictionary<string, object> p) => new Combo((int)p["n"]));
+            _mockPluginLoader.Setup(x => x.CreateStrategyInstance(It.IsNotIn("PerAttraction", "PerEvent", "Combo"), It.IsAny<Dictionary<string, object>>()))
+                .Throws<KeyNotFoundException>();
         }
 
         [TestMethod]
         public async Task ActiveStrategy_SetStrategy_ShouldSetStrategy()
         {
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -44,7 +56,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_GetStrategy_ShouldReturnDefaultWhenNoStrategySet()
         {
             SetupMocks();
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             IConcreteStrategy result = await activeStrategy.GetStrategy();
 
@@ -55,7 +67,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_SetStrategy_WithCombo_ShouldSetComboWithN()
         {
             SetupMocks();
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -74,7 +86,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_SetStrategy_WithCombo_ShouldThrowWhenNIsNull()
         {
             SetupMocks();
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
                 await activeStrategy.SetStrategy(new SetStrategyRequest
@@ -87,7 +99,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public async Task ActiveStrategy_SetStrategy_ShouldThrowForInvalidStrategyName()
         {
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
                 await activeStrategy.SetStrategy(new SetStrategyRequest
@@ -350,7 +362,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_GetStrategy_FirstStrategySet_ShouldReturnStrategyImmediately()
         {
             SetupMocks();
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -366,7 +378,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_GetStrategy_ShouldReturnSameStrategyRegardlessOfDate()
         {
             SetupMocks();
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -386,7 +398,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_GetStrategy_AfterMultipleSets_ShouldReturnLatestStrategy()
         {
             SetupMocks();
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -407,7 +419,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_GetStrategy_AfterSettingCombo_ShouldReturnComboWithCorrectN()
         {
             SetupMocks();
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -425,7 +437,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public async Task ActiveStrategy_GetStrategy_AfterChangingFromComboToPerAttraction_ShouldReturnPerAttraction()
         {
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -493,7 +505,7 @@ namespace TestBusinessLogic
         public async Task ActiveStrategy_SetStrategy_WithPerEvent_ShouldPersistToDatabase()
         {
             SetupMocks();
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
@@ -513,7 +525,7 @@ namespace TestBusinessLogic
                 StrategyName = "PerEvent",
                 N = null
             };
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             IConcreteStrategy result = await activeStrategy.GetStrategy();
 
@@ -529,7 +541,7 @@ namespace TestBusinessLogic
                 StrategyName = "Combo",
                 N = 50
             };
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             IConcreteStrategy result = await activeStrategy.GetStrategy();
 
@@ -547,7 +559,7 @@ namespace TestBusinessLogic
                 StrategyName = "InvalidStrategyName",
                 N = null
             };
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             IConcreteStrategy result = await activeStrategy.GetStrategy();
 
@@ -564,14 +576,14 @@ namespace TestBusinessLogic
                 N = null
             };
 
-            Assert.ThrowsException<ArgumentException>(() => new ActiveStrategy(_mockRepo.Object));
+            Assert.ThrowsException<ArgumentException>(() => new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object));
         }
 
         [TestMethod]
         public async Task CalculateScore_WithRealActiveStrategy_DelegatesToUnderlyingStrategy()
         {
             SetupMocks();
-            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object);
+            ActiveStrategy activeStrategy = new ActiveStrategy(_mockRepo.Object, _mockPluginLoader.Object);
 
             await activeStrategy.SetStrategy(new SetStrategyRequest
             {
