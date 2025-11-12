@@ -30,6 +30,11 @@ namespace BusinessLogic
             TicketType ticketType = (TicketType)request.TicketType;
             Guid? eventId = request.EventId;
 
+            if (!Enum.IsDefined(typeof(TicketType), ticketType))
+            {
+                throw new ArgumentException($"Invalid ticket type: {request.TicketType}");
+            }
+
             User visitor = await _userRepository.GetById(visitorId);
             if (visitor == null)
             {

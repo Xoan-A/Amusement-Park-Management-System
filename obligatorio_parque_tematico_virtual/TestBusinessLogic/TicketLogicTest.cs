@@ -140,6 +140,39 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
+        public async Task TestPurchaseTicketAsync_InvalidTicketType()
+        {
+            Guid visitorId = Guid.NewGuid();
+            DateTime currentDate = new DateTime(2025, 1, 1, 10, 0, 0);
+            DateTime visitDate = new DateTime(2025, 1, 15, 0, 0, 0);
+
+            User visitor = new User
+            {
+                Id = visitorId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com"
+            };
+
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
+            _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
+
+            PurchaseTicketRequest request = new PurchaseTicketRequest
+            {
+                VisitorId = visitorId,
+                VisitDate = visitDate,
+                TicketType = 999 // Invalid ticket type value
+            };
+
+            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
+                async () => await _ticketLogic.PurchaseTicketAsync(request)
+            );
+
+            Assert.IsTrue(exception.Message.Contains("Invalid ticket type"));
+            _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
+        }
+
+        [TestMethod]
         public async Task TestPurchaseTicketAsync_EventSpecialType()
         {
             Guid visitorId = Guid.NewGuid();
