@@ -4,10 +4,6 @@ using BusinessLogic;
 using BusinessLogic.Plugins;
 
 namespace ExamplePlugin;
-
-[PluginDescription(
-    "Multiplies scoring points based on hour of the day. 2x during peak hours (10-14, 18-22), 1.5x during normal hours, 1x during off-peak hours.")]
-[PluginAuthor("Theme Park Team")]
 public class PuntuacionPorHora : IConcreteStrategy
 {
     public string Name => "PuntuacionPorHora";
