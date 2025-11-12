@@ -116,7 +116,7 @@ namespace BusinessLogic
             return MapToTicketResponse(ticket);
         }
 
-        public async Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, Guid? eventId)
+        public async Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, Guid? eventId, Guid attractionId)
         {
             bool isValid = false;
 
@@ -141,6 +141,9 @@ namespace BusinessLogic
                 Event ticketEvent = await _eventRepository.GetById(ticket.EventId.Value);
                 if (ticketEvent.Date.Date != enterDate.Date || ticketEvent.Date.Hour > enterDate.Hour ||
                     ticketEvent.Date.Hour + _eventDurationHours < enterDate.Hour)
+                    isValid = false;
+
+                if (isValid && !ticketEvent.Attractions.Any(ea => ea.AttractionId == attractionId))
                     isValid = false;
             }
 

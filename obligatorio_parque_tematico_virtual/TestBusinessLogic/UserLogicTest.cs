@@ -290,8 +290,18 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
+            };
+
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(false);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(false);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
@@ -331,7 +341,7 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date)).ReturnsAsync((Event?)null);
@@ -351,7 +361,7 @@ namespace TestBusinessLogic
             Assert.AreEqual(enterDate.Date, visitor.VisitorReports[0].Date.Date);
             _mockUserRepository.Verify(r => r.GetById(userId), Times.Once);
             _mockAttractionRepository.Verify(r => r.GetById(attractionId), Times.Once);
-            _mockTicketLogic.Verify(t => t.ValidateTicketAsync(qrCode, null, enterDate, null), Times.Once);
+            _mockTicketLogic.Verify(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>()), Times.Once);
         }
 
         [TestMethod]
@@ -393,7 +403,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).ReturnsAsync(attraction1);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).ReturnsAsync(attraction2);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(It.IsAny<Guid>(), enterDate.Date)).ReturnsAsync((Event?)null);
@@ -423,9 +433,19 @@ namespace TestBusinessLogic
             Guid qrCode = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 10,
+                CurrentCapacity = 0
+            };
+
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync((User)null);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
@@ -458,7 +478,7 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync((Attraction)null);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
@@ -499,7 +519,7 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date)).ReturnsAsync((Event?)null);
@@ -547,7 +567,7 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
 
             RegisterEntryRequest request = new RegisterEntryRequest
             {
@@ -588,7 +608,7 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date)).ReturnsAsync((Event?)null);
@@ -639,7 +659,7 @@ namespace TestBusinessLogic
             .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date)).ReturnsAsync((Event?)null);
@@ -745,7 +765,7 @@ namespace TestBusinessLogic
             .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date)).ReturnsAsync((Event?)null);
@@ -802,7 +822,7 @@ namespace TestBusinessLogic
             .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date)).ReturnsAsync((Event?)null);
@@ -859,7 +879,7 @@ namespace TestBusinessLogic
             .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date)).ReturnsAsync((Event?)null);
@@ -912,7 +932,7 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(null, userId, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(null, userId, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date)).ReturnsAsync((Event?)null);
@@ -930,7 +950,7 @@ namespace TestBusinessLogic
 
             Assert.AreEqual(1, visitor.VisitorReports.Count);
             Assert.AreEqual(1, attraction.CurrentCapacity);
-            _mockTicketLogic.Verify(t => t.ValidateTicketAsync(null, userId, enterDate, null), Times.Once);
+            _mockTicketLogic.Verify(t => t.ValidateTicketAsync(null, userId, enterDate, null, It.IsAny<Guid>()), Times.Once);
         }
 
         [TestMethod]
@@ -962,7 +982,7 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date)).ReturnsAsync((Event?)null);
@@ -980,7 +1000,7 @@ namespace TestBusinessLogic
 
             Assert.AreEqual(1, visitor.VisitorReports.Count);
             Assert.AreEqual(1, attraction.CurrentCapacity);
-            _mockTicketLogic.Verify(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId), Times.Once);
+            _mockTicketLogic.Verify(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId, It.IsAny<Guid>()), Times.Once);
         }
 
         [TestMethod]
@@ -1012,7 +1032,7 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date)).ReturnsAsync((Event?)null);
@@ -1030,7 +1050,7 @@ namespace TestBusinessLogic
 
             Assert.AreEqual(1, visitor.VisitorReports.Count);
             Assert.AreEqual(6, attraction.CurrentCapacity);
-            _mockTicketLogic.Verify(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId), Times.Once);
+            _mockTicketLogic.Verify(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId, It.IsAny<Guid>()), Times.Once);
         }
 
         [TestMethod]
@@ -1043,7 +1063,7 @@ namespace TestBusinessLogic
             Guid eventId = Guid.NewGuid();
             DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
 
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId)).ReturnsAsync(false);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, eventId, It.IsAny<Guid>())).ReturnsAsync(false);
 
             RegisterEntryRequest request = new RegisterEntryRequest();
 
@@ -1078,7 +1098,7 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
@@ -1133,7 +1153,7 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, specialEvent.Id))
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, specialEvent.Id, It.IsAny<Guid>()))
             .ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
@@ -1196,7 +1216,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).ReturnsAsync(attraction1);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).ReturnsAsync(attraction2);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, It.IsAny<DateTime>(), null))
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, It.IsAny<DateTime>(), null, It.IsAny<Guid>()))
             .ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
@@ -1256,7 +1276,7 @@ namespace TestBusinessLogic
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(enterDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
@@ -1867,7 +1887,7 @@ namespace TestBusinessLogic
             .ReturnsAsync(exitDate);
             _mockUserRepository.Setup(r => r.GetById(userId)).ReturnsAsync(visitor);
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).ReturnsAsync(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null)).ReturnsAsync(true);
+            _mockTicketLogic.Setup(t => t.ValidateTicketAsync(qrCode, null, enterDate, null, It.IsAny<Guid>())).ReturnsAsync(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>())).Returns(Task.CompletedTask);
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>())).Returns(Task.CompletedTask);
             _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date)).ReturnsAsync((Event?)null);
@@ -2228,3 +2248,4 @@ namespace TestBusinessLogic
         }
     }
 }
+

@@ -201,7 +201,11 @@ namespace BusinessLogic
             if (qr == null && nfc == null)
                 throw new ArgumentException("QR code or NFC must be provided.");
 
-            bool isValidTicket = await _ticketLogic.ValidateTicketAsync(qr, nfc, enterDate, eventId);
+            Attraction attraction = await _attractionRepository.GetById(attractionId);
+            if (attraction == null)
+                throw new ArgumentException("Attraction not found.");
+                
+            bool isValidTicket = await _ticketLogic.ValidateTicketAsync(qr, nfc, enterDate, eventId, attractionId);
             if (!isValidTicket)
                 throw new ArgumentException("User does not have a valid ticket.");
 
@@ -209,9 +213,7 @@ namespace BusinessLogic
             if (user == null)
                 throw new ArgumentException("User not found.");
 
-            Attraction attraction = await _attractionRepository.GetById(attractionId);
-            if (attraction == null)
-                throw new ArgumentException("Attraction not found.");
+            
 
             if (attraction.CurrentCapacity < attraction.MaxCapacity)
             {
