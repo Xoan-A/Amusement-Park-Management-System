@@ -263,6 +263,20 @@ public class MaintenanceLogicTest
     }
 
     [TestMethod]
+    public async Task UpdateScheduleStatus_NumericStatusNotDefined_ThrowsArgumentException()
+    {
+        Guid scheduleId = Guid.NewGuid();
+        Attraction attraction = CreateTestAttraction(Guid.NewGuid());
+        MaintenanceSchedule schedule = CreateTestSchedule(scheduleId, attraction.Id, attraction);
+
+        _mockScheduleRepository.Setup(r => r.GetByIdAsync(scheduleId)).ReturnsAsync(schedule);
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            () => _maintenanceLogic.UpdateScheduleStatus(scheduleId, "99")
+        );
+    }
+
+    [TestMethod]
     public async Task UpdateScheduleStatus_ToCompleted_SetsIsOverdueToFalse()
     {
         Guid scheduleId = Guid.NewGuid();

@@ -287,8 +287,29 @@ public class AttractionLogicTest
         };
         _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
 
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+        ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
             await _attractionLogic.CreateAttraction(request));
+        
+        Assert.AreEqual("Invalid attraction type: TipoInvalido", exception.Message);
+    }
+
+    [TestMethod]
+    public async Task CreateAttraction_ShouldThrowException_WhenTypeIsNumericButNotDefined()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "ValidName",
+            Description = "desc",
+            Type = "99",
+            MinAge = 10,
+            MaxCapacity = 10,
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
+
+        ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionLogic.CreateAttraction(request));
+        
+        Assert.AreEqual("Invalid attraction type: 99", exception.Message);
     }
 
     [TestMethod]
@@ -414,7 +435,7 @@ public class AttractionLogicTest
         {
             Name = "ValidName",
             Description = "desc",
-            Type = "TipoInvalido",
+            Type = "Roller",
             MinAge = 10,
             MaxCapacity = 10,
             CurrentCapacity = 0
@@ -423,8 +444,32 @@ public class AttractionLogicTest
         Attraction attraction = new Attraction { Id = Guid.NewGuid(), CurrentCapacity = 0 };
         _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
 
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+        ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
             await _attractionLogic.UpdateAttraction(attraction.Id, request));
+
+        Assert.AreEqual("Invalid attraction type: Roller", exception.Message);
+    }
+    
+    [TestMethod]
+    public async Task UpdateAttraction_ShouldThrowException_WhenTypeIsNumericButNotDefined()
+    {
+        AttractionRequest request = new AttractionRequest
+        {
+            Name = "ValidName",
+            Description = "desc",
+            Type = "99",
+            MinAge = 10,
+            MaxCapacity = 10,
+            CurrentCapacity = 0
+        };
+        _mockAttractionRepository.Setup(r => r.IsNameUnique(request.Name)).ReturnsAsync(true);
+        Attraction attraction = new Attraction { Id = Guid.NewGuid(), CurrentCapacity = 0 };
+        _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).ReturnsAsync(attraction);
+
+        ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await _attractionLogic.UpdateAttraction(attraction.Id, request));
+
+        Assert.AreEqual("Invalid attraction type: 99", exception.Message);
     }
 
     [TestMethod]

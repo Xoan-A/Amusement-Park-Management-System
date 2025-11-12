@@ -66,11 +66,18 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
     public async Task<Guid> CreateAttraction(AttractionRequest newAttraction)
     {
         await ValidateAttractionRequest(newAttraction);
+        
+        if (!Enum.TryParse<AttractionType>(newAttraction.Type, out AttractionType attractionType) || 
+            !Enum.IsDefined(typeof(AttractionType), attractionType))
+        {
+            throw new ArgumentException($"Invalid attraction type: {newAttraction.Type}");
+        }
+        
         Attraction attraction = new Attraction()
         {
             Name = newAttraction.Name,
             Description = newAttraction.Description,
-            Type = Enum.Parse<AttractionType>(newAttraction.Type),
+            Type = attractionType,
             MinAge = newAttraction.MinAge,
             MaxCapacity = newAttraction.MaxCapacity,
             CurrentCapacity = 0,
@@ -88,9 +95,16 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         {
             throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
         }
+        
+        if (!Enum.TryParse<AttractionType>(existingAttraction.Type, out AttractionType attractionType) || 
+            !Enum.IsDefined(typeof(AttractionType), attractionType))
+        {
+            throw new ArgumentException($"Invalid attraction type: {existingAttraction.Type}");
+        }
+        
         attraction.Name = existingAttraction.Name;
         attraction.Description = existingAttraction.Description;
-        attraction.Type = Enum.Parse<AttractionType>(existingAttraction.Type);
+        attraction.Type = attractionType;
         attraction.MinAge = existingAttraction.MinAge;
         attraction.MaxCapacity = existingAttraction.MaxCapacity;
         attraction.CurrentCapacity = existingAttraction.CurrentCapacity ?? attraction.CurrentCapacity;

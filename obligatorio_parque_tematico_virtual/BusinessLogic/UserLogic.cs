@@ -132,7 +132,8 @@ namespace BusinessLogic
 
             if (!string.IsNullOrEmpty(membershipLevel))
             {
-                if (Enum.TryParse<MembershipLevel>(membershipLevel, true, out MembershipLevel parsedLevel))
+                if (Enum.TryParse<MembershipLevel>(membershipLevel, true, out MembershipLevel parsedLevel) &&
+                    Enum.IsDefined(typeof(MembershipLevel), parsedLevel))
                 {
                     user.MembershipLevel = parsedLevel;
                 }

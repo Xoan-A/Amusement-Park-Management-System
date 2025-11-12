@@ -545,5 +545,26 @@ public class UserLogicRoleTest
         await Assert.ThrowsExceptionAsync<ArgumentException>(
             async () => await _userLogic.CreateUser(request)
         );
-    }    
+    }
+
+    [TestMethod]
+    public async Task CreateUser_ShouldThrowException_WhenMembershipLevelIsNumericButNotDefined()
+    {
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
+        _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
+
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "password123",
+            MembershipLevel = "99",
+            Roles = new List<string>()
+        };
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _userLogic.CreateUser(request)
+        );
+    }
 }
