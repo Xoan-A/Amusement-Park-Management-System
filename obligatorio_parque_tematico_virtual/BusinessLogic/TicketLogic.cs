@@ -35,6 +35,20 @@ namespace BusinessLogic
                 throw new ArgumentException($"Invalid ticket type: {request.TicketType}");
             }
 
+            if (ticketType == TicketType.EventSpecial)
+            {
+                if (eventId == null)
+                {
+                    throw new ArgumentException("EventSpecial ticket type requires an event ID");
+                }
+
+                Event ticketEvent = await _eventRepository.GetById(eventId.Value);
+                if (ticketEvent == null)
+                {
+                    throw new KeyNotFoundException($"Event with ID {eventId} not found");
+                }
+            }
+
             User visitor = await _userRepository.GetById(visitorId);
             if (visitor == null)
             {
@@ -111,7 +125,7 @@ namespace BusinessLogic
                 isValid = ticket != null;
             }
 
-            if (isValid && ticket is { EventId: not null })
+            if (isValid && ticket?.Type == TicketType.EventSpecial && ticket.EventId != null)
             {
                 Event ticketEvent = await _eventRepository.GetById(ticket.EventId.Value);
                 if (ticketEvent.Date.Date != enterDate.Date || ticketEvent.Date.Hour > enterDate.Hour ||
