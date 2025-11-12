@@ -33,7 +33,7 @@ public class PluginLoaderTest
     public void LoadPlugins_EmptyDirectory_ReturnsEmptyList()
     {
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
-        
+
         Assert.AreEqual(2, plugins.Count);
     }
 
@@ -115,20 +115,14 @@ public class PluginLoaderTest
         byte[] fileContent = new byte[] { 0x4D, 0x5A };
         using (MemoryStream stream = new MemoryStream(fileContent))
         {
-            Assert.ThrowsException<ArgumentException>(() =>
-            {
-                _pluginLoader.AddPlugin(stream, "TestPlugin.txt");
-            });
+            Assert.ThrowsException<ArgumentException>(() => { _pluginLoader.AddPlugin(stream, "TestPlugin.txt"); });
         }
     }
 
     [TestMethod]
     public void AddPlugin_WithNullStream_ThrowsArgumentException()
     {
-        Assert.ThrowsException<ArgumentException>(() =>
-        {
-            _pluginLoader.AddPlugin(null!, "TestPlugin.dll");
-        });
+        Assert.ThrowsException<ArgumentException>(() => { _pluginLoader.AddPlugin(null!, "TestPlugin.dll"); });
     }
 
     [TestMethod]
@@ -137,10 +131,7 @@ public class PluginLoaderTest
         byte[] fileContent = new byte[] { 0x4D, 0x5A };
         using (MemoryStream stream = new MemoryStream(fileContent))
         {
-            Assert.ThrowsException<ArgumentException>(() =>
-            {
-                _pluginLoader.AddPlugin(stream, "");
-            });
+            Assert.ThrowsException<ArgumentException>(() => { _pluginLoader.AddPlugin(stream, ""); });
         }
     }
 
