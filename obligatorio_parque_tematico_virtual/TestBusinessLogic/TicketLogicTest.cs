@@ -315,19 +315,45 @@ namespace TestBusinessLogic
         {
             Guid visitorId = Guid.NewGuid();
             Guid eventId = Guid.NewGuid();
+
+            User visitor = new User
+            {
+                Id = visitorId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com"
+            };
+
             List<Ticket> expectedTickets = new List<Ticket>
             {
                 new Ticket { Id = Guid.NewGuid(), VisitorId = visitorId, Type = TicketType.General },
                 new Ticket { Id = Guid.NewGuid(), VisitorId = visitorId, Type = TicketType.EventSpecial, EventId = eventId }
             };
 
+            _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
             _mockTicketRepository.Setup(t => t.GetByVisitorIdAsync(visitorId)).ReturnsAsync(expectedTickets);
 
             IEnumerable<TicketResponse> result = await _ticketLogic.GetVisitorTicketsAsync(visitorId);
 
             Assert.AreEqual(2, result.Count());
             Assert.IsTrue(result.All(t => t.VisitorId == visitorId));
+            _mockUserRepository.Verify(u => u.GetById(visitorId), Times.Once);
             _mockTicketRepository.Verify(t => t.GetByVisitorIdAsync(visitorId), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task TestGetVisitorTicketsAsync_VisitorNotFound()
+        {
+            Guid visitorId = Guid.NewGuid();
+
+            _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync((User)null);
+
+            await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
+                async () => await _ticketLogic.GetVisitorTicketsAsync(visitorId)
+            );
+
+            _mockUserRepository.Verify(u => u.GetById(visitorId), Times.Once);
+            _mockTicketRepository.Verify(t => t.GetByVisitorIdAsync(It.IsAny<Guid>()), Times.Never);
         }
 
         [TestMethod]

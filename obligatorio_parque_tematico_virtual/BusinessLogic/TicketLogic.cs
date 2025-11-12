@@ -90,6 +90,12 @@ namespace BusinessLogic
 
         public async Task<IEnumerable<TicketResponse>> GetVisitorTicketsAsync(Guid visitorId)
         {
+            User visitor = await _userRepository.GetById(visitorId);
+            if (visitor == null)
+            {
+                throw new KeyNotFoundException($"Visitor with ID {visitorId} not found");
+            }
+
             IEnumerable<Ticket> tickets = await _ticketRepository.GetByVisitorIdAsync(visitorId);
             return tickets.Select(MapToTicketResponse);
         }
