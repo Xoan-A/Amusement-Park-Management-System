@@ -147,7 +147,7 @@ public class AttractionRepositoryTest
     }
 
     [TestMethod]
-    public async Task Remove_ShouldRemoveAttractionFromDatabase()
+    public async Task Delete_ShouldDeleteAttractionFromDatabase()
     {
         await _context.Attractions.AddAsync(attraction);
         await _context.SaveChangesAsync();
@@ -156,4 +156,87 @@ public class AttractionRepositoryTest
 
         Assert.AreEqual(0, await _context.Attractions.CountAsync());
     }
+
+    [TestMethod]
+    public async Task Delete_ShouldDeleteMaintenanceSchedules_BeforeDeletingAttraction()
+    {
+        await _context.Attractions.AddAsync(attraction);
+        await _context.SaveChangesAsync();
+
+        MaintenanceSchedule maintenance1 = new MaintenanceSchedule
+        {
+            Id = Guid.NewGuid(),
+            AttractionId = attraction.Id,
+            ScheduledDate = DateTime.Now.AddDays(1),
+            Status = MaintenanceStatus.Pending
+        };
+
+        MaintenanceSchedule maintenance2 = new MaintenanceSchedule
+        {
+            Id = Guid.NewGuid(),
+            AttractionId = attraction.Id,
+            ScheduledDate = DateTime.Now.AddDays(2),
+            Status = MaintenanceStatus.Pending
+        };
+
+        await _context.MaintenanceSchedules.AddAsync(maintenance1);
+        await _context.MaintenanceSchedules.AddAsync(maintenance2);
+        await _context.SaveChangesAsync();
+
+        Assert.AreEqual(2, await _context.MaintenanceSchedules.CountAsync());
+
+        await _attractionRepository.Delete(attraction);
+
+        Assert.AreEqual(0, await _context.Attractions.CountAsync());
+        Assert.AreEqual(0, await _context.MaintenanceSchedules.CountAsync());
+    }
+
+    [TestMethod]
+    public async Task Delete_ShouldDeleteEventAttractions_BeforeDeletingAttraction()
+    {
+        await _context.Attractions.AddAsync(attraction);
+        await _context.SaveChangesAsync();
+
+        Event event1 = new Event
+        {
+            Id = Guid.NewGuid(),
+            Name = "Special Event 1",
+            Date = DateTime.Now.AddDays(5)
+        };
+
+        Event event2 = new Event
+        {
+            Id = Guid.NewGuid(),
+            Name = "Special Event 2",
+            Date = DateTime.Now.AddDays(10)
+        };
+
+        await _context.Events.AddAsync(event1);
+        await _context.Events.AddAsync(event2);
+        await _context.SaveChangesAsync();
+
+        EventAttraction eventAttraction1 = new EventAttraction
+        {
+            EventId = event1.Id,
+            AttractionId = attraction.Id
+        };
+
+        EventAttraction eventAttraction2 = new EventAttraction
+        {
+            EventId = event2.Id,
+            AttractionId = attraction.Id
+        };
+
+        _context.Set<EventAttraction>().Add(eventAttraction1);
+        _context.Set<EventAttraction>().Add(eventAttraction2);
+        await _context.SaveChangesAsync();
+
+        Assert.AreEqual(2, await _context.Set<EventAttraction>().CountAsync());
+
+        await _attractionRepository.Delete(attraction);
+
+        Assert.AreEqual(0, await _context.Attractions.CountAsync());
+        Assert.AreEqual(0, await _context.Set<EventAttraction>().CountAsync());
+        Assert.AreEqual(2, await _context.Events.CountAsync());
+    }    
 }

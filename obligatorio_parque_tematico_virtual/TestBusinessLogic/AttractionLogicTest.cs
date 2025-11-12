@@ -161,6 +161,16 @@ public class AttractionLogicTest
     }
 
     [TestMethod]
+    public async Task DeleteAttraction_ShouldThrowException_WhenAttractionNotFound()
+    {
+        Guid nonExistentId = Guid.NewGuid();
+        _mockAttractionRepository.Setup(r => r.GetById(nonExistentId)).ReturnsAsync((Attraction)null);
+
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
+            await _attractionLogic.DeleteAttraction(nonExistentId));
+    }
+
+    [TestMethod]
     public async Task GetAttractionEntityById_ShouldReturnAttraction_WhenIdIsValid()
     {
         Attraction expectedAttraction = new Attraction

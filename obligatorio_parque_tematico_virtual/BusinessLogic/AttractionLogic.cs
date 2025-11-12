@@ -100,6 +100,10 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
     public async Task DeleteAttraction(Guid id)
     {
         Attraction attraction = await _attractionRepository.GetById(id);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
+        }
         await _attractionRepository.Delete(attraction);
     }
 
