@@ -2071,5 +2071,160 @@ namespace TestBusinessLogic
             _mockUserRepository.Verify(r => r.GetByIdWithRoles(userId), Times.Once);
             _mockUserRepository.Verify(r => r.Update(user), Times.Once);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenEmailHasNoAtSymbol()
+        {
+            RegisterVisitorRequest request = new RegisterVisitorRequest
+            {
+                Name = "John",
+                LastName = "Doe",
+                Email = "invalidemail.com",
+                Password = "password123",
+                BirthDate = new DateTime(1990, 1, 1)
+            };
+
+            await _userLogic.RegisterVisitor(request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenEmailStartsWithAt()
+        {
+            RegisterVisitorRequest request = new RegisterVisitorRequest
+            {
+                Name = "John",
+                LastName = "Doe",
+                Email = "@test.com",
+                Password = "password123",
+                BirthDate = new DateTime(1990, 1, 1)
+            };
+
+            await _userLogic.RegisterVisitor(request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenEmailEndsWithAt()
+        {
+            RegisterVisitorRequest request = new RegisterVisitorRequest
+            {
+                Name = "John",
+                LastName = "Doe",
+                Email = "test@",
+                Password = "password123",
+                BirthDate = new DateTime(1990, 1, 1)
+            };
+
+            await _userLogic.RegisterVisitor(request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenEmailHasMultipleAtSymbols()
+        {
+            RegisterVisitorRequest request = new RegisterVisitorRequest
+            {
+                Name = "John",
+                LastName = "Doe",
+                Email = "test@@test.com",
+                Password = "password123",
+                BirthDate = new DateTime(1990, 1, 1)
+            };
+
+            await _userLogic.RegisterVisitor(request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenEmailDomainHasNoDot()
+        {
+            RegisterVisitorRequest request = new RegisterVisitorRequest
+            {
+                Name = "John",
+                LastName = "Doe",
+                Email = "test@testcom",
+                Password = "password123",
+                BirthDate = new DateTime(1990, 1, 1)
+            };
+
+            await _userLogic.RegisterVisitor(request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenEmailDomainStartsWithDot()
+        {
+            RegisterVisitorRequest request = new RegisterVisitorRequest
+            {
+                Name = "John",
+                LastName = "Doe",
+                Email = "test@.test.com",
+                Password = "password123",
+                BirthDate = new DateTime(1990, 1, 1)
+            };
+
+            await _userLogic.RegisterVisitor(request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RegisterVisitor_ShouldThrowException_WhenEmailDomainEndsWithDot()
+        {
+            RegisterVisitorRequest request = new RegisterVisitorRequest
+            {
+                Name = "John",
+                LastName = "Doe",
+                Email = "test@test.com.",
+                Password = "password123",
+                BirthDate = new DateTime(1990, 1, 1)
+            };
+
+            await _userLogic.RegisterVisitor(request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreateUser_ShouldThrowException_WhenEmailIsInvalid()
+        {
+            _mockUserRepository.Setup(r => r.IsEmailUnique(It.IsAny<string>())).ReturnsAsync(true);
+
+            CreateUserRequest request = new CreateUserRequest
+            {
+                Name = "John",
+                LastName = "Doe",
+                Email = "invalidemail",
+                Password = "password123",
+                Roles = new List<string>()
+            };
+
+            await _userLogic.CreateUser(request);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task ModifyUser_ShouldThrowException_WhenEmailIsInvalid()
+        {
+            Guid userId = Guid.NewGuid();
+            User user = new User
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com",
+                Password = "hashed",
+                BirthDate = new DateTime(1990, 1, 1)
+            };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).ReturnsAsync(user);
+
+            ModifyUserRequest request = new ModifyUserRequest
+            {
+                Email = "invalidemail"
+            };
+
+            await _userLogic.ModifyUser(userId, userId, request);
+        }
     }
 }

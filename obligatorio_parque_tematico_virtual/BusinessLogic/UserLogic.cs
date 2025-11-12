@@ -44,6 +44,9 @@ namespace BusinessLogic
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 throw new ArgumentException("Name, last name, email, and password must be provided.");
 
+            if (!ValidateEmail(email))
+                throw new ArgumentException("Invalid email format.");
+
             DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
 
             if (birthDate >= currentDateTime)
@@ -100,6 +103,9 @@ namespace BusinessLogic
             {
                 throw new ArgumentException("Name, last name, email, and password must be provided.");
             }
+
+            if (!ValidateEmail(email))
+                throw new ArgumentException("Invalid email format.");
 
             if (!await _userRepository.IsEmailUnique(email))
             {
@@ -312,6 +318,9 @@ namespace BusinessLogic
 
             if (!string.IsNullOrWhiteSpace(request.Email))
             {
+                if (!ValidateEmail(request.Email))
+                    throw new ArgumentException("Invalid email format.");
+
                 if (!string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
                 {
                     bool unique = await _userRepository.IsEmailUnique(request.Email);
@@ -373,6 +382,31 @@ namespace BusinessLogic
                 UserRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
                 Score = user.Score
             };
+        }
+
+        private bool ValidateEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            if (!email.Contains("@"))
+                return false;
+
+            int atIndex = email.IndexOf("@");
+            if (atIndex == 0 || atIndex == email.Length - 1)
+                return false;
+
+            if (email.IndexOf("@", atIndex + 1) != -1)
+                return false;
+
+            string domain = email.Substring(atIndex + 1);
+            if (!domain.Contains("."))
+                return false;
+
+            if (domain.StartsWith(".") || domain.EndsWith("."))
+                return false;
+
+            return true;
         }
     }
 }
