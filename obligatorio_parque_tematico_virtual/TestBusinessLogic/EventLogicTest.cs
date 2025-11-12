@@ -177,6 +177,20 @@ public class EventLogicTest
     }
 
     [TestMethod]
+    public async Task CreateEvent_ShouldThrowException_WhenAttractionNotFound()
+    {
+        Guid nonExistentAttractionId = Guid.NewGuid();
+        baseEventRequest.AttractionIds = new List<Guid> { nonExistentAttractionId };
+        
+        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        _mockAttractionService.Setup(s => s.GetAttractionEntityById(nonExistentAttractionId))
+            .ReturnsAsync((Attraction)null);
+
+        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
+            await _eventLogic.CreateEvent(baseEventRequest));
+    }
+
+    [TestMethod]
     public async Task CreateEvent_ShouldThrowException_WhenNameIsNotUnique()
     {
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event> { baseEvent });

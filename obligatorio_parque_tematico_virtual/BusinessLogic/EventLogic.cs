@@ -106,6 +106,10 @@ public class EventLogic : IEventLogic
             foreach (Guid attractionId in newEvent.AttractionIds)
             {
                 Attraction attraction = await _attractionLogic.GetAttractionEntityById(attractionId);
+                if (attraction == null)
+                {
+                    throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+                }
                 eventEntity.AddAttraction(attraction);
             }
         }
