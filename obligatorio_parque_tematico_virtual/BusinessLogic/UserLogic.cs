@@ -91,17 +91,26 @@ namespace BusinessLogic
             string lastName = request.LastName;
             string email = request.Email;
             string password = request.Password;
+            DateTime? birthDate = request.BirthDate;
+            string? membershipLevel = request.MembershipLevel;
             List<string> roles = request.Roles;
 
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
-                return null;
+                throw new ArgumentException("Name, last name, email, and password must be provided.");
             }
 
             if (!await _userRepository.IsEmailUnique(email))
             {
-                return null;
+                throw new ArgumentException("Email is already in use.");
+            }
+
+            if (birthDate.HasValue)
+            {
+                DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+                if (birthDate.Value >= currentDateTime)
+                    throw new ArgumentException("Birth date cannot be after today.");
             }
 
             string hashedPassword = _passwordLogic.HashPassword(password);
@@ -111,8 +120,21 @@ namespace BusinessLogic
                 Name = name,
                 LastName = lastName,
                 Email = email,
-                Password = hashedPassword
+                Password = hashedPassword,
+                BirthDate = birthDate
             };
+
+            if (!string.IsNullOrEmpty(membershipLevel))
+            {
+                if (Enum.TryParse<MembershipLevel>(membershipLevel, true, out MembershipLevel parsedLevel))
+                {
+                    user.MembershipLevel = parsedLevel;
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid membership level.");
+                }
+            }
 
             if (roles != null && roles.Count > 0)
             {

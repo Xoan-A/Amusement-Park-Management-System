@@ -103,7 +103,7 @@ public class UserLogicRoleTest
     }
 
     [TestMethod]
-    public async Task CreateUser_ShouldReturnNull_WhenNameIsEmpty()
+    public async Task CreateUser_ShouldThrowException_WhenNameIsEmpty()
     {
         CreateUserRequest request = new CreateUserRequest
         {
@@ -114,12 +114,13 @@ public class UserLogicRoleTest
             Roles = new List<string> { Role.VISITOR }
         };
 
-        UserResponse result = await _userLogic.CreateUser(request);
-        Assert.IsNull(result);
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _userLogic.CreateUser(request)
+        );
     }
 
     [TestMethod]
-    public async Task CreateUser_ShouldReturnNull_WhenLastNameIsEmpty()
+    public async Task CreateUser_ShouldThrowException_WhenLastNameIsEmpty()
     {
         CreateUserRequest request = new CreateUserRequest
         {
@@ -130,12 +131,13 @@ public class UserLogicRoleTest
             Roles = new List<string> { Role.VISITOR }
         };
 
-        UserResponse result = await _userLogic.CreateUser(request);
-        Assert.IsNull(result);
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _userLogic.CreateUser(request)
+        );
     }
 
     [TestMethod]
-    public async Task CreateUser_ShouldReturnNull_WhenEmailIsEmpty()
+    public async Task CreateUser_ShouldThrowException_WhenEmailIsEmpty()
     {
         CreateUserRequest request = new CreateUserRequest
         {
@@ -146,12 +148,13 @@ public class UserLogicRoleTest
             Roles = new List<string> { Role.VISITOR }
         };
 
-        UserResponse result = await _userLogic.CreateUser(request);
-        Assert.IsNull(result);
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _userLogic.CreateUser(request)
+        );
     }
 
     [TestMethod]
-    public async Task CreateUser_ShouldReturnNull_WhenPasswordIsEmpty()
+    public async Task CreateUser_ShouldThrowException_WhenPasswordIsEmpty()
     {
         CreateUserRequest request = new CreateUserRequest
         {
@@ -162,12 +165,13 @@ public class UserLogicRoleTest
             Roles = new List<string> { Role.VISITOR }
         };
 
-        UserResponse result = await _userLogic.CreateUser(request);
-        Assert.IsNull(result);
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _userLogic.CreateUser(request)
+        );
     }
 
     [TestMethod]
-    public async Task CreateUser_ShouldReturnNull_WhenEmailIsNotUnique()
+    public async Task CreateUser_ShouldThrowException_WhenEmailIsNotUnique()
     {
         _mockUserRepository.Setup(r => r.IsEmailUnique("existing@test.com")).ReturnsAsync(false);
 
@@ -180,8 +184,9 @@ public class UserLogicRoleTest
             Roles = new List<string> { Role.VISITOR }
         };
 
-        UserResponse result = await _userLogic.CreateUser(request);
-        Assert.IsNull(result);
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _userLogic.CreateUser(request)
+        );
     }
 
     [TestMethod]
@@ -432,4 +437,113 @@ public class UserLogicRoleTest
         Assert.IsTrue(user.UserRoles.Any(ur => ur.Role == adminRole));
         _mockUserRepository.Verify(r => r.Update(user), Times.Once);
     }
+
+    [TestMethod]
+    public async Task CreateUser_ShouldSetBirthDate_WhenProvided()
+    {
+        DateTime birthDate = new DateTime(1990, 5, 15);
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
+        _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
+        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
+
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "password123",
+            BirthDate = birthDate,
+            Roles = new List<string>()
+        };
+
+        UserResponse result = await _userLogic.CreateUser(request);
+
+        Assert.AreEqual(birthDate, result.BirthDate);
+    }
+
+    [TestMethod]
+    public async Task CreateUser_ShouldThrowException_WhenBirthDateIsInFuture()
+    {
+        DateTime futureBirthDate = DateTime.Now.AddDays(1);
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
+
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "password123",
+            BirthDate = futureBirthDate,
+            Roles = new List<string>()
+        };
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _userLogic.CreateUser(request)
+        );
+    }
+
+    [TestMethod]
+    public async Task CreateUser_ShouldSetMembershipLevel_WhenProvided()
+    {
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
+        _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
+        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
+
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "password123",
+            MembershipLevel = "Premium",
+            Roles = new List<string>()
+        };
+
+        UserResponse result = await _userLogic.CreateUser(request);
+
+        Assert.AreEqual((int)MembershipLevel.Premium, result.MembershipLevel);
+    }
+
+    [TestMethod]
+    public async Task CreateUser_ShouldSetMembershipLevelVIP_WhenProvided()
+    {
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
+        _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
+        _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).ReturnsAsync((User u) => u);
+
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "password123",
+            MembershipLevel = "VIP",
+            Roles = new List<string>()
+        };
+
+        UserResponse result = await _userLogic.CreateUser(request);
+
+        Assert.AreEqual((int)MembershipLevel.VIP, result.MembershipLevel);
+    }
+
+    [TestMethod]
+    public async Task CreateUser_ShouldThrowException_WhenMembershipLevelIsInvalid()
+    {
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).ReturnsAsync(true);
+        _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
+
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "password123",
+            MembershipLevel = "InvalidLevel",
+            Roles = new List<string>()
+        };
+
+        await Assert.ThrowsExceptionAsync<ArgumentException>(
+            async () => await _userLogic.CreateUser(request)
+        );
+    }    
 }
