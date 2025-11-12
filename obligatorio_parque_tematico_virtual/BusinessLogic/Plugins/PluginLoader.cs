@@ -15,16 +15,27 @@ public class PluginLoader : IPluginLoader
     {
         _pluginsPath = pluginsPath;
         _availablePlugins = new Dictionary<string, PluginInfo>();
+        DiscoverPluginsInCurrentAssembly();
         LoadPlugins();
     }
 
     public List<PluginInfoResponse> LoadPlugins()
     {
+        string currentAssemblyPath = Assembly.GetExecutingAssembly().Location;
+        var builtInPlugins = _availablePlugins
+            .Where(p => p.Value.AssemblyPath == currentAssemblyPath)
+            .ToDictionary(p => p.Key, p => p.Value);
+
         _availablePlugins.Clear();
+
+        foreach (var plugin in builtInPlugins)
+        {
+            _availablePlugins[plugin.Key] = plugin.Value;
+        }
 
         if (!Directory.Exists(_pluginsPath))
         {
-            return new List<PluginInfoResponse>();
+            return _availablePlugins.Values.Select(MapToResponse).ToList();
         }
 
         string[] dllFiles = Directory.GetFiles(_pluginsPath, "*.dll");
@@ -69,9 +80,6 @@ public class PluginLoader : IPluginLoader
                         PluginInfo pluginInfo = new PluginInfo
                         {
                             Name = instance.Name,
-                            Description = type.GetCustomAttribute<PluginDescriptionAttribute>()?.Description ?? string.Empty,
-                            Author = type.GetCustomAttribute<PluginAuthorAttribute>()?.Author ?? string.Empty,
-                            Version = assembly.GetName().Version?.ToString() ?? "1.0.0",
                             AssemblyPath = assemblyPath,
                             TypeName = type.FullName ?? type.Name
                         };
@@ -87,13 +95,13 @@ public class PluginLoader : IPluginLoader
         }
     }
 
-    public PluginInfoResponse? GetPluginByName(string name)
+    private void DiscoverPluginsInCurrentAssembly()
     {
-        PluginInfo pluginInfo = _availablePlugins.GetValueOrDefault(name);
-        return pluginInfo != null ? MapToResponse(pluginInfo) : null;
+        Assembly currentAssembly = Assembly.GetExecutingAssembly();
+        DiscoverPlugins(currentAssembly, currentAssembly.Location);
     }
 
-    public IConcreteStrategy CreateStrategyInstance(string name)
+    public IConcreteStrategy CreateStrategyInstance(string name, Dictionary<string, object>? parameters = null)
     {
         if (!_availablePlugins.TryGetValue(name, out PluginInfo? pluginInfo))
         {
@@ -108,7 +116,47 @@ public class PluginLoader : IPluginLoader
             throw new InvalidOperationException($"Type '{pluginInfo.TypeName}' not found in assembly");
         }
 
-        object? instance = Activator.CreateInstance(type);
+        object? instance = null;
+
+        if (parameters != null && parameters.Count > 0)
+        {
+            var constructors = type.GetConstructors();
+            foreach (var constructor in constructors)
+            {
+                var ctorParams = constructor.GetParameters();
+                if (ctorParams.Length == parameters.Count)
+                {
+                    object[] args = new object[ctorParams.Length];
+                    bool matched = true;
+
+                    for (int i = 0; i < ctorParams.Length; i++)
+                    {
+                        string paramName = ctorParams[i].Name?.ToLower() ?? "";
+                        if (parameters.ContainsKey(paramName))
+                        {
+                            args[i] = parameters[paramName];
+                        }
+                        else
+                        {
+                            matched = false;
+                            break;
+                        }
+                    }
+
+                    if (matched)
+                    {
+                        instance = constructor.Invoke(args);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (instance == null)
+        {
+            instance = Activator.CreateInstance(type);
+        }
+
         if (instance is not IConcreteStrategy strategy)
         {
             throw new InvalidOperationException($"Type '{pluginInfo.TypeName}' does not implement IConcreteStrategy");
@@ -117,9 +165,36 @@ public class PluginLoader : IPluginLoader
         return strategy;
     }
 
-    public List<string> GetAvailablePluginNames()
+    public void AddPlugin(Stream dllStream, string fileName)
     {
-        return _availablePlugins.Keys.ToList();
+        if (dllStream == null || !dllStream.CanRead)
+        {
+            throw new ArgumentException("Invalid stream provided");
+        }
+
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            throw new ArgumentException("File name cannot be empty");
+        }
+
+        if (!fileName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Only .dll files are allowed");
+        }
+
+        if (!Directory.Exists(_pluginsPath))
+        {
+            Directory.CreateDirectory(_pluginsPath);
+        }
+
+        string filePath = Path.Combine(_pluginsPath, fileName);
+
+        using (FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+        {
+            dllStream.CopyTo(fileStream);
+        }
+
+        LoadPlugins();
     }
 
     private PluginInfoResponse MapToResponse(PluginInfo pluginInfo)
@@ -127,29 +202,6 @@ public class PluginLoader : IPluginLoader
         return new PluginInfoResponse
         {
             Name = pluginInfo.Name,
-            Description = pluginInfo.Description,
-            Author = pluginInfo.Author,
-            Version = pluginInfo.Version
         };
-    }
-}
-
-[AttributeUsage(AttributeTargets.Class)]
-public class PluginDescriptionAttribute : Attribute
-{
-    public string Description { get; }
-    public PluginDescriptionAttribute(string description)
-    {
-        Description = description;
-    }
-}
-
-[AttributeUsage(AttributeTargets.Class)]
-public class PluginAuthorAttribute : Attribute
-{
-    public string Author { get; }
-    public PluginAuthorAttribute(string author)
-    {
-        Author = author;
     }
 }
