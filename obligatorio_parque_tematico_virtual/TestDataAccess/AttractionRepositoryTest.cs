@@ -17,8 +17,8 @@ public class AttractionRepositoryTest
     public void Setup()
     {
         DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite("DataSource=:memory:")
-            .Options;
+        .UseSqlite("DataSource=:memory:")
+        .Options;
         _context = new AppDbContext(options);
         _context.Database.OpenConnection();
         _context.Database.EnsureDeleted();
@@ -238,5 +238,5 @@ public class AttractionRepositoryTest
         Assert.AreEqual(0, await _context.Attractions.CountAsync());
         Assert.AreEqual(0, await _context.Set<EventAttraction>().CountAsync());
         Assert.AreEqual(2, await _context.Events.CountAsync());
-    }    
+    }
 }

@@ -181,13 +181,13 @@ public class EventLogicTest
     {
         Guid nonExistentAttractionId = Guid.NewGuid();
         baseEventRequest.AttractionIds = new List<Guid> { nonExistentAttractionId };
-        
+
         _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
         _mockAttractionService.Setup(s => s.GetAttractionEntityById(nonExistentAttractionId))
-            .ReturnsAsync((Attraction)null);
+        .ReturnsAsync((Attraction)null);
 
         await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
-            await _eventLogic.CreateEvent(baseEventRequest));
+        await _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]

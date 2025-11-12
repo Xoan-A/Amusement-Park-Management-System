@@ -17,8 +17,8 @@ public class EventRepositoryTest
     public void Setup()
     {
         DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite("DataSource=:memory:")
-            .Options;
+        .UseSqlite("DataSource=:memory:")
+        .Options;
         _context = new AppDbContext(options);
         _context.Database.OpenConnection();
         _context.Database.EnsureDeleted();
@@ -167,7 +167,7 @@ public class EventRepositoryTest
         List<Event> result = await _eventRepository.GetAll();
 
         Assert.AreEqual(2, result.Count);
-        
+
         Event firstEvent = result.First(e => e.Id == eventEntity.Id);
         Assert.AreEqual(1, firstEvent.Attractions.Count);
         Assert.IsTrue(firstEvent.Attractions.First().AttractionId == attraction1.Id);

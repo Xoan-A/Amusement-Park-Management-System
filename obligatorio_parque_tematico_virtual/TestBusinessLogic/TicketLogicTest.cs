@@ -365,7 +365,10 @@ namespace TestBusinessLogic
             List<Ticket> expectedTickets = new List<Ticket>
             {
                 new Ticket { Id = Guid.NewGuid(), VisitorId = visitorId, Type = TicketType.General },
-                new Ticket { Id = Guid.NewGuid(), VisitorId = visitorId, Type = TicketType.EventSpecial, EventId = eventId }
+                new Ticket
+                {
+                    Id = Guid.NewGuid(), VisitorId = visitorId, Type = TicketType.EventSpecial, EventId = eventId
+                }
             };
 
             _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
@@ -723,13 +726,13 @@ namespace TestBusinessLogic
                 EventId = eventId,
                 Type = TicketType.EventSpecial
             };
-            
+
             Attraction attraction = new Attraction
             {
                 Id = attractionId,
                 Name = "Main Stage",
             };
-            
+
             EventAttraction eventAttraction = new EventAttraction
             {
                 EventId = eventId,
@@ -928,14 +931,14 @@ namespace TestBusinessLogic
                 Id = attractionId,
                 Name = "Main Stage"
             };
-            
+
             EventAttraction eventAttraction = new EventAttraction
             {
                 EventId = eventId,
                 AttractionId = attraction.Id,
                 Attraction = attraction
             };
-            
+
             Event eventEntity = new Event
             {
                 Id = eventId,
@@ -946,8 +949,6 @@ namespace TestBusinessLogic
                 Cost = 50,
                 Attractions = new List<EventAttraction> { eventAttraction }
             };
-
-            
 
             eventEntity.AddAttraction(attraction);
 

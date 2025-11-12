@@ -70,7 +70,8 @@ namespace BusinessLogic
             Role? visitorRole = await _roleRepository.GetByNameAsync(Role.VISITOR);
             if (visitorRole != null)
             {
-                visitor.UserRoles.Add(new UserRole { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
+                visitor.UserRoles.Add(new UserRole
+                { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
             }
 
             User res = await _userRepository.Create(visitor);
@@ -204,7 +205,7 @@ namespace BusinessLogic
             Attraction attraction = await _attractionRepository.GetById(attractionId);
             if (attraction == null)
                 throw new ArgumentException("Attraction not found.");
-                
+
             bool isValidTicket = await _ticketLogic.ValidateTicketAsync(qr, nfc, enterDate, eventId, attractionId);
             if (!isValidTicket)
                 throw new ArgumentException("User does not have a valid ticket.");
@@ -213,7 +214,6 @@ namespace BusinessLogic
             if (user == null)
                 throw new ArgumentException("User not found.");
 
-            
 
             if (attraction.CurrentCapacity < attraction.MaxCapacity)
             {
