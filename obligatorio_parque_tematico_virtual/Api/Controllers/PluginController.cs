@@ -1,6 +1,8 @@
+using Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using IBusinessLogic;
+using IBusinessLogic.Strategy;
 using Models.Out;
 
 namespace Api.Controllers;
@@ -24,16 +26,13 @@ public class PluginController : ControllerBase
         return Ok(plugins);
     }
 
-    [HttpGet("{name}")]
-    public IActionResult GetPluginByName(string name)
+    [HttpPost]
+    public IActionResult AddPlugin([FromForm] IFormFile dllFile)
     {
-        PluginInfoResponse plugin = _pluginLoader.GetPluginByName(name);
-
-        if (plugin == null)
+        using (Stream stream = dllFile.OpenReadStream())
         {
-            return NotFound(new { Message = $"Plugin '{name}' not found" });
+            _pluginLoader.AddPlugin(stream, dllFile.FileName);
         }
-
-        return Ok(plugin);
+        return Ok();
     }
 }

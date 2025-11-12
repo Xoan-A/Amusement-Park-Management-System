@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Domain;
 using IBusinessLogic;
+using IBusinessLogic.Strategy;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using Microsoft.Data.Sqlite;
@@ -92,9 +93,6 @@ public class PluginControllerTest
             new PluginInfoResponse
             {
                 Name = "PuntuacionPorHora",
-                Description = "Test plugin",
-                Author = "Test Author",
-                Version = "1.0.0"
             }
         };
 
@@ -106,30 +104,51 @@ public class PluginControllerTest
     }
 
     [TestMethod]
-    public async Task GetPluginByName_AsAdministrator_ReturnsOk()
+    public async Task AddPlugin_WithValidDllFile_ReturnsOk()
     {
-        PluginInfoResponse plugin = new PluginInfoResponse
-        {
-            Name = "PuntuacionPorHora",
-            Description = "Test plugin",
-            Author = "Test Author",
-            Version = "1.0.0"
-        };
+        byte[] fileContent = new byte[] { 0x4D, 0x5A }; // MZ header (simplified DLL)
+        MultipartFormDataContent content = new MultipartFormDataContent();
+        ByteArrayContent fileContentBytes = new ByteArrayContent(fileContent);
+        fileContentBytes.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+        content.Add(fileContentBytes, "dllFile", "TestPlugin.dll");
 
-        _mockPluginLoader.Setup(p => p.GetPluginByName("PuntuacionPorHora")).Returns(plugin);
+        _mockPluginLoader.Setup(p => p.AddPlugin(It.IsAny<Stream>(), "TestPlugin.dll"));
 
-        HttpResponseMessage response = await _adminClient.GetAsync("/api/plugins/PuntuacionPorHora");
+        HttpResponseMessage response = await _adminClient.PostAsync("/api/plugins", content);
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
+        _mockPluginLoader.Verify(p => p.AddPlugin(It.IsAny<Stream>(), "TestPlugin.dll"), Times.Once);
     }
 
     [TestMethod]
-    public async Task GetPluginByName_NonExistent_ReturnsNotFound()
+    public async Task AddPlugin_WithInvalidFileExtension_ReturnsBadRequest()
     {
-        _mockPluginLoader.Setup(p => p.GetPluginByName("NonExistent")).Returns((PluginInfoResponse?)null);
+        byte[] fileContent = new byte[] { 0x4D, 0x5A };
+        MultipartFormDataContent content = new MultipartFormDataContent();
+        ByteArrayContent fileContentBytes = new ByteArrayContent(fileContent);
+        fileContentBytes.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+        content.Add(fileContentBytes, "dllFile", "TestPlugin.txt");
 
-        HttpResponseMessage response = await _adminClient.GetAsync("/api/plugins/NonExistent");
+        _mockPluginLoader.Setup(p => p.AddPlugin(It.IsAny<Stream>(), "TestPlugin.txt"))
+            .Throws(new ArgumentException("Only .dll files are allowed"));
 
-        Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
+        HttpResponseMessage response = await _adminClient.PostAsync("/api/plugins", content);
+
+        Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task AddPlugin_WithoutAuthentication_ReturnsUnauthorized()
+    {
+        HttpClient unauthenticatedClient = _factory.CreateClient();
+        byte[] fileContent = new byte[] { 0x4D, 0x5A };
+        MultipartFormDataContent content = new MultipartFormDataContent();
+        ByteArrayContent fileContentBytes = new ByteArrayContent(fileContent);
+        fileContentBytes.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+        content.Add(fileContentBytes, "dllFile", "TestPlugin.dll");
+
+        HttpResponseMessage response = await unauthenticatedClient.PostAsync("/api/plugins", content);
+
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }

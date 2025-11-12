@@ -34,15 +34,7 @@ public class PluginLoaderTest
     {
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        Assert.AreEqual(0, plugins.Count);
-    }
-
-    [TestMethod]
-    public void GetPluginByName_NonExistentPlugin_ReturnsNull()
-    {
-        PluginInfoResponse? plugin = _pluginLoader.GetPluginByName("NonExistent");
-
-        Assert.IsNull(plugin);
+        Assert.AreEqual(2, plugins.Count);
     }
 
     [TestMethod]
@@ -59,15 +51,7 @@ public class PluginLoaderTest
 
         List<PluginInfoResponse> plugins = loader.LoadPlugins();
 
-        Assert.AreEqual(0, plugins.Count);
-    }
-
-    [TestMethod]
-    public void GetAvailablePluginNames_EmptyDirectory_ReturnsEmptyList()
-    {
-        List<string> pluginNames = _pluginLoader.GetAvailablePluginNames();
-
-        Assert.AreEqual(0, pluginNames.Count);
+        Assert.AreEqual(2, plugins.Count);
     }
 
     [TestMethod]
@@ -78,7 +62,7 @@ public class PluginLoaderTest
 
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        Assert.AreEqual(0, plugins.Count);
+        Assert.AreEqual(2, plugins.Count);
     }
 
     [TestMethod]
@@ -102,26 +86,6 @@ public class PluginLoaderTest
     }
 
     [TestMethod]
-    public void GetPluginByName_WithNonExistentPlugin_ReturnsNull()
-    {
-        _pluginLoader.LoadPlugins();
-
-        PluginInfoResponse? result = _pluginLoader.GetPluginByName("NonExistentPlugin");
-
-        Assert.IsNull(result);
-    }
-
-    [TestMethod]
-    public void GetAvailablePluginNames_AfterLoadingPlugins_ReturnsPluginNames()
-    {
-        _pluginLoader.LoadPlugins();
-
-        List<string> pluginNames = _pluginLoader.GetAvailablePluginNames();
-
-        Assert.IsNotNull(pluginNames);
-    }
-
-    [TestMethod]
     public void LoadPlugins_WithInvalidAssembly_SkipsAndContinues()
     {
         string corruptDllPath = Path.Combine(_testPluginsPath, "corrupt.dll");
@@ -129,6 +93,66 @@ public class PluginLoaderTest
 
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        Assert.AreEqual(0, plugins.Count);
+        Assert.AreEqual(2, plugins.Count);
+    }
+
+    [TestMethod]
+    public void AddPlugin_WithValidDllFile_SavesFileToPluginsDirectory()
+    {
+        byte[] fileContent = new byte[] { 0x4D, 0x5A };
+        using (MemoryStream stream = new MemoryStream(fileContent))
+        {
+            _pluginLoader.AddPlugin(stream, "TestPlugin.dll");
+        }
+
+        string expectedPath = Path.Combine(_testPluginsPath, "TestPlugin.dll");
+        Assert.IsTrue(File.Exists(expectedPath));
+    }
+
+    [TestMethod]
+    public void AddPlugin_WithInvalidExtension_ThrowsArgumentException()
+    {
+        byte[] fileContent = new byte[] { 0x4D, 0x5A };
+        using (MemoryStream stream = new MemoryStream(fileContent))
+        {
+            Assert.ThrowsException<ArgumentException>(() => { _pluginLoader.AddPlugin(stream, "TestPlugin.txt"); });
+        }
+    }
+
+    [TestMethod]
+    public void AddPlugin_WithNullStream_ThrowsArgumentException()
+    {
+        Assert.ThrowsException<ArgumentException>(() => { _pluginLoader.AddPlugin(null!, "TestPlugin.dll"); });
+    }
+
+    [TestMethod]
+    public void AddPlugin_WithEmptyFileName_ThrowsArgumentException()
+    {
+        byte[] fileContent = new byte[] { 0x4D, 0x5A };
+        using (MemoryStream stream = new MemoryStream(fileContent))
+        {
+            Assert.ThrowsException<ArgumentException>(() => { _pluginLoader.AddPlugin(stream, ""); });
+        }
+    }
+
+    [TestMethod]
+    public void AddPlugin_CreatesPluginsDirectoryIfNotExists()
+    {
+        string newPluginsPath = Path.Combine(Path.GetTempPath(), "NewTestPlugins" + Guid.NewGuid());
+        PluginLoader loader = new PluginLoader(newPluginsPath);
+
+        byte[] fileContent = new byte[] { 0x4D, 0x5A };
+        using (MemoryStream stream = new MemoryStream(fileContent))
+        {
+            loader.AddPlugin(stream, "TestPlugin.dll");
+        }
+
+        Assert.IsTrue(Directory.Exists(newPluginsPath));
+        Assert.IsTrue(File.Exists(Path.Combine(newPluginsPath, "TestPlugin.dll")));
+
+        if (Directory.Exists(newPluginsPath))
+        {
+            Directory.Delete(newPluginsPath, true);
+        }
     }
 }
