@@ -30,6 +30,30 @@ namespace BusinessLogic
             TicketType ticketType = (TicketType)request.TicketType;
             Guid? eventId = request.EventId;
 
+            if (!Enum.IsDefined(typeof(TicketType), ticketType))
+            {
+                throw new ArgumentException($"Invalid ticket type: {request.TicketType}");
+            }
+
+            if (ticketType == TicketType.EventSpecial)
+            {
+                if (eventId == null)
+                {
+                    throw new ArgumentException("EventSpecial ticket type requires an event ID");
+                }
+
+                Event ticketEvent = await _eventRepository.GetById(eventId.Value);
+                if (ticketEvent == null)
+                {
+                    throw new KeyNotFoundException($"Event with ID {eventId} not found");
+                }
+
+                if (ticketEvent.Date.Date != visitDate.Date)
+                {
+                    throw new ArgumentException($"Visit date must match the event date ({ticketEvent.Date.Date:yyyy-MM-dd})");
+                }
+            }
+
             User visitor = await _userRepository.GetById(visitorId);
             if (visitor == null)
             {
@@ -71,6 +95,12 @@ namespace BusinessLogic
 
         public async Task<IEnumerable<TicketResponse>> GetVisitorTicketsAsync(Guid visitorId)
         {
+            User visitor = await _userRepository.GetById(visitorId);
+            if (visitor == null)
+            {
+                throw new KeyNotFoundException($"Visitor with ID {visitorId} not found");
+            }
+
             IEnumerable<Ticket> tickets = await _ticketRepository.GetByVisitorIdAsync(visitorId);
             return tickets.Select(MapToTicketResponse);
         }
@@ -86,7 +116,7 @@ namespace BusinessLogic
             return MapToTicketResponse(ticket);
         }
 
-        public async Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, Guid? eventId)
+        public async Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, Guid? eventId, Guid attractionId)
         {
             bool isValid = false;
 
@@ -106,11 +136,14 @@ namespace BusinessLogic
                 isValid = ticket != null;
             }
 
-            if (isValid && ticket is { EventId: not null })
+            if (isValid && ticket?.Type == TicketType.EventSpecial && ticket.EventId != null)
             {
                 Event ticketEvent = await _eventRepository.GetById(ticket.EventId.Value);
                 if (ticketEvent.Date.Date != enterDate.Date || ticketEvent.Date.Hour > enterDate.Hour ||
                     ticketEvent.Date.Hour + _eventDurationHours < enterDate.Hour)
+                    isValid = false;
+
+                if (isValid && !ticketEvent.Attractions.Any(ea => ea.AttractionId == attractionId))
                     isValid = false;
             }
 

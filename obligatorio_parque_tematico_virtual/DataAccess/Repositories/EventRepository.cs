@@ -14,7 +14,10 @@ public class EventRepository : IEventRepository
     }
     public async Task<Event> GetById(Guid id)
     {
-        return await _context.Events.FindAsync(id);
+        return await _context.Events
+            .Include(e => e.Attractions)
+            .ThenInclude(ea => ea.Attraction)
+            .FirstOrDefaultAsync(e => e.Id == id);
     }
 
     public async Task Create(Event eventEntity)
@@ -25,7 +28,10 @@ public class EventRepository : IEventRepository
 
     public async Task<List<Event>> GetAll()
     {
-        return await _context.Events.ToListAsync();
+        return await _context.Events
+            .Include(e => e.Attractions)
+            .ThenInclude(ea => ea.Attraction)
+            .ToListAsync();
     }
 
     public async Task Delete(Event eventEntity)
@@ -38,6 +44,7 @@ public class EventRepository : IEventRepository
     {
         return await _context.Events
             .Include(e => e.Attractions)
+            .ThenInclude(ea => ea.Attraction)
             .FirstOrDefaultAsync(e =>
                 e.Date.Date == date.Date &&
                 e.Attractions.Any(ea => ea.AttractionId == attractionId));

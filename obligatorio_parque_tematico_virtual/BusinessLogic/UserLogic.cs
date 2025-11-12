@@ -44,6 +44,9 @@ namespace BusinessLogic
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 throw new ArgumentException("Name, last name, email, and password must be provided.");
 
+            if (!ValidateEmail(email))
+                throw new ArgumentException("Invalid email format.");
+
             DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
 
             if (birthDate >= currentDateTime)
@@ -67,7 +70,8 @@ namespace BusinessLogic
             Role? visitorRole = await _roleRepository.GetByNameAsync(Role.VISITOR);
             if (visitorRole != null)
             {
-                visitor.UserRoles.Add(new UserRole { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
+                visitor.UserRoles.Add(new UserRole
+                { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
             }
 
             User res = await _userRepository.Create(visitor);
@@ -91,17 +95,29 @@ namespace BusinessLogic
             string lastName = request.LastName;
             string email = request.Email;
             string password = request.Password;
+            DateTime? birthDate = request.BirthDate;
+            string? membershipLevel = request.MembershipLevel;
             List<string> roles = request.Roles;
 
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
                 string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
-                return null;
+                throw new ArgumentException("Name, last name, email, and password must be provided.");
             }
+
+            if (!ValidateEmail(email))
+                throw new ArgumentException("Invalid email format.");
 
             if (!await _userRepository.IsEmailUnique(email))
             {
-                return null;
+                throw new ArgumentException("Email is already in use.");
+            }
+
+            if (birthDate.HasValue)
+            {
+                DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+                if (birthDate.Value >= currentDateTime)
+                    throw new ArgumentException("Birth date cannot be after today.");
             }
 
             string hashedPassword = _passwordLogic.HashPassword(password);
@@ -111,8 +127,22 @@ namespace BusinessLogic
                 Name = name,
                 LastName = lastName,
                 Email = email,
-                Password = hashedPassword
+                Password = hashedPassword,
+                BirthDate = birthDate
             };
+
+            if (!string.IsNullOrEmpty(membershipLevel))
+            {
+                if (Enum.TryParse<MembershipLevel>(membershipLevel, true, out MembershipLevel parsedLevel) &&
+                    Enum.IsDefined(typeof(MembershipLevel), parsedLevel))
+                {
+                    user.MembershipLevel = parsedLevel;
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid membership level.");
+                }
+            }
 
             if (roles != null && roles.Count > 0)
             {
@@ -172,7 +202,11 @@ namespace BusinessLogic
             if (qr == null && nfc == null)
                 throw new ArgumentException("QR code or NFC must be provided.");
 
-            bool isValidTicket = await _ticketLogic.ValidateTicketAsync(qr, nfc, enterDate, eventId);
+            Attraction attraction = await _attractionRepository.GetById(attractionId);
+            if (attraction == null)
+                throw new ArgumentException("Attraction not found.");
+
+            bool isValidTicket = await _ticketLogic.ValidateTicketAsync(qr, nfc, enterDate, eventId, attractionId);
             if (!isValidTicket)
                 throw new ArgumentException("User does not have a valid ticket.");
 
@@ -180,9 +214,6 @@ namespace BusinessLogic
             if (user == null)
                 throw new ArgumentException("User not found.");
 
-            Attraction attraction = await _attractionRepository.GetById(attractionId);
-            if (attraction == null)
-                throw new ArgumentException("Attraction not found.");
 
             if (attraction.CurrentCapacity < attraction.MaxCapacity)
             {
@@ -290,6 +321,9 @@ namespace BusinessLogic
 
             if (!string.IsNullOrWhiteSpace(request.Email))
             {
+                if (!ValidateEmail(request.Email))
+                    throw new ArgumentException("Invalid email format.");
+
                 if (!string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
                 {
                     bool unique = await _userRepository.IsEmailUnique(request.Email);
@@ -351,6 +385,31 @@ namespace BusinessLogic
                 UserRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
                 Score = user.Score
             };
+        }
+
+        private bool ValidateEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            if (!email.Contains("@"))
+                return false;
+
+            int atIndex = email.IndexOf("@");
+            if (atIndex == 0 || atIndex == email.Length - 1)
+                return false;
+
+            if (email.IndexOf("@", atIndex + 1) != -1)
+                return false;
+
+            string domain = email.Substring(atIndex + 1);
+            if (!domain.Contains("."))
+                return false;
+
+            if (domain.StartsWith(".") || domain.EndsWith("."))
+                return false;
+
+            return true;
         }
     }
 }

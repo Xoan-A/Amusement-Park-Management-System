@@ -364,8 +364,7 @@ namespace TestApi
             {
                 VisitorId = registerResult.Id,
                 VisitDate = DateTime.Now.AddDays(14),
-                TicketType = (int)TicketType.EventSpecial,
-                EventId = Guid.NewGuid()
+                TicketType = (int)TicketType.General
             };
 
             HttpContent purchaseContent2 = new StringContent(

@@ -17,8 +17,8 @@ public class EventRepositoryTest
     public void Setup()
     {
         DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite("DataSource=:memory:")
-            .Options;
+        .UseSqlite("DataSource=:memory:")
+        .Options;
         _context = new AppDbContext(options);
         _context.Database.OpenConnection();
         _context.Database.EnsureDeleted();
@@ -65,6 +65,44 @@ public class EventRepositoryTest
     }
 
     [TestMethod]
+    public async Task GetById_ShouldIncludeAttractions_WhenEventHasAttractions()
+    {
+        Attraction attraction1 = new Attraction
+        {
+            Name = "Roller Coaster",
+            Description = "Fast ride",
+            MinAge = 12,
+            MaxCapacity = 100,
+            CurrentCapacity = 0
+        };
+
+        Attraction attraction2 = new Attraction
+        {
+            Name = "Ferris Wheel",
+            Description = "Slow ride",
+            MinAge = 5,
+            MaxCapacity = 150,
+            CurrentCapacity = 0
+        };
+
+        await _context.Attractions.AddAsync(attraction1);
+        await _context.Attractions.AddAsync(attraction2);
+        await _context.SaveChangesAsync();
+
+        eventEntity.AddAttraction(attraction1);
+        eventEntity.AddAttraction(attraction2);
+
+        await _context.Events.AddAsync(eventEntity);
+        await _context.SaveChangesAsync();
+
+        Event result = await _eventRepository.GetById(eventEntity.Id);
+
+        Assert.AreEqual(2, result.Attractions.Count);
+        Assert.IsTrue(result.Attractions.First().AttractionId == attraction1.Id);
+        Assert.IsTrue(result.Attractions.Last().AttractionId == attraction2.Id);
+    }
+
+    [TestMethod]
     public async Task Create_ShouldAddEventToDatabase()
     {
         await _eventRepository.Create(eventEntity);
@@ -85,6 +123,58 @@ public class EventRepositoryTest
         Assert.IsTrue(events.Any());
         Assert.AreEqual(1, events.Count());
         Assert.AreEqual(eventEntity.Name, events.First().Name);
+    }
+
+    [TestMethod]
+    public async Task GetAll_ShouldIncludeAttractions_WhenEventsHaveAttractions()
+    {
+        Attraction attraction1 = new Attraction
+        {
+            Name = "Haunted House",
+            Description = "Scary ride",
+            MinAge = 10,
+            MaxCapacity = 50,
+            CurrentCapacity = 0
+        };
+
+        Attraction attraction2 = new Attraction
+        {
+            Name = "Water Slide",
+            Description = "Wet ride",
+            MinAge = 8,
+            MaxCapacity = 200,
+            CurrentCapacity = 0
+        };
+
+        await _context.Attractions.AddAsync(attraction1);
+        await _context.Attractions.AddAsync(attraction2);
+        await _context.SaveChangesAsync();
+
+        eventEntity.AddAttraction(attraction1);
+        await _context.Events.AddAsync(eventEntity);
+
+        Event newEvent = new Event
+        {
+            Name = "Water Park Day",
+            Date = new DateTime(2024, 09, 20, 10, 0, 0),
+            MaxCapacity = 2000
+        };
+        newEvent.AddAttraction(attraction2);
+        await _context.Events.AddAsync(newEvent);
+
+        await _context.SaveChangesAsync();
+
+        List<Event> result = await _eventRepository.GetAll();
+
+        Assert.AreEqual(2, result.Count);
+
+        Event firstEvent = result.First(e => e.Id == eventEntity.Id);
+        Assert.AreEqual(1, firstEvent.Attractions.Count);
+        Assert.IsTrue(firstEvent.Attractions.First().AttractionId == attraction1.Id);
+
+        Event secondEvent = result.First(e => e.Id == newEvent.Id);
+        Assert.AreEqual(1, secondEvent.Attractions.Count);
+        Assert.IsTrue(secondEvent.Attractions.First().AttractionId == attraction2.Id);
     }
 
     [TestMethod]

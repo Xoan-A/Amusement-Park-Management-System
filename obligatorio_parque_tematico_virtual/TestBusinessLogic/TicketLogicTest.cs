@@ -140,11 +140,134 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
+        public async Task TestPurchaseTicketAsync_InvalidTicketType()
+        {
+            Guid visitorId = Guid.NewGuid();
+            DateTime currentDate = new DateTime(2025, 1, 1, 10, 0, 0);
+            DateTime visitDate = new DateTime(2025, 1, 15, 0, 0, 0);
+
+            User visitor = new User
+            {
+                Id = visitorId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com"
+            };
+
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
+            _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
+
+            PurchaseTicketRequest request = new PurchaseTicketRequest
+            {
+                VisitorId = visitorId,
+                VisitDate = visitDate,
+                TicketType = 999 // Invalid ticket type value
+            };
+
+            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
+                async () => await _ticketLogic.PurchaseTicketAsync(request)
+            );
+
+            Assert.IsTrue(exception.Message.Contains("Invalid ticket type"));
+            _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task TestPurchaseTicketAsync_EventSpecialWithoutEventId_ThrowsException()
+        {
+            Guid visitorId = Guid.NewGuid();
+            DateTime currentDate = new DateTime(2025, 1, 1, 10, 0, 0);
+            DateTime visitDate = new DateTime(2025, 1, 15, 0, 0, 0);
+
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
+
+            PurchaseTicketRequest request = new PurchaseTicketRequest
+            {
+                VisitorId = visitorId,
+                VisitDate = visitDate,
+                TicketType = (int)TicketType.EventSpecial,
+                EventId = null
+            };
+
+            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
+                async () => await _ticketLogic.PurchaseTicketAsync(request)
+            );
+
+            Assert.IsTrue(exception.Message.Contains("EventSpecial ticket type requires an event ID"));
+            _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task TestPurchaseTicketAsync_EventSpecialWithNonExistentEvent_ThrowsException()
+        {
+            Guid visitorId = Guid.NewGuid();
+            Guid eventId = Guid.NewGuid();
+            DateTime currentDate = new DateTime(2025, 1, 1, 10, 0, 0);
+            DateTime visitDate = new DateTime(2025, 1, 15, 0, 0, 0);
+
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
+            _mockEventRepository.Setup(e => e.GetById(eventId)).ReturnsAsync((Event)null);
+
+            PurchaseTicketRequest request = new PurchaseTicketRequest
+            {
+                VisitorId = visitorId,
+                VisitDate = visitDate,
+                TicketType = (int)TicketType.EventSpecial,
+                EventId = eventId
+            };
+
+            KeyNotFoundException exception = await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
+                async () => await _ticketLogic.PurchaseTicketAsync(request)
+            );
+
+            Assert.IsTrue(exception.Message.Contains($"Event with ID {eventId} not found"));
+            _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task TestPurchaseTicketAsync_EventSpecialWithMismatchingDate_ThrowsException()
+        {
+            Guid visitorId = Guid.NewGuid();
+            Guid eventId = Guid.NewGuid();
+            DateTime currentDate = new DateTime(2025, 1, 1, 10, 0, 0);
+            DateTime eventDate = new DateTime(2025, 1, 15, 14, 0, 0);
+            DateTime visitDate = new DateTime(2025, 1, 20, 0, 0, 0);
+
+            Event eventEntity = new Event
+            {
+                Id = eventId,
+                Name = "Special Event",
+                Date = eventDate,
+                MaxCapacity = 100,
+                CurrentCapacity = 10,
+                Cost = 50
+            };
+
+            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
+            _mockEventRepository.Setup(e => e.GetById(eventId)).ReturnsAsync(eventEntity);
+
+            PurchaseTicketRequest request = new PurchaseTicketRequest
+            {
+                VisitorId = visitorId,
+                VisitDate = visitDate,
+                TicketType = (int)TicketType.EventSpecial,
+                EventId = eventId
+            };
+
+            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
+                async () => await _ticketLogic.PurchaseTicketAsync(request)
+            );
+
+            Assert.IsTrue(exception.Message.Contains("Visit date must match the event date"));
+            _mockTicketRepository.Verify(t => t.AddAsync(It.IsAny<Ticket>()), Times.Never);
+        }
+
+        [TestMethod]
         public async Task TestPurchaseTicketAsync_EventSpecialType()
         {
             Guid visitorId = Guid.NewGuid();
             DateTime currentDate = new DateTime(2025, 1, 1, 10, 0, 0);
-            DateTime visitDate = new DateTime(2025, 1, 20, 0, 0, 0);
+            DateTime visitDate = new DateTime(2025, 1, 20, 14, 0, 0);
             Guid eventId = Guid.NewGuid();
 
             User visitor = new User
@@ -152,6 +275,16 @@ namespace TestBusinessLogic
                 Id = visitorId,
                 Name = "Jane",
                 LastName = "Smith"
+            };
+
+            Event eventEntity = new Event
+            {
+                Id = eventId,
+                Name = "Special Event",
+                Date = visitDate,
+                MaxCapacity = 100,
+                CurrentCapacity = 10,
+                Cost = 50
             };
 
             Guid ticketId = Guid.NewGuid();
@@ -167,6 +300,7 @@ namespace TestBusinessLogic
             };
 
             _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).ReturnsAsync(currentDate);
+            _mockEventRepository.Setup(e => e.GetById(eventId)).ReturnsAsync(eventEntity);
             _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
             _mockTicketRepository.Setup(t => t.AddAsync(It.IsAny<Ticket>())).ReturnsAsync(expectedTicket);
             _mockTicketRepository.Setup(t => t.GetByIdAsync(expectedTicket.Id)).ReturnsAsync(new Ticket
@@ -218,19 +352,49 @@ namespace TestBusinessLogic
         public async Task TestGetVisitorTicketsAsync()
         {
             Guid visitorId = Guid.NewGuid();
+            Guid eventId = Guid.NewGuid();
+
+            User visitor = new User
+            {
+                Id = visitorId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com"
+            };
+
             List<Ticket> expectedTickets = new List<Ticket>
             {
                 new Ticket { Id = Guid.NewGuid(), VisitorId = visitorId, Type = TicketType.General },
-                new Ticket { Id = Guid.NewGuid(), VisitorId = visitorId, Type = TicketType.EventSpecial }
+                new Ticket
+                {
+                    Id = Guid.NewGuid(), VisitorId = visitorId, Type = TicketType.EventSpecial, EventId = eventId
+                }
             };
 
+            _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync(visitor);
             _mockTicketRepository.Setup(t => t.GetByVisitorIdAsync(visitorId)).ReturnsAsync(expectedTickets);
 
             IEnumerable<TicketResponse> result = await _ticketLogic.GetVisitorTicketsAsync(visitorId);
 
             Assert.AreEqual(2, result.Count());
             Assert.IsTrue(result.All(t => t.VisitorId == visitorId));
+            _mockUserRepository.Verify(u => u.GetById(visitorId), Times.Once);
             _mockTicketRepository.Verify(t => t.GetByVisitorIdAsync(visitorId), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task TestGetVisitorTicketsAsync_VisitorNotFound()
+        {
+            Guid visitorId = Guid.NewGuid();
+
+            _mockUserRepository.Setup(u => u.GetById(visitorId)).ReturnsAsync((User)null);
+
+            await Assert.ThrowsExceptionAsync<KeyNotFoundException>(
+                async () => await _ticketLogic.GetVisitorTicketsAsync(visitorId)
+            );
+
+            _mockUserRepository.Verify(u => u.GetById(visitorId), Times.Once);
+            _mockTicketRepository.Verify(t => t.GetByVisitorIdAsync(It.IsAny<Guid>()), Times.Never);
         }
 
         [TestMethod]
@@ -257,8 +421,9 @@ namespace TestBusinessLogic
         {
             DateTime enterDate = new DateTime(2025, 1, 15, 10, 0, 0);
             Guid? eventId = null;
+            Guid attractionId = Guid.NewGuid();
 
-            bool result = await _ticketLogic.ValidateTicketAsync(null, null, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(null, null, enterDate, eventId, attractionId);
 
             Assert.IsFalse(result);
             _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(It.IsAny<Guid>()), Times.Never);
@@ -278,12 +443,12 @@ namespace TestBusinessLogic
                 QRCode = qrCode,
                 VisitDate = new DateTime(2025, 1, 15, 0, 0, 0),
                 EventId = eventId,
-                Type = TicketType.EventSpecial
+                Type = TicketType.General
             };
 
             _mockTicketRepository.Setup(t => t.GetByQRCodeAsync(qrCode)).ReturnsAsync(ticket);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId, Guid.NewGuid());
 
             Assert.IsTrue(result);
             _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(qrCode), Times.Once);
@@ -303,12 +468,12 @@ namespace TestBusinessLogic
                 QRCode = qrCode,
                 VisitDate = new DateTime(2025, 1, 15, 0, 0, 0),
                 EventId = differentEventId,
-                Type = TicketType.EventSpecial
+                Type = TicketType.General
             };
 
             _mockTicketRepository.Setup(t => t.GetByQRCodeAsync(qrCode)).ReturnsAsync(ticket);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId, Guid.NewGuid());
 
             Assert.IsFalse(result);
             _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(qrCode), Times.Once);
@@ -332,7 +497,7 @@ namespace TestBusinessLogic
 
             _mockTicketRepository.Setup(t => t.GetByQRCodeAsync(qrCode)).ReturnsAsync(ticket);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId, Guid.NewGuid());
 
             Assert.IsFalse(result);
             _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(qrCode), Times.Once);
@@ -347,7 +512,7 @@ namespace TestBusinessLogic
 
             _mockTicketRepository.Setup(t => t.GetByQRCodeAsync(qrCode)).ReturnsAsync((Ticket)null);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId, Guid.NewGuid());
 
             Assert.IsFalse(result);
             _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(qrCode), Times.Once);
@@ -368,13 +533,13 @@ namespace TestBusinessLogic
                     VisitorId = visitorId,
                     VisitDate = new DateTime(2025, 1, 15, 0, 0, 0),
                     EventId = eventId,
-                    Type = TicketType.EventSpecial
+                    Type = TicketType.General
                 }
             };
 
             _mockTicketRepository.Setup(t => t.GetByVisitorIdAsync(visitorId)).ReturnsAsync(tickets);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(null, visitorId, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(null, visitorId, enterDate, eventId, Guid.NewGuid());
 
             Assert.IsTrue(result);
             _mockTicketRepository.Verify(t => t.GetByVisitorIdAsync(visitorId), Times.Once);
@@ -396,13 +561,13 @@ namespace TestBusinessLogic
                     VisitorId = visitorId,
                     VisitDate = new DateTime(2025, 1, 15, 0, 0, 0),
                     EventId = differentEventId,
-                    Type = TicketType.EventSpecial
+                    Type = TicketType.General
                 }
             };
 
             _mockTicketRepository.Setup(t => t.GetByVisitorIdAsync(visitorId)).ReturnsAsync(tickets);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(null, visitorId, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(null, visitorId, enterDate, eventId, Guid.NewGuid());
 
             Assert.IsFalse(result);
             _mockTicketRepository.Verify(t => t.GetByVisitorIdAsync(visitorId), Times.Once);
@@ -429,7 +594,7 @@ namespace TestBusinessLogic
 
             _mockTicketRepository.Setup(t => t.GetByVisitorIdAsync(visitorId)).ReturnsAsync(tickets);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(null, visitorId, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(null, visitorId, enterDate, eventId, Guid.NewGuid());
 
             Assert.IsFalse(result);
             _mockTicketRepository.Verify(t => t.GetByVisitorIdAsync(visitorId), Times.Once);
@@ -444,7 +609,7 @@ namespace TestBusinessLogic
 
             _mockTicketRepository.Setup(t => t.GetByVisitorIdAsync(visitorId)).ReturnsAsync(new List<Ticket>());
 
-            bool result = await _ticketLogic.ValidateTicketAsync(null, visitorId, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(null, visitorId, enterDate, eventId, Guid.NewGuid());
 
             Assert.IsFalse(result);
             _mockTicketRepository.Verify(t => t.GetByVisitorIdAsync(visitorId), Times.Once);
@@ -467,7 +632,7 @@ namespace TestBusinessLogic
 
             _mockTicketRepository.Setup(t => t.GetByQRCodeAsync(qrCode)).ReturnsAsync(ticket);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, null);
+            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, null, Guid.NewGuid());
 
             Assert.IsTrue(result);
             _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(qrCode), Times.Once);
@@ -493,7 +658,7 @@ namespace TestBusinessLogic
 
             _mockTicketRepository.Setup(t => t.GetByVisitorIdAsync(visitorId)).ReturnsAsync(tickets);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(null, visitorId, enterDate, null);
+            bool result = await _ticketLogic.ValidateTicketAsync(null, visitorId, enterDate, null, Guid.NewGuid());
 
             Assert.IsTrue(result);
             _mockTicketRepository.Verify(t => t.GetByVisitorIdAsync(visitorId), Times.Once);
@@ -524,7 +689,7 @@ namespace TestBusinessLogic
                     VisitorId = visitorId,
                     VisitDate = new DateTime(2025, 1, 15, 0, 0, 0),
                     EventId = eventId,
-                    Type = TicketType.EventSpecial
+                    Type = TicketType.General
                 },
                 new Ticket
                 {
@@ -538,7 +703,7 @@ namespace TestBusinessLogic
 
             _mockTicketRepository.Setup(t => t.GetByVisitorIdAsync(visitorId)).ReturnsAsync(tickets);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(null, visitorId, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(null, visitorId, enterDate, eventId, Guid.NewGuid());
 
             Assert.IsTrue(result);
             _mockTicketRepository.Verify(t => t.GetByVisitorIdAsync(visitorId), Times.Once);
@@ -548,6 +713,7 @@ namespace TestBusinessLogic
         public async Task TestValidateTicketAsync_EventTimeWithinWindow_ReturnsTrue()
         {
             Guid eventId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
             Guid qrCode = Guid.NewGuid();
             DateTime eventDateStart = new DateTime(2025, 1, 15, 10, 0, 0);
             DateTime enterDate = new DateTime(2025, 1, 15, 11, 0, 0);
@@ -561,6 +727,19 @@ namespace TestBusinessLogic
                 Type = TicketType.EventSpecial
             };
 
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Main Stage",
+            };
+
+            EventAttraction eventAttraction = new EventAttraction
+            {
+                EventId = eventId,
+                AttractionId = attraction.Id,
+                Attraction = attraction
+            };
+
             Event eventEntity = new Event
             {
                 Id = eventId,
@@ -568,13 +747,14 @@ namespace TestBusinessLogic
                 Date = eventDateStart,
                 MaxCapacity = 100,
                 CurrentCapacity = 10,
-                Cost = 50
+                Cost = 50,
+                Attractions = new List<EventAttraction> { eventAttraction }
             };
 
             _mockTicketRepository.Setup(t => t.GetByQRCodeAsync(qrCode)).ReturnsAsync(ticket);
             _mockEventRepository.Setup(e => e.GetById(eventId)).ReturnsAsync(eventEntity);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId, attractionId);
 
             Assert.IsTrue(result);
             _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(qrCode), Times.Once);
@@ -611,7 +791,7 @@ namespace TestBusinessLogic
             _mockTicketRepository.Setup(t => t.GetByQRCodeAsync(qrCode)).ReturnsAsync(ticket);
             _mockEventRepository.Setup(e => e.GetById(eventId)).ReturnsAsync(eventEntity);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId, Guid.NewGuid());
 
             Assert.IsFalse(result);
             _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(qrCode), Times.Once);
@@ -636,7 +816,7 @@ namespace TestBusinessLogic
 
             _mockTicketRepository.Setup(t => t.GetByQRCodeAsync(qrCode)).ReturnsAsync(ticket);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, null);
+            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, null, Guid.NewGuid());
 
             Assert.IsTrue(result, "Ticket should be valid when no event is associated");
             _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(qrCode), Times.Once);
@@ -674,9 +854,110 @@ namespace TestBusinessLogic
             _mockTicketRepository.Setup(t => t.GetByQRCodeAsync(qrCode)).ReturnsAsync(ticket);
             _mockEventRepository.Setup(e => e.GetById(eventId)).ReturnsAsync(eventEntity);
 
-            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId);
+            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId, Guid.NewGuid());
 
             Assert.IsFalse(result, "Ticket should be invalid when trying to enter before event starts");
+            _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(qrCode), Times.Once);
+            _mockEventRepository.Verify(e => e.GetById(eventId), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task ValidateTicketAsync_EventSpecialWithAttractionNotInEvent_ReturnsFalse()
+        {
+            Guid eventId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+            Guid attractionInEventId = Guid.NewGuid();
+            Guid attractionNotInEventId = Guid.NewGuid();
+            DateTime eventDateStart = new DateTime(2025, 1, 15, 10, 0, 0);
+            DateTime enterDate = new DateTime(2025, 1, 15, 11, 0, 0);
+
+            Ticket ticket = new Ticket
+            {
+                Id = Guid.NewGuid(),
+                QRCode = qrCode,
+                VisitDate = eventDateStart.Date,
+                EventId = eventId,
+                Type = TicketType.EventSpecial
+            };
+
+            Event eventEntity = new Event
+            {
+                Id = eventId,
+                Name = "Concert",
+                Date = eventDateStart,
+                MaxCapacity = 100,
+                CurrentCapacity = 10,
+                Cost = 50
+            };
+
+            Attraction attractionInEvent = new Attraction
+            {
+                Id = attractionInEventId,
+                Name = "Main Stage"
+            };
+
+            eventEntity.AddAttraction(attractionInEvent);
+
+            _mockTicketRepository.Setup(t => t.GetByQRCodeAsync(qrCode)).ReturnsAsync(ticket);
+            _mockEventRepository.Setup(e => e.GetById(eventId)).ReturnsAsync(eventEntity);
+
+            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId, Guid.NewGuid());
+
+            Assert.IsFalse(result, "Ticket should be invalid when attraction does not belong to event");
+            _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(qrCode), Times.Once);
+            _mockEventRepository.Verify(e => e.GetById(eventId), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task ValidateTicketAsync_EventSpecialWithAttractionInEvent_ReturnsTrue()
+        {
+            Guid eventId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            DateTime eventDateStart = new DateTime(2025, 1, 15, 10, 0, 0);
+            DateTime enterDate = new DateTime(2025, 1, 15, 11, 0, 0);
+
+            Ticket ticket = new Ticket
+            {
+                Id = Guid.NewGuid(),
+                QRCode = qrCode,
+                VisitDate = eventDateStart.Date,
+                EventId = eventId,
+                Type = TicketType.EventSpecial
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Main Stage"
+            };
+
+            EventAttraction eventAttraction = new EventAttraction
+            {
+                EventId = eventId,
+                AttractionId = attraction.Id,
+                Attraction = attraction
+            };
+
+            Event eventEntity = new Event
+            {
+                Id = eventId,
+                Name = "Concert",
+                Date = eventDateStart,
+                MaxCapacity = 100,
+                CurrentCapacity = 10,
+                Cost = 50,
+                Attractions = new List<EventAttraction> { eventAttraction }
+            };
+
+            eventEntity.AddAttraction(attraction);
+
+            _mockTicketRepository.Setup(t => t.GetByQRCodeAsync(qrCode)).ReturnsAsync(ticket);
+            _mockEventRepository.Setup(e => e.GetById(eventId)).ReturnsAsync(eventEntity);
+
+            bool result = await _ticketLogic.ValidateTicketAsync(qrCode, null, enterDate, eventId, attractionId);
+
+            Assert.IsTrue(result, "Ticket should be valid when attraction belongs to event");
             _mockTicketRepository.Verify(t => t.GetByQRCodeAsync(qrCode), Times.Once);
             _mockEventRepository.Verify(e => e.GetById(eventId), Times.Once);
         }

@@ -129,7 +129,8 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
             throw new KeyNotFoundException($"Schedule with id {id} not found");
         }
 
-        if (!Enum.TryParse<MaintenanceStatus>(status, out MaintenanceStatus maintenanceStatus))
+        if (!Enum.TryParse<MaintenanceStatus>(status, out MaintenanceStatus maintenanceStatus) ||
+            !Enum.IsDefined(typeof(MaintenanceStatus), maintenanceStatus))
         {
             throw new ArgumentException($"Invalid status: {status}");
         }

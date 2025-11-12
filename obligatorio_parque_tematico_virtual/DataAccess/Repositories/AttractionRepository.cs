@@ -48,6 +48,16 @@ public class AttractionRepository : IAttractionRepository
 
     public async Task Delete(Attraction attraction)
     {
+        List<MaintenanceSchedule> maintenanceSchedules = await _context.MaintenanceSchedules
+            .Where(ms => ms.AttractionId == attraction.Id)
+            .ToListAsync();
+        _context.MaintenanceSchedules.RemoveRange(maintenanceSchedules);
+
+        List<EventAttraction> eventAttractions = await _context.Set<EventAttraction>()
+            .Where(ea => ea.AttractionId == attraction.Id)
+            .ToListAsync();
+        _context.Set<EventAttraction>().RemoveRange(eventAttractions);
+
         _context.Attractions.Remove(attraction);
         await _context.SaveChangesAsync();
     }
