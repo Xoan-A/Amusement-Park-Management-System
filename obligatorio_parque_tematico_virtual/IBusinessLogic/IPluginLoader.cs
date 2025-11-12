@@ -6,7 +6,6 @@ namespace IBusinessLogic;
 public interface IPluginLoader
 {
     List<PluginInfoResponse> LoadPlugins();
-    PluginInfoResponse? GetPluginByName(string name);
-    IConcreteStrategy CreateStrategyInstance(string name);
-    List<string> GetAvailablePluginNames();
+    IConcreteStrategy CreateStrategyInstance(string name, Dictionary<string, object>? parameters = null);
+    void AddPlugin(Stream dllStream, string fileName);
 }
