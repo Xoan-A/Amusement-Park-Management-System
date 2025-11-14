@@ -1,16 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { TicketService } from '../../../core/services/ticket.service';
 import { AttractionResponse, TicketResponse } from '../../../core/models';
+import { BrowserMultiFormatReader, IScannerControls } from '@zxing/browser';
 
 @Component({
   selector: 'app-entry-exit',
   standalone: true,
-  imports: [CommonModule, FormsModule, ZXingScannerModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   template: `
     <app-navbar></app-navbar>
     <div class="container mt-4">
@@ -95,12 +95,7 @@ import { AttractionResponse, TicketResponse } from '../../../core/models';
               }
 
               <div class="scanner-container" style="max-width: 500px; margin: 0 auto;">
-                <zxing-scanner
-                  [device]="selectedDevice"
-                  (scanSuccess)="onScanSuccess($event)"
-                  (permissionResponse)="onPermissionResponse($event)"
-                  (camerasFound)="onCamerasFound($event)"
-                ></zxing-scanner>
+                <video #videoElement style="width: 100%; border: 2px solid #ccc; border-radius: 8px;"></video>
               </div>
 
               @if (hasDevices === false) {
@@ -199,7 +194,9 @@ import { AttractionResponse, TicketResponse } from '../../../core/models';
     }
   `]
 })
-export class EntryExitComponent implements OnInit {
+export class EntryExitComponent implements OnInit, OnDestroy {
+  @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
+
   attractions: AttractionResponse[] = [];
   successMessage = '';
   errorMessage = '';
@@ -215,6 +212,9 @@ export class EntryExitComponent implements OnInit {
   hasDevices?: boolean;
   hasPermission?: boolean;
 
+  private codeReader?: BrowserMultiFormatReader;
+  private scannerControls?: IScannerControls;
+
   constructor(
     private attractionService: AttractionService,
     private ticketService: TicketService
@@ -222,6 +222,10 @@ export class EntryExitComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAttractions();
+  }
+
+  ngOnDestroy(): void {
+    this.stopScanner();
   }
 
   loadAttractions(): void {
@@ -236,9 +240,62 @@ export class EntryExitComponent implements OnInit {
     });
   }
 
-  setInputMethod(method: 'manual' | 'camera'): void {
+  async setInputMethod(method: 'manual' | 'camera'): Promise<void> {
     this.inputMethod = method;
     this.resetScanner();
+
+    if (method === 'camera') {
+      await this.initScanner();
+    } else {
+      this.stopScanner();
+    }
+  }
+
+  async initScanner(): Promise<void> {
+    try {
+      this.codeReader = new BrowserMultiFormatReader();
+      const devices = await BrowserMultiFormatReader.listVideoInputDevices();
+      this.availableDevices = devices;
+      this.hasDevices = devices && devices.length > 0;
+
+      if (this.hasDevices) {
+        this.selectedDevice = devices[0];
+        this.startScanning();
+      } else {
+        this.errorMessage = 'No camera devices found';
+      }
+      this.hasPermission = true;
+    } catch (error) {
+      console.error('Error initializing scanner:', error);
+      this.hasPermission = false;
+      this.errorMessage = 'Camera permission denied or not available';
+    }
+  }
+
+  async startScanning(): Promise<void> {
+    if (!this.codeReader || !this.selectedDevice || !this.videoElement) return;
+
+    try {
+      this.scannerControls = await this.codeReader.decodeFromVideoDevice(
+        this.selectedDevice.deviceId,
+        this.videoElement.nativeElement,
+        (result, error) => {
+          if (result) {
+            this.onScanSuccess(result.getText());
+          }
+        }
+      );
+    } catch (error) {
+      console.error('Error starting scanner:', error);
+      this.errorMessage = 'Failed to start camera';
+    }
+  }
+
+  stopScanner(): void {
+    if (this.scannerControls) {
+      this.scannerControls.stop();
+      this.scannerControls = undefined;
+    }
   }
 
   lookupTicket(): void {
@@ -261,27 +318,14 @@ export class EntryExitComponent implements OnInit {
     });
   }
 
-  onCamerasFound(devices: MediaDeviceInfo[]): void {
-    this.availableDevices = devices;
-    this.hasDevices = devices && devices.length > 0;
-    if (this.hasDevices) {
-      this.selectedDevice = devices[0];
-    }
-  }
-
-  onDeviceSelectChange(event: Event): void {
+  async onDeviceSelectChange(event: Event): Promise<void> {
     const target = event.target as HTMLSelectElement;
     const deviceId = target.value;
     const device = this.availableDevices.find(d => d.deviceId === deviceId);
     if (device) {
       this.selectedDevice = device;
-    }
-  }
-
-  onPermissionResponse(hasPermission: boolean): void {
-    this.hasPermission = hasPermission;
-    if (!hasPermission) {
-      this.errorMessage = 'Camera permission denied. Please use manual input.';
+      this.stopScanner();
+      await this.startScanning();
     }
   }
 
@@ -381,5 +425,6 @@ export class EntryExitComponent implements OnInit {
     this.scannedTicket = null;
     this.selectedAttractionId = '';
     this.manualTicketId = '';
+    this.stopScanner();
   }
 }

@@ -1,38 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../core/services/attraction.service';
-import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration } from 'chart.js';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent, BaseChartDirective],
+  imports: [CommonModule, ReactiveFormsModule, NavbarComponent],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.scss'
 })
-export class ReportsComponent implements OnInit {
+export class ReportsComponent implements OnInit, AfterViewInit {
+  @ViewChild('chartCanvas') chartCanvas!: ElementRef<HTMLCanvasElement>;
   dateRangeForm: FormGroup;
   loading = false;
   reportData: any = null;
-
-  public barChartData: ChartConfiguration<'bar'>['data'] = {
-    labels: [],
-    datasets: [{
-      data: [],
-      label: 'Total Visits',
-      backgroundColor: 'rgba(54, 162, 235, 0.6)'
-    }]
-  };
-
-  public barChartOptions: ChartConfiguration<'bar'>['options'] = {
-    responsive: true,
-    scales: {
-      y: { beginAtZero: true }
-    }
-  };
+  chart?: Chart;
 
   constructor(
     private fb: FormBuilder,
@@ -49,6 +36,32 @@ export class ReportsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadReport();
+  }
+
+  ngAfterViewInit(): void {
+    this.initChart();
+  }
+
+  initChart(): void {
+    if (this.chartCanvas) {
+      this.chart = new Chart(this.chartCanvas.nativeElement, {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [{
+            data: [],
+            label: 'Total Visits',
+            backgroundColor: 'rgba(54, 162, 235, 0.6)'
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
   }
 
   loadReport(): void {
@@ -69,9 +82,10 @@ export class ReportsComponent implements OnInit {
   }
 
   updateChart(data: any): void {
-    if (data && data.attractionVisits) {
-      this.barChartData.labels = data.attractionVisits.map((v: any) => v.attractionName);
-      this.barChartData.datasets[0].data = data.attractionVisits.map((v: any) => v.totalVisits);
+    if (this.chart && data && data.attractionVisits) {
+      this.chart.data.labels = data.attractionVisits.map((v: any) => v.attractionName);
+      this.chart.data.datasets[0].data = data.attractionVisits.map((v: any) => v.totalVisits);
+      this.chart.update();
     }
   }
 }

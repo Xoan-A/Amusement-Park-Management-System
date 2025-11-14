@@ -32,11 +32,7 @@
         <h5 class="mb-0">Visits Chart</h5>
       </div>
       <div class="card-body">
-        <canvas baseChart
-          [data]="barChartData"
-          [options]="barChartOptions"
-          type="bar">
-        </canvas>
+        <canvas #chartCanvas></canvas>
       </div>
     </div>
 
