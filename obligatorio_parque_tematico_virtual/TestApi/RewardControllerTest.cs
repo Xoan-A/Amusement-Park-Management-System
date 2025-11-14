@@ -44,7 +44,7 @@ public class RewardControllerTest
                 }
 
                 services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlite(_connection));
+                options.UseSqlite(_connection));
 
                 services.AddSingleton(_mockRewardLogic.Object);
             });
@@ -58,7 +58,8 @@ public class RewardControllerTest
 
         _client = _factory.CreateClient();
 
-        Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings = Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+        Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
+        Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
         {
             SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
             Issuer = "ParqueTematico",
@@ -78,7 +79,7 @@ public class RewardControllerTest
         string adminToken = tokenService.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();
         _adminClient.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
 
         UserResponse visitorUser = new UserResponse
         {
@@ -91,7 +92,7 @@ public class RewardControllerTest
         string visitorToken = tokenService.GenerateToken(visitorUser);
         _visitorClient = _factory.CreateClient();
         _visitorClient.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", visitorToken);
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", visitorToken);
     }
 
     [TestCleanup]
@@ -105,7 +106,7 @@ public class RewardControllerTest
     }
 
     [TestMethod]
-    public  void GetAllRewards_AsAdmin_ReturnsOk()
+    public void GetAllRewards_AsAdmin_ReturnsOk()
     {
         List<RewardModelOut> rewards = new List<RewardModelOut>
         {
@@ -131,16 +132,16 @@ public class RewardControllerTest
 
         _mockRewardLogic.Setup(s => s.GetAllRewards()).Returns(rewards);
 
-        HttpResponseMessage response =  _ = _adminClient.GetAsync("/api/rewards").Result;
+        HttpResponseMessage response = _ = _adminClient.GetAsync("/api/rewards").Result;
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-        string content =  response.Content.ReadAsStringAsync().Result;
+        string content = response.Content.ReadAsStringAsync().Result;
         Assert.IsTrue(content.Contains("Reward 1"));
         Assert.IsTrue(content.Contains("Reward 2"));
     }
 
     [TestMethod]
-    public  void GetAllRewards_AsVisitor_ReturnsOk()
+    public void GetAllRewards_AsVisitor_ReturnsOk()
     {
         List<RewardModelOut> rewards = new List<RewardModelOut>
         {
@@ -157,13 +158,13 @@ public class RewardControllerTest
 
         _mockRewardLogic.Setup(s => s.GetAllRewards()).Returns(rewards);
 
-        HttpResponseMessage response =  _ = _visitorClient.GetAsync("/api/rewards").Result;
+        HttpResponseMessage response = _ = _visitorClient.GetAsync("/api/rewards").Result;
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public  void GetRewardById_ExistingReward_ReturnsOk()
+    public void GetRewardById_ExistingReward_ReturnsOk()
     {
         Guid rewardId = Guid.NewGuid();
         RewardModelOut reward = new RewardModelOut
@@ -178,27 +179,27 @@ public class RewardControllerTest
 
         _mockRewardLogic.Setup(s => s.GetRewardById(rewardId)).Returns(reward);
 
-        HttpResponseMessage response =  _ = _adminClient.GetAsync($"/api/rewards/{rewardId}").Result;
+        HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/rewards/{rewardId}").Result;
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-        string content =  response.Content.ReadAsStringAsync().Result;
+        string content = response.Content.ReadAsStringAsync().Result;
         Assert.IsTrue(content.Contains("Test Reward"));
     }
 
     [TestMethod]
-    public  void GetRewardById_NonExistingReward_ReturnsNotFound()
+    public void GetRewardById_NonExistingReward_ReturnsNotFound()
     {
         Guid rewardId = Guid.NewGuid();
         _mockRewardLogic.Setup(s => s.GetRewardById(rewardId))
-            .Throws(new KeyNotFoundException("Reward not found"));
+        .Throws(new KeyNotFoundException("Reward not found"));
 
-        HttpResponseMessage response =  _ = _adminClient.GetAsync($"/api/rewards/{rewardId}").Result;
+        HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/rewards/{rewardId}").Result;
 
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [TestMethod]
-    public  void CreateReward_AsAdmin_ReturnsCreated()
+    public void CreateReward_AsAdmin_ReturnsCreated()
     {
         RewardModelIn rewardModelIn = new RewardModelIn
         {
@@ -225,14 +226,14 @@ public class RewardControllerTest
         string json = JsonSerializer.Serialize(rewardModelIn);
         StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response =  _ = _adminClient.PostAsync("/api/rewards", content).Result;
+        HttpResponseMessage response = _ = _adminClient.PostAsync("/api/rewards", content).Result;
 
         Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
         Assert.IsNotNull(response.Headers.Location);
     }
 
     [TestMethod]
-    public  void CreateReward_AsVisitor_ReturnsForbidden()
+    public void CreateReward_AsVisitor_ReturnsForbidden()
     {
         RewardModelIn rewardModelIn = new RewardModelIn
         {
@@ -245,13 +246,13 @@ public class RewardControllerTest
         string json = JsonSerializer.Serialize(rewardModelIn);
         StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response =  _ = _visitorClient.PostAsync("/api/rewards", content).Result;
+        HttpResponseMessage response = _ = _visitorClient.PostAsync("/api/rewards", content).Result;
 
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [TestMethod]
-    public  void CreateReward_Unauthenticated_ReturnsUnauthorized()
+    public void CreateReward_Unauthenticated_ReturnsUnauthorized()
     {
         RewardModelIn rewardModelIn = new RewardModelIn
         {
@@ -264,13 +265,13 @@ public class RewardControllerTest
         string json = JsonSerializer.Serialize(rewardModelIn);
         StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response =  _ = _client.PostAsync("/api/rewards", content).Result;
+        HttpResponseMessage response = _ = _client.PostAsync("/api/rewards", content).Result;
 
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [TestMethod]
-    public  void CreateReward_DuplicateName_ReturnsBadRequest()
+    public void CreateReward_DuplicateName_ReturnsBadRequest()
     {
         RewardModelIn rewardModelIn = new RewardModelIn
         {
@@ -281,18 +282,18 @@ public class RewardControllerTest
         };
 
         _mockRewardLogic.Setup(s => s.CreateReward(It.IsAny<RewardModelIn>()))
-            .Throws(new ArgumentException("A reward with this name already exists"));
+        .Throws(new ArgumentException("A reward with this name already exists"));
 
         string json = JsonSerializer.Serialize(rewardModelIn);
         StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response =  _ = _adminClient.PostAsync("/api/rewards", content).Result;
+        HttpResponseMessage response = _ = _adminClient.PostAsync("/api/rewards", content).Result;
 
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [TestMethod]
-    public  void UpdateReward_AsAdmin_ReturnsOk()
+    public void UpdateReward_AsAdmin_ReturnsOk()
     {
         Guid rewardId = Guid.NewGuid();
         RewardModelIn rewardModelIn = new RewardModelIn
@@ -320,13 +321,13 @@ public class RewardControllerTest
         string json = JsonSerializer.Serialize(rewardModelIn);
         StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response =  _ = _adminClient.PutAsync($"/api/rewards/{rewardId}", content).Result;
+        HttpResponseMessage response = _ = _adminClient.PutAsync($"/api/rewards/{rewardId}", content).Result;
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public  void UpdateReward_AsVisitor_ReturnsForbidden()
+    public void UpdateReward_AsVisitor_ReturnsForbidden()
     {
         Guid rewardId = Guid.NewGuid();
         RewardModelIn rewardModelIn = new RewardModelIn
@@ -340,13 +341,13 @@ public class RewardControllerTest
         string json = JsonSerializer.Serialize(rewardModelIn);
         StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response =  _ = _visitorClient.PutAsync($"/api/rewards/{rewardId}", content).Result;
+        HttpResponseMessage response = _ = _visitorClient.PutAsync($"/api/rewards/{rewardId}", content).Result;
 
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [TestMethod]
-    public  void UpdateReward_NonExistingReward_ReturnsNotFound()
+    public void UpdateReward_NonExistingReward_ReturnsNotFound()
     {
         Guid rewardId = Guid.NewGuid();
         RewardModelIn rewardModelIn = new RewardModelIn
@@ -358,51 +359,51 @@ public class RewardControllerTest
         };
 
         _mockRewardLogic.Setup(s => s.UpdateReward(rewardId, It.IsAny<RewardModelIn>()))
-            .Throws(new KeyNotFoundException("Reward not found"));
+        .Throws(new KeyNotFoundException("Reward not found"));
 
         string json = JsonSerializer.Serialize(rewardModelIn);
         StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response =  _ = _adminClient.PutAsync($"/api/rewards/{rewardId}", content).Result;
+        HttpResponseMessage response = _ = _adminClient.PutAsync($"/api/rewards/{rewardId}", content).Result;
 
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [TestMethod]
-    public  void DeleteReward_AsAdmin_ReturnsNoContent()
+    public void DeleteReward_AsAdmin_ReturnsNoContent()
     {
         Guid rewardId = Guid.NewGuid();
         _mockRewardLogic.Setup(s => s.DeleteReward(rewardId));
 
-        HttpResponseMessage response =  _ = _adminClient.DeleteAsync($"/api/rewards/{rewardId}").Result;
+        HttpResponseMessage response = _ = _adminClient.DeleteAsync($"/api/rewards/{rewardId}").Result;
 
         Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
     }
 
     [TestMethod]
-    public  void DeleteReward_AsVisitor_ReturnsForbidden()
+    public void DeleteReward_AsVisitor_ReturnsForbidden()
     {
         Guid rewardId = Guid.NewGuid();
 
-        HttpResponseMessage response =  _ = _visitorClient.DeleteAsync($"/api/rewards/{rewardId}").Result;
+        HttpResponseMessage response = _ = _visitorClient.DeleteAsync($"/api/rewards/{rewardId}").Result;
 
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [TestMethod]
-    public  void DeleteReward_NonExistingReward_ReturnsNotFound()
+    public void DeleteReward_NonExistingReward_ReturnsNotFound()
     {
         Guid rewardId = Guid.NewGuid();
         _mockRewardLogic.Setup(s => s.DeleteReward(rewardId))
-            .Throws(new KeyNotFoundException("Reward not found"));
+        .Throws(new KeyNotFoundException("Reward not found"));
 
-        HttpResponseMessage response =  _ = _adminClient.DeleteAsync($"/api/rewards/{rewardId}").Result;
+        HttpResponseMessage response = _ = _adminClient.DeleteAsync($"/api/rewards/{rewardId}").Result;
 
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [TestMethod]
-    public  void GetAvailableRewards_ReturnsOnlyAvailable()
+    public void GetAvailableRewards_ReturnsOnlyAvailable()
     {
         List<RewardModelOut> availableRewards = new List<RewardModelOut>
         {
@@ -428,10 +429,10 @@ public class RewardControllerTest
 
         _mockRewardLogic.Setup(s => s.GetAvailableRewards()).Returns(availableRewards);
 
-        HttpResponseMessage response =  _ = _visitorClient.GetAsync("/api/rewards/available").Result;
+        HttpResponseMessage response = _ = _visitorClient.GetAsync("/api/rewards/available").Result;
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-        string content =  response.Content.ReadAsStringAsync().Result;
+        string content = response.Content.ReadAsStringAsync().Result;
         Assert.IsTrue(content.Contains("Available 1"));
         Assert.IsTrue(content.Contains("Available 2"));
     }
