@@ -19,7 +19,7 @@ namespace ApiTests
     public class BranchCoverageTest
     {
         [TestMethod]
-        public async Task PurchaseTicket_WithNullVisitorNavigation_ReturnsNullNames()
+        public void PurchaseTicket_WithNullVisitorNavigation_ReturnsNullNames()
         {
             SqliteConnection connection = new SqliteConnection("DataSource=:memory:");
             connection.Open();
@@ -37,8 +37,8 @@ namespace ApiTests
             };
 
             Mock<ITicketLogic> mockTicketLogic = new Mock<ITicketLogic>();
-            mockTicketLogic.Setup(t => t.PurchaseTicketAsync(It.IsAny<PurchaseTicketRequest>()))
-                .ReturnsAsync(ticketWithNullVisitor);
+            mockTicketLogic.Setup(t => t.PurchaseTicket(It.IsAny<PurchaseTicketRequest>()))
+            .Returns(ticketWithNullVisitor);
 
             Mock<IUserLogic> mockUserLogic = new Mock<IUserLogic>();
             Mock<IAuthLogic> mockAuthLogic = new Mock<IAuthLogic>();
@@ -53,38 +53,38 @@ namespace ApiTests
             };
 
             mockUserLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
-                .ReturnsAsync(visitor);
+            .Returns(visitor);
 
             mockAuthLogic.Setup(a => a.Login(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(visitor);
+            .Returns(visitor);
 
             WebApplicationFactory<Program> factory = new WebApplicationFactory<Program>()
-                .WithWebHostBuilder(builder =>
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
                 {
-                    builder.ConfigureServices(services =>
-                    {
-                        ServiceDescriptor dbDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                        if (dbDescriptor != null) services.Remove(dbDescriptor);
+                    ServiceDescriptor dbDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                    if (dbDescriptor != null) services.Remove(dbDescriptor);
 
-                        ServiceDescriptor ticketDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(ITicketLogic));
-                        if (ticketDescriptor != null) services.Remove(ticketDescriptor);
+                    ServiceDescriptor ticketDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(ITicketLogic));
+                    if (ticketDescriptor != null) services.Remove(ticketDescriptor);
 
-                        ServiceDescriptor userDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(IUserLogic));
-                        if (userDescriptor != null) services.Remove(userDescriptor);
+                    ServiceDescriptor userDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(IUserLogic));
+                    if (userDescriptor != null) services.Remove(userDescriptor);
 
-                        ServiceDescriptor authDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(IAuthLogic));
-                        if (authDescriptor != null) services.Remove(authDescriptor);
+                    ServiceDescriptor authDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(IAuthLogic));
+                    if (authDescriptor != null) services.Remove(authDescriptor);
 
-                        services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
-                        services.AddSingleton(mockTicketLogic.Object);
-                        services.AddSingleton(mockUserLogic.Object);
-                        services.AddSingleton(mockAuthLogic.Object);
-                    });
+                    services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
+                    services.AddSingleton(mockTicketLogic.Object);
+                    services.AddSingleton(mockUserLogic.Object);
+                    services.AddSingleton(mockAuthLogic.Object);
                 });
+            });
 
             using (IServiceScope scope = factory.Services.CreateScope())
             {
@@ -108,7 +108,7 @@ namespace ApiTests
                 Encoding.UTF8,
                 "application/json"
             );
-            await client.PostAsync("/api/auth/register", registerContent);
+            _ = client.PostAsync("/api/auth/register", registerContent).Result;
 
             LoginRequest loginRequest = new LoginRequest
             {
@@ -122,8 +122,8 @@ namespace ApiTests
                 "application/json"
             );
 
-            HttpResponseMessage loginResponse = await client.PostAsync("/api/auth/login", loginContent);
-            string loginBody = await loginResponse.Content.ReadAsStringAsync();
+            HttpResponseMessage loginResponse = _ = client.PostAsync("/api/auth/login", loginContent).Result;
+            string loginBody = loginResponse.Content.ReadAsStringAsync().Result;
             LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -142,11 +142,11 @@ namespace ApiTests
                 "application/json"
             );
 
-            HttpResponseMessage response = await client.PostAsync("/api/tickets", content);
+            HttpResponseMessage response = _ = client.PostAsync("/api/tickets", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
 
-            string responseBody = await response.Content.ReadAsStringAsync();
+            string responseBody = response.Content.ReadAsStringAsync().Result;
             TicketResponse result = JsonSerializer.Deserialize<TicketResponse>(responseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -160,7 +160,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task GetTicketById_WithNullVisitorNavigation_ReturnsNullNames()
+        public void GetTicketById_WithNullVisitorNavigation_ReturnsNullNames()
         {
             SqliteConnection connection = new SqliteConnection("DataSource=:memory:");
             connection.Open();
@@ -178,8 +178,8 @@ namespace ApiTests
             };
 
             Mock<ITicketLogic> mockTicketLogic = new Mock<ITicketLogic>();
-            mockTicketLogic.Setup(t => t.GetTicketByIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(ticketWithNullVisitor);
+            mockTicketLogic.Setup(t => t.GetTicketById(It.IsAny<Guid>()))
+            .Returns(ticketWithNullVisitor);
 
             Mock<IUserLogic> mockUserLogic = new Mock<IUserLogic>();
             Mock<IAuthLogic> mockAuthLogic = new Mock<IAuthLogic>();
@@ -194,38 +194,38 @@ namespace ApiTests
             };
 
             mockUserLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
-                .ReturnsAsync(visitor);
+            .Returns(visitor);
 
             mockAuthLogic.Setup(a => a.Login(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(visitor);
+            .Returns(visitor);
 
             WebApplicationFactory<Program> factory = new WebApplicationFactory<Program>()
-                .WithWebHostBuilder(builder =>
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
                 {
-                    builder.ConfigureServices(services =>
-                    {
-                        ServiceDescriptor dbDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                        if (dbDescriptor != null) services.Remove(dbDescriptor);
+                    ServiceDescriptor dbDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                    if (dbDescriptor != null) services.Remove(dbDescriptor);
 
-                        ServiceDescriptor ticketDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(ITicketLogic));
-                        if (ticketDescriptor != null) services.Remove(ticketDescriptor);
+                    ServiceDescriptor ticketDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(ITicketLogic));
+                    if (ticketDescriptor != null) services.Remove(ticketDescriptor);
 
-                        ServiceDescriptor userDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(IUserLogic));
-                        if (userDescriptor != null) services.Remove(userDescriptor);
+                    ServiceDescriptor userDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(IUserLogic));
+                    if (userDescriptor != null) services.Remove(userDescriptor);
 
-                        ServiceDescriptor authDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(IAuthLogic));
-                        if (authDescriptor != null) services.Remove(authDescriptor);
+                    ServiceDescriptor authDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(IAuthLogic));
+                    if (authDescriptor != null) services.Remove(authDescriptor);
 
-                        services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
-                        services.AddSingleton(mockTicketLogic.Object);
-                        services.AddSingleton(mockUserLogic.Object);
-                        services.AddSingleton(mockAuthLogic.Object);
-                    });
+                    services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
+                    services.AddSingleton(mockTicketLogic.Object);
+                    services.AddSingleton(mockUserLogic.Object);
+                    services.AddSingleton(mockAuthLogic.Object);
                 });
+            });
 
             using (IServiceScope scope = factory.Services.CreateScope())
             {
@@ -249,7 +249,7 @@ namespace ApiTests
                 Encoding.UTF8,
                 "application/json"
             );
-            await client.PostAsync("/api/auth/register", registerContent);
+            _ = client.PostAsync("/api/auth/register", registerContent).Result;
 
             LoginRequest loginRequest = new LoginRequest
             {
@@ -263,18 +263,18 @@ namespace ApiTests
                 "application/json"
             );
 
-            HttpResponseMessage loginResponse = await client.PostAsync("/api/auth/login", loginContent);
-            string loginBody = await loginResponse.Content.ReadAsStringAsync();
+            HttpResponseMessage loginResponse = _ = client.PostAsync("/api/auth/login", loginContent).Result;
+            string loginBody = loginResponse.Content.ReadAsStringAsync().Result;
             LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.Token);
 
-            HttpResponseMessage response = await client.GetAsync($"/api/tickets/{ticketWithNullVisitor.Id}");
+            HttpResponseMessage response = _ = client.GetAsync($"/api/tickets/{ticketWithNullVisitor.Id}").Result;
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            string responseBody = await response.Content.ReadAsStringAsync();
+            string responseBody = response.Content.ReadAsStringAsync().Result;
             TicketResponse result = JsonSerializer.Deserialize<TicketResponse>(responseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -288,7 +288,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task GetTicketByQRCode_WithNullVisitorNavigation_ReturnsNullNames()
+        public void GetTicketByQRCode_WithNullVisitorNavigation_ReturnsNullNames()
         {
             SqliteConnection connection = new SqliteConnection("DataSource=:memory:");
             connection.Open();
@@ -307,8 +307,8 @@ namespace ApiTests
             };
 
             Mock<ITicketLogic> mockTicketLogic = new Mock<ITicketLogic>();
-            mockTicketLogic.Setup(t => t.GetTicketByQRCodeAsync(qrCode))
-                .ReturnsAsync(ticketWithNullVisitor);
+            mockTicketLogic.Setup(t => t.GetTicketByQRCode(qrCode))
+            .Returns(ticketWithNullVisitor);
 
             Mock<IUserLogic> mockUserLogic = new Mock<IUserLogic>();
             Mock<IAuthLogic> mockAuthLogic = new Mock<IAuthLogic>();
@@ -323,38 +323,38 @@ namespace ApiTests
             };
 
             mockUserLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
-                .ReturnsAsync(visitor);
+            .Returns(visitor);
 
             mockAuthLogic.Setup(a => a.Login(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(visitor);
+            .Returns(visitor);
 
             WebApplicationFactory<Program> factory = new WebApplicationFactory<Program>()
-                .WithWebHostBuilder(builder =>
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
                 {
-                    builder.ConfigureServices(services =>
-                    {
-                        ServiceDescriptor dbDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                        if (dbDescriptor != null) services.Remove(dbDescriptor);
+                    ServiceDescriptor dbDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                    if (dbDescriptor != null) services.Remove(dbDescriptor);
 
-                        ServiceDescriptor ticketDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(ITicketLogic));
-                        if (ticketDescriptor != null) services.Remove(ticketDescriptor);
+                    ServiceDescriptor ticketDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(ITicketLogic));
+                    if (ticketDescriptor != null) services.Remove(ticketDescriptor);
 
-                        ServiceDescriptor userDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(IUserLogic));
-                        if (userDescriptor != null) services.Remove(userDescriptor);
+                    ServiceDescriptor userDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(IUserLogic));
+                    if (userDescriptor != null) services.Remove(userDescriptor);
 
-                        ServiceDescriptor authDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(IAuthLogic));
-                        if (authDescriptor != null) services.Remove(authDescriptor);
+                    ServiceDescriptor authDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(IAuthLogic));
+                    if (authDescriptor != null) services.Remove(authDescriptor);
 
-                        services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
-                        services.AddSingleton(mockTicketLogic.Object);
-                        services.AddSingleton(mockUserLogic.Object);
-                        services.AddSingleton(mockAuthLogic.Object);
-                    });
+                    services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
+                    services.AddSingleton(mockTicketLogic.Object);
+                    services.AddSingleton(mockUserLogic.Object);
+                    services.AddSingleton(mockAuthLogic.Object);
                 });
+            });
 
             using (IServiceScope scope = factory.Services.CreateScope())
             {
@@ -378,7 +378,7 @@ namespace ApiTests
                 Encoding.UTF8,
                 "application/json"
             );
-            await client.PostAsync("/api/auth/register", registerContent);
+            _ = client.PostAsync("/api/auth/register", registerContent).Result;
 
             LoginRequest loginRequest = new LoginRequest
             {
@@ -392,18 +392,18 @@ namespace ApiTests
                 "application/json"
             );
 
-            HttpResponseMessage loginResponse = await client.PostAsync("/api/auth/login", loginContent);
-            string loginBody = await loginResponse.Content.ReadAsStringAsync();
+            HttpResponseMessage loginResponse = _ = client.PostAsync("/api/auth/login", loginContent).Result;
+            string loginBody = loginResponse.Content.ReadAsStringAsync().Result;
             LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.Token);
 
-            HttpResponseMessage response = await client.GetAsync($"/api/tickets/qr/{qrCode}");
+            HttpResponseMessage response = _ = client.GetAsync($"/api/tickets/qr/{qrCode}").Result;
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            string responseBody = await response.Content.ReadAsStringAsync();
+            string responseBody = response.Content.ReadAsStringAsync().Result;
             TicketResponse result = JsonSerializer.Deserialize<TicketResponse>(responseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -417,7 +417,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task GetVisitorTickets_WithNullVisitorNavigation_ReturnsNullNames()
+        public void GetVisitorTickets_WithNullVisitorNavigation_ReturnsNullNames()
         {
             SqliteConnection connection = new SqliteConnection("DataSource=:memory:");
             connection.Open();
@@ -439,8 +439,8 @@ namespace ApiTests
             };
 
             Mock<ITicketLogic> mockTicketLogic = new Mock<ITicketLogic>();
-            mockTicketLogic.Setup(t => t.GetVisitorTicketsAsync(visitorId))
-                .ReturnsAsync(ticketsWithNullVisitor);
+            mockTicketLogic.Setup(t => t.GetVisitorTickets(visitorId))
+            .Returns(ticketsWithNullVisitor);
 
             Mock<IUserLogic> mockUserLogic = new Mock<IUserLogic>();
             Mock<IAuthLogic> mockAuthLogic = new Mock<IAuthLogic>();
@@ -455,38 +455,38 @@ namespace ApiTests
             };
 
             mockUserLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
-                .ReturnsAsync(visitor);
+            .Returns(visitor);
 
             mockAuthLogic.Setup(a => a.Login(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(visitor);
+            .Returns(visitor);
 
             WebApplicationFactory<Program> factory = new WebApplicationFactory<Program>()
-                .WithWebHostBuilder(builder =>
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
                 {
-                    builder.ConfigureServices(services =>
-                    {
-                        ServiceDescriptor dbDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                        if (dbDescriptor != null) services.Remove(dbDescriptor);
+                    ServiceDescriptor dbDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                    if (dbDescriptor != null) services.Remove(dbDescriptor);
 
-                        ServiceDescriptor ticketDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(ITicketLogic));
-                        if (ticketDescriptor != null) services.Remove(ticketDescriptor);
+                    ServiceDescriptor ticketDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(ITicketLogic));
+                    if (ticketDescriptor != null) services.Remove(ticketDescriptor);
 
-                        ServiceDescriptor userDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(IUserLogic));
-                        if (userDescriptor != null) services.Remove(userDescriptor);
+                    ServiceDescriptor userDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(IUserLogic));
+                    if (userDescriptor != null) services.Remove(userDescriptor);
 
-                        ServiceDescriptor authDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(IAuthLogic));
-                        if (authDescriptor != null) services.Remove(authDescriptor);
+                    ServiceDescriptor authDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(IAuthLogic));
+                    if (authDescriptor != null) services.Remove(authDescriptor);
 
-                        services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
-                        services.AddSingleton(mockTicketLogic.Object);
-                        services.AddSingleton(mockUserLogic.Object);
-                        services.AddSingleton(mockAuthLogic.Object);
-                    });
+                    services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
+                    services.AddSingleton(mockTicketLogic.Object);
+                    services.AddSingleton(mockUserLogic.Object);
+                    services.AddSingleton(mockAuthLogic.Object);
                 });
+            });
 
             using (IServiceScope scope = factory.Services.CreateScope())
             {
@@ -510,7 +510,7 @@ namespace ApiTests
                 Encoding.UTF8,
                 "application/json"
             );
-            await client.PostAsync("/api/auth/register", registerContent);
+            _ = client.PostAsync("/api/auth/register", registerContent).Result;
 
             LoginRequest loginRequest = new LoginRequest
             {
@@ -524,18 +524,18 @@ namespace ApiTests
                 "application/json"
             );
 
-            HttpResponseMessage loginResponse = await client.PostAsync("/api/auth/login", loginContent);
-            string loginBody = await loginResponse.Content.ReadAsStringAsync();
+            HttpResponseMessage loginResponse = _ = client.PostAsync("/api/auth/login", loginContent).Result;
+            string loginBody = loginResponse.Content.ReadAsStringAsync().Result;
             LoginResponse loginResult = JsonSerializer.Deserialize<LoginResponse>(loginBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.Token);
 
-            HttpResponseMessage response = await client.GetAsync($"/api/tickets/visitor/{visitorId}");
+            HttpResponseMessage response = _ = client.GetAsync($"/api/tickets/visitor/{visitorId}").Result;
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            string responseBody = await response.Content.ReadAsStringAsync();
+            string responseBody = response.Content.ReadAsStringAsync().Result;
             List<TicketResponse> result = JsonSerializer.Deserialize<List<TicketResponse>>(responseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 

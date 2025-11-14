@@ -30,7 +30,7 @@ namespace TestDataAccess
             _context.Database.EnsureCreated();
 
             _mockDateTimeRepository = new Mock<IDateTimeRepository>();
-            _mockDateTimeRepository.Setup(x => x.GetConfiguredDateTime()).ReturnsAsync(DateTime.Now);
+            _mockDateTimeRepository.Setup(x => x.GetConfiguredDateTime()).Returns(DateTime.Now);
 
             _repository = new MaintenanceScheduleRepository(_context, _mockDateTimeRepository.Object);
         }
@@ -44,11 +44,11 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task Create_ValidSchedule_Success()
+        public void Create_ValidSchedule_Success()
         {
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
             MaintenanceSchedule schedule = new MaintenanceSchedule
             {
@@ -59,39 +59,39 @@ namespace TestDataAccess
                 Status = MaintenanceStatus.Pending
             };
 
-            await _repository.CreateAsync(schedule);
+            _repository.Create(schedule);
 
-            MaintenanceSchedule? result = await _context.MaintenanceSchedules.FindAsync(schedule.Id);
+            MaintenanceSchedule? result = _context.MaintenanceSchedules.Find(schedule.Id);
             Assert.AreEqual(schedule.Description, result.Description);
             Assert.AreEqual(MaintenanceStatus.Pending, result.Status);
         }
 
         [TestMethod]
-        public async Task GetById_ExistingSchedule_ReturnsSchedule()
+        public void GetById_ExistingSchedule_ReturnsSchedule()
         {
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
 
             MaintenanceSchedule schedule = CreateTestSchedule(attraction.Id);
             _context.MaintenanceSchedules.Add(schedule);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            MaintenanceSchedule? result = await _repository.GetByIdAsync(schedule.Id);
+            MaintenanceSchedule? result = _repository.GetById(schedule.Id);
 
             Assert.AreEqual(schedule.Id, result.Id);
             Assert.AreEqual(schedule.Description, result.Description);
         }
 
         [TestMethod]
-        public async Task GetById_NonExistingSchedule_ReturnsNull()
+        public void GetById_NonExistingSchedule_ReturnsNull()
         {
-            MaintenanceSchedule? result = await _repository.GetByIdAsync(Guid.NewGuid());
+            MaintenanceSchedule? result = _repository.GetById(Guid.NewGuid());
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public async Task GetAll_MultipleSchedules_ReturnsAllSchedules()
+        public void GetAll_MultipleSchedules_ReturnsAllSchedules()
         {
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
@@ -101,15 +101,15 @@ namespace TestDataAccess
             schedule2.Description = "Different description";
 
             _context.MaintenanceSchedules.AddRange(schedule1, schedule2);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            List<MaintenanceSchedule> results = await _repository.GetAllAsync();
+            List<MaintenanceSchedule> results = _repository.GetAll();
 
             Assert.AreEqual(2, results.Count);
         }
 
         [TestMethod]
-        public async Task GetByAttractionId_ExistingSchedules_ReturnsSchedulesForAttraction()
+        public void GetByAttractionId_ExistingSchedules_ReturnsSchedulesForAttraction()
         {
             Attraction attraction1 = CreateTestAttraction();
             Attraction attraction2 = CreateTestAttraction();
@@ -120,16 +120,16 @@ namespace TestDataAccess
             MaintenanceSchedule schedule3 = CreateTestSchedule(attraction2.Id);
 
             _context.MaintenanceSchedules.AddRange(schedule1, schedule2, schedule3);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            List<MaintenanceSchedule> results = await _repository.GetByAttractionIdAsync(attraction1.Id);
+            List<MaintenanceSchedule> results = _repository.GetByAttractionId(attraction1.Id);
 
             Assert.AreEqual(2, results.Count);
             Assert.IsTrue(results.All(s => s.AttractionId == attraction1.Id));
         }
 
         [TestMethod]
-        public async Task GetOverdueSchedules_ReturnsPendingPastDueSchedules()
+        public void GetOverdueSchedules_ReturnsPendingPastDueSchedules()
         {
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
@@ -150,9 +150,9 @@ namespace TestDataAccess
             completedOverdue.IsOverdue = false;
 
             _context.MaintenanceSchedules.AddRange(overdueSchedule, futureSchedule, completedOverdue);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            List<MaintenanceSchedule> results = await _repository.GetOverdueSchedulesAsync();
+            List<MaintenanceSchedule> results = _repository.GetOverdueSchedules();
 
             Assert.AreEqual(1, results.Count);
             Assert.IsTrue(results[0].IsOverdue);
@@ -160,7 +160,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task GetOverdueSchedules_ReturnsMultipleOverdueSchedules()
+        public void GetOverdueSchedules_ReturnsMultipleOverdueSchedules()
         {
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
@@ -185,53 +185,54 @@ namespace TestDataAccess
             notOverdueYet.Status = MaintenanceStatus.Pending;
             notOverdueYet.IsOverdue = false;
 
-            _context.MaintenanceSchedules.AddRange(overdueInProgress, overduePending, completedNotOverdue, notOverdueYet);
-            await _context.SaveChangesAsync();
+            _context.MaintenanceSchedules.AddRange(overdueInProgress, overduePending, completedNotOverdue,
+                notOverdueYet);
+            _context.SaveChanges();
 
-            List<MaintenanceSchedule> results = await _repository.GetOverdueSchedulesAsync();
+            List<MaintenanceSchedule> results = _repository.GetOverdueSchedules();
 
             Assert.AreEqual(2, results.Count);
             Assert.IsTrue(results.All(r => r.IsOverdue));
         }
 
         [TestMethod]
-        public async Task Update_ExistingSchedule_UpdatesSuccessfully()
+        public void Update_ExistingSchedule_UpdatesSuccessfully()
         {
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
 
             MaintenanceSchedule schedule = CreateTestSchedule(attraction.Id);
             _context.MaintenanceSchedules.Add(schedule);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
             schedule.Status = MaintenanceStatus.Completed;
             schedule.Description = "Updated description";
-            await _repository.UpdateAsync(schedule);
+            _repository.Update(schedule);
 
-            MaintenanceSchedule? result = await _context.MaintenanceSchedules.FindAsync(schedule.Id);
+            MaintenanceSchedule? result = _context.MaintenanceSchedules.Find(schedule.Id);
 
             Assert.AreEqual(MaintenanceStatus.Completed, result.Status);
             Assert.AreEqual("Updated description", result.Description);
         }
 
         [TestMethod]
-        public async Task Delete_ExistingSchedule_RemovesSchedule()
+        public void Delete_ExistingSchedule_RemovesSchedule()
         {
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
 
             MaintenanceSchedule schedule = CreateTestSchedule(attraction.Id);
             _context.MaintenanceSchedules.Add(schedule);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            await _repository.DeleteAsync(schedule.Id);
+            _repository.Delete(schedule.Id);
 
-            MaintenanceSchedule? result = await _context.MaintenanceSchedules.FindAsync(schedule.Id);
+            MaintenanceSchedule? result = _context.MaintenanceSchedules.Find(schedule.Id);
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public async Task GetUpcomingSchedules_ReturnsSchedulesWithinDays_Success()
+        public void GetUpcomingSchedules_ReturnsSchedulesWithinDays_Success()
         {
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
@@ -245,18 +246,18 @@ namespace TestDataAccess
             schedule2.Status = MaintenanceStatus.Pending;
 
             _context.MaintenanceSchedules.AddRange(schedule1, schedule2);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            List<MaintenanceSchedule> results = await _repository.GetUpcomingSchedulesAsync(7);
+            List<MaintenanceSchedule> results = _repository.GetUpcomingSchedules(7);
 
             Assert.AreEqual(1, results.Count);
             Assert.IsTrue((results[0].ScheduledDate - DateTime.Now).TotalDays <= 7);
         }
 
         [TestMethod]
-        public async Task GetUpcomingSchedules_WhenDateTimeRepositoryReturnsNull_UsesDateTimeNow()
+        public void GetUpcomingSchedules_WhenDateTimeRepositoryReturnsNull_UsesDateTimeNow()
         {
-            _mockDateTimeRepository.Setup(x => x.GetConfiguredDateTime()).ReturnsAsync((DateTime?)null);
+            _mockDateTimeRepository.Setup(x => x.GetConfiguredDateTime()).Returns((DateTime?)null);
 
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
@@ -274,9 +275,9 @@ namespace TestDataAccess
             schedule3.Status = MaintenanceStatus.Pending;
 
             _context.MaintenanceSchedules.AddRange(schedule1, schedule2, schedule3);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            List<MaintenanceSchedule> results = await _repository.GetUpcomingSchedulesAsync(5);
+            List<MaintenanceSchedule> results = _repository.GetUpcomingSchedules(5);
 
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(schedule1.Id, results[0].Id);
@@ -285,7 +286,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task GetUpcomingSchedules_OnlyReturnsPendingSchedules_ExcludesOtherStatuses()
+        public void GetUpcomingSchedules_OnlyReturnsPendingSchedules_ExcludesOtherStatuses()
         {
             Attraction attraction = CreateTestAttraction();
             _context.Attractions.Add(attraction);
@@ -303,9 +304,9 @@ namespace TestDataAccess
             completedSchedule.Status = MaintenanceStatus.Completed;
 
             _context.MaintenanceSchedules.AddRange(pendingSchedule, inProgressSchedule, completedSchedule);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            List<MaintenanceSchedule> results = await _repository.GetUpcomingSchedulesAsync(7);
+            List<MaintenanceSchedule> results = _repository.GetUpcomingSchedules(7);
 
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(MaintenanceStatus.Pending, results[0].Status);

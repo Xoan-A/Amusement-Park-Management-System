@@ -4,11 +4,11 @@ namespace IDataAccess;
 
 public interface IAttractionRepository
 {
-    Task Create(Attraction attraction);
-    Task<Attraction> GetByName(string name);
-    Task<Attraction> GetById(Guid id);
-    Task<bool> IsNameUnique(string name);
-    Task<List<Attraction>> GetAll();
-    Task Update(Attraction attraction);
-    Task Delete(Attraction attraction);
+    void Create(Attraction attraction);
+    Attraction GetByName(string name);
+    Attraction GetById(Guid id);
+    bool IsNameUnique(string name);
+    List<Attraction> GetAll();
+    void Update(Attraction attraction);
+    void Delete(Attraction attraction);
 }

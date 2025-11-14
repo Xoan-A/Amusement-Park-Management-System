@@ -27,38 +27,38 @@ namespace ApiTests
             _connection.Open();
 
             _factory = new WebApplicationFactory<Program>()
-                .WithWebHostBuilder(builder =>
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
                 {
-                    builder.ConfigureServices(services =>
+                    ServiceDescriptor descriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                    if (descriptor != null)
                     {
-                        ServiceDescriptor descriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                        if (descriptor != null)
-                        {
-                            services.Remove(descriptor);
-                        }
+                        services.Remove(descriptor);
+                    }
 
-                        ServiceDescriptor dateTimeDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(IDateTimeLogic));
-                        if (dateTimeDescriptor != null)
-                        {
-                            services.Remove(dateTimeDescriptor);
-                        }
+                    ServiceDescriptor dateTimeDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(IDateTimeLogic));
+                    if (dateTimeDescriptor != null)
+                    {
+                        services.Remove(dateTimeDescriptor);
+                    }
 
-                        ServiceDescriptor dateTimeRepoDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(IDateTimeRepository));
-                        if (dateTimeRepoDescriptor != null)
-                        {
-                            services.Remove(dateTimeRepoDescriptor);
-                        }
+                    ServiceDescriptor dateTimeRepoDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(IDateTimeRepository));
+                    if (dateTimeRepoDescriptor != null)
+                    {
+                        services.Remove(dateTimeRepoDescriptor);
+                    }
 
-                        services.AddDbContext<AppDbContext>(options =>
-                            options.UseSqlite(_connection));
+                    services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlite(_connection));
 
-                        services.AddScoped<IDateTimeRepository, DateTimeRepository>();
-                        services.AddScoped<IDateTimeLogic, DateTimeLogic>();
-                    });
+                    services.AddScoped<IDateTimeRepository, DateTimeRepository>();
+                    services.AddScoped<IDateTimeLogic, DateTimeLogic>();
                 });
+            });
 
             using (IServiceScope scope = _factory.Services.CreateScope())
             {
@@ -79,7 +79,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task LoginEndpoint_RequiresNoAuthentication()
+        public void LoginEndpoint_RequiresNoAuthentication()
         {
             RegisterVisitorRequest registerRequest = new RegisterVisitorRequest
             {
@@ -91,7 +91,7 @@ namespace ApiTests
             };
             string registerJson = JsonSerializer.Serialize(registerRequest);
             StringContent registerContent = new StringContent(registerJson, Encoding.UTF8, "application/json");
-            await _client.PostAsync("/api/auth/register", registerContent);
+            _ = _client.PostAsync("/api/auth/register", registerContent).Result;
 
             LoginRequest request = new LoginRequest
             {
@@ -102,13 +102,13 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _client.PostAsync("/api/auth/login", content);
+            HttpResponseMessage response = _ = _client.PostAsync("/api/auth/login", content).Result;
 
             Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
 
         [TestMethod]
-        public async Task RegisterEndpoint_RequiresNoAuthentication()
+        public void RegisterEndpoint_RequiresNoAuthentication()
         {
             RegisterVisitorRequest request = new RegisterVisitorRequest
             {
@@ -122,15 +122,15 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _client.PostAsync("/api/auth/register", content);
+            HttpResponseMessage response = _ = _client.PostAsync("/api/auth/register", content).Result;
 
             Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
 
         [TestMethod]
-        public async Task DateTimeEndpoints_RequireNoAuthentication()
+        public void DateTimeEndpoints_RequireNoAuthentication()
         {
-            HttpResponseMessage getResponse = await _client.GetAsync("/api/datetime");
+            HttpResponseMessage getResponse = _ = _client.GetAsync("/api/datetime").Result;
             Assert.AreEqual(System.Net.HttpStatusCode.OK, getResponse.StatusCode);
 
             SetDateTimeRequest setRequest = new SetDateTimeRequest
@@ -141,41 +141,41 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(setRequest);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage postResponse = await _client.PutAsync("/api/datetime", content);
+            HttpResponseMessage postResponse = _ = _client.PutAsync("/api/datetime", content).Result;
             Assert.AreEqual(System.Net.HttpStatusCode.OK, postResponse.StatusCode);
         }
 
         [TestMethod]
-        public async Task ServiceFactory_RegistersDateTimeLogicWithObservers()
+        public void ServiceFactory_RegistersDateTimeLogicWithObservers()
         {
             SqliteConnection connection = new SqliteConnection("DataSource=:memory:");
             connection.Open();
 
             WebApplicationFactory<Program> factoryWithObservers = new WebApplicationFactory<Program>()
-                .WithWebHostBuilder(builder =>
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
                 {
-                    builder.ConfigureServices(services =>
+                    ServiceDescriptor descriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                    if (descriptor != null)
                     {
-                        ServiceDescriptor descriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                        if (descriptor != null)
-                        {
-                            services.Remove(descriptor);
-                        }
+                        services.Remove(descriptor);
+                    }
 
-                        ServiceDescriptor dateTimeRepoDescriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(IDateTimeRepository));
-                        if (dateTimeRepoDescriptor != null)
-                        {
-                            services.Remove(dateTimeRepoDescriptor);
-                        }
+                    ServiceDescriptor dateTimeRepoDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(IDateTimeRepository));
+                    if (dateTimeRepoDescriptor != null)
+                    {
+                        services.Remove(dateTimeRepoDescriptor);
+                    }
 
-                        services.AddDbContext<AppDbContext>(options =>
-                            options.UseSqlite(connection));
+                    services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlite(connection));
 
-                        services.AddScoped<IDateTimeRepository, DateTimeRepository>();
-                    });
+                    services.AddScoped<IDateTimeRepository, DateTimeRepository>();
                 });
+            });
 
             using (IServiceScope scope = factoryWithObservers.Services.CreateScope())
             {
@@ -185,7 +185,7 @@ namespace ApiTests
 
             HttpClient client = factoryWithObservers.CreateClient();
 
-            HttpResponseMessage getResponse = await client.GetAsync("/api/datetime");
+            HttpResponseMessage getResponse = _ = client.GetAsync("/api/datetime").Result;
             Assert.AreEqual(System.Net.HttpStatusCode.OK, getResponse.StatusCode);
 
             SetDateTimeRequest setRequest = new SetDateTimeRequest
@@ -196,7 +196,7 @@ namespace ApiTests
             string jsonContent = JsonSerializer.Serialize(setRequest);
             StringContent content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage putResponse = await client.PutAsync("/api/datetime", content);
+            HttpResponseMessage putResponse = _ = client.PutAsync("/api/datetime", content).Result;
             Assert.AreEqual(System.Net.HttpStatusCode.OK, putResponse.StatusCode);
 
             using (IServiceScope scope = factoryWithObservers.Services.CreateScope())

@@ -1,7 +1,6 @@
 ﻿using DataAccess.Context;
 using Domain;
 using IDataAccess;
-using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories;
 
@@ -14,51 +13,51 @@ public class AttractionRepository : IAttractionRepository
         _context = context;
     }
 
-    public async Task Create(Attraction attraction)
+    public void Create(Attraction attraction)
     {
-        await _context.Attractions.AddAsync(attraction);
-        await _context.SaveChangesAsync();
+        _context.Attractions.Add(attraction);
+        _context.SaveChanges();
     }
 
-    public async Task<Attraction> GetByName(string name)
+    public Attraction GetByName(string name)
     {
-        return await _context.Attractions.FirstOrDefaultAsync(a => a.Name == name);
+        return _context.Attractions.FirstOrDefault(a => a.Name == name);
     }
 
-    public async Task<Attraction> GetById(Guid id)
+    public Attraction GetById(Guid id)
     {
-        return await _context.Attractions.FirstOrDefaultAsync(a => a.Id == id);
+        return _context.Attractions.FirstOrDefault(a => a.Id == id);
     }
 
-    public async Task<bool> IsNameUnique(string name)
+    public bool IsNameUnique(string name)
     {
-        return !await _context.Attractions.AnyAsync(a => a.Name == name);
+        return !_context.Attractions.Any(a => a.Name == name);
     }
 
-    public async Task<List<Attraction>> GetAll()
+    public List<Attraction> GetAll()
     {
-        return await _context.Attractions.ToListAsync();
+        return _context.Attractions.ToList();
     }
 
-    public async Task Update(Attraction attraction)
+    public void Update(Attraction attraction)
     {
         _context.Attractions.Update(attraction);
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
     }
 
-    public async Task Delete(Attraction attraction)
+    public void Delete(Attraction attraction)
     {
-        List<MaintenanceSchedule> maintenanceSchedules = await _context.MaintenanceSchedules
-            .Where(ms => ms.AttractionId == attraction.Id)
-            .ToListAsync();
+        List<MaintenanceSchedule> maintenanceSchedules = _context.MaintenanceSchedules
+        .Where(ms => ms.AttractionId == attraction.Id)
+        .ToList();
         _context.MaintenanceSchedules.RemoveRange(maintenanceSchedules);
 
-        List<EventAttraction> eventAttractions = await _context.Set<EventAttraction>()
-            .Where(ea => ea.AttractionId == attraction.Id)
-            .ToListAsync();
+        List<EventAttraction> eventAttractions = _context.Set<EventAttraction>()
+        .Where(ea => ea.AttractionId == attraction.Id)
+        .ToList();
         _context.Set<EventAttraction>().RemoveRange(eventAttractions);
 
         _context.Attractions.Remove(attraction);
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
     }
 }

@@ -22,11 +22,11 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
         _attractionLogic = attractionLogic;
     }
 
-    public async Task DateUpdated(IDateSubject subject)
+    public void DateUpdated(IDateSubject subject)
     {
-        DateTime currentDateTime = await subject.GetCurrentDateTime();
+        DateTime currentDateTime = subject.GetCurrentDateTime();
 
-        List<MaintenanceSchedule> allSchedules = await _scheduleRepository.GetAllAsync();
+        List<MaintenanceSchedule> allSchedules = _scheduleRepository.GetAll();
 
         foreach (MaintenanceSchedule schedule in allSchedules)
         {
@@ -51,22 +51,22 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
 
             if (wasUpdated)
             {
-                await _scheduleRepository.UpdateAsync(schedule);
+                _scheduleRepository.Update(schedule);
             }
 
             if (statusChangedToInProgress)
             {
                 string incidentMessage = $"Mantenimiento programado: {schedule.Description}";
-                await _attractionLogic.AddIncident(schedule.AttractionId, incidentMessage);
+                _attractionLogic.AddIncident(schedule.AttractionId, incidentMessage);
             }
         }
     }
 
     #region Schedule Management
 
-    public async Task<Guid> CreateSchedule(MaintenanceScheduleRequest request)
+    public Guid CreateSchedule(MaintenanceScheduleRequest request)
     {
-        Attraction attraction = await _attractionRepository.GetById(request.AttractionId);
+        Attraction attraction = _attractionRepository.GetById(request.AttractionId);
         if (attraction == null)
         {
             throw new KeyNotFoundException($"Attraction with id {request.AttractionId} not found");
@@ -82,13 +82,13 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
             Status = MaintenanceStatus.Pending,
         };
 
-        await _scheduleRepository.CreateAsync(schedule);
+        _scheduleRepository.Create(schedule);
         return schedule.Id;
     }
 
-    public async Task<MaintenanceScheduleResponse> GetScheduleById(Guid id)
+    public MaintenanceScheduleResponse GetScheduleById(Guid id)
     {
-        MaintenanceSchedule? schedule = await _scheduleRepository.GetByIdAsync(id);
+        MaintenanceSchedule? schedule = _scheduleRepository.GetById(id);
         if (schedule == null)
         {
             throw new KeyNotFoundException($"Schedule with id {id} not found");
@@ -97,33 +97,33 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
         return MapToScheduleResponse(schedule);
     }
 
-    public async Task<List<MaintenanceScheduleResponse>> GetAllSchedules()
+    public List<MaintenanceScheduleResponse> GetAllSchedules()
     {
-        List<MaintenanceSchedule> schedules = await _scheduleRepository.GetAllAsync();
+        List<MaintenanceSchedule> schedules = _scheduleRepository.GetAll();
         return schedules.Select(MapToScheduleResponse).ToList();
     }
 
-    public async Task<List<MaintenanceScheduleResponse>> GetSchedulesByAttraction(Guid attractionId)
+    public List<MaintenanceScheduleResponse> GetSchedulesByAttraction(Guid attractionId)
     {
-        List<MaintenanceSchedule> schedules = await _scheduleRepository.GetByAttractionIdAsync(attractionId);
+        List<MaintenanceSchedule> schedules = _scheduleRepository.GetByAttractionId(attractionId);
         return schedules.Select(MapToScheduleResponse).ToList();
     }
 
-    public async Task<List<MaintenanceScheduleResponse>> GetOverdueSchedules()
+    public List<MaintenanceScheduleResponse> GetOverdueSchedules()
     {
-        List<MaintenanceSchedule> schedules = await _scheduleRepository.GetOverdueSchedulesAsync();
+        List<MaintenanceSchedule> schedules = _scheduleRepository.GetOverdueSchedules();
         return schedules.Select(MapToScheduleResponse).ToList();
     }
 
-    public async Task<List<MaintenanceScheduleResponse>> GetUpcomingSchedules(int daysAhead)
+    public List<MaintenanceScheduleResponse> GetUpcomingSchedules(int daysAhead)
     {
-        List<MaintenanceSchedule> schedules = await _scheduleRepository.GetUpcomingSchedulesAsync(daysAhead);
+        List<MaintenanceSchedule> schedules = _scheduleRepository.GetUpcomingSchedules(daysAhead);
         return schedules.Select(MapToScheduleResponse).ToList();
     }
 
-    public async Task UpdateScheduleStatus(Guid id, string status)
+    public void UpdateScheduleStatus(Guid id, string status)
     {
-        MaintenanceSchedule? schedule = await _scheduleRepository.GetByIdAsync(id);
+        MaintenanceSchedule? schedule = _scheduleRepository.GetById(id);
         if (schedule == null)
         {
             throw new KeyNotFoundException($"Schedule with id {id} not found");
@@ -140,21 +140,22 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
         {
             schedule.IsOverdue = false;
         }
-        await _scheduleRepository.UpdateAsync(schedule);
+
+        _scheduleRepository.Update(schedule);
     }
 
-    public async Task DeleteSchedule(Guid id)
+    public void DeleteSchedule(Guid id)
     {
-        await _scheduleRepository.DeleteAsync(id);
+        _scheduleRepository.Delete(id);
     }
 
     #endregion
 
     #region Business Operations
 
-    public async Task<Guid> CompleteMaintenance(Guid scheduleId, Guid performedBy)
+    public Guid CompleteMaintenance(Guid scheduleId, Guid performedBy)
     {
-        MaintenanceSchedule? schedule = await _scheduleRepository.GetByIdAsync(scheduleId);
+        MaintenanceSchedule? schedule = _scheduleRepository.GetById(scheduleId);
         if (schedule == null)
         {
             throw new KeyNotFoundException($"Schedule with id {scheduleId} not found");
@@ -166,18 +167,18 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
                 $"Schedule with id {scheduleId} cannot be completed (status: {schedule.Status})");
         }
 
-        Attraction? attraction = await _attractionRepository.GetById(schedule.AttractionId);
+        Attraction? attraction = _attractionRepository.GetById(schedule.AttractionId);
         if (attraction == null)
         {
             throw new KeyNotFoundException($"Attraction with id {schedule.AttractionId} not found");
         }
 
         string incidentMessage = $"Mantenimiento programado: {schedule.Description}";
-        await _attractionLogic.RemoveIncident(schedule.AttractionId, incidentMessage);
+        _attractionLogic.RemoveIncident(schedule.AttractionId, incidentMessage);
 
         schedule.Status = MaintenanceStatus.Completed;
         schedule.IsOverdue = false;
-        await _scheduleRepository.UpdateAsync(schedule);
+        _scheduleRepository.Update(schedule);
 
         return scheduleId;
     }

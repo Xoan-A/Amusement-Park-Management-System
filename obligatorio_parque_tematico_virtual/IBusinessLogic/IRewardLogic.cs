@@ -6,11 +6,11 @@ namespace IBusinessLogic
 {
     public interface IRewardLogic
     {
-        Task<RewardModelOut> CreateReward(RewardModelIn reward);
-        Task<List<RewardModelOut>> GetAllRewards();
-        Task<RewardModelOut> GetRewardById(Guid id);
-        Task<RewardModelOut> UpdateReward(Guid id, RewardModelIn reward);
-        Task DeleteReward(Guid id);
-        Task<List<RewardModelOut>> GetAvailableRewards();
+        RewardModelOut CreateReward(RewardModelIn reward);
+        List<RewardModelOut> GetAllRewards();
+        RewardModelOut GetRewardById(Guid id);
+        RewardModelOut UpdateReward(Guid id, RewardModelIn reward);
+        void DeleteReward(Guid id);
+        List<RewardModelOut> GetAvailableRewards();
     }
 }

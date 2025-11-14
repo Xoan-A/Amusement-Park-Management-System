@@ -4,8 +4,8 @@ namespace BusinessLogic
     {
         void Attach(IDateObserver observer);
         void Detach(IDateObserver observer);
-        Task NotifyDateChange();
+        void NotifyDateChange();
         DateTime GetPreviousDateTime();
-        Task<DateTime> GetCurrentDateTime();
+        DateTime GetCurrentDateTime();
     }
 }

@@ -121,7 +121,7 @@ public class MaintenanceControllerTest
     #region Schedule Endpoints
 
     [TestMethod]
-    public async Task CreateSchedule_AsAdministrator_ReturnsCreated()
+    public void CreateSchedule_AsAdministrator_ReturnsCreated()
     {
         Guid scheduleId = Guid.NewGuid();
         MaintenanceScheduleRequest request = new MaintenanceScheduleRequest
@@ -133,19 +133,19 @@ public class MaintenanceControllerTest
         };
 
         _mockMaintenanceLogic.Setup(m => m.CreateSchedule(It.IsAny<MaintenanceScheduleRequest>()))
-        .ReturnsAsync(scheduleId);
+        .Returns(scheduleId);
 
         StringContent content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response = await _adminClient.PostAsync("/api/maintenance/schedules", content);
+        HttpResponseMessage response = _ = _adminClient.PostAsync("/api/maintenance/schedules", content).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.Created, response.StatusCode);
-        string responseBody = await response.Content.ReadAsStringAsync();
+        string responseBody = response.Content.ReadAsStringAsync().Result;
         Assert.IsTrue(responseBody.Contains(scheduleId.ToString()));
     }
 
     [TestMethod]
-    public async Task CreateSchedule_AsOperator_ReturnsForbidden()
+    public void CreateSchedule_AsOperator_ReturnsForbidden()
     {
         MaintenanceScheduleRequest request = new MaintenanceScheduleRequest
         {
@@ -157,13 +157,13 @@ public class MaintenanceControllerTest
 
         StringContent content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response = await _operatorClient.PostAsync("/api/maintenance/schedules", content);
+        HttpResponseMessage response = _ = _operatorClient.PostAsync("/api/maintenance/schedules", content).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetAllSchedules_AsAdministrator_ReturnsOk()
+    public void GetAllSchedules_AsAdministrator_ReturnsOk()
     {
         List<MaintenanceScheduleResponse> schedules = new List<MaintenanceScheduleResponse>
         {
@@ -180,17 +180,17 @@ public class MaintenanceControllerTest
             }
         };
 
-        _mockMaintenanceLogic.Setup(m => m.GetAllSchedules()).ReturnsAsync(schedules);
+        _mockMaintenanceLogic.Setup(m => m.GetAllSchedules()).Returns(schedules);
 
-        HttpResponseMessage response = await _adminClient.GetAsync("/api/maintenance/schedules");
+        HttpResponseMessage response = _ = _adminClient.GetAsync("/api/maintenance/schedules").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
-        string responseBody = await response.Content.ReadAsStringAsync();
+        string responseBody = response.Content.ReadAsStringAsync().Result;
         Assert.IsTrue(responseBody.Contains("Roller Coaster"));
     }
 
     [TestMethod]
-    public async Task GetScheduleById_ExistingSchedule_ReturnsOk()
+    public void GetScheduleById_ExistingSchedule_ReturnsOk()
     {
         Guid scheduleId = Guid.NewGuid();
         MaintenanceScheduleResponse schedule = new MaintenanceScheduleResponse
@@ -205,15 +205,15 @@ public class MaintenanceControllerTest
             IsOverdue = false
         };
 
-        _mockMaintenanceLogic.Setup(m => m.GetScheduleById(scheduleId)).ReturnsAsync(schedule);
+        _mockMaintenanceLogic.Setup(m => m.GetScheduleById(scheduleId)).Returns(schedule);
 
-        HttpResponseMessage response = await _adminClient.GetAsync($"/api/maintenance/schedules/{scheduleId}");
+        HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/maintenance/schedules/{scheduleId}").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetOverdueSchedules_ReturnsOk()
+    public void GetOverdueSchedules_ReturnsOk()
     {
         List<MaintenanceScheduleResponse> schedules = new List<MaintenanceScheduleResponse>
         {
@@ -230,26 +230,26 @@ public class MaintenanceControllerTest
             }
         };
 
-        _mockMaintenanceLogic.Setup(m => m.GetOverdueSchedules()).ReturnsAsync(schedules);
+        _mockMaintenanceLogic.Setup(m => m.GetOverdueSchedules()).Returns(schedules);
 
-        HttpResponseMessage response = await _adminClient.GetAsync("/api/maintenance/schedules/overdue");
+        HttpResponseMessage response = _ = _adminClient.GetAsync("/api/maintenance/schedules/overdue").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetUpcomingSchedules_ReturnsOk()
+    public void GetUpcomingSchedules_ReturnsOk()
     {
         List<MaintenanceScheduleResponse> schedules = new List<MaintenanceScheduleResponse>();
-        _mockMaintenanceLogic.Setup(m => m.GetUpcomingSchedules(7)).ReturnsAsync(schedules);
+        _mockMaintenanceLogic.Setup(m => m.GetUpcomingSchedules(7)).Returns(schedules);
 
-        HttpResponseMessage response = await _adminClient.GetAsync("/api/maintenance/schedules/upcoming?days=7");
+        HttpResponseMessage response = _ = _adminClient.GetAsync("/api/maintenance/schedules/upcoming?days=7").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetSchedulesByAttraction_AsAdministrator_ReturnsOk()
+    public void GetSchedulesByAttraction_AsAdministrator_ReturnsOk()
     {
         Guid attractionId = Guid.NewGuid();
         List<MaintenanceScheduleResponse> schedules = new List<MaintenanceScheduleResponse>
@@ -266,47 +266,47 @@ public class MaintenanceControllerTest
                 IsOverdue = false
             }
         };
-        _mockMaintenanceLogic.Setup(m => m.GetSchedulesByAttraction(attractionId)).ReturnsAsync(schedules);
+        _mockMaintenanceLogic.Setup(m => m.GetSchedulesByAttraction(attractionId)).Returns(schedules);
 
         HttpResponseMessage response =
-        await _adminClient.GetAsync($"/api/maintenance/schedules/attraction/{attractionId}");
+        _ = _adminClient.GetAsync($"/api/maintenance/schedules/attraction/{attractionId}").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task UpdateScheduleStatus_AsAdministrator_ReturnsOk()
+    public void UpdateScheduleStatus_AsAdministrator_ReturnsOk()
     {
         Guid scheduleId = Guid.NewGuid();
         object request = new { status = "Completed" };
         StringContent content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
         _mockMaintenanceLogic.Setup(m => m.UpdateScheduleStatus(scheduleId, "Completed"))
-        .Returns(Task.CompletedTask);
+        ;
 
         HttpResponseMessage response =
-        await _adminClient.PutAsync($"/api/maintenance/schedules/{scheduleId}/status", content);
+        _ = _adminClient.PutAsync($"/api/maintenance/schedules/{scheduleId}/status", content).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task DeleteSchedule_AsAdministrator_ReturnsOk()
+    public void DeleteSchedule_AsAdministrator_ReturnsOk()
     {
         Guid scheduleId = Guid.NewGuid();
-        _mockMaintenanceLogic.Setup(m => m.DeleteSchedule(scheduleId)).Returns(Task.CompletedTask);
+        _mockMaintenanceLogic.Setup(m => m.DeleteSchedule(scheduleId));
 
-        HttpResponseMessage response = await _adminClient.DeleteAsync($"/api/maintenance/schedules/{scheduleId}");
+        HttpResponseMessage response = _ = _adminClient.DeleteAsync($"/api/maintenance/schedules/{scheduleId}").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task DeleteSchedule_AsOperator_ReturnsForbidden()
+    public void DeleteSchedule_AsOperator_ReturnsForbidden()
     {
         Guid scheduleId = Guid.NewGuid();
 
-        HttpResponseMessage response = await _operatorClient.DeleteAsync($"/api/maintenance/schedules/{scheduleId}");
+        HttpResponseMessage response = _ = _operatorClient.DeleteAsync($"/api/maintenance/schedules/{scheduleId}").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -316,28 +316,28 @@ public class MaintenanceControllerTest
     #region Business Operations
 
     [TestMethod]
-    public async Task CompleteMaintenance_AsOperator_ReturnsOk()
+    public void CompleteMaintenance_AsOperator_ReturnsOk()
     {
         Guid scheduleId = Guid.NewGuid();
         Guid recordId = Guid.NewGuid();
 
         _mockMaintenanceLogic.Setup(m =>
         m.CompleteMaintenance(scheduleId, It.IsAny<Guid>()))
-        .ReturnsAsync(recordId);
+        .Returns(recordId);
 
         HttpResponseMessage response =
-        await _operatorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", null);
+        _ = _operatorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", null).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task CompleteMaintenance_AsVisitor_ReturnsForbidden()
+    public void CompleteMaintenance_AsVisitor_ReturnsForbidden()
     {
         Guid scheduleId = Guid.NewGuid();
 
         HttpResponseMessage response =
-        await _visitorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", null);
+        _ = _visitorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", null).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -347,7 +347,7 @@ public class MaintenanceControllerTest
     #region Error Path Tests
 
     [TestMethod]
-    public async Task CreateSchedule_WithInvalidData_ReturnsBadRequest()
+    public void CreateSchedule_WithInvalidData_ReturnsBadRequest()
     {
         MaintenanceScheduleRequest request = new MaintenanceScheduleRequest
         {
@@ -357,44 +357,44 @@ public class MaintenanceControllerTest
         };
 
         _mockMaintenanceLogic.Setup(m => m.CreateSchedule(It.IsAny<MaintenanceScheduleRequest>()))
-        .ThrowsAsync(new ArgumentException("Invalid data"));
+        .Throws(new ArgumentException("Invalid data"));
 
         StringContent content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response = await _adminClient.PostAsync("/api/maintenance/schedules", content);
+        HttpResponseMessage response = _ = _adminClient.PostAsync("/api/maintenance/schedules", content).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetScheduleById_NonExistentSchedule_ReturnsNotFound()
+    public void GetScheduleById_NonExistentSchedule_ReturnsNotFound()
     {
         Guid scheduleId = Guid.NewGuid();
         _mockMaintenanceLogic.Setup(m => m.GetScheduleById(scheduleId))
-        .ThrowsAsync(new KeyNotFoundException("Schedule not found"));
+        .Throws(new KeyNotFoundException("Schedule not found"));
 
-        HttpResponseMessage response = await _adminClient.GetAsync($"/api/maintenance/schedules/{scheduleId}");
+        HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/maintenance/schedules/{scheduleId}").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task CompleteMaintenance_NonExistentSchedule_ReturnsNotFound()
+    public void CompleteMaintenance_NonExistentSchedule_ReturnsNotFound()
     {
         Guid scheduleId = Guid.NewGuid();
 
         _mockMaintenanceLogic.Setup(m =>
         m.CompleteMaintenance(scheduleId, It.IsAny<Guid>()))
-        .ThrowsAsync(new KeyNotFoundException("Schedule not found"));
+        .Throws(new KeyNotFoundException("Schedule not found"));
 
         HttpResponseMessage response =
-        await _operatorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", null);
+        _ = _operatorClient.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", null).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task CreateSchedule_WithMissingNameIdentifierClaim_UsesEmptyGuid()
+    public void CreateSchedule_WithMissingNameIdentifierClaim_UsesEmptyGuid()
     {
         MaintenanceScheduleRequest request = new MaintenanceScheduleRequest
         {
@@ -405,7 +405,7 @@ public class MaintenanceControllerTest
 
         _mockMaintenanceLogic.Setup(m => m.CreateSchedule(
             It.IsAny<MaintenanceScheduleRequest>()))
-        .ReturnsAsync(Guid.NewGuid());
+        .Returns(Guid.NewGuid());
 
         JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
         byte[] key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
@@ -431,19 +431,19 @@ public class MaintenanceControllerTest
 
         StringContent content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response = await client.PostAsync("/api/maintenance/schedules", content);
+        HttpResponseMessage response = _ = client.PostAsync("/api/maintenance/schedules", content).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.Created, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task CompleteMaintenance_WithMissingNameIdentifierClaim_UsesEmptyGuid()
+    public void CompleteMaintenance_WithMissingNameIdentifierClaim_UsesEmptyGuid()
     {
         Guid scheduleId = Guid.NewGuid();
 
         _mockMaintenanceLogic.Setup(m =>
         m.CompleteMaintenance(scheduleId, It.IsAny<Guid>()))
-        .ReturnsAsync(Guid.NewGuid());
+        .Returns(Guid.NewGuid());
 
         JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
         byte[] key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
@@ -468,7 +468,7 @@ public class MaintenanceControllerTest
         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
 
         HttpResponseMessage response =
-        await client.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", null);
+        _ = client.PostAsync($"/api/maintenance/schedules/{scheduleId}/complete", null).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }

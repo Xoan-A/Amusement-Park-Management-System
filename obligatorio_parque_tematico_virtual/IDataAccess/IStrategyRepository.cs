@@ -4,6 +4,6 @@ namespace IDataAccess;
 
 public interface IStrategyRepository
 {
-    Task<StrategyConfiguration?> Get();
-    Task Update(StrategyConfiguration strategyConfiguration);
+    StrategyConfiguration? Get();
+    void Update(StrategyConfiguration strategyConfiguration);
 }

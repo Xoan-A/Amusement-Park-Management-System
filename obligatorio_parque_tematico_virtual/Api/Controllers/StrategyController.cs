@@ -22,9 +22,9 @@ public class StrategyController : ControllerBase
 
     [HttpGet]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetStrategy()
+    public IActionResult GetStrategy()
     {
-        IConcreteStrategy strategy = await _activeStrategy.GetStrategy();
+        IConcreteStrategy strategy = _activeStrategy.GetStrategy();
 
         StrategyResponse response = new StrategyResponse
         {
@@ -36,9 +36,9 @@ public class StrategyController : ControllerBase
 
     [HttpPut]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> SetStrategy([FromBody] SetStrategyRequest setStrategyRequest)
+    public IActionResult SetStrategy([FromBody] SetStrategyRequest setStrategyRequest)
     {
-        await _activeStrategy.SetStrategy(setStrategyRequest);
+        _activeStrategy.SetStrategy(setStrategyRequest);
 
         MessageResponse response = new MessageResponse
         {
@@ -50,9 +50,9 @@ public class StrategyController : ControllerBase
 
     [HttpGet("topTen")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetTopTen()
+    public IActionResult GetTopTen()
     {
-        TopTenResponse response = await _userLogic.GetTopTenUsers();
+        TopTenResponse response = _userLogic.GetTopTenUsers();
         return Ok(response);
     }
 }

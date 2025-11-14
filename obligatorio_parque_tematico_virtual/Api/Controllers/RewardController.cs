@@ -19,49 +19,49 @@ public class RewardController : ControllerBase
 
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetAllRewards()
+    public IActionResult GetAllRewards()
     {
-        List<RewardModelOut> rewards = await _rewardLogic.GetAllRewards();
+        List<RewardModelOut> rewards = _rewardLogic.GetAllRewards();
         return Ok(rewards);
     }
 
     [HttpGet("{id}")]
     [Authorize]
-    public async Task<IActionResult> GetRewardById(Guid id)
+    public IActionResult GetRewardById(Guid id)
     {
-        RewardModelOut reward = await _rewardLogic.GetRewardById(id);
+        RewardModelOut reward = _rewardLogic.GetRewardById(id);
         return Ok(reward);
     }
 
     [HttpPost]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> CreateReward([FromBody] RewardModelIn rewardModelIn)
+    public IActionResult CreateReward([FromBody] RewardModelIn rewardModelIn)
     {
-        RewardModelOut createdReward = await _rewardLogic.CreateReward(rewardModelIn);
+        RewardModelOut createdReward = _rewardLogic.CreateReward(rewardModelIn);
         return CreatedAtAction(nameof(GetRewardById), new { id = createdReward.Id }, createdReward);
     }
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdateReward(Guid id, [FromBody] RewardModelIn rewardModelIn)
+    public IActionResult UpdateReward(Guid id, [FromBody] RewardModelIn rewardModelIn)
     {
-        RewardModelOut updatedReward = await _rewardLogic.UpdateReward(id, rewardModelIn);
+        RewardModelOut updatedReward = _rewardLogic.UpdateReward(id, rewardModelIn);
         return Ok(updatedReward);
     }
 
     [HttpDelete("{id}")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DeleteReward(Guid id)
+    public IActionResult DeleteReward(Guid id)
     {
-        await _rewardLogic.DeleteReward(id);
+        _rewardLogic.DeleteReward(id);
         return NoContent();
     }
 
     [HttpGet("available")]
     [Authorize]
-    public async Task<IActionResult> GetAvailableRewards()
+    public IActionResult GetAvailableRewards()
     {
-        List<RewardModelOut> rewards = await _rewardLogic.GetAvailableRewards();
+        List<RewardModelOut> rewards = _rewardLogic.GetAvailableRewards();
         return Ok(rewards);
     }
 }

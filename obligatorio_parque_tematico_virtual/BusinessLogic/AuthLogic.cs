@@ -16,12 +16,12 @@ namespace BusinessLogic
             _passwordLogic = passwordLogic;
         }
 
-        public async Task<UserResponse> Login(string email, string password)
+        public UserResponse Login(string email, string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 throw new ArgumentException("Email and password must be provided.");
 
-            User user = await _userRepository.GetByEmailWithRoles(email);
+            User user = _userRepository.GetByEmailWithRoles(email);
             if (user == null)
                 throw new ArgumentException("Invalid email or password.");
 

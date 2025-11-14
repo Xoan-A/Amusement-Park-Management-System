@@ -19,33 +19,33 @@ namespace Api.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Visitor")]
-        public async Task<IActionResult> PurchaseTicket([FromBody] PurchaseTicketRequest request)
+        public IActionResult PurchaseTicket([FromBody] PurchaseTicketRequest request)
         {
-            TicketResponse response = await _ticketLogic.PurchaseTicketAsync(request);
+            TicketResponse response = _ticketLogic.PurchaseTicket(request);
             return CreatedAtAction(nameof(GetTicketById), new { id = response.Id }, response);
         }
 
         [HttpGet("qr/{qrCode}")]
         [Authorize(Roles = "Visitor, Operator, Administrator")]
-        public async Task<IActionResult> GetTicketByQRCode(Guid qrCode)
+        public IActionResult GetTicketByQRCode(Guid qrCode)
         {
-            TicketResponse response = await _ticketLogic.GetTicketByQRCodeAsync(qrCode);
+            TicketResponse response = _ticketLogic.GetTicketByQRCode(qrCode);
             return Ok(response);
         }
 
         [HttpGet("{id}")]
         [Authorize(Roles = "Visitor, Operator, Administrator")]
-        public async Task<IActionResult> GetTicketById(Guid id)
+        public IActionResult GetTicketById(Guid id)
         {
-            TicketResponse response = await _ticketLogic.GetTicketByIdAsync(id);
+            TicketResponse response = _ticketLogic.GetTicketById(id);
             return Ok(response);
         }
 
         [HttpGet("visitor/{visitorId}")]
         [Authorize(Roles = "Visitor, Operator, Administrator")]
-        public async Task<IActionResult> GetVisitorTickets(Guid visitorId)
+        public IActionResult GetVisitorTickets(Guid visitorId)
         {
-            IEnumerable<TicketResponse> responses = await _ticketLogic.GetVisitorTicketsAsync(visitorId);
+            IEnumerable<TicketResponse> responses = _ticketLogic.GetVisitorTickets(visitorId);
 
             return Ok(responses);
         }

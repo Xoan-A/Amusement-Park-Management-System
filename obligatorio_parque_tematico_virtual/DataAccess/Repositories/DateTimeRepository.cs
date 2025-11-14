@@ -14,18 +14,18 @@ public class DateTimeRepository : IDateTimeRepository
         _context = context;
     }
 
-    public async Task<DateTime?> GetConfiguredDateTime()
+    public DateTime? GetConfiguredDateTime()
     {
-        DateTimeConfiguration currentDate = await _context.DateTimeConfigurations.FirstOrDefaultAsync();
+        DateTimeConfiguration currentDate = _context.DateTimeConfigurations.FirstOrDefault();
         return currentDate?.CurrentDateTime;
     }
 
-    public async Task SetConfiguredDateTime(DateTime dateTime)
+    public void SetConfiguredDateTime(DateTime dateTime)
     {
-        DateTimeConfiguration existingConfig = await _context.DateTimeConfigurations.FirstOrDefaultAsync();
+        DateTimeConfiguration existingConfig = _context.DateTimeConfigurations.FirstOrDefault();
         if (existingConfig == null)
         {
-            await _context.DateTimeConfigurations.AddAsync(new DateTimeConfiguration(dateTime));
+            _context.DateTimeConfigurations.Add(new DateTimeConfiguration(dateTime));
         }
         else
         {
@@ -33,6 +33,6 @@ public class DateTimeRepository : IDateTimeRepository
             _context.DateTimeConfigurations.Update(existingConfig);
         }
 
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
     }
 }

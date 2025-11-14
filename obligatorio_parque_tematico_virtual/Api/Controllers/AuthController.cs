@@ -21,9 +21,9 @@ namespace Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public IActionResult Login([FromBody] LoginRequest request)
         {
-            UserResponse user = await _authLogic.Login(request.Email, request.Password);
+            UserResponse user = _authLogic.Login(request.Email, request.Password);
 
             string token = _tokenLogic.GenerateToken(user);
             string[] roles = user.UserRoles?.ToArray() ?? new string[0];
@@ -41,9 +41,9 @@ namespace Api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterVisitorRequest request)
+        public IActionResult Register([FromBody] RegisterVisitorRequest request)
         {
-            UserResponse visitor = await _userLogic.RegisterVisitor(request);
+            UserResponse visitor = _userLogic.RegisterVisitor(request);
 
             RegisterResponse response = new RegisterResponse
             {

@@ -4,5 +4,5 @@ using Domain;
 
 public interface IReportRepository
 {
-    Task<List<Report>> GetAllReports();
+    List<Report> GetAllReports();
 }

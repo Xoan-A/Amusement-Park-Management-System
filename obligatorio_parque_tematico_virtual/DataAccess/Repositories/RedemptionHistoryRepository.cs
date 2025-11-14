@@ -14,30 +14,30 @@ namespace DataAccess.Repositories
             _context = context;
         }
 
-        public async Task CreateAsync(RedemptionHistory redemptionHistory)
+        public void Create(RedemptionHistory redemptionHistory)
         {
             _context.RedemptionHistories.Add(redemptionHistory);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
-        public async Task<List<RedemptionHistory>> GetByVisitorIdAsync(Guid visitorId)
+        public List<RedemptionHistory> GetByVisitorId(Guid visitorId)
         {
-            return await _context.RedemptionHistories
-                .Include(rh => rh.Visitor)
-                .Include(rh => rh.Reward)
-                .Where(rh => rh.VisitorId == visitorId)
-                .OrderByDescending(rh => rh.RedeemedAt)
-                .ToListAsync();
+            return _context.RedemptionHistories
+            .Include(rh => rh.Visitor)
+            .Include(rh => rh.Reward)
+            .Where(rh => rh.VisitorId == visitorId)
+            .OrderByDescending(rh => rh.RedeemedAt)
+            .ToList();
         }
 
-        public async Task<List<RedemptionHistory>> GetByVisitorIdWithDateRangeAsync(Guid visitorId, DateTime dateFrom, DateTime dateTo)
+        public List<RedemptionHistory> GetByVisitorIdWithDateRange(Guid visitorId, DateTime dateFrom, DateTime dateTo)
         {
-            return await _context.RedemptionHistories
-                .Include(rh => rh.Visitor)
-                .Include(rh => rh.Reward)
-                .Where(rh => rh.VisitorId == visitorId && rh.RedeemedAt >= dateFrom && rh.RedeemedAt <= dateTo)
-                .OrderByDescending(rh => rh.RedeemedAt)
-                .ToListAsync();
+            return _context.RedemptionHistories
+            .Include(rh => rh.Visitor)
+            .Include(rh => rh.Reward)
+            .Where(rh => rh.VisitorId == visitorId && rh.RedeemedAt >= dateFrom && rh.RedeemedAt <= dateTo)
+            .OrderByDescending(rh => rh.RedeemedAt)
+            .ToList();
         }
     }
 }

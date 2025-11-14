@@ -14,49 +14,49 @@ namespace DataAccess.Repositories
             _context = context;
         }
 
-        public async Task CreateAsync(Reward reward)
+        public void Create(Reward reward)
         {
             _context.Rewards.Add(reward);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
-        public async Task<List<Reward>> GetAllAsync()
+        public List<Reward> GetAll()
         {
-            return await _context.Rewards.ToListAsync();
+            return _context.Rewards.ToList();
         }
 
-        public async Task<Reward?> GetByIdAsync(Guid id)
+        public Reward? GetById(Guid id)
         {
-            return await _context.Rewards.FindAsync(id);
+            return _context.Rewards.Find(id);
         }
 
-        public async Task UpdateAsync(Reward reward)
+        public void Update(Reward reward)
         {
             _context.Rewards.Update(reward);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
-        public async Task DeleteAsync(Guid id)
+        public void Delete(Guid id)
         {
-            Reward? reward = await GetByIdAsync(id);
+            Reward? reward = GetById(id);
             if (reward != null)
             {
                 _context.Rewards.Remove(reward);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
             }
         }
 
-        public async Task<List<Reward>> GetAvailableRewardsAsync()
+        public List<Reward> GetAvailableRewards()
         {
-            return await _context.Rewards
-                .Where(r => r.AvailableQuantity > 0)
-                .ToListAsync();
+            return _context.Rewards
+            .Where(r => r.AvailableQuantity > 0)
+            .ToList();
         }
 
-        public async Task<Reward?> GetByNameAsync(string name)
+        public Reward? GetByName(string name)
         {
-            return await _context.Rewards
-                .FirstOrDefaultAsync(r => r.Name == name);
+            return _context.Rewards
+            .FirstOrDefault(r => r.Name == name);
         }
     }
 }

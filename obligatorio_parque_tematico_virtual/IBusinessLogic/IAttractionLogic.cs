@@ -5,14 +5,14 @@ namespace IBusinessLogic;
 
 public interface IAttractionLogic
 {
-    Task<AttractionResponse> GetAttractionById(Guid id);
-    Task<List<AttractionResponse>> GetAllAttractions();
-    Task<Guid> CreateAttraction(AttractionRequest newAttraction);
-    Task UpdateAttraction(Guid id, AttractionRequest existingAttraction);
-    Task DeleteAttraction(Guid id);
-    Task AddIncident(Guid id, string incident);
-    Task RemoveIncident(Guid id, string incident);
-    Task<List<string>> GetAttractionIncidents(Guid id);
-    Task<CapacityResponse> GetCapacity(Guid id);
-    Task<AttractionsVisitResponse> GetAllAttractionsVisits(AttractionsVisitsRequest request);
+    AttractionResponse GetAttractionById(Guid id);
+    List<AttractionResponse> GetAllAttractions();
+    Guid CreateAttraction(AttractionRequest newAttraction);
+    void UpdateAttraction(Guid id, AttractionRequest existingAttraction);
+    void DeleteAttraction(Guid id);
+    void AddIncident(Guid id, string incident);
+    void RemoveIncident(Guid id, string incident);
+    List<string> GetAttractionIncidents(Guid id);
+    CapacityResponse GetCapacity(Guid id);
+    AttractionsVisitResponse GetAllAttractionsVisits(AttractionsVisitsRequest request);
 }

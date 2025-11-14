@@ -4,9 +4,9 @@ namespace IDataAccess;
 
 public interface IEventRepository
 {
-    public Task<Event> GetById(Guid id);
-    Task Create(Event eventEntity);
-    Task<List<Event>> GetAll();
-    Task Delete(Event eventEntity);
-    Task<Event?> GetEventByAttractionAndDate(Guid attractionId, DateTime date);
+    public Event GetById(Guid id);
+    void Create(Event eventEntity);
+    List<Event> GetAll();
+    void Delete(Event eventEntity);
+    Event? GetEventByAttractionAndDate(Guid attractionId, DateTime date);
 }

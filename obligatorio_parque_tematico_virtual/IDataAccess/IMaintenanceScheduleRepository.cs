@@ -4,13 +4,13 @@ namespace IDataAccess
 {
     public interface IMaintenanceScheduleRepository
     {
-        Task CreateAsync(MaintenanceSchedule schedule);
-        Task<MaintenanceSchedule?> GetByIdAsync(Guid id);
-        Task<List<MaintenanceSchedule>> GetAllAsync();
-        Task<List<MaintenanceSchedule>> GetByAttractionIdAsync(Guid attractionId);
-        Task<List<MaintenanceSchedule>> GetOverdueSchedulesAsync();
-        Task<List<MaintenanceSchedule>> GetUpcomingSchedulesAsync(int daysAhead);
-        Task UpdateAsync(MaintenanceSchedule schedule);
-        Task DeleteAsync(Guid id);
+        void Create(MaintenanceSchedule schedule);
+        MaintenanceSchedule? GetById(Guid id);
+        List<MaintenanceSchedule> GetAll();
+        List<MaintenanceSchedule> GetByAttractionId(Guid attractionId);
+        List<MaintenanceSchedule> GetOverdueSchedules();
+        List<MaintenanceSchedule> GetUpcomingSchedules(int daysAhead);
+        void Update(MaintenanceSchedule schedule);
+        void Delete(Guid id);
     }
 }

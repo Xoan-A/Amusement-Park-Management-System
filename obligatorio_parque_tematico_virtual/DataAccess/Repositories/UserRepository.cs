@@ -14,71 +14,72 @@ namespace DataAccess.Repositories
             _context = context;
         }
 
-        public async Task<User> Create(User user)
+        public User Create(User user)
         {
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            _context.Users.Add(user);
+            _context.SaveChanges();
             return user;
         }
 
-        public Task<User?> GetById(Guid id)
+        public User? GetById(Guid id)
         {
             return _context.Users.Include(u =>
-                    u.VisitorReports)
-                .ThenInclude(vr =>
-                    vr.Reports)
-                .ThenInclude(r
-                    => r.Attraction).FirstOrDefaultAsync(u => u.Id == id);
+            u.VisitorReports)
+            .ThenInclude(vr =>
+            vr.Reports)
+            .ThenInclude(r
+            => r.Attraction).FirstOrDefault(u => u.Id == id);
         }
 
-        public Task<User?> GetByIdWithRoles(Guid id)
+        public User? GetByIdWithRoles(Guid id)
         {
             return _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Id == id);
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefault(u => u.Id == id);
         }
 
-        public Task<User?> GetByEmailWithRoles(string email)
+        public User? GetByEmailWithRoles(string email)
         {
             return _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Email == email);
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefault(u => u.Email == email);
         }
 
-        public async Task<bool> IsEmailUnique(string email)
+        public bool IsEmailUnique(string email)
         {
-            return !await _context.Users.AnyAsync(u => u.Email == email);
+            return !_context.Users.Any(u => u.Email == email);
         }
 
-        public Task<List<User>> GetTopTen()
+        public List<User> GetTopTen()
         {
             return _context.Users
-                .Where(u => u.UserRoles.Any(ur => ur.Role.Name == Role.VISITOR))
-                .OrderByDescending(u => u.DailyScore)
-                .Take(10)
-                .ToListAsync();
+            .Where(u => u.UserRoles.Any(ur => ur.Role.Name == Role.VISITOR))
+            .OrderByDescending(u => u.DailyScore)
+            .Take(10)
+            .ToList();
         }
 
-        public async Task ResetScores()
+        public void ResetScores()
         {
-            List<User> users = await _context.Users.ToListAsync();
+            List<User> users = _context.Users.ToList();
             foreach (User user in users)
             {
                 user.DailyScore = 0;
             }
 
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
-        public async Task Update(User user)
+        public void Update(User user)
         {
             if (_context.Entry(user).State == EntityState.Detached)
             {
                 _context.Users.Update(user);
             }
-            await _context.SaveChangesAsync();
+
+            _context.SaveChanges();
         }
     }
 }

@@ -4,5 +4,5 @@ namespace IDataAccess;
 
 public interface IRoleRepository
 {
-    Task<Role?> GetByNameAsync(string name);
+    Role? GetByName(string name);
 }

@@ -22,13 +22,13 @@ public class PluginLoader : IPluginLoader
     public List<PluginInfoResponse> LoadPlugins()
     {
         string currentAssemblyPath = Assembly.GetExecutingAssembly().Location;
-        var builtInPlugins = _availablePlugins
+        Dictionary<string, PluginInfo> builtInPlugins = _availablePlugins
             .Where(p => p.Value.AssemblyPath == currentAssemblyPath)
             .ToDictionary(p => p.Key, p => p.Value);
 
         _availablePlugins.Clear();
 
-        foreach (var plugin in builtInPlugins)
+        foreach (KeyValuePair<string, PluginInfo> plugin in builtInPlugins)
         {
             _availablePlugins[plugin.Key] = plugin.Value;
         }
@@ -120,10 +120,10 @@ public class PluginLoader : IPluginLoader
 
         if (parameters != null && parameters.Count > 0)
         {
-            var constructors = type.GetConstructors();
-            foreach (var constructor in constructors)
+            ConstructorInfo[] constructors = type.GetConstructors();
+            foreach (ConstructorInfo constructor in constructors)
             {
-                var ctorParams = constructor.GetParameters();
+                ParameterInfo[] ctorParams = constructor.GetParameters();
                 if (ctorParams.Length == parameters.Count)
                 {
                     object[] args = new object[ctorParams.Length];

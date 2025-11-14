@@ -4,5 +4,5 @@ namespace IBusinessLogic;
 
 public interface IAttractionLogicEntity
 {
-    Task<Attraction> GetAttractionEntityById(Guid expectedAttractionId);
+    Attraction GetAttractionEntityById(Guid expectedAttractionId);
 }

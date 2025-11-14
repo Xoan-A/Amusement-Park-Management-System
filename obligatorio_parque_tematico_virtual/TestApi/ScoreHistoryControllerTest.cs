@@ -40,7 +40,7 @@ public class ScoreHistoryControllerTest
                 }
 
                 services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlite(_connection));
+                options.UseSqlite(_connection));
 
                 services.AddSingleton(_mockScoreHistoryLogic.Object);
             });
@@ -53,13 +53,13 @@ public class ScoreHistoryControllerTest
         }
 
         Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
-            Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
-            {
-                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
-                Issuer = "ParqueTematico",
-                Audience = "ParqueTematico",
-                ExpirationHours = 1
-            });
+        Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+        {
+            SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+            Issuer = "ParqueTematico",
+            Audience = "ParqueTematico",
+            ExpirationHours = 1
+        });
         BusinessLogic.TokenLogic tokenService = new BusinessLogic.TokenLogic(jwtSettings);
 
         UserResponse adminUser = new UserResponse
@@ -73,7 +73,7 @@ public class ScoreHistoryControllerTest
         string adminToken = tokenService.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();
         _adminClient.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
 
         _visitorUserId = Guid.NewGuid();
         UserResponse visitorUser = new UserResponse
@@ -87,7 +87,7 @@ public class ScoreHistoryControllerTest
         string visitorToken = tokenService.GenerateToken(visitorUser);
         _visitorClient = _factory.CreateClient();
         _visitorClient.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", visitorToken);
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", visitorToken);
     }
 
     [TestCleanup]
@@ -101,7 +101,7 @@ public class ScoreHistoryControllerTest
     }
 
     [TestMethod]
-    public async Task GetMyScoreHistory_AsVisitor_ReturnsOk()
+    public void GetMyScoreHistory_AsVisitor_ReturnsOk()
     {
         List<ScoreHistoryModelOut> history = new List<ScoreHistoryModelOut>
         {
@@ -117,15 +117,15 @@ public class ScoreHistoryControllerTest
             }
         };
 
-        _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(_visitorUserId)).ReturnsAsync(history);
+        _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(_visitorUserId)).Returns(history);
 
-        HttpResponseMessage response = await _visitorClient.GetAsync("/api/score-history/my-history");
+        HttpResponseMessage response = _ = _visitorClient.GetAsync("/api/score-history/my-history").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetVisitorHistory_AsAdministrator_ReturnsOk()
+    public void GetVisitorHistory_AsAdministrator_ReturnsOk()
     {
         Guid visitorId = Guid.NewGuid();
         List<ScoreHistoryModelOut> history = new List<ScoreHistoryModelOut>
@@ -142,15 +142,15 @@ public class ScoreHistoryControllerTest
             }
         };
 
-        _mockScoreHistoryLogic.Setup(l => l.GetVisitorScoreHistory(visitorId, null, null)).ReturnsAsync(history);
+        _mockScoreHistoryLogic.Setup(l => l.GetVisitorScoreHistory(visitorId, null, null)).Returns(history);
 
-        HttpResponseMessage response = await _adminClient.GetAsync($"/api/score-history/visitor/{visitorId}");
+        HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/score-history/visitor/{visitorId}").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetAllHistory_AsAdministrator_ReturnsOk()
+    public void GetAllHistory_AsAdministrator_ReturnsOk()
     {
         List<ScoreHistoryModelOut> history = new List<ScoreHistoryModelOut>
         {
@@ -167,79 +167,79 @@ public class ScoreHistoryControllerTest
             }
         };
 
-        _mockScoreHistoryLogic.Setup(l => l.GetAllScoreHistory()).ReturnsAsync(history);
+        _mockScoreHistoryLogic.Setup(l => l.GetAllScoreHistory()).Returns(history);
 
-        HttpResponseMessage response = await _adminClient.GetAsync("/api/score-history");
+        HttpResponseMessage response = _ = _adminClient.GetAsync("/api/score-history").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetMyScoreHistory_WithBusinessLogicException_ReturnsBadRequest()
+    public void GetMyScoreHistory_WithBusinessLogicException_ReturnsBadRequest()
     {
         _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(_visitorUserId))
-            .Throws(new ArgumentException("Invalid visitor"));
+        .Throws(new ArgumentException("Invalid visitor"));
 
-        HttpResponseMessage response = await _visitorClient.GetAsync("/api/score-history/my-history");
+        HttpResponseMessage response = _ = _visitorClient.GetAsync("/api/score-history/my-history").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetVisitorHistory_VisitorNotFound_ReturnsNotFound()
+    public void GetVisitorHistory_VisitorNotFound_ReturnsNotFound()
     {
         Guid visitorId = Guid.NewGuid();
         _mockScoreHistoryLogic.Setup(l => l.GetVisitorScoreHistory(visitorId, null, null))
-            .Throws(new KeyNotFoundException("Visitor not found"));
+        .Throws(new KeyNotFoundException("Visitor not found"));
 
-        HttpResponseMessage response = await _adminClient.GetAsync($"/api/score-history/visitor/{visitorId}");
+        HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/score-history/visitor/{visitorId}").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetAllHistory_WithInvalidDateRange_ReturnsBadRequest()
+    public void GetAllHistory_WithInvalidDateRange_ReturnsBadRequest()
     {
         _mockScoreHistoryLogic.Setup(l => l.GetAllScoreHistory())
-            .Throws(new ArgumentException("Invalid data"));
+        .Throws(new ArgumentException("Invalid data"));
 
-        HttpResponseMessage response = await _adminClient.GetAsync("/api/score-history");
+        HttpResponseMessage response = _ = _adminClient.GetAsync("/api/score-history").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetMyScoreHistory_WithMissingNameIdentifierClaim_UsesEmptyGuid()
+    public void GetMyScoreHistory_WithMissingNameIdentifierClaim_UsesEmptyGuid()
     {
         System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler tokenHandler =
-            new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+        new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
         byte[] key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
         Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor =
-            new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+        new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+        {
+            Subject = new System.Security.Claims.ClaimsIdentity(new[]
             {
-                Subject = new System.Security.Claims.ClaimsIdentity(new[]
-                {
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Visitor")
-                }),
-                Expires = System.DateTime.UtcNow.AddHours(1),
-                Issuer = "ParqueTematico",
-                Audience = "ParqueTematico",
-                SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
-                    new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
-                    Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
-            };
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Visitor")
+            }),
+            Expires = System.DateTime.UtcNow.AddHours(1),
+            Issuer = "ParqueTematico",
+            Audience = "ParqueTematico",
+            SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+                new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
+                Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
+        };
         System.IdentityModel.Tokens.Jwt.JwtSecurityToken token =
-            tokenHandler.CreateToken(tokenDescriptor) as System.IdentityModel.Tokens.Jwt.JwtSecurityToken;
+        tokenHandler.CreateToken(tokenDescriptor) as System.IdentityModel.Tokens.Jwt.JwtSecurityToken;
         string tokenString = tokenHandler.WriteToken(token);
 
         HttpClient client = _factory.CreateClient();
         client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
 
         _mockScoreHistoryLogic.Setup(l => l.GetMyScoreHistory(Guid.Empty))
-            .ReturnsAsync(new List<ScoreHistoryModelOut>());
+        .Returns(new List<ScoreHistoryModelOut>());
 
-        HttpResponseMessage response = await client.GetAsync("/api/score-history/my-history");
+        HttpResponseMessage response = _ = client.GetAsync("/api/score-history/my-history").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }

@@ -45,27 +45,27 @@ public class EventRepositoryTest
     }
 
     [TestMethod]
-    public async Task GetById_ShouldReturnEvent_WhenEventExists()
+    public void GetById_ShouldReturnEvent_WhenEventExists()
     {
-        await _context.Events.AddAsync(eventEntity);
-        await _context.SaveChangesAsync();
+        _context.Events.Add(eventEntity);
+        _context.SaveChanges();
 
-        Event result = await _eventRepository.GetById(eventEntity.Id);
+        Event result = _eventRepository.GetById(eventEntity.Id);
 
         Assert.AreEqual(eventEntity.Id, result.Id);
         Assert.AreEqual(eventEntity.Name, result.Name);
     }
 
     [TestMethod]
-    public async Task GetById_ShouldReturnNull_WhenEventDoesNotExist()
+    public void GetById_ShouldReturnNull_WhenEventDoesNotExist()
     {
-        Event result = await _eventRepository.GetById(Guid.NewGuid());
+        Event result = _eventRepository.GetById(Guid.NewGuid());
 
         Assert.IsNull(result);
     }
 
     [TestMethod]
-    public async Task GetById_ShouldIncludeAttractions_WhenEventHasAttractions()
+    public void GetById_ShouldIncludeAttractions_WhenEventHasAttractions()
     {
         Attraction attraction1 = new Attraction
         {
@@ -85,17 +85,17 @@ public class EventRepositoryTest
             CurrentCapacity = 0
         };
 
-        await _context.Attractions.AddAsync(attraction1);
-        await _context.Attractions.AddAsync(attraction2);
-        await _context.SaveChangesAsync();
+        _context.Attractions.Add(attraction1);
+        _context.Attractions.Add(attraction2);
+        _context.SaveChanges();
 
         eventEntity.AddAttraction(attraction1);
         eventEntity.AddAttraction(attraction2);
 
-        await _context.Events.AddAsync(eventEntity);
-        await _context.SaveChangesAsync();
+        _context.Events.Add(eventEntity);
+        _context.SaveChanges();
 
-        Event result = await _eventRepository.GetById(eventEntity.Id);
+        Event result = _eventRepository.GetById(eventEntity.Id);
 
         Assert.AreEqual(2, result.Attractions.Count);
         Assert.IsTrue(result.Attractions.First().AttractionId == attraction1.Id);
@@ -103,22 +103,22 @@ public class EventRepositoryTest
     }
 
     [TestMethod]
-    public async Task Create_ShouldAddEventToDatabase()
+    public void Create_ShouldAddEventToDatabase()
     {
-        await _eventRepository.Create(eventEntity);
+        _eventRepository.Create(eventEntity);
 
-        Event result = await _context.Events.FindAsync(eventEntity.Id);
+        Event result = _context.Events.Find(eventEntity.Id);
 
         Assert.AreEqual(eventEntity.Name, result.Name);
     }
 
     [TestMethod]
-    public async Task GetAll_ShouldReturnAllEvents_WhenEventsExist()
+    public void GetAll_ShouldReturnAllEvents_WhenEventsExist()
     {
-        await _context.Events.AddAsync(eventEntity);
-        await _context.SaveChangesAsync();
+        _context.Events.Add(eventEntity);
+        _context.SaveChanges();
 
-        List<Event> events = await _eventRepository.GetAll();
+        List<Event> events = _eventRepository.GetAll();
 
         Assert.IsTrue(events.Any());
         Assert.AreEqual(1, events.Count());
@@ -126,7 +126,7 @@ public class EventRepositoryTest
     }
 
     [TestMethod]
-    public async Task GetAll_ShouldIncludeAttractions_WhenEventsHaveAttractions()
+    public void GetAll_ShouldIncludeAttractions_WhenEventsHaveAttractions()
     {
         Attraction attraction1 = new Attraction
         {
@@ -146,12 +146,12 @@ public class EventRepositoryTest
             CurrentCapacity = 0
         };
 
-        await _context.Attractions.AddAsync(attraction1);
-        await _context.Attractions.AddAsync(attraction2);
-        await _context.SaveChangesAsync();
+        _context.Attractions.Add(attraction1);
+        _context.Attractions.Add(attraction2);
+        _context.SaveChanges();
 
         eventEntity.AddAttraction(attraction1);
-        await _context.Events.AddAsync(eventEntity);
+        _context.Events.Add(eventEntity);
 
         Event newEvent = new Event
         {
@@ -160,11 +160,11 @@ public class EventRepositoryTest
             MaxCapacity = 2000
         };
         newEvent.AddAttraction(attraction2);
-        await _context.Events.AddAsync(newEvent);
+        _context.Events.Add(newEvent);
 
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
 
-        List<Event> result = await _eventRepository.GetAll();
+        List<Event> result = _eventRepository.GetAll();
 
         Assert.AreEqual(2, result.Count);
 
@@ -178,19 +178,19 @@ public class EventRepositoryTest
     }
 
     [TestMethod]
-    public async Task Delete_ShouldDeleteEventFromDatabase()
+    public void Delete_ShouldDeleteEventFromDatabase()
     {
-        await _eventRepository.Create(eventEntity);
+        _eventRepository.Create(eventEntity);
 
-        await _eventRepository.Delete(eventEntity);
+        _eventRepository.Delete(eventEntity);
 
-        Event result = await _eventRepository.GetById(eventEntity.Id);
+        Event result = _eventRepository.GetById(eventEntity.Id);
 
         Assert.IsNull(result);
     }
 
     [TestMethod]
-    public async Task GetEventByAttractionAndDate_ShouldReturnEvent_WhenEventExistsWithAttractionAndDate()
+    public void GetEventByAttractionAndDate_ShouldReturnEvent_WhenEventExistsWithAttractionAndDate()
     {
         Attraction attraction = new Attraction
         {
@@ -209,18 +209,18 @@ public class EventRepositoryTest
 
         eventEntity.Attractions = new List<EventAttraction> { eventAttraction };
 
-        await _context.Events.AddAsync(eventEntity);
-        await _context.Attractions.AddAsync(attraction);
-        await _context.SaveChangesAsync();
+        _context.Events.Add(eventEntity);
+        _context.Attractions.Add(attraction);
+        _context.SaveChanges();
 
-        Event? result = await _eventRepository.GetEventByAttractionAndDate(attraction.Id, eventEntity.Date);
+        Event? result = _eventRepository.GetEventByAttractionAndDate(attraction.Id, eventEntity.Date);
 
         Assert.AreEqual(eventEntity.Id, result.Id);
         Assert.IsTrue(result.Attractions.Any(ea => ea.AttractionId == attraction.Id));
     }
 
     [TestMethod]
-    public async Task GetEventByAttractionAndDate_ShouldReturnNull_WhenNoEventExistsForDate()
+    public void GetEventByAttractionAndDate_ShouldReturnNull_WhenNoEventExistsForDate()
     {
         Attraction attraction = new Attraction
         {
@@ -239,17 +239,17 @@ public class EventRepositoryTest
 
         eventEntity.Attractions = new List<EventAttraction> { eventAttraction };
 
-        await _context.Events.AddAsync(eventEntity);
-        await _context.Attractions.AddAsync(attraction);
-        await _context.SaveChangesAsync();
+        _context.Events.Add(eventEntity);
+        _context.Attractions.Add(attraction);
+        _context.SaveChanges();
 
-        Event? result = await _eventRepository.GetEventByAttractionAndDate(attraction.Id, new DateTime(2024, 9, 15));
+        Event? result = _eventRepository.GetEventByAttractionAndDate(attraction.Id, new DateTime(2024, 9, 15));
 
         Assert.IsNull(result);
     }
 
     [TestMethod]
-    public async Task GetEventByAttractionAndDate_ShouldReturnNull_WhenEventExistsButDoesNotHaveAttraction()
+    public void GetEventByAttractionAndDate_ShouldReturnNull_WhenEventExistsButDoesNotHaveAttraction()
     {
         Attraction attraction1 = new Attraction
         {
@@ -277,20 +277,20 @@ public class EventRepositoryTest
 
         eventEntity.Attractions = new List<EventAttraction> { eventAttraction };
 
-        await _context.Events.AddAsync(eventEntity);
-        await _context.Attractions.AddAsync(attraction1);
-        await _context.Attractions.AddAsync(attraction2);
-        await _context.SaveChangesAsync();
+        _context.Events.Add(eventEntity);
+        _context.Attractions.Add(attraction1);
+        _context.Attractions.Add(attraction2);
+        _context.SaveChanges();
 
-        Event? result = await _eventRepository.GetEventByAttractionAndDate(attraction2.Id, eventEntity.Date);
+        Event? result = _eventRepository.GetEventByAttractionAndDate(attraction2.Id, eventEntity.Date);
 
         Assert.IsNull(result);
     }
 
     [TestMethod]
-    public async Task GetEventByAttractionAndDate_ShouldReturnNull_WhenNoEventExists()
+    public void GetEventByAttractionAndDate_ShouldReturnNull_WhenNoEventExists()
     {
-        Event? result = await _eventRepository.GetEventByAttractionAndDate(Guid.NewGuid(), new DateTime(2024, 8, 15));
+        Event? result = _eventRepository.GetEventByAttractionAndDate(Guid.NewGuid(), new DateTime(2024, 8, 15));
 
         Assert.IsNull(result);
     }
