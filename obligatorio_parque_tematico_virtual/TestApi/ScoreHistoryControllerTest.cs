@@ -112,7 +112,6 @@ public class ScoreHistoryControllerTest
                 Points = 100,
                 Origin = "AttractionVisit",
                 StrategyName = "PerAttraction",
-                Description = "Visited Roller Coaster",
                 CreatedAt = DateTime.UtcNow
             }
         };
@@ -137,7 +136,6 @@ public class ScoreHistoryControllerTest
                 Points = 50,
                 Origin = "EventParticipation",
                 StrategyName = "PerEvent",
-                Description = "Participated in event",
                 CreatedAt = DateTime.UtcNow
             }
         };
@@ -162,7 +160,6 @@ public class ScoreHistoryControllerTest
                 Points = 100,
                 Origin = "AttractionVisit",
                 StrategyName = "PerAttraction",
-                Description = "Test",
                 CreatedAt = DateTime.UtcNow
             }
         };
