@@ -21,7 +21,7 @@ public class ActiveStrategy : IActiveStrategy
 
     private void LoadStrategyFromDatabase()
     {
-        StrategyConfiguration? config = _strategyRepository.Get().GetAwaiter().GetResult();
+        StrategyConfiguration? config = _strategyRepository.Get();
         if (config != null)
         {
             try
@@ -47,7 +47,7 @@ public class ActiveStrategy : IActiveStrategy
         }
     }
 
-    public async Task SetStrategy(SetStrategyRequest setStrategyRequest)
+    public void SetStrategy(SetStrategyRequest setStrategyRequest)
     {
         Dictionary<string, object>? parameters = null;
         if (setStrategyRequest.StrategyName == "Combo")
@@ -59,7 +59,8 @@ public class ActiveStrategy : IActiveStrategy
 
         try
         {
-            IConcreteStrategy strategy = _pluginLoader.CreateStrategyInstance(setStrategyRequest.StrategyName, parameters);
+            IConcreteStrategy strategy =
+            _pluginLoader.CreateStrategyInstance(setStrategyRequest.StrategyName, parameters);
             Strategy = strategy;
         }
         catch (KeyNotFoundException)
@@ -73,16 +74,16 @@ public class ActiveStrategy : IActiveStrategy
             StrategyName = setStrategyRequest.StrategyName,
             N = setStrategyRequest.N,
         };
-        await _strategyRepository.Update(config);
+        _strategyRepository.Update(config);
     }
 
-    public Task<IConcreteStrategy> GetStrategy()
+    public IConcreteStrategy GetStrategy()
     {
         LoadStrategyFromDatabase();
         if (Strategy == null)
             throw new InvalidOperationException("Strategy not set");
 
-        return Task.FromResult(Strategy);
+        return Strategy;
     }
 
     public static int BasicCalculation(User visitor, Attraction attraction)

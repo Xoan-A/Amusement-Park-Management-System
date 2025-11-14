@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -123,7 +123,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task AddRoleToUser_WithAdminRole_ReturnsOk()
+        public void AddRoleToUser_WithAdminRole_ReturnsOk()
         {
             Guid userId = Guid.NewGuid();
             AddRolesRequest request = new AddRolesRequest
@@ -132,17 +132,17 @@ namespace ApiTests
             };
 
             _mockUserLogic.Setup(u => u.AddRoleToUser(userId, Role.OPERATOR))
-            .Returns(Task.CompletedTask);
+            ;
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _adminClient.PutAsync($"/api/users/{userId}/roles", content);
+            HttpResponseMessage response = _ = _adminClient.PutAsync($"/api/users/{userId}/roles", content).Result;
 
             response.EnsureSuccessStatusCode();
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            string responseContent = await response.Content.ReadAsStringAsync();
+            string responseContent = response.Content.ReadAsStringAsync().Result;
             MessageResponse messageResponse = JsonSerializer.Deserialize<MessageResponse>(responseContent,
                 new JsonSerializerOptions
                 {
@@ -155,7 +155,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task AddRoleToUser_WithoutAuthentication_ReturnsUnauthorized()
+        public void AddRoleToUser_WithoutAuthentication_ReturnsUnauthorized()
         {
             Guid userId = Guid.NewGuid();
             AddRolesRequest request = new AddRolesRequest
@@ -166,14 +166,14 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _client.PutAsync($"/api/users/{userId}/roles", content);
+            HttpResponseMessage response = _ = _client.PutAsync($"/api/users/{userId}/roles", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
             _mockUserLogic.Verify(u => u.AddRoleToUser(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task GetUserById_WithAdminRole_ReturnsOk()
+        public void GetUserById_WithAdminRole_ReturnsOk()
         {
             Guid userId = Guid.NewGuid();
             UserResponse expected = new UserResponse
@@ -188,14 +188,14 @@ namespace ApiTests
                 Score = 0
             };
 
-            _mockUserLogic.Setup(u => u.GetUserResponseById(userId)).ReturnsAsync(expected);
+            _mockUserLogic.Setup(u => u.GetUserResponseById(userId)).Returns(expected);
 
-            HttpResponseMessage response = await _adminClient.GetAsync($"/api/users/{userId}");
+            HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/users/{userId}").Result;
 
             response.EnsureSuccessStatusCode();
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            string json = await response.Content.ReadAsStringAsync();
+            string json = response.Content.ReadAsStringAsync().Result;
             UserResponse? userResponse = JsonSerializer.Deserialize<UserResponse>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -210,18 +210,18 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task GetUserById_WithoutAuthentication_ReturnsUnauthorized()
+        public void GetUserById_WithoutAuthentication_ReturnsUnauthorized()
         {
             Guid userId = Guid.NewGuid();
 
-            HttpResponseMessage response = await _client.GetAsync($"/api/users/{userId}");
+            HttpResponseMessage response = _ = _client.GetAsync($"/api/users/{userId}").Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
             _mockUserLogic.Verify(u => u.GetUserResponseById(It.IsAny<Guid>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task CreateUser_WithAdminRole_ReturnsCreated()
+        public void CreateUser_WithAdminRole_ReturnsCreated()
         {
             CreateUserRequest request = new CreateUserRequest
             {
@@ -251,17 +251,17 @@ namespace ApiTests
             r.Name == request.Name &&
             r.LastName == request.LastName &&
             r.Email == request.Email)))
-            .ReturnsAsync(created);
+            .Returns(created);
 
             string jsonBody = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _adminClient.PostAsync("/api/users", content);
+            HttpResponseMessage response = _ = _adminClient.PostAsync("/api/users", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
             StringAssert.Contains(response.Headers.Location.ToString(), $"/api/users/{created.Id}");
 
-            string json = await response.Content.ReadAsStringAsync();
+            string json = response.Content.ReadAsStringAsync().Result;
             UserResponse? userResponse = JsonSerializer.Deserialize<UserResponse>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -275,7 +275,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task CreateUser_WithoutAuthentication_ReturnsUnauthorized()
+        public void CreateUser_WithoutAuthentication_ReturnsUnauthorized()
         {
             CreateUserRequest request = new CreateUserRequest
             {
@@ -291,14 +291,14 @@ namespace ApiTests
             string jsonBody = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _client.PostAsync("/api/users", content);
+            HttpResponseMessage response = _ = _client.PostAsync("/api/users", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
             _mockUserLogic.Verify(u => u.CreateUser(It.IsAny<CreateUserRequest>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task ModifyUser_WithAuthenticatedUser_ReturnsOk()
+        public void ModifyUser_WithAuthenticatedUser_ReturnsOk()
         {
             Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
             Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
@@ -348,17 +348,17 @@ namespace ApiTests
             _mockUserLogic
             .Setup(l => l.ModifyUser(
                 It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
-            .ReturnsAsync(expected);
+            .Returns(expected);
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
+            HttpResponseMessage response = _ = authedClient.PutAsync($"/api/users/{userId}", content).Result;
 
             response.EnsureSuccessStatusCode();
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            string body = await response.Content.ReadAsStringAsync();
+            string body = response.Content.ReadAsStringAsync().Result;
             UserResponse? parsed = JsonSerializer.Deserialize<UserResponse>(body, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -371,7 +371,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task ModifyUser_WithoutAuthentication_ReturnsUnauthorized()
+        public void ModifyUser_WithoutAuthentication_ReturnsUnauthorized()
         {
             Guid userId = Guid.NewGuid();
             ModifyUserRequest request = new ModifyUserRequest
@@ -384,7 +384,7 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _client.PutAsync($"/api/users/{userId}", content);
+            HttpResponseMessage response = _ = _client.PutAsync($"/api/users/{userId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
             _mockUserLogic.Verify(
@@ -392,7 +392,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task ModifyUser_WithDifferentUserToken_ReturnsForbidden()
+        public void ModifyUser_WithDifferentUserToken_ReturnsForbidden()
         {
             Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
             Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
@@ -428,12 +428,12 @@ namespace ApiTests
 
             _mockUserLogic
             .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
-            .ThrowsAsync(new ForbiddenException("You cannot modify another user"));
+            .Throws(new ForbiddenException("You cannot modify another user"));
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{routeUserId}", content);
+            HttpResponseMessage response = _ = authedClient.PutAsync($"/api/users/{routeUserId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
             _mockUserLogic.Verify(
@@ -441,7 +441,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task ModifyUser_WhenLogicThrowsUnauthorized_Returns401()
+        public void ModifyUser_WhenLogicThrowsUnauthorized_Returns401()
         {
             Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
             Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
@@ -477,18 +477,18 @@ namespace ApiTests
 
             _mockUserLogic
             .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
-            .ThrowsAsync(new UnauthorizedException("Invalid token"));
+            .Throws(new UnauthorizedException("Invalid token"));
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
+            HttpResponseMessage response = _ = authedClient.PutAsync($"/api/users/{userId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
         [TestMethod]
-        public async Task ModifyUser_WhenLogicThrowsNotFound_Returns404()
+        public void ModifyUser_WhenLogicThrowsNotFound_Returns404()
         {
             Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
             Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
@@ -524,18 +524,18 @@ namespace ApiTests
 
             _mockUserLogic
             .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
-            .ThrowsAsync(new KeyNotFoundException("User not found"));
+            .Throws(new KeyNotFoundException("User not found"));
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
+            HttpResponseMessage response = _ = authedClient.PutAsync($"/api/users/{userId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [TestMethod]
-        public async Task ModifyUser_WhenLogicThrowsArgument_Returns400()
+        public void ModifyUser_WhenLogicThrowsArgument_Returns400()
         {
             Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
             Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
@@ -571,18 +571,18 @@ namespace ApiTests
 
             _mockUserLogic
             .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
-            .ThrowsAsync(new ArgumentException("Name cannot be empty"));
+            .Throws(new ArgumentException("Name cannot be empty"));
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
+            HttpResponseMessage response = _ = authedClient.PutAsync($"/api/users/{userId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [TestMethod]
-        public async Task ModifyUser_WithTokenWithoutSubClaim_PassesEmptyStringToLogic()
+        public void ModifyUser_WithTokenWithoutSubClaim_PassesEmptyStringToLogic()
         {
             SymmetricSecurityKey securityKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890"));
@@ -626,7 +626,7 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
+            HttpResponseMessage response = _ = authedClient.PutAsync($"/api/users/{userId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
             _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()),
@@ -634,7 +634,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task ModifyUser_WithTokenWithNullSubClaimValue_PassesEmptyStringToLogic()
+        public void ModifyUser_WithTokenWithNullSubClaimValue_PassesEmptyStringToLogic()
         {
             SymmetricSecurityKey securityKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890"));
@@ -680,7 +680,7 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await authedClient.PutAsync($"/api/users/{userId}", content);
+            HttpResponseMessage response = _ = authedClient.PutAsync($"/api/users/{userId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
             _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()),
@@ -688,7 +688,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task AddRoleToUser_OperatorRole_ReturnsForbidden()
+        public void AddRoleToUser_OperatorRole_ReturnsForbidden()
         {
             Guid userId = Guid.NewGuid();
             AddRolesRequest request = new AddRolesRequest { Role = "Administrator" };
@@ -696,25 +696,25 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _operatorClient.PutAsync($"/api/users/{userId}/roles", content);
+            HttpResponseMessage response = _ = _operatorClient.PutAsync($"/api/users/{userId}/roles", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
         [TestMethod]
-        public async Task GetUserById_UserNotFound_ReturnsNotFound()
+        public void GetUserById_UserNotFound_ReturnsNotFound()
         {
             Guid userId = Guid.NewGuid();
             _mockUserLogic.Setup(l => l.GetUserResponseById(userId))
-            .ThrowsAsync(new KeyNotFoundException("User not found"));
+            .Throws(new KeyNotFoundException("User not found"));
 
-            HttpResponseMessage response = await _adminClient.GetAsync($"/api/users/{userId}");
+            HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/users/{userId}").Result;
 
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [TestMethod]
-        public async Task ModifyUser_WithMissingSubClaim_PassesNullActorSubClaim()
+        public void ModifyUser_WithMissingSubClaim_PassesNullActorSubClaim()
         {
             JwtSecurityTokenHandler tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
             byte[] key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
@@ -747,7 +747,7 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await client.PutAsync($"/api/users/{userId}", content);
+            HttpResponseMessage response = _ = client.PutAsync($"/api/users/{userId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
             _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()),
@@ -755,7 +755,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task ChangeMembershipLevel_WithAdminRole_ReturnsOk()
+        public void ChangeMembershipLevel_WithAdminRole_ReturnsOk()
         {
             Guid userId = Guid.NewGuid();
             ChangeMembershipLevelRequest request = new ChangeMembershipLevelRequest
@@ -776,16 +776,16 @@ namespace ApiTests
             };
 
             _mockUserLogic.Setup(u => u.ChangeMembershipLevel(userId, 1))
-            .ReturnsAsync(expectedResponse);
+            .Returns(expectedResponse);
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _adminClient.PutAsync($"/api/users/{userId}/membership", content);
+            HttpResponseMessage response = _ = _adminClient.PutAsync($"/api/users/{userId}/membership", content).Result;
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            string responseContent = await response.Content.ReadAsStringAsync();
+            string responseContent = response.Content.ReadAsStringAsync().Result;
             UserResponse? userResponse = JsonSerializer.Deserialize<UserResponse>(responseContent,
                 new JsonSerializerOptions
                 {
@@ -800,7 +800,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task ChangeMembershipLevel_WithoutAuthentication_ReturnsUnauthorized()
+        public void ChangeMembershipLevel_WithoutAuthentication_ReturnsUnauthorized()
         {
             Guid userId = Guid.NewGuid();
             ChangeMembershipLevelRequest request = new ChangeMembershipLevelRequest
@@ -811,14 +811,14 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _client.PutAsync($"/api/users/{userId}/membership", content);
+            HttpResponseMessage response = _ = _client.PutAsync($"/api/users/{userId}/membership", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
             _mockUserLogic.Verify(u => u.ChangeMembershipLevel(It.IsAny<Guid>(), It.IsAny<int>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task ChangeMembershipLevel_WithOperatorRole_ReturnsForbidden()
+        public void ChangeMembershipLevel_WithOperatorRole_ReturnsForbidden()
         {
             Guid userId = Guid.NewGuid();
             ChangeMembershipLevelRequest request = new ChangeMembershipLevelRequest
@@ -829,14 +829,14 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _operatorClient.PutAsync($"/api/users/{userId}/membership", content);
+            HttpResponseMessage response = _ = _operatorClient.PutAsync($"/api/users/{userId}/membership", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
             _mockUserLogic.Verify(u => u.ChangeMembershipLevel(It.IsAny<Guid>(), It.IsAny<int>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task ChangeMembershipLevel_UserNotFound_ReturnsNotFound()
+        public void ChangeMembershipLevel_UserNotFound_ReturnsNotFound()
         {
             Guid userId = Guid.NewGuid();
             ChangeMembershipLevelRequest request = new ChangeMembershipLevelRequest
@@ -845,19 +845,19 @@ namespace ApiTests
             };
 
             _mockUserLogic.Setup(u => u.ChangeMembershipLevel(userId, 2))
-            .ThrowsAsync(new KeyNotFoundException("User not found."));
+            .Throws(new KeyNotFoundException("User not found."));
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _adminClient.PutAsync($"/api/users/{userId}/membership", content);
+            HttpResponseMessage response = _ = _adminClient.PutAsync($"/api/users/{userId}/membership", content).Result;
 
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
             _mockUserLogic.Verify(u => u.ChangeMembershipLevel(userId, 2), Times.Once);
         }
 
         [TestMethod]
-        public async Task ChangeMembershipLevel_InvalidMembershipLevel_ReturnsBadRequest()
+        public void ChangeMembershipLevel_InvalidMembershipLevel_ReturnsBadRequest()
         {
             Guid userId = Guid.NewGuid();
             ChangeMembershipLevelRequest request = new ChangeMembershipLevelRequest
@@ -866,19 +866,19 @@ namespace ApiTests
             };
 
             _mockUserLogic.Setup(u => u.ChangeMembershipLevel(userId, 999))
-            .ThrowsAsync(new ArgumentException("Invalid membership level."));
+            .Throws(new ArgumentException("Invalid membership level."));
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _adminClient.PutAsync($"/api/users/{userId}/membership", content);
+            HttpResponseMessage response = _ = _adminClient.PutAsync($"/api/users/{userId}/membership", content).Result;
 
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
             _mockUserLogic.Verify(u => u.ChangeMembershipLevel(userId, 999), Times.Once);
         }
 
         [TestMethod]
-        public async Task ChangeMembershipLevel_ToStandard_ReturnsOk()
+        public void ChangeMembershipLevel_ToStandard_ReturnsOk()
         {
             Guid userId = Guid.NewGuid();
             ChangeMembershipLevelRequest request = new ChangeMembershipLevelRequest
@@ -898,16 +898,16 @@ namespace ApiTests
             };
 
             _mockUserLogic.Setup(u => u.ChangeMembershipLevel(userId, 0))
-            .ReturnsAsync(expectedResponse);
+            .Returns(expectedResponse);
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _adminClient.PutAsync($"/api/users/{userId}/membership", content);
+            HttpResponseMessage response = _ = _adminClient.PutAsync($"/api/users/{userId}/membership", content).Result;
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            string responseContent = await response.Content.ReadAsStringAsync();
+            string responseContent = response.Content.ReadAsStringAsync().Result;
             UserResponse? userResponse = JsonSerializer.Deserialize<UserResponse>(responseContent,
                 new JsonSerializerOptions
                 {

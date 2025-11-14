@@ -40,7 +40,7 @@ public class PluginControllerTest
                 }
 
                 services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlite(_connection));
+                options.UseSqlite(_connection));
 
                 services.AddSingleton(_mockPluginLoader.Object);
             });
@@ -53,13 +53,13 @@ public class PluginControllerTest
         }
 
         Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
-            Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
-            {
-                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
-                Issuer = "ParqueTematico",
-                Audience = "ParqueTematico",
-                ExpirationHours = 1
-            });
+        Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+        {
+            SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+            Issuer = "ParqueTematico",
+            Audience = "ParqueTematico",
+            ExpirationHours = 1
+        });
         BusinessLogic.TokenLogic tokenService = new BusinessLogic.TokenLogic(jwtSettings);
 
         UserResponse adminUser = new UserResponse
@@ -73,7 +73,7 @@ public class PluginControllerTest
         string adminToken = tokenService.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();
         _adminClient.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
     }
 
     [TestCleanup]
@@ -86,7 +86,7 @@ public class PluginControllerTest
     }
 
     [TestMethod]
-    public async Task GetAvailablePlugins_AsAdministrator_ReturnsOk()
+    public void GetAvailablePlugins_AsAdministrator_ReturnsOk()
     {
         List<PluginInfoResponse> plugins = new List<PluginInfoResponse>
         {
@@ -98,56 +98,59 @@ public class PluginControllerTest
 
         _mockPluginLoader.Setup(p => p.LoadPlugins()).Returns(plugins);
 
-        HttpResponseMessage response = await _adminClient.GetAsync("/api/plugins");
+        HttpResponseMessage response = _ = _adminClient.GetAsync("/api/plugins").Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task AddPlugin_WithValidDllFile_ReturnsOk()
+    public void AddPlugin_WithValidDllFile_ReturnsOk()
     {
         byte[] fileContent = new byte[] { 0x4D, 0x5A }; // MZ header (simplified DLL)
         MultipartFormDataContent content = new MultipartFormDataContent();
         ByteArrayContent fileContentBytes = new ByteArrayContent(fileContent);
-        fileContentBytes.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+        fileContentBytes.Headers.ContentType =
+        new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
         content.Add(fileContentBytes, "dllFile", "TestPlugin.dll");
 
         _mockPluginLoader.Setup(p => p.AddPlugin(It.IsAny<Stream>(), "TestPlugin.dll"));
 
-        HttpResponseMessage response = await _adminClient.PostAsync("/api/plugins", content);
+        HttpResponseMessage response = _ = _adminClient.PostAsync("/api/plugins", content).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
         _mockPluginLoader.Verify(p => p.AddPlugin(It.IsAny<Stream>(), "TestPlugin.dll"), Times.Once);
     }
 
     [TestMethod]
-    public async Task AddPlugin_WithInvalidFileExtension_ReturnsBadRequest()
+    public void AddPlugin_WithInvalidFileExtension_ReturnsBadRequest()
     {
         byte[] fileContent = new byte[] { 0x4D, 0x5A };
         MultipartFormDataContent content = new MultipartFormDataContent();
         ByteArrayContent fileContentBytes = new ByteArrayContent(fileContent);
-        fileContentBytes.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+        fileContentBytes.Headers.ContentType =
+        new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
         content.Add(fileContentBytes, "dllFile", "TestPlugin.txt");
 
         _mockPluginLoader.Setup(p => p.AddPlugin(It.IsAny<Stream>(), "TestPlugin.txt"))
-            .Throws(new ArgumentException("Only .dll files are allowed"));
+        .Throws(new ArgumentException("Only .dll files are allowed"));
 
-        HttpResponseMessage response = await _adminClient.PostAsync("/api/plugins", content);
+        HttpResponseMessage response = _ = _adminClient.PostAsync("/api/plugins", content).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task AddPlugin_WithoutAuthentication_ReturnsUnauthorized()
+    public void AddPlugin_WithoutAuthentication_ReturnsUnauthorized()
     {
         HttpClient unauthenticatedClient = _factory.CreateClient();
         byte[] fileContent = new byte[] { 0x4D, 0x5A };
         MultipartFormDataContent content = new MultipartFormDataContent();
         ByteArrayContent fileContentBytes = new ByteArrayContent(fileContent);
-        fileContentBytes.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+        fileContentBytes.Headers.ContentType =
+        new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
         content.Add(fileContentBytes, "dllFile", "TestPlugin.dll");
 
-        HttpResponseMessage response = await unauthenticatedClient.PostAsync("/api/plugins", content);
+        HttpResponseMessage response = _ = unauthenticatedClient.PostAsync("/api/plugins", content).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }

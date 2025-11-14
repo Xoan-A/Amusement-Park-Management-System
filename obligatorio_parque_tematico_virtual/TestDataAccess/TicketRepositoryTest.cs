@@ -17,8 +17,8 @@ namespace TestDataAccess
         public void Setup()
         {
             DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite("DataSource=:memory:")
-                .Options;
+            .UseSqlite("DataSource=:memory:")
+            .Options;
 
             _context = new AppDbContext(options);
             _context.Database.OpenConnection();
@@ -49,7 +49,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task TestAddTicketAsync()
+        public void TestAddTicket()
         {
             Ticket ticket = new Ticket
             {
@@ -60,14 +60,14 @@ namespace TestDataAccess
                 QRCode = Guid.NewGuid()
             };
 
-            Ticket addedTicket = await _ticketRepository.AddAsync(ticket);
+            Ticket addedTicket = _ticketRepository.Add(ticket);
 
             Assert.AreNotEqual(Guid.Empty, addedTicket.Id);
             Assert.AreEqual(_visitorId, addedTicket.VisitorId);
         }
 
         [TestMethod]
-        public async Task TestGetByIdAsync()
+        public void TestGetById()
         {
             Guid eventId = Guid.NewGuid();
             Ticket ticket = new Ticket
@@ -80,8 +80,8 @@ namespace TestDataAccess
                 EventId = eventId
             };
 
-            Ticket addedTicket = await _ticketRepository.AddAsync(ticket);
-            Ticket retrievedTicket = await _ticketRepository.GetByIdAsync(addedTicket.Id);
+            Ticket addedTicket = _ticketRepository.Add(ticket);
+            Ticket retrievedTicket = _ticketRepository.GetById(addedTicket.Id);
 
             Assert.AreEqual(addedTicket.Id, retrievedTicket.Id);
             Assert.AreEqual(_visitorId, retrievedTicket.VisitorId);
@@ -90,7 +90,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task TestGetByVisitorIdAsync()
+        public void TestGetByVisitorId()
         {
             Guid eventId = Guid.NewGuid();
             Ticket ticket1 = new Ticket
@@ -112,17 +112,17 @@ namespace TestDataAccess
                 EventId = eventId
             };
 
-            await _ticketRepository.AddAsync(ticket1);
-            await _ticketRepository.AddAsync(ticket2);
+            _ticketRepository.Add(ticket1);
+            _ticketRepository.Add(ticket2);
 
-            IEnumerable<Ticket> visitorTickets = await _ticketRepository.GetByVisitorIdAsync(_visitorId);
+            IEnumerable<Ticket> visitorTickets = _ticketRepository.GetByVisitorId(_visitorId);
 
             Assert.AreEqual(2, visitorTickets.Count());
             Assert.IsTrue(visitorTickets.All(t => t.VisitorId == _visitorId));
         }
 
         [TestMethod]
-        public async Task TestGetByQRCodeAsync()
+        public void TestGetByQRCode()
         {
             Guid qrCode = Guid.NewGuid();
             Ticket ticket = new Ticket
@@ -134,23 +134,23 @@ namespace TestDataAccess
                 QRCode = qrCode
             };
 
-            await _ticketRepository.AddAsync(ticket);
-            Ticket retrievedTicket = await _ticketRepository.GetByQRCodeAsync(qrCode);
+            _ticketRepository.Add(ticket);
+            Ticket retrievedTicket = _ticketRepository.GetByQRCode(qrCode);
 
             Assert.AreEqual(qrCode, retrievedTicket.QRCode);
         }
 
         [TestMethod]
-        public async Task TestGetByIdAsync_ReturnsNullForNonExistentId()
+        public void TestGetById_ReturnsNullForNonExistentId()
         {
-            Ticket ticket = await _ticketRepository.GetByIdAsync(Guid.NewGuid());
+            Ticket ticket = _ticketRepository.GetById(Guid.NewGuid());
             Assert.IsNull(ticket);
         }
 
         [TestMethod]
-        public async Task TestGetByQRCodeAsync_ReturnsNullForNonExistentQR()
+        public void TestGetByQRCode_ReturnsNullForNonExistentQR()
         {
-            Ticket ticket = await _ticketRepository.GetByQRCodeAsync(Guid.NewGuid());
+            Ticket ticket = _ticketRepository.GetByQRCode(Guid.NewGuid());
             Assert.IsNull(ticket);
         }
     }

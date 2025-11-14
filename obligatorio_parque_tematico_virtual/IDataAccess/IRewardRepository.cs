@@ -4,12 +4,12 @@ namespace IDataAccess
 {
     public interface IRewardRepository
     {
-        Task CreateAsync(Reward reward);
-        Task<List<Reward>> GetAllAsync();
-        Task<Reward?> GetByIdAsync(Guid id);
-        Task UpdateAsync(Reward reward);
-        Task DeleteAsync(Guid id);
-        Task<List<Reward>> GetAvailableRewardsAsync();
-        Task<Reward?> GetByNameAsync(string name);
+        void Create(Reward reward);
+        List<Reward> GetAll();
+        Reward? GetById(Guid id);
+        void Update(Reward reward);
+        void Delete(Guid id);
+        List<Reward> GetAvailableRewards();
+        Reward? GetByName(string name);
     }
 }

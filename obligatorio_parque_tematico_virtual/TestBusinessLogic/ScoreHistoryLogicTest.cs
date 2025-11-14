@@ -23,7 +23,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public async Task GetMyScoreHistory_WithVisitorId_ReturnsScoreHistory()
+        public void GetMyScoreHistory_WithVisitorId_ReturnsScoreHistory()
         {
             List<ScoreHistory> histories = new List<ScoreHistory>
             {
@@ -47,19 +47,19 @@ namespace TestBusinessLogic
                 }
             };
 
-            _mockRepository.Setup(r => r.GetByVisitorAsync(_visitorId)).ReturnsAsync(histories);
+            _mockRepository.Setup(r => r.GetByVisitor(_visitorId)).Returns(histories);
 
-            List<ScoreHistoryModelOut> result = await _scoreHistoryLogic.GetMyScoreHistory(_visitorId);
+            List<ScoreHistoryModelOut> result = _scoreHistoryLogic.GetMyScoreHistory(_visitorId);
 
             Assert.AreEqual(_visitorId, result[0].VisitorId);
             Assert.AreEqual(100, result[0].Points);
             Assert.AreEqual("AttractionVisit", result[0].Origin);
             Assert.AreEqual("PerAttraction", result[0].StrategyName);
-            _mockRepository.Verify(r => r.GetByVisitorAsync(_visitorId), Times.Once);
+            _mockRepository.Verify(r => r.GetByVisitor(_visitorId), Times.Once);
         }
 
         [TestMethod]
-        public async Task GetVisitorScoreHistory_WithDateRange_FiltersCorrectly()
+        public void GetVisitorScoreHistory_WithDateRange_FiltersCorrectly()
         {
             DateTime dateFrom = DateTime.UtcNow.AddDays(-7);
             DateTime dateTo = DateTime.UtcNow;
@@ -85,22 +85,22 @@ namespace TestBusinessLogic
                 }
             };
 
-            _mockRepository.Setup(r => r.GetByVisitorAndDateRangeAsync(_visitorId, dateFrom, dateTo))
-                .ReturnsAsync(histories);
+            _mockRepository.Setup(r => r.GetByVisitorAndDateRange(_visitorId, dateFrom, dateTo))
+            .Returns(histories);
 
-            List<ScoreHistoryModelOut> result = await _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, dateFrom, dateTo);
+            List<ScoreHistoryModelOut> result = _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, dateFrom, dateTo);
 
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(_visitorId, result[0].VisitorId);
             Assert.AreEqual("Jane", result[0].VisitorName);
             Assert.AreEqual(50, result[0].Points);
             Assert.AreEqual("EventParticipation", result[0].Origin);
-            _mockRepository.Verify(r => r.GetByVisitorAndDateRangeAsync(_visitorId, dateFrom, dateTo), Times.Once);
-            _mockRepository.Verify(r => r.GetByVisitorAsync(It.IsAny<Guid>()), Times.Never);
+            _mockRepository.Verify(r => r.GetByVisitorAndDateRange(_visitorId, dateFrom, dateTo), Times.Once);
+            _mockRepository.Verify(r => r.GetByVisitor(It.IsAny<Guid>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task GetVisitorScoreHistory_WithoutDateRange_ReturnsAll()
+        public void GetVisitorScoreHistory_WithoutDateRange_ReturnsAll()
         {
             List<ScoreHistory> histories = new List<ScoreHistory>
             {
@@ -142,19 +142,19 @@ namespace TestBusinessLogic
                 }
             };
 
-            _mockRepository.Setup(r => r.GetByVisitorAsync(_visitorId)).ReturnsAsync(histories);
+            _mockRepository.Setup(r => r.GetByVisitor(_visitorId)).Returns(histories);
 
-            List<ScoreHistoryModelOut> result = await _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, null, null);
+            List<ScoreHistoryModelOut> result = _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, null, null);
 
             Assert.AreEqual(2, result.Count);
-            _mockRepository.Verify(r => r.GetByVisitorAsync(_visitorId), Times.Once);
+            _mockRepository.Verify(r => r.GetByVisitor(_visitorId), Times.Once);
             _mockRepository.Verify(
-                r => r.GetByVisitorAndDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()),
+                r => r.GetByVisitorAndDateRange(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()),
                 Times.Never);
         }
 
         [TestMethod]
-        public async Task GetAllScoreHistory_ReturnsAllHistoryWithVisitorNames()
+        public void GetAllScoreHistory_ReturnsAllHistoryWithVisitorNames()
         {
             Guid visitor1Id = Guid.NewGuid();
             Guid visitor2Id = Guid.NewGuid();
@@ -198,9 +198,9 @@ namespace TestBusinessLogic
                 }
             };
 
-            _mockRepository.Setup(r => r.GetAllAsync()).ReturnsAsync(histories);
+            _mockRepository.Setup(r => r.GetAll()).Returns(histories);
 
-            List<ScoreHistoryModelOut> result = await _scoreHistoryLogic.GetAllScoreHistory();
+            List<ScoreHistoryModelOut> result = _scoreHistoryLogic.GetAllScoreHistory();
 
             Assert.AreEqual(2, result.Count);
 
@@ -212,11 +212,11 @@ namespace TestBusinessLogic
             Assert.AreEqual(200, charlieHistory.Points);
             Assert.AreEqual("EventParticipation", charlieHistory.Origin);
 
-            _mockRepository.Verify(r => r.GetAllAsync(), Times.Once);
+            _mockRepository.Verify(r => r.GetAll(), Times.Once);
         }
 
         [TestMethod]
-        public async Task GetVisitorScoreHistory_WithOnlyDateFrom_ReturnsAll()
+        public void GetVisitorScoreHistory_WithOnlyDateFrom_ReturnsAll()
         {
             DateTime dateFrom = DateTime.UtcNow.AddDays(-7);
             List<ScoreHistory> histories = new List<ScoreHistory>
@@ -241,19 +241,19 @@ namespace TestBusinessLogic
                 }
             };
 
-            _mockRepository.Setup(r => r.GetByVisitorAsync(_visitorId)).ReturnsAsync(histories);
+            _mockRepository.Setup(r => r.GetByVisitor(_visitorId)).Returns(histories);
 
-            List<ScoreHistoryModelOut> result = await _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, dateFrom, null);
+            List<ScoreHistoryModelOut> result = _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, dateFrom, null);
 
             Assert.AreEqual(1, result.Count);
-            _mockRepository.Verify(r => r.GetByVisitorAsync(_visitorId), Times.Once);
+            _mockRepository.Verify(r => r.GetByVisitor(_visitorId), Times.Once);
             _mockRepository.Verify(
-                r => r.GetByVisitorAndDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()),
+                r => r.GetByVisitorAndDateRange(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()),
                 Times.Never);
         }
 
         [TestMethod]
-        public async Task GetVisitorScoreHistory_WithOnlyDateTo_ReturnsAll()
+        public void GetVisitorScoreHistory_WithOnlyDateTo_ReturnsAll()
         {
             DateTime dateTo = DateTime.UtcNow;
             List<ScoreHistory> histories = new List<ScoreHistory>
@@ -278,14 +278,14 @@ namespace TestBusinessLogic
                 }
             };
 
-            _mockRepository.Setup(r => r.GetByVisitorAsync(_visitorId)).ReturnsAsync(histories);
+            _mockRepository.Setup(r => r.GetByVisitor(_visitorId)).Returns(histories);
 
-            List<ScoreHistoryModelOut> result = await _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, null, dateTo);
+            List<ScoreHistoryModelOut> result = _scoreHistoryLogic.GetVisitorScoreHistory(_visitorId, null, dateTo);
 
             Assert.AreEqual(1, result.Count);
-            _mockRepository.Verify(r => r.GetByVisitorAsync(_visitorId), Times.Once);
+            _mockRepository.Verify(r => r.GetByVisitor(_visitorId), Times.Once);
             _mockRepository.Verify(
-                r => r.GetByVisitorAndDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()),
+                r => r.GetByVisitorAndDateRange(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()),
                 Times.Never);
         }
     }

@@ -33,11 +33,11 @@ namespace BusinessLogic
             _observers.Remove(observer);
         }
 
-        public async Task NotifyDateChange()
+        public void NotifyDateChange()
         {
             foreach (IDateObserver observer in _observers)
             {
-                await observer.DateUpdated(this);
+                observer.DateUpdated(this);
             }
         }
 
@@ -46,17 +46,17 @@ namespace BusinessLogic
             return _previousDateTime;
         }
 
-        public async Task<DateTime> GetCurrentDateTime()
+        public DateTime GetCurrentDateTime()
         {
-            return await _dateTimeRepository.GetConfiguredDateTime() ?? DateTime.Now;
+            return _dateTimeRepository.GetConfiguredDateTime() ?? DateTime.Now;
         }
 
-        public async Task SetDateTime(DateTime dateTime)
+        public void SetDateTime(DateTime dateTime)
         {
-            _previousDateTime = await _dateTimeRepository.GetConfiguredDateTime() ?? DateTime.Now;
-            await _dateTimeRepository.SetConfiguredDateTime(dateTime);
+            _previousDateTime = _dateTimeRepository.GetConfiguredDateTime() ?? DateTime.Now;
+            _dateTimeRepository.SetConfiguredDateTime(dateTime);
             _currentDateTime = dateTime;
-            await NotifyDateChange();
+            NotifyDateChange();
         }
     }
 }

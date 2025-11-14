@@ -34,21 +34,21 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task GetConfiguredDateTime_ShouldReturnNull_WhenNoConfigurationExists()
+        public void GetConfiguredDateTime_ShouldReturnNull_WhenNoConfigurationExists()
         {
-            DateTime? result = await _dateTimeRepository.GetConfiguredDateTime();
+            DateTime? result = _dateTimeRepository.GetConfiguredDateTime();
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public async Task GetConfiguredDateTime_ShouldReturnConfiguredDateTime_WhenConfigurationExists()
+        public void GetConfiguredDateTime_ShouldReturnConfiguredDateTime_WhenConfigurationExists()
         {
             DateTime configuredTime = new DateTime(2025, 9, 2, 14, 45, 0);
             _context.DateTimeConfigurations.Add(new DateTimeConfiguration(configuredTime));
             _context.SaveChanges();
 
-            DateTime? result = await _dateTimeRepository.GetConfiguredDateTime();
+            DateTime? result = _dateTimeRepository.GetConfiguredDateTime();
 
             Assert.AreEqual(configuredTime, result.Value);
         }

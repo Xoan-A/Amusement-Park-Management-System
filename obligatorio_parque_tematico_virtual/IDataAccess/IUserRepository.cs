@@ -4,13 +4,13 @@ namespace IDataAccess
 {
     public interface IUserRepository
     {
-        Task<User> Create(User user);
-        Task<User?> GetById(Guid id);
-        Task<User?> GetByIdWithRoles(Guid id);
-        Task<User?> GetByEmailWithRoles(string email);
-        Task<bool> IsEmailUnique(string email);
-        Task<List<User>> GetTopTen();
-        Task ResetScores();
-        Task Update(User user);
+        User Create(User user);
+        User? GetById(Guid id);
+        User? GetByIdWithRoles(Guid id);
+        User? GetByEmailWithRoles(string email);
+        bool IsEmailUnique(string email);
+        List<User> GetTopTen();
+        void ResetScores();
+        void Update(User user);
     }
 }

@@ -19,18 +19,19 @@ namespace BusinessLogic
             _scoreHistoryRepository = scoreHistoryRepository;
         }
 
-        public async Task DateUpdated(IDateSubject subject)
+        public void DateUpdated(IDateSubject subject)
         {
             DateTime previousDate = subject.GetPreviousDateTime().Date;
-            DateTime currentDate = (await subject.GetCurrentDateTime()).Date;
+            DateTime currentDate = subject.GetCurrentDateTime().Date;
 
             if (previousDate != currentDate)
             {
-                await _userRepository.ResetScores();
+                _userRepository.ResetScores();
             }
         }
 
-        public async Task AddScoreToUser(User user, Attraction attraction, DateTime currentDateTime, Event? attractionEvent = null)
+        public void AddScoreToUser(User user, Attraction attraction, DateTime currentDateTime,
+            Event? attractionEvent = null)
         {
             StrategyRequest strategyRequest = new StrategyRequest
             {
@@ -43,9 +44,9 @@ namespace BusinessLogic
 
             user.Score += score;
             user.DailyScore += score;
-            await _userRepository.Update(user);
+            _userRepository.Update(user);
 
-            IConcreteStrategy currentStrategy = await _activeStrategy.GetStrategy();
+            IConcreteStrategy currentStrategy = _activeStrategy.GetStrategy();
 
             ScoreHistory scoreHistory = new ScoreHistory
             {
@@ -58,7 +59,7 @@ namespace BusinessLogic
                 StrategyName = currentStrategy.Name,
             };
 
-            await _scoreHistoryRepository.CreateAsync(scoreHistory);
+            _scoreHistoryRepository.Create(scoreHistory);
         }
     }
 }

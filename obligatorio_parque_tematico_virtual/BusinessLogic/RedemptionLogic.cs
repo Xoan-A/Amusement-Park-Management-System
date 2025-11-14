@@ -27,15 +27,15 @@ namespace BusinessLogic
             _scoreHistoryRepository = scoreHistoryRepository;
         }
 
-        public async Task<RedemptionHistoryModelOut> RedeemReward(Guid visitorId, Guid rewardId)
+        public RedemptionHistoryModelOut RedeemReward(Guid visitorId, Guid rewardId)
         {
-            User? visitor = await _userRepository.GetById(visitorId);
+            User? visitor = _userRepository.GetById(visitorId);
             if (visitor == null)
             {
                 throw new KeyNotFoundException($"Visitor with ID '{visitorId}' not found");
             }
 
-            Reward? reward = await _rewardRepository.GetByIdAsync(rewardId);
+            Reward? reward = _rewardRepository.GetById(rewardId);
             if (reward == null)
             {
                 throw new KeyNotFoundException($"Reward with ID '{rewardId}' not found");
@@ -46,7 +46,7 @@ namespace BusinessLogic
             visitor.Score -= reward.PointsCost;
             reward.DecrementQuantity();
 
-            DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime().Result;
+            DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime();
 
             RedemptionHistory redemption = new RedemptionHistory
             {
@@ -57,9 +57,9 @@ namespace BusinessLogic
                 PointsSpent = reward.PointsCost
             };
 
-            await _redemptionHistoryRepository.CreateAsync(redemption);
-            await _userRepository.Update(visitor);
-            await _rewardRepository.UpdateAsync(reward);
+            _redemptionHistoryRepository.Create(redemption);
+            _userRepository.Update(visitor);
+            _rewardRepository.Update(reward);
 
             ScoreHistory scoreHistory = new ScoreHistory
             {
@@ -72,23 +72,23 @@ namespace BusinessLogic
                 StrategyName = "RedemptionStrategy"
             };
 
-            await _scoreHistoryRepository.CreateAsync(scoreHistory);
+            _scoreHistoryRepository.Create(scoreHistory);
 
             return MapToModelOut(redemption, visitor.Name, reward.Name);
         }
 
-        public async Task<List<RedemptionHistoryModelOut>> GetRedemptionHistory(Guid visitorId)
+        public List<RedemptionHistoryModelOut> GetRedemptionHistory(Guid visitorId)
         {
-            List<RedemptionHistory> redemptions = await _redemptionHistoryRepository.GetByVisitorIdAsync(visitorId);
+            List<RedemptionHistory> redemptions = _redemptionHistoryRepository.GetByVisitorId(visitorId);
             return MapToModelOutList(redemptions);
         }
 
-        public async Task<List<RedemptionHistoryModelOut>> GetRedemptionHistoryWithDateRange(Guid visitorId,
+        public List<RedemptionHistoryModelOut> GetRedemptionHistoryWithDateRange(Guid visitorId,
             DateTime dateFrom,
             DateTime dateTo)
         {
             List<RedemptionHistory> redemptions =
-            await _redemptionHistoryRepository.GetByVisitorIdWithDateRangeAsync(visitorId, dateFrom, dateTo);
+            _redemptionHistoryRepository.GetByVisitorIdWithDateRange(visitorId, dateFrom, dateTo);
             return MapToModelOutList(redemptions);
         }
 

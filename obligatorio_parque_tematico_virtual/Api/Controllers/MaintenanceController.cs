@@ -24,9 +24,9 @@ public class MaintenanceController : ControllerBase
 
     [HttpPost("schedules")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> CreateSchedule([FromBody] MaintenanceScheduleRequest request)
+    public IActionResult CreateSchedule([FromBody] MaintenanceScheduleRequest request)
     {
-        Guid scheduleId = await _maintenanceLogic.CreateSchedule(request);
+        Guid scheduleId = _maintenanceLogic.CreateSchedule(request);
 
         return CreatedAtAction(nameof(GetScheduleById), new { id = scheduleId },
             new { id = scheduleId, message = "Schedule created successfully" });
@@ -34,57 +34,57 @@ public class MaintenanceController : ControllerBase
 
     [HttpGet("schedules")]
     [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> GetAllSchedules()
+    public IActionResult GetAllSchedules()
     {
-        List<MaintenanceScheduleResponse> schedules = await _maintenanceLogic.GetAllSchedules();
+        List<MaintenanceScheduleResponse> schedules = _maintenanceLogic.GetAllSchedules();
         return Ok(schedules);
     }
 
     [HttpGet("schedules/{id}")]
     [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> GetScheduleById(Guid id)
+    public IActionResult GetScheduleById(Guid id)
     {
-        MaintenanceScheduleResponse schedule = await _maintenanceLogic.GetScheduleById(id);
+        MaintenanceScheduleResponse schedule = _maintenanceLogic.GetScheduleById(id);
         return Ok(schedule);
     }
 
     [HttpGet("schedules/attraction/{attractionId}")]
     [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> GetSchedulesByAttraction(Guid attractionId)
+    public IActionResult GetSchedulesByAttraction(Guid attractionId)
     {
-        List<MaintenanceScheduleResponse> schedules = await _maintenanceLogic.GetSchedulesByAttraction(attractionId);
+        List<MaintenanceScheduleResponse> schedules = _maintenanceLogic.GetSchedulesByAttraction(attractionId);
         return Ok(schedules);
     }
 
     [HttpGet("schedules/overdue")]
     [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> GetOverdueSchedules()
+    public IActionResult GetOverdueSchedules()
     {
-        List<MaintenanceScheduleResponse> schedules = await _maintenanceLogic.GetOverdueSchedules();
+        List<MaintenanceScheduleResponse> schedules = _maintenanceLogic.GetOverdueSchedules();
         return Ok(schedules);
     }
 
     [HttpGet("schedules/upcoming")]
     [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> GetUpcomingSchedules([FromQuery] int days = 7)
+    public IActionResult GetUpcomingSchedules([FromQuery] int days = 7)
     {
-        List<MaintenanceScheduleResponse> schedules = await _maintenanceLogic.GetUpcomingSchedules(days);
+        List<MaintenanceScheduleResponse> schedules = _maintenanceLogic.GetUpcomingSchedules(days);
         return Ok(schedules);
     }
 
     [HttpPut("schedules/{id}/status")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdateScheduleStatus(Guid id, [FromBody] UpdateStatusRequest request)
+    public IActionResult UpdateScheduleStatus(Guid id, [FromBody] UpdateStatusRequest request)
     {
-        await _maintenanceLogic.UpdateScheduleStatus(id, request.Status);
+        _maintenanceLogic.UpdateScheduleStatus(id, request.Status);
         return Ok(new { message = "Schedule status updated successfully" });
     }
 
     [HttpDelete("schedules/{id}")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DeleteSchedule(Guid id)
+    public IActionResult DeleteSchedule(Guid id)
     {
-        await _maintenanceLogic.DeleteSchedule(id);
+        _maintenanceLogic.DeleteSchedule(id);
         return Ok(new { message = "Schedule deleted successfully" });
     }
 
@@ -94,10 +94,10 @@ public class MaintenanceController : ControllerBase
 
     [HttpPost("schedules/{scheduleId}/complete")]
     [Authorize(Roles = "Administrator,Operator")]
-    public async Task<IActionResult> CompleteMaintenance(Guid scheduleId)
+    public IActionResult CompleteMaintenance(Guid scheduleId)
     {
         Guid userId = _claimsLogic.GetCurrentUserId(User);
-        Guid completedScheduleId = await _maintenanceLogic.CompleteMaintenance(scheduleId, userId);
+        Guid completedScheduleId = _maintenanceLogic.CompleteMaintenance(scheduleId, userId);
 
         return Ok(new { scheduleId = completedScheduleId, message = "Maintenance completed successfully" });
     }

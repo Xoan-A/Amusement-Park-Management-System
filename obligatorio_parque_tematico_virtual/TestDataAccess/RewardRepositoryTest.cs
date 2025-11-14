@@ -20,8 +20,8 @@ namespace TestDataAccess
             _connection.Open();
 
             DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite(_connection)
-                .Options;
+            .UseSqlite(_connection)
+            .Options;
 
             _context = new AppDbContext(options);
             _context.Database.EnsureCreated();
@@ -37,7 +37,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task Create_ValidReward_Success()
+        public void Create_ValidReward_Success()
         {
             Reward reward = new Reward
             {
@@ -49,16 +49,16 @@ namespace TestDataAccess
                 RequiredMembershipLevel = MembershipLevel.Premium
             };
 
-            await _repository.CreateAsync(reward);
+            _repository.Create(reward);
 
-            Reward? retrieved = await _context.Rewards.FindAsync(reward.Id);
+            Reward? retrieved = _context.Rewards.Find(reward.Id);
 
             Assert.AreEqual("VIP Access", retrieved.Name);
             Assert.AreEqual(500, retrieved.PointsCost);
         }
 
         [TestMethod]
-        public async Task GetAll_ReturnsAllRewards()
+        public void GetAll_ReturnsAllRewards()
         {
             Reward reward1 = new Reward
             {
@@ -80,15 +80,15 @@ namespace TestDataAccess
 
             _context.Rewards.Add(reward1);
             _context.Rewards.Add(reward2);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            List<Reward> rewards = await _repository.GetAllAsync();
+            List<Reward> rewards = _repository.GetAll();
 
             Assert.AreEqual(2, rewards.Count);
         }
 
         [TestMethod]
-        public async Task GetById_ExistingReward_ReturnsReward()
+        public void GetById_ExistingReward_ReturnsReward()
         {
             Reward reward = new Reward
             {
@@ -100,24 +100,24 @@ namespace TestDataAccess
             };
 
             _context.Rewards.Add(reward);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            Reward? retrieved = await _repository.GetByIdAsync(reward.Id);
+            Reward? retrieved = _repository.GetById(reward.Id);
 
             Assert.AreEqual(reward.Id, retrieved.Id);
             Assert.AreEqual("Test Reward", retrieved.Name);
         }
 
         [TestMethod]
-        public async Task GetById_NonExistingReward_ReturnsNull()
+        public void GetById_NonExistingReward_ReturnsNull()
         {
-            Reward? retrieved = await _repository.GetByIdAsync(Guid.NewGuid());
+            Reward? retrieved = _repository.GetById(Guid.NewGuid());
 
             Assert.IsNull(retrieved);
         }
 
         [TestMethod]
-        public async Task Update_ExistingReward_Success()
+        public void Update_ExistingReward_Success()
         {
             Reward reward = new Reward
             {
@@ -129,19 +129,19 @@ namespace TestDataAccess
             };
 
             _context.Rewards.Add(reward);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
             reward.Name = "Updated Name";
             reward.PointsCost = 150;
-            await _repository.UpdateAsync(reward);
+            _repository.Update(reward);
 
-            Reward? updated = await _context.Rewards.FindAsync(reward.Id);
+            Reward? updated = _context.Rewards.Find(reward.Id);
             Assert.AreEqual("Updated Name", updated.Name);
             Assert.AreEqual(150, updated.PointsCost);
         }
 
         [TestMethod]
-        public async Task Delete_ExistingReward_Success()
+        public void Delete_ExistingReward_Success()
         {
             Reward reward = new Reward
             {
@@ -153,16 +153,16 @@ namespace TestDataAccess
             };
 
             _context.Rewards.Add(reward);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            await _repository.DeleteAsync(reward.Id);
+            _repository.Delete(reward.Id);
 
-            Reward? deleted = await _context.Rewards.FindAsync(reward.Id);
+            Reward? deleted = _context.Rewards.Find(reward.Id);
             Assert.IsNull(deleted);
         }
 
         [TestMethod]
-        public async Task GetAvailableRewards_ReturnsOnlyRewardsWithQuantity()
+        public void GetAvailableRewards_ReturnsOnlyRewardsWithQuantity()
         {
             Reward availableReward1 = new Reward
             {
@@ -192,16 +192,16 @@ namespace TestDataAccess
             };
 
             _context.Rewards.AddRange(availableReward1, availableReward2, unavailableReward);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            List<Reward> availableRewards = await _repository.GetAvailableRewardsAsync();
+            List<Reward> availableRewards = _repository.GetAvailableRewards();
 
             Assert.AreEqual(2, availableRewards.Count);
             Assert.IsTrue(availableRewards.All(r => r.AvailableQuantity > 0));
         }
 
         [TestMethod]
-        public async Task GetByName_ExistingName_ReturnsReward()
+        public void GetByName_ExistingName_ReturnsReward()
         {
             Reward reward = new Reward
             {
@@ -213,17 +213,17 @@ namespace TestDataAccess
             };
 
             _context.Rewards.Add(reward);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            Reward? retrieved = await _repository.GetByNameAsync("Unique Name");
+            Reward? retrieved = _repository.GetByName("Unique Name");
 
             Assert.AreEqual("Unique Name", retrieved.Name);
         }
 
         [TestMethod]
-        public async Task GetByName_NonExistingName_ReturnsNull()
+        public void GetByName_NonExistingName_ReturnsNull()
         {
-            Reward? retrieved = await _repository.GetByNameAsync("Non Existing");
+            Reward? retrieved = _repository.GetByName("Non Existing");
 
             Assert.IsNull(retrieved);
         }

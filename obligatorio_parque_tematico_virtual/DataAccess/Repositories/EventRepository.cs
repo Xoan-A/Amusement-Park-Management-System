@@ -8,45 +8,47 @@ namespace DataAccess.Repositories;
 public class EventRepository : IEventRepository
 {
     private readonly AppDbContext _context;
+
     public EventRepository(AppDbContext context)
     {
         _context = context;
     }
-    public async Task<Event> GetById(Guid id)
+
+    public Event GetById(Guid id)
     {
-        return await _context.Events
-            .Include(e => e.Attractions)
-            .ThenInclude(ea => ea.Attraction)
-            .FirstOrDefaultAsync(e => e.Id == id);
+        return _context.Events
+        .Include(e => e.Attractions)
+        .ThenInclude(ea => ea.Attraction)
+        .FirstOrDefault(e => e.Id == id);
     }
 
-    public async Task Create(Event eventEntity)
+    public void Create(Event eventEntity)
     {
         _context.Events.Add(eventEntity);
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
     }
 
-    public async Task<List<Event>> GetAll()
+    public List<Event> GetAll()
     {
-        return await _context.Events
-            .Include(e => e.Attractions)
-            .ThenInclude(ea => ea.Attraction)
-            .ToListAsync();
+        return _context.Events
+        .Include(e => e.Attractions)
+        .ThenInclude(ea => ea.Attraction)
+        .ToList();
     }
 
-    public async Task Delete(Event eventEntity)
+    public void Delete(Event eventEntity)
     {
         _context.Events.Remove(eventEntity);
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
     }
 
-    public async Task<Event?> GetEventByAttractionAndDate(Guid attractionId, DateTime date)
+    public Event? GetEventByAttractionAndDate(Guid attractionId, DateTime date)
     {
-        return await _context.Events
-            .Include(e => e.Attractions)
-            .ThenInclude(ea => ea.Attraction)
-            .FirstOrDefaultAsync(e =>
-                e.Date.Date == date.Date &&
-                e.Attractions.Any(ea => ea.AttractionId == attractionId));
+        return _context.Events
+        .Include(e => e.Attractions)
+        .ThenInclude(ea => ea.Attraction)
+        .FirstOrDefault(e =>
+        e.Date.Date == date.Date &&
+        e.Attractions.Any(ea => ea.AttractionId == attractionId));
     }
 }

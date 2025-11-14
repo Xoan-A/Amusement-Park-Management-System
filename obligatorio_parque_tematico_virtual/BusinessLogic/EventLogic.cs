@@ -25,9 +25,9 @@ public class EventLogic : IEventLogic
         _dateTimeLogic = dateTimeLogic;
     }
 
-    public async Task<EventResponse> GetEventById(Guid expectedEventId)
+    public EventResponse GetEventById(Guid expectedEventId)
     {
-        Event eventEntity = await _eventRepository.GetById(expectedEventId);
+        Event eventEntity = _eventRepository.GetById(expectedEventId);
         if (eventEntity == null)
         {
             throw new KeyNotFoundException($"No se encontró el evento con id {expectedEventId}");
@@ -59,9 +59,9 @@ public class EventLogic : IEventLogic
         return eventResponse;
     }
 
-    public async Task<List<EventResponse>> GetAllEvents()
+    public List<EventResponse> GetAllEvents()
     {
-        List<Event> events = await _eventRepository.GetAll();
+        List<Event> events = _eventRepository.GetAll();
         List<EventResponse> eventResponses = events.Select(eventEntity => new EventResponse
         {
             Id = eventEntity.Id,
@@ -88,9 +88,9 @@ public class EventLogic : IEventLogic
         return eventResponses;
     }
 
-    public async Task<Guid> CreateEvent(EventRequest newEvent)
+    public Guid CreateEvent(EventRequest newEvent)
     {
-        await ValidateEventRequest(newEvent);
+        ValidateEventRequest(newEvent);
         Event eventEntity = new Event()
         {
             Name = newEvent.Name,
@@ -105,38 +105,39 @@ public class EventLogic : IEventLogic
         {
             foreach (Guid attractionId in newEvent.AttractionIds)
             {
-                Attraction attraction = await _attractionLogic.GetAttractionEntityById(attractionId);
+                Attraction attraction = _attractionLogic.GetAttractionEntityById(attractionId);
                 if (attraction == null)
                 {
                     throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
                 }
+
                 eventEntity.AddAttraction(attraction);
             }
         }
 
-        await _eventRepository.Create(eventEntity);
+        _eventRepository.Create(eventEntity);
         return eventEntity.Id;
     }
 
-    public async Task DeleteEvent(Guid eventId)
+    public void DeleteEvent(Guid eventId)
     {
-        Event eventEntity = await _eventRepository.GetById(eventId);
+        Event eventEntity = _eventRepository.GetById(eventId);
         if (eventEntity == null)
         {
             throw new KeyNotFoundException($"No se encontró el evento con id {eventId}");
         }
 
-        await _eventRepository.Delete(eventEntity);
+        _eventRepository.Delete(eventEntity);
     }
 
-    private async Task ValidateEventRequest(EventRequest newEvent)
+    private void ValidateEventRequest(EventRequest newEvent)
     {
         if (string.IsNullOrWhiteSpace(newEvent.Name))
             throw new ArgumentException("El nombre del evento no puede estar vacío.");
-        if (!await IsEventNameUnique(newEvent.Name))
+        if (!IsEventNameUnique(newEvent.Name))
             throw new ArgumentException("El nombre del evento ya existe.");
 
-        DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+        DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime();
         if (newEvent.Date <= currentDateTime)
             throw new ArgumentException("La fecha del evento debe ser futura.");
 
@@ -149,9 +150,9 @@ public class EventLogic : IEventLogic
             throw new ArgumentException("El coste debe ser mayor a 0.");
     }
 
-    private async Task<bool> IsEventNameUnique(string name)
+    private bool IsEventNameUnique(string name)
     {
-        List<Event> events = await _eventRepository.GetAll() ?? new List<Event>();
+        List<Event> events = _eventRepository.GetAll() ?? new List<Event>();
         return !events.Any(e => e.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 }

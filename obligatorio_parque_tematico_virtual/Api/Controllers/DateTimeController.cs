@@ -17,9 +17,9 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetDateTime()
+        public IActionResult GetDateTime()
         {
-            DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+            DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime();
 
             DateTimeResponse response = new DateTimeResponse
             {
@@ -30,10 +30,10 @@ namespace Api.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> SetDateTime([FromBody] SetDateTimeRequest request)
+        public IActionResult SetDateTime([FromBody] SetDateTimeRequest request)
         {
             DateTime dateTime = DateTime.Parse(request.DateTime);
-            await _dateTimeLogic.SetDateTime(dateTime);
+            _dateTimeLogic.SetDateTime(dateTime);
 
             return Ok();
         }

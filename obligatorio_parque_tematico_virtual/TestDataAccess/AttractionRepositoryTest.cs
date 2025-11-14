@@ -43,76 +43,76 @@ public class AttractionRepositoryTest
     }
 
     [TestMethod]
-    public async Task GetById_ShouldReturnAttraction_WhenAttractionExists()
+    public void GetById_ShouldReturnAttraction_WhenAttractionExists()
     {
-        await _context.Attractions.AddAsync(attraction);
-        await _context.SaveChangesAsync();
+        _context.Attractions.Add(attraction);
+        _context.SaveChanges();
 
-        Attraction result = await _attractionRepository.GetById(attraction.Id);
+        Attraction result = _attractionRepository.GetById(attraction.Id);
 
         Assert.AreEqual(attraction.Id, result.Id);
     }
 
     [TestMethod]
-    public async Task GetById_ShouldReturnNull_WhenAttractionDoesNotExist()
+    public void GetById_ShouldReturnNull_WhenAttractionDoesNotExist()
     {
         Guid nonExistentId = Guid.NewGuid();
 
-        Attraction result = await _attractionRepository.GetById(nonExistentId);
+        Attraction result = _attractionRepository.GetById(nonExistentId);
 
         Assert.IsNull(result);
     }
 
     [TestMethod]
-    public async Task Create_ShouldAddAttractionToDatabase()
+    public void Create_ShouldAddAttractionToDatabase()
     {
-        await _attractionRepository.Create(attraction);
-        Attraction result = await _attractionRepository.GetById(attraction.Id);
+        _attractionRepository.Create(attraction);
+        Attraction result = _attractionRepository.GetById(attraction.Id);
 
         Assert.AreEqual("Race simulator", result.Name);
-        Assert.AreEqual(1, await _context.Attractions.CountAsync());
+        Assert.AreEqual(1, _context.Attractions.Count());
     }
 
     [TestMethod]
-    public async Task GetByName_ShouldReturnAttraction_WhenAttractionExists()
+    public void GetByName_ShouldReturnAttraction_WhenAttractionExists()
     {
-        await _context.Attractions.AddAsync(attraction);
-        await _context.SaveChangesAsync();
+        _context.Attractions.Add(attraction);
+        _context.SaveChanges();
 
-        Attraction result = await _attractionRepository.GetByName("Race simulator");
+        Attraction result = _attractionRepository.GetByName("Race simulator");
 
         Assert.AreEqual(attraction.Name, result.Name);
     }
 
     [TestMethod]
-    public async Task GetByName_ShouldReturnNull_WhenAttractionDoesNotExist()
+    public void GetByName_ShouldReturnNull_WhenAttractionDoesNotExist()
     {
-        Attraction result = await _attractionRepository.GetByName("nonexistent");
+        Attraction result = _attractionRepository.GetByName("nonexistent");
 
         Assert.IsNull(result);
     }
 
     [TestMethod]
-    public async Task IsNameUnique_ShouldReturnFalse_WhenNameExists()
+    public void IsNameUnique_ShouldReturnFalse_WhenNameExists()
     {
-        await _context.Attractions.AddAsync(attraction);
-        await _context.SaveChangesAsync();
+        _context.Attractions.Add(attraction);
+        _context.SaveChanges();
 
-        bool result = await _attractionRepository.IsNameUnique("Race simulator");
+        bool result = _attractionRepository.IsNameUnique("Race simulator");
 
         Assert.IsFalse(result);
     }
 
     [TestMethod]
-    public async Task IsNameUnique_ShouldReturnTrue_WhenNameDoesNotExist()
+    public void IsNameUnique_ShouldReturnTrue_WhenNameDoesNotExist()
     {
-        bool result = await _attractionRepository.IsNameUnique("new name");
+        bool result = _attractionRepository.IsNameUnique("new name");
 
         Assert.IsTrue(result);
     }
 
     [TestMethod]
-    public async Task GetAll_ShouldReturnAllAttractions()
+    public void GetAll_ShouldReturnAllAttractions()
     {
         Attraction attraction2 = new Attraction
         {
@@ -124,44 +124,44 @@ public class AttractionRepositoryTest
             CurrentCapacity = 3,
         };
 
-        await _context.Attractions.AddAsync(attraction);
-        await _context.Attractions.AddAsync(attraction2);
-        await _context.SaveChangesAsync();
-        List<Attraction> result = await _attractionRepository.GetAll();
+        _context.Attractions.Add(attraction);
+        _context.Attractions.Add(attraction2);
+        _context.SaveChanges();
+        List<Attraction> result = _attractionRepository.GetAll();
 
         Assert.AreEqual(2, result.Count);
     }
 
     [TestMethod]
-    public async Task Update_ShouldUpdateAttractionInDatabase()
+    public void Update_ShouldUpdateAttractionInDatabase()
     {
-        await _context.Attractions.AddAsync(attraction);
-        await _context.SaveChangesAsync();
+        _context.Attractions.Add(attraction);
+        _context.SaveChanges();
 
         attraction.Name = "Updated Name";
-        await _attractionRepository.Update(attraction);
+        _attractionRepository.Update(attraction);
 
-        Attraction result = await _attractionRepository.GetById(attraction.Id);
+        Attraction result = _attractionRepository.GetById(attraction.Id);
 
         Assert.AreEqual("Updated Name", result.Name);
     }
 
     [TestMethod]
-    public async Task Delete_ShouldDeleteAttractionFromDatabase()
+    public void Delete_ShouldDeleteAttractionFromDatabase()
     {
-        await _context.Attractions.AddAsync(attraction);
-        await _context.SaveChangesAsync();
+        _context.Attractions.Add(attraction);
+        _context.SaveChanges();
 
-        await _attractionRepository.Delete(attraction);
+        _attractionRepository.Delete(attraction);
 
-        Assert.AreEqual(0, await _context.Attractions.CountAsync());
+        Assert.AreEqual(0, _context.Attractions.Count());
     }
 
     [TestMethod]
-    public async Task Delete_ShouldDeleteMaintenanceSchedules_BeforeDeletingAttraction()
+    public void Delete_ShouldDeleteMaintenanceSchedules_BeforeDeletingAttraction()
     {
-        await _context.Attractions.AddAsync(attraction);
-        await _context.SaveChangesAsync();
+        _context.Attractions.Add(attraction);
+        _context.SaveChanges();
 
         MaintenanceSchedule maintenance1 = new MaintenanceSchedule
         {
@@ -179,23 +179,23 @@ public class AttractionRepositoryTest
             Status = MaintenanceStatus.Pending
         };
 
-        await _context.MaintenanceSchedules.AddAsync(maintenance1);
-        await _context.MaintenanceSchedules.AddAsync(maintenance2);
-        await _context.SaveChangesAsync();
+        _context.MaintenanceSchedules.Add(maintenance1);
+        _context.MaintenanceSchedules.Add(maintenance2);
+        _context.SaveChanges();
 
-        Assert.AreEqual(2, await _context.MaintenanceSchedules.CountAsync());
+        Assert.AreEqual(2, _context.MaintenanceSchedules.Count());
 
-        await _attractionRepository.Delete(attraction);
+        _attractionRepository.Delete(attraction);
 
-        Assert.AreEqual(0, await _context.Attractions.CountAsync());
-        Assert.AreEqual(0, await _context.MaintenanceSchedules.CountAsync());
+        Assert.AreEqual(0, _context.Attractions.Count());
+        Assert.AreEqual(0, _context.MaintenanceSchedules.Count());
     }
 
     [TestMethod]
-    public async Task Delete_ShouldDeleteEventAttractions_BeforeDeletingAttraction()
+    public void Delete_ShouldDeleteEventAttractions_BeforeDeletingAttraction()
     {
-        await _context.Attractions.AddAsync(attraction);
-        await _context.SaveChangesAsync();
+        _context.Attractions.Add(attraction);
+        _context.SaveChanges();
 
         Event event1 = new Event
         {
@@ -211,9 +211,9 @@ public class AttractionRepositoryTest
             Date = DateTime.Now.AddDays(10)
         };
 
-        await _context.Events.AddAsync(event1);
-        await _context.Events.AddAsync(event2);
-        await _context.SaveChangesAsync();
+        _context.Events.Add(event1);
+        _context.Events.Add(event2);
+        _context.SaveChanges();
 
         EventAttraction eventAttraction1 = new EventAttraction
         {
@@ -229,14 +229,14 @@ public class AttractionRepositoryTest
 
         _context.Set<EventAttraction>().Add(eventAttraction1);
         _context.Set<EventAttraction>().Add(eventAttraction2);
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
 
-        Assert.AreEqual(2, await _context.Set<EventAttraction>().CountAsync());
+        Assert.AreEqual(2, _context.Set<EventAttraction>().Count());
 
-        await _attractionRepository.Delete(attraction);
+        _attractionRepository.Delete(attraction);
 
-        Assert.AreEqual(0, await _context.Attractions.CountAsync());
-        Assert.AreEqual(0, await _context.Set<EventAttraction>().CountAsync());
-        Assert.AreEqual(2, await _context.Events.CountAsync());
+        Assert.AreEqual(0, _context.Attractions.Count());
+        Assert.AreEqual(0, _context.Set<EventAttraction>().Count());
+        Assert.AreEqual(2, _context.Events.Count());
     }
 }

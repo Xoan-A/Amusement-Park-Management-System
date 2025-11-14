@@ -23,7 +23,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public async Task Login_ShouldReturnUserResponse_WhenCredentialsAreValid()
+        public void Login_ShouldReturnUserResponse_WhenCredentialsAreValid()
         {
             string email = "admin@test.com";
             string password = "password123";
@@ -42,10 +42,10 @@ namespace TestBusinessLogic
                 new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
             };
 
-            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).ReturnsAsync(admin);
+            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(admin);
             _mockPasswordService.Setup(p => p.VerifyPassword(password, hashedPassword)).Returns(true);
 
-            UserResponse result = await _authLogic.Login(email, password);
+            UserResponse result = _authLogic.Login(email, password);
 
             Assert.IsNotNull(result);
             _mockUserRepository.Verify(r => r.GetByEmailWithRoles(email), Times.Once);
@@ -53,7 +53,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public async Task Login_ShouldReturnCorrectEmail_WhenCredentialsAreValid()
+        public void Login_ShouldReturnCorrectEmail_WhenCredentialsAreValid()
         {
             string email = "admin@test.com";
             string password = "password123";
@@ -72,10 +72,10 @@ namespace TestBusinessLogic
                 new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
             };
 
-            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).ReturnsAsync(admin);
+            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(admin);
             _mockPasswordService.Setup(p => p.VerifyPassword(password, hashedPassword)).Returns(true);
 
-            UserResponse result = await _authLogic.Login(email, password);
+            UserResponse result = _authLogic.Login(email, password);
 
             Assert.AreEqual(admin.Email, result.Email);
             _mockUserRepository.Verify(r => r.GetByEmailWithRoles(email), Times.Once);
@@ -83,15 +83,15 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public async Task Login_ShouldThrowArgumentException_WhenUserNotFound()
+        public void Login_ShouldThrowArgumentException_WhenUserNotFound()
         {
             string email = "nonexistent@test.com";
             string password = "password123";
 
-            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).ReturnsAsync((User)null!);
+            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns((User)null!);
 
-            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
-                async () => await _authLogic.Login(email, password)
+            ArgumentException exception = Assert.ThrowsException<ArgumentException>(
+                () => _authLogic.Login(email, password)
             );
 
             Assert.AreEqual("Invalid email or password.", exception.Message);
@@ -100,7 +100,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public async Task Login_ShouldThrowArgumentException_WhenPasswordIsInvalid()
+        public void Login_ShouldThrowArgumentException_WhenPasswordIsInvalid()
         {
             string email = "admin@test.com";
             string password = "wrongPassword";
@@ -119,11 +119,11 @@ namespace TestBusinessLogic
                 new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
             };
 
-            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).ReturnsAsync(admin);
+            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(admin);
             _mockPasswordService.Setup(p => p.VerifyPassword(password, hashedPassword)).Returns(false);
 
-            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
-                async () => await _authLogic.Login(email, password)
+            ArgumentException exception = Assert.ThrowsException<ArgumentException>(
+                () => _authLogic.Login(email, password)
             );
 
             Assert.AreEqual("Invalid email or password.", exception.Message);
@@ -132,7 +132,7 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public async Task Login_ShouldWork_ForAllUserTypes()
+        public void Login_ShouldWork_ForAllUserTypes()
         {
             string email = "visitor@test.com";
             string password = "password123";
@@ -150,56 +150,56 @@ namespace TestBusinessLogic
             };
             visitor.UserRoles = new System.Collections.Generic.List<UserRole>();
 
-            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).ReturnsAsync(visitor);
+            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(visitor);
             _mockPasswordService.Setup(p => p.VerifyPassword(password, hashedPassword)).Returns(true);
 
-            UserResponse result = await _authLogic.Login(email, password);
+            UserResponse result = _authLogic.Login(email, password);
 
             Assert.AreEqual(visitor.Email, result.Email);
         }
 
         [TestMethod]
-        public async Task Login_ShouldThrowArgumentException_ForEmptyEmail()
+        public void Login_ShouldThrowArgumentException_ForEmptyEmail()
         {
-            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
-                async () => await _authLogic.Login("", "password")
+            ArgumentException exception = Assert.ThrowsException<ArgumentException>(
+                () => _authLogic.Login("", "password")
             );
 
             Assert.AreEqual("Email and password must be provided.", exception.Message);
         }
 
         [TestMethod]
-        public async Task Login_ShouldThrowArgumentException_ForEmptyPassword()
+        public void Login_ShouldThrowArgumentException_ForEmptyPassword()
         {
-            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
-                async () => await _authLogic.Login("email@test.com", "")
+            ArgumentException exception = Assert.ThrowsException<ArgumentException>(
+                () => _authLogic.Login("email@test.com", "")
             );
 
             Assert.AreEqual("Email and password must be provided.", exception.Message);
         }
 
         [TestMethod]
-        public async Task Login_ShouldThrowArgumentException_ForNullEmail()
+        public void Login_ShouldThrowArgumentException_ForNullEmail()
         {
-            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
-                async () => await _authLogic.Login(null!, "password")
+            ArgumentException exception = Assert.ThrowsException<ArgumentException>(
+                () => _authLogic.Login(null!, "password")
             );
 
             Assert.AreEqual("Email and password must be provided.", exception.Message);
         }
 
         [TestMethod]
-        public async Task Login_ShouldThrowArgumentException_ForNullPassword()
+        public void Login_ShouldThrowArgumentException_ForNullPassword()
         {
-            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(
-                async () => await _authLogic.Login("email@test.com", null!)
+            ArgumentException exception = Assert.ThrowsException<ArgumentException>(
+                () => _authLogic.Login("email@test.com", null!)
             );
 
             Assert.AreEqual("Email and password must be provided.", exception.Message);
         }
 
         [TestMethod]
-        public async Task Login_ShouldLoadUserWithRoles()
+        public void Login_ShouldLoadUserWithRoles()
         {
             string email = "admin@test.com";
             string password = "password123";
@@ -219,10 +219,10 @@ namespace TestBusinessLogic
                 new UserRole { Role = new Role { Name = Role.OPERATOR } }
             };
 
-            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).ReturnsAsync(user);
+            _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(user);
             _mockPasswordService.Setup(p => p.VerifyPassword(password, hashedPassword)).Returns(true);
 
-            UserResponse result = await _authLogic.Login(email, password);
+            UserResponse result = _authLogic.Login(email, password);
 
             Assert.AreEqual(user.Email, result.Email);
             _mockUserRepository.Verify(r => r.GetByEmailWithRoles(email), Times.Once);

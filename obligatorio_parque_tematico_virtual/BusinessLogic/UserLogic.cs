@@ -32,7 +32,7 @@ namespace BusinessLogic
             _dateTimeLogic = dateTimeLogic;
         }
 
-        public async Task<UserResponse> RegisterVisitor(RegisterVisitorRequest request)
+        public UserResponse RegisterVisitor(RegisterVisitorRequest request)
         {
             string name = request.Name;
             string lastName = request.LastName;
@@ -47,12 +47,12 @@ namespace BusinessLogic
             if (!ValidateEmail(email))
                 throw new ArgumentException("Invalid email format.");
 
-            DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+            DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime();
 
             if (birthDate >= currentDateTime)
                 throw new ArgumentException("Birth date cannot be after today.");
 
-            if (!await _userRepository.IsEmailUnique(email))
+            if (!_userRepository.IsEmailUnique(email))
                 throw new ArgumentException("Email is already in use.");
 
             string hashedPassword = _passwordLogic.HashPassword(password);
@@ -67,14 +67,14 @@ namespace BusinessLogic
                 MembershipLevel = MembershipLevel.Standard
             };
 
-            Role? visitorRole = await _roleRepository.GetByNameAsync(Role.VISITOR);
+            Role? visitorRole = _roleRepository.GetByName(Role.VISITOR);
             if (visitorRole != null)
             {
                 visitor.UserRoles.Add(new UserRole
                 { UserId = visitor.Id, RoleId = visitorRole.Id, Role = visitorRole });
             }
 
-            User res = await _userRepository.Create(visitor);
+            User res = _userRepository.Create(visitor);
 
             return new UserResponse
             {
@@ -89,7 +89,7 @@ namespace BusinessLogic
             };
         }
 
-        public async Task<UserResponse> CreateUser(CreateUserRequest request)
+        public UserResponse CreateUser(CreateUserRequest request)
         {
             string name = request.Name;
             string lastName = request.LastName;
@@ -108,14 +108,14 @@ namespace BusinessLogic
             if (!ValidateEmail(email))
                 throw new ArgumentException("Invalid email format.");
 
-            if (!await _userRepository.IsEmailUnique(email))
+            if (!_userRepository.IsEmailUnique(email))
             {
                 throw new ArgumentException("Email is already in use.");
             }
 
             if (birthDate.HasValue)
             {
-                DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+                DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime();
                 if (birthDate.Value >= currentDateTime)
                     throw new ArgumentException("Birth date cannot be after today.");
             }
@@ -148,7 +148,7 @@ namespace BusinessLogic
             {
                 foreach (string roleName in roles)
                 {
-                    Role? role = await _roleRepository.GetByNameAsync(roleName);
+                    Role? role = _roleRepository.GetByName(roleName);
                     if (role != null)
                     {
                         user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = role.Id, Role = role });
@@ -156,7 +156,7 @@ namespace BusinessLogic
                 }
             }
 
-            User returnedUser = await _userRepository.Create(user);
+            User returnedUser = _userRepository.Create(user);
             return new UserResponse
             {
                 Id = returnedUser.Id,
@@ -170,9 +170,9 @@ namespace BusinessLogic
             };
         }
 
-        public async Task<UserResponse> GetUserResponseById(Guid userId)
+        public UserResponse GetUserResponseById(Guid userId)
         {
-            User user = await _userRepository.GetByIdWithRoles(userId);
+            User user = _userRepository.GetByIdWithRoles(userId);
             if (user == null)
             {
                 throw new KeyNotFoundException("User not found");
@@ -191,26 +191,26 @@ namespace BusinessLogic
             };
         }
 
-        public async Task RegisterEntry(Guid attractionId, RegisterEntryRequest request)
+        public void RegisterEntry(Guid attractionId, RegisterEntryRequest request)
         {
             Guid? qr = request.Qr;
             Guid? nfc = request.NFC;
             Guid userId = request.UserId;
             Guid? eventId = request.EventId;
-            DateTime enterDate = await _dateTimeLogic.GetCurrentDateTime();
+            DateTime enterDate = _dateTimeLogic.GetCurrentDateTime();
 
             if (qr == null && nfc == null)
                 throw new ArgumentException("QR code or NFC must be provided.");
 
-            Attraction attraction = await _attractionRepository.GetById(attractionId);
+            Attraction attraction = _attractionRepository.GetById(attractionId);
             if (attraction == null)
                 throw new ArgumentException("Attraction not found.");
 
-            bool isValidTicket = await _ticketLogic.ValidateTicketAsync(qr, nfc, enterDate, eventId, attractionId);
+            bool isValidTicket = _ticketLogic.ValidateTicket(qr, nfc, enterDate, eventId, attractionId);
             if (!isValidTicket)
                 throw new ArgumentException("User does not have a valid ticket.");
 
-            User user = await _userRepository.GetById(userId);
+            User user = _userRepository.GetById(userId);
             if (user == null)
                 throw new ArgumentException("User not found.");
 
@@ -219,43 +219,43 @@ namespace BusinessLogic
             {
                 user.RegisterEntry(attraction, enterDate);
                 attraction.CurrentCapacity++;
-                await _userRepository.Update(user);
-                await _attractionRepository.Update(attraction);
+                _userRepository.Update(user);
+                _attractionRepository.Update(attraction);
             }
             else
                 throw new ArgumentException("Attraction is at full capacity.");
 
-            Event even = await _eventRepository.GetEventByAttractionAndDate(attractionId, enterDate.Date);
+            Event even = _eventRepository.GetEventByAttractionAndDate(attractionId, enterDate.Date);
 
-            await _dailyScoreLogic.AddScoreToUser(user, attraction, enterDate, even);
+            _dailyScoreLogic.AddScoreToUser(user, attraction, enterDate, even);
         }
 
-        public async Task RegisterExit(Guid attractionId, RegisterExitRequest request)
+        public void RegisterExit(Guid attractionId, RegisterExitRequest request)
         {
             Guid userId = request.userId;
-            DateTime exitDate = await _dateTimeLogic.GetCurrentDateTime();
+            DateTime exitDate = _dateTimeLogic.GetCurrentDateTime();
 
-            User user = await _userRepository.GetById(userId);
+            User user = _userRepository.GetById(userId);
             if (user == null)
                 throw new ArgumentException("User not found.");
 
-            Attraction attraction = await _attractionRepository.GetById(attractionId);
+            Attraction attraction = _attractionRepository.GetById(attractionId);
             if (attraction == null)
                 throw new ArgumentException("Attraction not found.");
 
             user.RegisterExit(attraction, exitDate);
-            await _userRepository.Update(user);
+            _userRepository.Update(user);
 
             if (attraction.CurrentCapacity > 0)
             {
                 attraction.CurrentCapacity--;
-                await _attractionRepository.Update(attraction);
+                _attractionRepository.Update(attraction);
             }
         }
 
-        public async Task<TopTenResponse> GetTopTenUsers()
+        public TopTenResponse GetTopTenUsers()
         {
-            List<User> users = await _userRepository.GetTopTen();
+            List<User> users = _userRepository.GetTopTen();
             return new TopTenResponse
             {
                 TopTenUsers = users.Select(u => new UserResponse
@@ -272,15 +272,15 @@ namespace BusinessLogic
             };
         }
 
-        public async Task AddRoleToUser(Guid userId, string roleName)
+        public void AddRoleToUser(Guid userId, string roleName)
         {
-            User user = await _userRepository.GetByIdWithRoles(userId);
+            User user = _userRepository.GetByIdWithRoles(userId);
             if (user == null)
             {
                 throw new ArgumentException("User not found.");
             }
 
-            Role? role = await _roleRepository.GetByNameAsync(roleName);
+            Role? role = _roleRepository.GetByName(roleName);
             if (role == null)
             {
                 throw new ArgumentException("Role not found.");
@@ -293,17 +293,17 @@ namespace BusinessLogic
 
             user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = role.Id, Role = role });
 
-            await _userRepository.Update(user);
+            _userRepository.Update(user);
         }
 
-        public async Task<UserResponse> ModifyUser(Guid userId, Guid actorUserId, ModifyUserRequest request)
+        public UserResponse ModifyUser(Guid userId, Guid actorUserId, ModifyUserRequest request)
         {
             if (actorUserId != userId)
             {
                 throw new ForbiddenException("You cannot modify another user");
             }
 
-            User user = await _userRepository.GetByIdWithRoles(userId);
+            User user = _userRepository.GetByIdWithRoles(userId);
             if (user == null)
             {
                 throw new KeyNotFoundException("User not found");
@@ -326,7 +326,7 @@ namespace BusinessLogic
 
                 if (!string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
                 {
-                    bool unique = await _userRepository.IsEmailUnique(request.Email);
+                    bool unique = _userRepository.IsEmailUnique(request.Email);
                     if (!unique)
                         throw new ArgumentException("Email must be unique");
                     user.Email = request.Email;
@@ -341,13 +341,13 @@ namespace BusinessLogic
 
             if (request.BirthDate.HasValue)
             {
-                DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+                DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime();
                 if (request.BirthDate.Value >= currentDateTime)
                     throw new ArgumentException("Birth date must be in the past");
                 user.BirthDate = request.BirthDate.Value;
             }
 
-            await _userRepository.Update(user);
+            _userRepository.Update(user);
 
             return new UserResponse
             {
@@ -362,17 +362,17 @@ namespace BusinessLogic
             };
         }
 
-        public async Task<UserResponse> ChangeMembershipLevel(Guid userId, int membershipLevel)
+        public UserResponse ChangeMembershipLevel(Guid userId, int membershipLevel)
         {
             if (!Enum.IsDefined(typeof(MembershipLevel), membershipLevel))
                 throw new ArgumentException("Invalid membership level.");
 
-            User user = await _userRepository.GetByIdWithRoles(userId);
+            User user = _userRepository.GetByIdWithRoles(userId);
             if (user == null)
                 throw new KeyNotFoundException("User not found.");
 
             user.MembershipLevel = (MembershipLevel)membershipLevel;
-            await _userRepository.Update(user);
+            _userRepository.Update(user);
 
             return new UserResponse
             {

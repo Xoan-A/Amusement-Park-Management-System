@@ -24,7 +24,7 @@ public class EventLogicTest
         _mockEventRepository = new Mock<IEventRepository>();
         _mockAttractionService = new Mock<IAttractionLogicEntity>();
         _mockDateTimeLogic = new Mock<IDateTimeLogic>();
-        _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).ReturnsAsync(DateTime.Now);
+        _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).Returns(DateTime.Now);
 
         _eventLogic = new EventLogic(_mockEventRepository.Object, _mockAttractionService.Object,
             _mockDateTimeLogic.Object);
@@ -50,16 +50,16 @@ public class EventLogicTest
     }
 
     [TestMethod]
-    public async Task GetEventById_ShouldReturnEvent_WhenIdIsValid()
+    public void GetEventById_ShouldReturnEvent_WhenIdIsValid()
     {
-        _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
-        EventResponse result = await _eventLogic.GetEventById(baseEvent.Id);
+        _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).Returns(baseEvent);
+        EventResponse result = _eventLogic.GetEventById(baseEvent.Id);
         Assert.AreEqual(baseEvent.Name, result.Name);
         _mockEventRepository.Verify(r => r.GetById(baseEvent.Id), Times.Once);
     }
 
     [TestMethod]
-    public async Task GetEventById_ShouldReturnEventWithAttractions_WhenEventHasAttractions()
+    public void GetEventById_ShouldReturnEventWithAttractions_WhenEventHasAttractions()
     {
         Attraction attraction1 = new Attraction
         {
@@ -72,8 +72,8 @@ public class EventLogicTest
             CurrentCapacity = 5,
         };
         baseEvent.AddAttraction(attraction1);
-        _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
-        EventResponse result = await _eventLogic.GetEventById(baseEvent.Id);
+        _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).Returns(baseEvent);
+        EventResponse result = _eventLogic.GetEventById(baseEvent.Id);
 
         Assert.AreEqual(baseEvent.Name, result.Name);
         Assert.AreEqual(1, result.Attractions.Count);
@@ -81,16 +81,16 @@ public class EventLogicTest
     }
 
     [TestMethod]
-    public async Task GetEventById_ShouldThrowException_WhenEventIsNull()
+    public void GetEventById_ShouldThrowException_WhenEventIsNull()
     {
         Guid eventId = Guid.NewGuid();
-        _mockEventRepository.Setup(r => r.GetById(eventId)).ReturnsAsync((Event)null);
+        _mockEventRepository.Setup(r => r.GetById(eventId)).Returns((Event)null);
 
-        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () => await _eventLogic.GetEventById(eventId));
+        Assert.ThrowsException<KeyNotFoundException>(() => _eventLogic.GetEventById(eventId));
     }
 
     [TestMethod]
-    public async Task GetAllEvents_ShouldReturnListOfEvents()
+    public void GetAllEvents_ShouldReturnListOfEvents()
     {
         Event event2 = new Event
         {
@@ -104,9 +104,9 @@ public class EventLogicTest
             Attractions = new List<EventAttraction>()
         };
         List<Event> expectedEvents = new List<Event> { baseEvent, event2 };
-        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(expectedEvents);
+        _mockEventRepository.Setup(r => r.GetAll()).Returns(expectedEvents);
 
-        List<EventResponse> result = await _eventLogic.GetAllEvents();
+        List<EventResponse> result = _eventLogic.GetAllEvents();
 
         Assert.AreEqual(2, result.Count);
         Assert.AreEqual(baseEvent.Name, result[0].Name);
@@ -115,7 +115,7 @@ public class EventLogicTest
     }
 
     [TestMethod]
-    public async Task GetAllEvents_ShouldReturnEventsWithAttractions()
+    public void GetAllEvents_ShouldReturnEventsWithAttractions()
     {
         Attraction attraction = new Attraction
         {
@@ -131,9 +131,9 @@ public class EventLogicTest
         baseEvent.AddAttraction(attraction);
 
         List<Event> eventsList = new List<Event> { baseEvent };
-        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(eventsList);
+        _mockEventRepository.Setup(r => r.GetAll()).Returns(eventsList);
 
-        List<EventResponse> result = await _eventLogic.GetAllEvents();
+        List<EventResponse> result = _eventLogic.GetAllEvents();
 
         Assert.AreEqual(1, result.Count);
         EventResponse returnedEvent = result[0];
@@ -143,25 +143,25 @@ public class EventLogicTest
     }
 
     [TestMethod]
-    public async Task CreateEvent_ShouldCreateEvent_WhenDataIsValid()
+    public void CreateEvent_ShouldCreateEvent_WhenDataIsValid()
     {
-        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        _mockEventRepository.Setup(r => r.GetAll()).Returns(new List<Event>());
         _mockEventRepository.Setup(r => r.Create(It.IsAny<Event>())).Callback<Event>(e => e.Id = baseEvent.Id)
-        .Returns(Task.CompletedTask);
+        ;
 
-        Guid resultId = await _eventLogic.CreateEvent(baseEventRequest);
+        Guid resultId = _eventLogic.CreateEvent(baseEventRequest);
 
         Assert.AreEqual(baseEvent.Id, resultId);
     }
 
     [TestMethod]
-    public async Task CreateEvent_ShouldAddAttractions_WhenEventHasAttractions()
+    public void CreateEvent_ShouldAddAttractions_WhenEventHasAttractions()
     {
         List<Guid> attractionIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
         baseEventRequest.AttractionIds = attractionIds;
 
         _mockAttractionService.Setup(s => s.GetAttractionEntityById(It.IsAny<Guid>()))
-        .ReturnsAsync((Guid id) => new Attraction { Id = id, Name = $"Attraction-{id}" });
+        .Returns((Guid id) => new Attraction { Id = id, Name = $"Attraction-{id}" });
 
 
         _mockEventRepository.Setup(r => r.Create(It.IsAny<Event>()))
@@ -171,99 +171,99 @@ public class EventLogicTest
             Assert.AreEqual(attractionIds[0], e.Attractions[0].AttractionId);
             Assert.AreEqual(attractionIds[1], e.Attractions[1].AttractionId);
         })
-        .Returns(Task.CompletedTask);
+        ;
 
-        await _eventLogic.CreateEvent(baseEventRequest);
+        _eventLogic.CreateEvent(baseEventRequest);
     }
 
     [TestMethod]
-    public async Task CreateEvent_ShouldThrowException_WhenAttractionNotFound()
+    public void CreateEvent_ShouldThrowException_WhenAttractionNotFound()
     {
         Guid nonExistentAttractionId = Guid.NewGuid();
         baseEventRequest.AttractionIds = new List<Guid> { nonExistentAttractionId };
 
-        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        _mockEventRepository.Setup(r => r.GetAll()).Returns(new List<Event>());
         _mockAttractionService.Setup(s => s.GetAttractionEntityById(nonExistentAttractionId))
-        .ReturnsAsync((Attraction)null);
+        .Returns((Attraction)null);
 
-        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () =>
-        await _eventLogic.CreateEvent(baseEventRequest));
+        Assert.ThrowsException<KeyNotFoundException>(() =>
+        _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
-    public async Task CreateEvent_ShouldThrowException_WhenNameIsNotUnique()
+    public void CreateEvent_ShouldThrowException_WhenNameIsNotUnique()
     {
-        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event> { baseEvent });
+        _mockEventRepository.Setup(r => r.GetAll()).Returns(new List<Event> { baseEvent });
 
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-        await _eventLogic.CreateEvent(baseEventRequest));
+        Assert.ThrowsException<ArgumentException>(() =>
+        _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
-    public async Task CreateEvent_ShouldThrowException_WhenNameIsEmpty()
+    public void CreateEvent_ShouldThrowException_WhenNameIsEmpty()
     {
-        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        _mockEventRepository.Setup(r => r.GetAll()).Returns(new List<Event>());
         baseEventRequest.Name = String.Empty;
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-        await _eventLogic.CreateEvent(baseEventRequest));
+        Assert.ThrowsException<ArgumentException>(() =>
+        _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
-    public async Task CreateEvent_ShouldThrowException_WhenDateIsNotFuture()
+    public void CreateEvent_ShouldThrowException_WhenDateIsNotFuture()
     {
-        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        _mockEventRepository.Setup(r => r.GetAll()).Returns(new List<Event>());
         baseEventRequest.Date = DateTime.Now.AddDays(-1);
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-        await _eventLogic.CreateEvent(baseEventRequest));
+        Assert.ThrowsException<ArgumentException>(() =>
+        _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
-    public async Task CreateEvent_ShouldThrowException_WhenHourIsInvalid()
+    public void CreateEvent_ShouldThrowException_WhenHourIsInvalid()
     {
-        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        _mockEventRepository.Setup(r => r.GetAll()).Returns(new List<Event>());
         baseEventRequest.Hour = -1;
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-        await _eventLogic.CreateEvent(baseEventRequest));
+        Assert.ThrowsException<ArgumentException>(() =>
+        _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
-    public async Task CreateEvent_ShouldThrowException_WhenMaxCapacityIsInvalid()
+    public void CreateEvent_ShouldThrowException_WhenMaxCapacityIsInvalid()
     {
-        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        _mockEventRepository.Setup(r => r.GetAll()).Returns(new List<Event>());
         baseEventRequest.MaxCapacity = -1;
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-        await _eventLogic.CreateEvent(baseEventRequest));
+        Assert.ThrowsException<ArgumentException>(() =>
+        _eventLogic.CreateEvent(baseEventRequest));
         baseEventRequest.MaxCapacity = 10001;
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-        await _eventLogic.CreateEvent(baseEventRequest));
+        Assert.ThrowsException<ArgumentException>(() =>
+        _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
-    public async Task CreateEvent_ShouldThrowException_WhenCostIsInvalid()
+    public void CreateEvent_ShouldThrowException_WhenCostIsInvalid()
     {
-        _mockEventRepository.Setup(r => r.GetAll()).ReturnsAsync(new List<Event>());
+        _mockEventRepository.Setup(r => r.GetAll()).Returns(new List<Event>());
         baseEventRequest.Cost = -1;
-        await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-        await _eventLogic.CreateEvent(baseEventRequest));
+        Assert.ThrowsException<ArgumentException>(() =>
+        _eventLogic.CreateEvent(baseEventRequest));
     }
 
     [TestMethod]
-    public async Task DeleteEvent_ShouldCallRepositoryDelete_WhenEventExists()
+    public void DeleteEvent_ShouldCallRepositoryDelete_WhenEventExists()
     {
-        _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).ReturnsAsync(baseEvent);
-        _mockEventRepository.Setup(r => r.Delete(baseEvent)).Returns(Task.CompletedTask);
+        _mockEventRepository.Setup(r => r.GetById(baseEvent.Id)).Returns(baseEvent);
+        _mockEventRepository.Setup(r => r.Delete(baseEvent));
 
-        await _eventLogic.DeleteEvent(baseEvent.Id);
+        _eventLogic.DeleteEvent(baseEvent.Id);
 
         _mockEventRepository.Verify(r => r.GetById(baseEvent.Id), Times.Once);
         _mockEventRepository.Verify(r => r.Delete(baseEvent), Times.Once);
     }
 
     [TestMethod]
-    public async Task DeleteEvent_ShouldThrowException_WhenEventDoesNotExist()
+    public void DeleteEvent_ShouldThrowException_WhenEventDoesNotExist()
     {
         Guid eventId = Guid.NewGuid();
-        _mockEventRepository.Setup(r => r.GetById(eventId)).ReturnsAsync((Event)null);
-        await Assert.ThrowsExceptionAsync<KeyNotFoundException>(async () => await _eventLogic.DeleteEvent(eventId));
+        _mockEventRepository.Setup(r => r.GetById(eventId)).Returns((Event)null);
+        Assert.ThrowsException<KeyNotFoundException>(() => _eventLogic.DeleteEvent(eventId));
     }
 }

@@ -14,28 +14,28 @@ namespace BusinessLogic
             _scoreHistoryRepository = scoreHistoryRepository;
         }
 
-        public async Task<List<ScoreHistoryModelOut>> GetMyScoreHistory(Guid visitorId)
+        public List<ScoreHistoryModelOut> GetMyScoreHistory(Guid visitorId)
         {
-            List<ScoreHistory> histories = await _scoreHistoryRepository.GetByVisitorAsync(visitorId);
+            List<ScoreHistory> histories = _scoreHistoryRepository.GetByVisitor(visitorId);
             return MapToModelOut(histories);
         }
 
-        public async Task<List<ScoreHistoryModelOut>> GetVisitorScoreHistory(Guid visitorId, DateTime? dateFrom, DateTime? dateTo)
+        public List<ScoreHistoryModelOut> GetVisitorScoreHistory(Guid visitorId, DateTime? dateFrom, DateTime? dateTo)
         {
             if (dateFrom.HasValue && dateTo.HasValue)
             {
                 List<ScoreHistory> histories =
-                    await _scoreHistoryRepository.GetByVisitorAndDateRangeAsync(visitorId, dateFrom.Value, dateTo.Value);
+                _scoreHistoryRepository.GetByVisitorAndDateRange(visitorId, dateFrom.Value, dateTo.Value);
                 return MapToModelOut(histories);
             }
 
-            List<ScoreHistory> allHistories = await _scoreHistoryRepository.GetByVisitorAsync(visitorId);
+            List<ScoreHistory> allHistories = _scoreHistoryRepository.GetByVisitor(visitorId);
             return MapToModelOut(allHistories);
         }
 
-        public async Task<List<ScoreHistoryModelOut>> GetAllScoreHistory()
+        public List<ScoreHistoryModelOut> GetAllScoreHistory()
         {
-            List<ScoreHistory> histories = await _scoreHistoryRepository.GetAllAsync();
+            List<ScoreHistory> histories = _scoreHistoryRepository.GetAll();
             return MapToModelOut(histories);
         }
 

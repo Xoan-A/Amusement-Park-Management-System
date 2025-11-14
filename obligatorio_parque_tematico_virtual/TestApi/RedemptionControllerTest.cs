@@ -45,7 +45,7 @@ public class RedemptionControllerTest
                 }
 
                 services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlite(_connection));
+                options.UseSqlite(_connection));
 
                 services.AddSingleton(_mockRedemptionLogic.Object);
             });
@@ -60,13 +60,13 @@ public class RedemptionControllerTest
         _client = _factory.CreateClient();
 
         Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
-            Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
-            {
-                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
-                Issuer = "ParqueTematico",
-                Audience = "ParqueTematico",
-                ExpirationHours = 1
-            });
+        Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+        {
+            SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+            Issuer = "ParqueTematico",
+            Audience = "ParqueTematico",
+            ExpirationHours = 1
+        });
         BusinessLogic.TokenLogic tokenService = new BusinessLogic.TokenLogic(jwtSettings);
 
         UserResponse adminUser = new UserResponse
@@ -80,7 +80,7 @@ public class RedemptionControllerTest
         string adminToken = tokenService.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();
         _adminClient.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
 
         UserResponse visitorUser = new UserResponse
         {
@@ -93,7 +93,7 @@ public class RedemptionControllerTest
         string visitorToken = tokenService.GenerateToken(visitorUser);
         _visitorClient = _factory.CreateClient();
         _visitorClient.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", visitorToken);
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", visitorToken);
     }
 
     [TestCleanup]
@@ -107,7 +107,7 @@ public class RedemptionControllerTest
     }
 
     [TestMethod]
-    public async Task RedeemReward_AsVisitor_ReturnsCreated()
+    public void RedeemReward_AsVisitor_ReturnsCreated()
     {
         Guid rewardId = Guid.NewGuid();
         RedemptionHistoryModelOut redemption = new RedemptionHistoryModelOut
@@ -119,59 +119,59 @@ public class RedemptionControllerTest
             PointsSpent = 500
         };
 
-        _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId)).ReturnsAsync(redemption);
+        _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId)).Returns(redemption);
 
-        HttpResponseMessage response = await _visitorClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
+        HttpResponseMessage response = _ = _visitorClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null).Result;
 
         Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task RedeemReward_AsAdmin_ReturnsForbidden()
+    public void RedeemReward_AsAdmin_ReturnsForbidden()
     {
         Guid rewardId = Guid.NewGuid();
 
-        HttpResponseMessage response = await _adminClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
+        HttpResponseMessage response = _ = _adminClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null).Result;
 
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task RedeemReward_Unauthenticated_ReturnsUnauthorized()
+    public void RedeemReward_Unauthenticated_ReturnsUnauthorized()
     {
         Guid rewardId = Guid.NewGuid();
 
-        HttpResponseMessage response = await _client.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
+        HttpResponseMessage response = _ = _client.PostAsync($"/api/redemptions/redeem/{rewardId}", null).Result;
 
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task RedeemReward_InsufficientPoints_ReturnsBadRequest()
+    public void RedeemReward_InsufficientPoints_ReturnsBadRequest()
     {
         Guid rewardId = Guid.NewGuid();
         _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId))
-            .ThrowsAsync(new InvalidOperationException("Insufficient points"));
+        .Throws(new InvalidOperationException("Insufficient points"));
 
-        HttpResponseMessage response = await _visitorClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
+        HttpResponseMessage response = _ = _visitorClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null).Result;
 
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task RedeemReward_RewardNotFound_ReturnsNotFound()
+    public void RedeemReward_RewardNotFound_ReturnsNotFound()
     {
         Guid rewardId = Guid.NewGuid();
         _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId))
-            .ThrowsAsync(new KeyNotFoundException("Reward not found"));
+        .Throws(new KeyNotFoundException("Reward not found"));
 
-        HttpResponseMessage response = await _visitorClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
+        HttpResponseMessage response = _ = _visitorClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null).Result;
 
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetMyRedemptionHistory_AsVisitor_ReturnsOk()
+    public void GetMyRedemptionHistory_AsVisitor_ReturnsOk()
     {
         List<RedemptionHistoryModelOut> history = new List<RedemptionHistoryModelOut>
         {
@@ -193,26 +193,26 @@ public class RedemptionControllerTest
             }
         };
 
-        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(_visitorUserId)).ReturnsAsync(history);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(_visitorUserId)).Returns(history);
 
-        HttpResponseMessage response = await _visitorClient.GetAsync("/api/redemptions/my-history");
+        HttpResponseMessage response = _ = _visitorClient.GetAsync("/api/redemptions/my-history").Result;
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-        string content = await response.Content.ReadAsStringAsync();
+        string content = response.Content.ReadAsStringAsync().Result;
         Assert.IsTrue(content.Contains("500"));
         Assert.IsTrue(content.Contains("300"));
     }
 
     [TestMethod]
-    public async Task GetMyRedemptionHistory_Unauthenticated_ReturnsUnauthorized()
+    public void GetMyRedemptionHistory_Unauthenticated_ReturnsUnauthorized()
     {
-        HttpResponseMessage response = await _client.GetAsync("/api/redemptions/my-history");
+        HttpResponseMessage response = _ = _client.GetAsync("/api/redemptions/my-history").Result;
 
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetVisitorRedemptionHistory_AsAdmin_ReturnsOk()
+    public void GetVisitorRedemptionHistory_AsAdmin_ReturnsOk()
     {
         Guid visitorId = Guid.NewGuid();
         List<RedemptionHistoryModelOut> history = new List<RedemptionHistoryModelOut>
@@ -227,25 +227,25 @@ public class RedemptionControllerTest
             }
         };
 
-        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).ReturnsAsync(history);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).Returns(history);
 
-        HttpResponseMessage response = await _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history");
+        HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history").Result;
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetVisitorRedemptionHistory_AsVisitor_ReturnsForbidden()
+    public void GetVisitorRedemptionHistory_AsVisitor_ReturnsForbidden()
     {
         Guid visitorId = Guid.NewGuid();
 
-        HttpResponseMessage response = await _visitorClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history");
+        HttpResponseMessage response = _ = _visitorClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history").Result;
 
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetMyRedemptionHistoryWithDateRange_AsVisitor_ReturnsOk()
+    public void GetMyRedemptionHistoryWithDateRange_AsVisitor_ReturnsOk()
     {
         DateTime dateFrom = DateTime.Now.AddDays(-7);
         DateTime dateTo = DateTime.Now;
@@ -262,81 +262,81 @@ public class RedemptionControllerTest
         };
 
         _mockRedemptionLogic.Setup(s =>
-                s.GetRedemptionHistoryWithDateRange(_visitorUserId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-            .ReturnsAsync(history);
+        s.GetRedemptionHistoryWithDateRange(_visitorUserId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+        .Returns(history);
 
         HttpResponseMessage response =
-            await _visitorClient.GetAsync(
-                $"/api/redemptions/my-history?dateFrom={dateFrom:yyyy-MM-dd}&dateTo={dateTo:yyyy-MM-dd}");
+        _ = _visitorClient.GetAsync(
+            $"/api/redemptions/my-history?dateFrom={dateFrom:yyyy-MM-dd}&dateTo={dateTo:yyyy-MM-dd}").Result;
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetVisitorRedemptionHistory_VisitorNotFound_ReturnsNotFound()
+    public void GetVisitorRedemptionHistory_VisitorNotFound_ReturnsNotFound()
     {
         Guid visitorId = Guid.NewGuid();
         _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId))
-            .ThrowsAsync(new KeyNotFoundException("Visitor not found"));
+        .Throws(new KeyNotFoundException("Visitor not found"));
 
-        HttpResponseMessage response = await _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history");
+        HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history").Result;
 
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetMyRedemptionHistoryWithDateRange_InvalidDateRange_ReturnsBadRequest()
+    public void GetMyRedemptionHistoryWithDateRange_InvalidDateRange_ReturnsBadRequest()
     {
         DateTime dateFrom = DateTime.Now;
         DateTime dateTo = DateTime.Now.AddDays(-7);
         _mockRedemptionLogic.Setup(s =>
-                s.GetRedemptionHistoryWithDateRange(_visitorUserId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-            .ThrowsAsync(new ArgumentException("Invalid date range"));
+        s.GetRedemptionHistoryWithDateRange(_visitorUserId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+        .Throws(new ArgumentException("Invalid date range"));
 
         HttpResponseMessage response =
-            await _visitorClient.GetAsync(
-                $"/api/redemptions/my-history?dateFrom={dateFrom:yyyy-MM-dd}&dateTo={dateTo:yyyy-MM-dd}");
+        _ = _visitorClient.GetAsync(
+            $"/api/redemptions/my-history?dateFrom={dateFrom:yyyy-MM-dd}&dateTo={dateTo:yyyy-MM-dd}").Result;
 
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task RedeemReward_RewardNotAvailable_ReturnsBadRequest()
+    public void RedeemReward_RewardNotAvailable_ReturnsBadRequest()
     {
         Guid rewardId = Guid.NewGuid();
         _mockRedemptionLogic.Setup(s => s.RedeemReward(_visitorUserId, rewardId))
-            .Throws(new ArgumentException("Reward is not available"));
+        .Throws(new ArgumentException("Reward is not available"));
 
-        HttpResponseMessage response = await _visitorClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
+        HttpResponseMessage response = _ = _visitorClient.PostAsync($"/api/redemptions/redeem/{rewardId}", null).Result;
 
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetVisitorRedemptionHistoryWithDateRange_InvalidDateRange_ReturnsBadRequest()
+    public void GetVisitorRedemptionHistoryWithDateRange_InvalidDateRange_ReturnsBadRequest()
     {
         Guid visitorId = Guid.NewGuid();
         DateTime dateFrom = DateTime.Now;
         DateTime dateTo = DateTime.Now.AddDays(-7);
         _mockRedemptionLogic.Setup(s =>
-                s.GetRedemptionHistoryWithDateRange(visitorId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-            .Throws(new ArgumentException("Invalid date range"));
+        s.GetRedemptionHistoryWithDateRange(visitorId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+        .Throws(new ArgumentException("Invalid date range"));
 
-        HttpResponseMessage response = await _adminClient.GetAsync(
-            $"/api/redemptions/visitor/{visitorId}/history?dateFrom={dateFrom:yyyy-MM-dd}&dateTo={dateTo:yyyy-MM-dd}");
+        HttpResponseMessage response = _ = _adminClient.GetAsync(
+            $"/api/redemptions/visitor/{visitorId}/history?dateFrom={dateFrom:yyyy-MM-dd}&dateTo={dateTo:yyyy-MM-dd}").Result;
 
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task GetMyRedemptionHistory_WithOnlyDateFrom_ReturnsAllHistory()
+    public void GetMyRedemptionHistory_WithOnlyDateFrom_ReturnsAllHistory()
     {
         DateTime dateFrom = DateTime.Now.AddDays(-7);
         List<RedemptionHistoryModelOut> expectedHistory = new List<RedemptionHistoryModelOut>();
-        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(It.IsAny<Guid>())).ReturnsAsync(expectedHistory);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(It.IsAny<Guid>())).Returns(expectedHistory);
 
         HttpResponseMessage response =
-            await _visitorClient.GetAsync($"/api/redemptions/my-history?dateFrom={dateFrom:yyyy-MM-dd}");
+        _ = _visitorClient.GetAsync($"/api/redemptions/my-history?dateFrom={dateFrom:yyyy-MM-dd}").Result;
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         _mockRedemptionLogic.Verify(s => s.GetRedemptionHistory(It.IsAny<Guid>()), Times.Once);
@@ -346,14 +346,14 @@ public class RedemptionControllerTest
     }
 
     [TestMethod]
-    public async Task GetMyRedemptionHistory_WithOnlyDateTo_ReturnsAllHistory()
+    public void GetMyRedemptionHistory_WithOnlyDateTo_ReturnsAllHistory()
     {
         DateTime dateTo = DateTime.Now;
         List<RedemptionHistoryModelOut> expectedHistory = new List<RedemptionHistoryModelOut>();
-        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(It.IsAny<Guid>())).ReturnsAsync(expectedHistory);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(It.IsAny<Guid>())).Returns(expectedHistory);
 
         HttpResponseMessage response =
-            await _visitorClient.GetAsync($"/api/redemptions/my-history?dateTo={dateTo:yyyy-MM-dd}");
+        _ = _visitorClient.GetAsync($"/api/redemptions/my-history?dateTo={dateTo:yyyy-MM-dd}").Result;
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         _mockRedemptionLogic.Verify(s => s.GetRedemptionHistory(It.IsAny<Guid>()), Times.Once);
@@ -363,15 +363,15 @@ public class RedemptionControllerTest
     }
 
     [TestMethod]
-    public async Task GetVisitorRedemptionHistory_WithOnlyDateFrom_ReturnsAllHistory()
+    public void GetVisitorRedemptionHistory_WithOnlyDateFrom_ReturnsAllHistory()
     {
         Guid visitorId = Guid.NewGuid();
         DateTime dateFrom = DateTime.Now.AddDays(-7);
         List<RedemptionHistoryModelOut> expectedHistory = new List<RedemptionHistoryModelOut>();
-        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).ReturnsAsync(expectedHistory);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).Returns(expectedHistory);
 
         HttpResponseMessage response =
-            await _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history?dateFrom={dateFrom:yyyy-MM-dd}");
+        _ = _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history?dateFrom={dateFrom:yyyy-MM-dd}").Result;
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         _mockRedemptionLogic.Verify(s => s.GetRedemptionHistory(visitorId), Times.Once);
@@ -381,15 +381,15 @@ public class RedemptionControllerTest
     }
 
     [TestMethod]
-    public async Task GetVisitorRedemptionHistory_WithOnlyDateTo_ReturnsAllHistory()
+    public void GetVisitorRedemptionHistory_WithOnlyDateTo_ReturnsAllHistory()
     {
         Guid visitorId = Guid.NewGuid();
         DateTime dateTo = DateTime.Now;
         List<RedemptionHistoryModelOut> expectedHistory = new List<RedemptionHistoryModelOut>();
-        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).ReturnsAsync(expectedHistory);
+        _mockRedemptionLogic.Setup(s => s.GetRedemptionHistory(visitorId)).Returns(expectedHistory);
 
         HttpResponseMessage response =
-            await _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history?dateTo={dateTo:yyyy-MM-dd}");
+        _ = _adminClient.GetAsync($"/api/redemptions/visitor/{visitorId}/history?dateTo={dateTo:yyyy-MM-dd}").Result;
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         _mockRedemptionLogic.Verify(s => s.GetRedemptionHistory(visitorId), Times.Once);
@@ -399,7 +399,7 @@ public class RedemptionControllerTest
     }
 
     [TestMethod]
-    public async Task GetMyRedemptionHistory_WithMissingNameIdentifierClaim_ThrowsUnauthorized()
+    public void GetMyRedemptionHistory_WithMissingNameIdentifierClaim_ThrowsUnauthorized()
     {
         JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
         byte[] key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
@@ -419,15 +419,15 @@ public class RedemptionControllerTest
 
         HttpClient client = _factory.CreateClient();
         client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
 
-        HttpResponseMessage response = await client.GetAsync("/api/redemptions/my-history");
+        HttpResponseMessage response = _ = client.GetAsync("/api/redemptions/my-history").Result;
 
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [TestMethod]
-    public async Task RedeemReward_WithMissingNameIdentifierClaim_ThrowsUnauthorized()
+    public void RedeemReward_WithMissingNameIdentifierClaim_ThrowsUnauthorized()
     {
         JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
         byte[] key = System.Text.Encoding.UTF8.GetBytes("MySecretKeyForJWTTokenGeneration1234567890");
@@ -447,10 +447,10 @@ public class RedemptionControllerTest
 
         HttpClient client = _factory.CreateClient();
         client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenString);
 
         Guid rewardId = Guid.NewGuid();
-        HttpResponseMessage response = await client.PostAsync($"/api/redemptions/redeem/{rewardId}", null);
+        HttpResponseMessage response = _ = client.PostAsync($"/api/redemptions/redeem/{rewardId}", null).Result;
 
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }

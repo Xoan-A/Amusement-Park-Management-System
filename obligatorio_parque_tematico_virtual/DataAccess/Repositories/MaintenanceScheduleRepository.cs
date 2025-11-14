@@ -16,72 +16,72 @@ namespace DataAccess.Repositories
             _dateTimeRepository = dateTimeRepository;
         }
 
-        public async Task CreateAsync(MaintenanceSchedule schedule)
+        public void Create(MaintenanceSchedule schedule)
         {
             _context.MaintenanceSchedules.Add(schedule);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
-        public async Task<MaintenanceSchedule?> GetByIdAsync(Guid id)
+        public MaintenanceSchedule? GetById(Guid id)
         {
-            return await _context.MaintenanceSchedules
-                .Include(s => s.Attraction)
-                .FirstOrDefaultAsync(s => s.Id == id);
+            return _context.MaintenanceSchedules
+            .Include(s => s.Attraction)
+            .FirstOrDefault(s => s.Id == id);
         }
 
-        public async Task<List<MaintenanceSchedule>> GetAllAsync()
+        public List<MaintenanceSchedule> GetAll()
         {
-            return await _context.MaintenanceSchedules
-                .Include(s => s.Attraction)
-                .OrderBy(s => s.ScheduledDate)
-                .ToListAsync();
+            return _context.MaintenanceSchedules
+            .Include(s => s.Attraction)
+            .OrderBy(s => s.ScheduledDate)
+            .ToList();
         }
 
-        public async Task<List<MaintenanceSchedule>> GetByAttractionIdAsync(Guid attractionId)
+        public List<MaintenanceSchedule> GetByAttractionId(Guid attractionId)
         {
-            return await _context.MaintenanceSchedules
-                .Include(s => s.Attraction)
-                .Where(s => s.AttractionId == attractionId)
-                .OrderBy(s => s.ScheduledDate)
-                .ToListAsync();
+            return _context.MaintenanceSchedules
+            .Include(s => s.Attraction)
+            .Where(s => s.AttractionId == attractionId)
+            .OrderBy(s => s.ScheduledDate)
+            .ToList();
         }
 
-        public async Task<List<MaintenanceSchedule>> GetOverdueSchedulesAsync()
+        public List<MaintenanceSchedule> GetOverdueSchedules()
         {
-            return await _context.MaintenanceSchedules
-                .Include(s => s.Attraction)
-                .Where(s => s.IsOverdue)
-                .OrderBy(s => s.ScheduledDate)
-                .ToListAsync();
+            return _context.MaintenanceSchedules
+            .Include(s => s.Attraction)
+            .Where(s => s.IsOverdue)
+            .OrderBy(s => s.ScheduledDate)
+            .ToList();
         }
 
-        public async Task<List<MaintenanceSchedule>> GetUpcomingSchedulesAsync(int daysAhead)
+        public List<MaintenanceSchedule> GetUpcomingSchedules(int daysAhead)
         {
-            DateTime now = _dateTimeRepository.GetConfiguredDateTime().Result ?? DateTime.Now;
+            DateTime now = _dateTimeRepository.GetConfiguredDateTime() ?? DateTime.Now;
             DateTime futureDate = now.AddDays(daysAhead);
 
-            return await _context.MaintenanceSchedules
-                .Include(s => s.Attraction)
-                .Where(s => s.ScheduledDate >= now &&
-                            s.ScheduledDate <= futureDate &&
-                            s.Status == MaintenanceStatus.Pending)
-                .OrderBy(s => s.ScheduledDate)
-                .ToListAsync();
+            return _context.MaintenanceSchedules
+            .Include(s => s.Attraction)
+            .Where(s => s.ScheduledDate >= now &&
+                        s.ScheduledDate <= futureDate &&
+                        s.Status == MaintenanceStatus.Pending)
+            .OrderBy(s => s.ScheduledDate)
+            .ToList();
         }
 
-        public async Task UpdateAsync(MaintenanceSchedule schedule)
+        public void Update(MaintenanceSchedule schedule)
         {
             _context.MaintenanceSchedules.Update(schedule);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
-        public async Task DeleteAsync(Guid id)
+        public void Delete(Guid id)
         {
-            MaintenanceSchedule? schedule = await _context.MaintenanceSchedules.FindAsync(id);
+            MaintenanceSchedule? schedule = _context.MaintenanceSchedules.Find(id);
             if (schedule != null)
             {
                 _context.MaintenanceSchedules.Remove(schedule);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
             }
         }
     }

@@ -15,8 +15,8 @@ public class RoleRepositoryTest
     public void Setup()
     {
         DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite("DataSource=:memory:")
-            .Options;
+        .UseSqlite("DataSource=:memory:")
+        .Options;
 
         _context = new AppDbContext(options);
         _context.Database.OpenConnection();
@@ -33,41 +33,41 @@ public class RoleRepositoryTest
     }
 
     [TestMethod]
-    public async Task GetByName_ShouldReturnRole_WhenRoleExists()
+    public void GetByName_ShouldReturnRole_WhenRoleExists()
     {
-        Role? role = await _repository.GetByNameAsync(Role.ADMINISTRATOR);
+        Role? role = _repository.GetByName(Role.ADMINISTRATOR);
 
         Assert.AreEqual(Role.ADMINISTRATOR, role.Name);
     }
 
     [TestMethod]
-    public async Task GetByName_ShouldReturnNull_WhenRoleDoesNotExist()
+    public void GetByName_ShouldReturnNull_WhenRoleDoesNotExist()
     {
-        Role? role = await _repository.GetByNameAsync("NonExistentRole");
+        Role? role = _repository.GetByName("NonExistentRole");
 
         Assert.IsNull(role);
     }
 
     [TestMethod]
-    public async Task SeedData_ShouldContainAdministratorRole()
+    public void SeedData_ShouldContainAdministratorRole()
     {
-        Role? role = await _repository.GetByNameAsync(Role.ADMINISTRATOR);
+        Role? role = _repository.GetByName(Role.ADMINISTRATOR);
 
         Assert.AreEqual("Administrator", role.Name);
     }
 
     [TestMethod]
-    public async Task SeedData_ShouldContainOperatorRole()
+    public void SeedData_ShouldContainOperatorRole()
     {
-        Role? role = await _repository.GetByNameAsync(Role.OPERATOR);
+        Role? role = _repository.GetByName(Role.OPERATOR);
 
         Assert.AreEqual("Operator", role.Name);
     }
 
     [TestMethod]
-    public async Task SeedData_ShouldContainVisitorRole()
+    public void SeedData_ShouldContainVisitorRole()
     {
-        Role? role = await _repository.GetByNameAsync(Role.VISITOR);
+        Role? role = _repository.GetByName(Role.VISITOR);
 
         Assert.AreEqual("Visitor", role.Name);
     }
