@@ -51,10 +51,6 @@ export class AttractionService {
     return this.http.put<MessageResponse>(`${this.apiUrl}/exit/${id}`, request);
   }
 
-  getCapacity(id: string): Observable<CapacityResponse> {
-    return this.http.get<CapacityResponse>(`${this.apiUrl}/capacity/${id}`);
-  }
-
   getVisitsReport(request: AttractionsVisitsRequest): Observable<AttractionsVisitResponse> {
     const params = new HttpParams()
       .set('startDate', request.startDate)

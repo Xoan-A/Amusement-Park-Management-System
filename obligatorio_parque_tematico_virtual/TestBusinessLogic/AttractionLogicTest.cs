@@ -25,14 +25,12 @@ public class AttractionLogicTest
         _mockAttractionRepository = new Mock<IAttractionRepository>();
         _mockReportRepository = new Mock<IReportRepository>();
 
-        var configuration = new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<MappingProfile>();
-        });
+        var configuration = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
         _mapper = configuration.CreateMapper();
 
         _attractionLogic = new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object, _mapper);
-        _attractionLogicEntity = new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object, _mapper);
+        _attractionLogicEntity =
+        new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object, _mapper);
     }
 
     [TestMethod]
@@ -51,6 +49,28 @@ public class AttractionLogicTest
         AttractionResponse result = _attractionLogic.GetAttractionById(expectedAttraction.Id);
 
         Assert.AreEqual(expectedAttraction.Name, result.Name);
+        _mockAttractionRepository.Verify(r => r.GetById(expectedAttraction.Id), Times.Once);
+    }
+
+    [TestMethod]
+    public void GetAttractionById_ShouldReturnAttractionWithIncidents_WhenAttractionHasIncidents()
+    {
+        Attraction expectedAttraction = new Attraction
+        {
+            Name = "Interactive Zone",
+            Description = "A fun interactive attraction",
+            Type = AttractionType.InteractiveZone,
+            MinAge = 8,
+            MaxCapacity = 30,
+            CurrentCapacity = 15,
+        };
+        expectedAttraction.AddIncident("Equipment failure");
+
+        _mockAttractionRepository.Setup(r => r.GetById(expectedAttraction.Id)).Returns(expectedAttraction);
+        AttractionResponse result = _attractionLogic.GetAttractionById(expectedAttraction.Id);
+
+        Assert.AreEqual(expectedAttraction.Name, result.Name);
+        Assert.AreEqual("Equipment failure", result.Incidents[0]);
         _mockAttractionRepository.Verify(r => r.GetById(expectedAttraction.Id), Times.Once);
     }
 
@@ -82,6 +102,31 @@ public class AttractionLogicTest
         List<AttractionResponse> result = _attractionLogic.GetAllAttractions();
 
         Assert.AreEqual(2, result.Count);
+        _mockAttractionRepository.Verify(r => r.GetAll(), Times.Once);
+    }
+
+    [TestMethod]
+    public void GetAllAttractions_ShouldReturnAttractionsWithIncidents_WhenAttractionsHaveIncidents()
+    {
+        List<Attraction> expectedAttractions = new List<Attraction>
+        {
+            new Attraction
+            {
+                Name = "Roller Coaster",
+                Description = "A thrilling ride",
+                Type = AttractionType.RollerCoaster,
+                MinAge = 12,
+                MaxCapacity = 20,
+                CurrentCapacity = 5,
+            }
+        };
+        expectedAttractions[0].AddIncident("Motor failure");
+
+        _mockAttractionRepository.Setup(r => r.GetAll()).Returns(expectedAttractions);
+        List<AttractionResponse> result = _attractionLogic.GetAllAttractions();
+
+        Assert.AreEqual("Motor failure", result[0].Incidents[0]);
+        Assert.IsFalse(result[0].IsActive);
         _mockAttractionRepository.Verify(r => r.GetAll(), Times.Once);
     }
 
@@ -514,35 +559,6 @@ public class AttractionLogicTest
     }
 
     [TestMethod]
-    public void GetAttractionIncidents_ShouldThrowException_WhenAttractionNotFound()
-    {
-        Guid id = Guid.NewGuid();
-        _mockAttractionRepository.Setup(r => r.GetById(id)).Returns((Attraction)null);
-        Assert.ThrowsException<KeyNotFoundException>(() =>
-        _attractionLogic.GetAttractionIncidents(id));
-    }
-
-    [TestMethod]
-    public void GetAttractionIncidents_ShouldThrowException_WhenNoIncidents()
-    {
-        Attraction attraction = new Attraction { Incidents = new List<string>() };
-        _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).Returns(attraction);
-        Assert.ThrowsException<KeyNotFoundException>(() =>
-        _attractionLogic.GetAttractionIncidents(attraction.Id));
-    }
-
-    [TestMethod]
-    public void GetAttractionIncidents_ShouldReturnIncidents_WhenHasIncidents()
-    {
-        Attraction attraction = new Attraction { Incidents = new List<string> { "Incidente1" } };
-        _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).Returns(attraction);
-        List<string> incidents = _attractionLogic.GetAttractionIncidents(attraction.Id);
-
-        Assert.AreEqual(1, incidents.Count);
-        Assert.AreEqual("Incidente1", incidents[0]);
-    }
-
-    [TestMethod]
     public void AddIncidence_ShouldThrowException_WhenAttractionNotFound()
     {
         Guid id = Guid.NewGuid();
@@ -576,39 +592,6 @@ public class AttractionLogicTest
         _mockAttractionRepository.Setup(r => r.GetById(attraction.Id)).Returns(attraction);
         _attractionLogic.RemoveIncident(attraction.Id, "Incidente");
         _mockAttractionRepository.Verify(r => r.Update(attraction), Times.Once);
-    }
-
-    [TestMethod]
-    public void GetCapacity_ShouldReturnCapacityResponse_WhenIdIsValid()
-    {
-        Guid attractionId = Guid.NewGuid();
-        Attraction expectedAttraction = new Attraction
-        {
-            Id = attractionId,
-            Name = "Carousel",
-            Description = "A classic merry-go-round",
-            Type = AttractionType.RollerCoaster,
-            MinAge = 3,
-            MaxCapacity = 50,
-            CurrentCapacity = 20,
-        };
-        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(expectedAttraction);
-        CapacityResponse result = _attractionLogic.GetCapacity(attractionId);
-
-        Assert.AreEqual(attractionId, result.Id);
-        Assert.AreEqual(50, result.Capacity);
-        Assert.AreEqual(20, result.CurrentCapacity);
-        _mockAttractionRepository.Verify(r => r.GetById(attractionId), Times.Once);
-    }
-
-    [TestMethod]
-    public void GetCapacity_ShouldThrowException_WhenAttractionNotFound()
-    {
-        Guid attractionId = Guid.NewGuid();
-        _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns((Attraction)null);
-
-        Assert.ThrowsException<KeyNotFoundException>(() =>
-        _attractionLogic.GetCapacity(attractionId));
     }
 
     [TestMethod]
