@@ -81,7 +81,7 @@ namespace ApiTests
                 Name = "Admin",
                 LastName = "User",
                 Email = "admin@test.com",
-                UserRoles = new List<string> { Domain.Role.ADMINISTRATOR }
+                UserRoles = new List<string> { Domain.Role.Administrator }
             };
 
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
@@ -99,7 +99,7 @@ namespace ApiTests
 
             Assert.AreEqual("admin@test.com", loginResponse.Email);
             Assert.AreEqual(1, loginResponse.Roles.Length);
-            Assert.AreEqual(Domain.Role.ADMINISTRATOR, loginResponse.Roles[0]);
+            Assert.AreEqual(Domain.Role.Administrator, loginResponse.Roles[0]);
         }
 
         [TestMethod]

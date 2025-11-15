@@ -58,7 +58,7 @@ namespace BusinessLogic
                 MembershipLevel = MembershipLevel.Standard
             };
 
-            Role? visitorRole = _roleRepository.GetByName(Role.VISITOR);
+            Role? visitorRole = _roleRepository.GetByName(Role.Visitor);
             if (visitorRole != null)
             {
                 visitor.UserRoles.Add(new UserRole

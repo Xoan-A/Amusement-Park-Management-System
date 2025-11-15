@@ -49,7 +49,7 @@ namespace ApiTests
                 Name = "Test",
                 LastName = "Visitor",
                 Email = "test@test.com",
-                UserRoles = new List<string> { Role.VISITOR }
+                UserRoles = new List<string> { Role.Visitor }
             };
 
             mockUserManagementLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
@@ -190,7 +190,7 @@ namespace ApiTests
                 Name = "Test",
                 LastName = "Visitor",
                 Email = "test2@test.com",
-                UserRoles = new List<string> { Role.VISITOR }
+                UserRoles = new List<string> { Role.Visitor }
             };
 
             mockUserManagementLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
@@ -319,7 +319,7 @@ namespace ApiTests
                 Name = "Test",
                 LastName = "Visitor",
                 Email = "test3@test.com",
-                UserRoles = new List<string> { Role.VISITOR }
+                UserRoles = new List<string> { Role.Visitor }
             };
 
             mockUserManagementLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
@@ -451,7 +451,7 @@ namespace ApiTests
                 Name = "Test",
                 LastName = "Visitor",
                 Email = "test4@test.com",
-                UserRoles = new List<string> { Role.VISITOR }
+                UserRoles = new List<string> { Role.Visitor }
             };
 
             mockUserManagementLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))

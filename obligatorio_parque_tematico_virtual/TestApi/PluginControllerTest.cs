@@ -68,7 +68,7 @@ public class PluginControllerTest
             Name = "Admin",
             LastName = "User",
             Email = "admin@example.com",
-            UserRoles = new List<string> { Role.ADMINISTRATOR }
+            UserRoles = new List<string> { Role.Administrator }
         };
         string adminToken = tokenService.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();

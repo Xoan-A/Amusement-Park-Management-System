@@ -85,7 +85,7 @@ namespace ApiTests
                 Name = "Admin",
                 LastName = "User",
                 Email = "admin@example.com",
-                UserRoles = new List<string> { Role.ADMINISTRATOR }
+                UserRoles = new List<string> { Role.Administrator }
             };
             string adminToken = tokenService.GenerateToken(adminUser);
 
@@ -99,7 +99,7 @@ namespace ApiTests
                 Name = "Operator",
                 LastName = "User",
                 Email = "operator@example.com",
-                UserRoles = new List<string> { Role.OPERATOR }
+                UserRoles = new List<string> { Role.Operator }
             };
             string operatorToken = tokenService.GenerateToken(operatorUser);
             _operatorClient = _factory.CreateClient();
@@ -128,10 +128,10 @@ namespace ApiTests
             Guid userId = Guid.NewGuid();
             AddRolesRequest request = new AddRolesRequest
             {
-                Role = Role.OPERATOR
+                Role = Role.Operator
             };
 
-            _mockUserManagementLogic.Setup(u => u.AddRoleToUser(userId, Role.OPERATOR))
+            _mockUserManagementLogic.Setup(u => u.AddRoleToUser(userId, Role.Operator))
             ;
 
             string json = JsonSerializer.Serialize(request);
@@ -149,9 +149,9 @@ namespace ApiTests
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.IsTrue(messageResponse.Message.Contains(Role.OPERATOR));
+            Assert.IsTrue(messageResponse.Message.Contains(Role.Operator));
 
-            _mockUserManagementLogic.Verify(u => u.AddRoleToUser(userId, Role.OPERATOR), Times.Once);
+            _mockUserManagementLogic.Verify(u => u.AddRoleToUser(userId, Role.Operator), Times.Once);
         }
 
         [TestMethod]
@@ -160,7 +160,7 @@ namespace ApiTests
             Guid userId = Guid.NewGuid();
             AddRolesRequest request = new AddRolesRequest
             {
-                Role = Role.OPERATOR
+                Role = Role.Operator
             };
 
             string json = JsonSerializer.Serialize(request);
@@ -184,7 +184,7 @@ namespace ApiTests
                 Email = "john@example.com",
                 BirthDate = new DateTime(1990, 1, 1),
                 MembershipLevel = null,
-                UserRoles = new List<string> { Role.VISITOR },
+                UserRoles = new List<string> { Role.Visitor },
                 Score = 0
             };
 
@@ -231,7 +231,7 @@ namespace ApiTests
                 Password = "Password#123",
                 BirthDate = new DateTime(1995, 5, 5),
                 MembershipLevel = null,
-                Roles = new List<string> { Role.OPERATOR }
+                Roles = new List<string> { Role.Operator }
             };
 
             UserResponse created = new UserResponse
@@ -285,7 +285,7 @@ namespace ApiTests
                 Password = "Password#123",
                 BirthDate = new DateTime(1995, 5, 5),
                 MembershipLevel = null,
-                Roles = new List<string> { Role.OPERATOR }
+                Roles = new List<string> { Role.Operator }
             };
 
             string jsonBody = JsonSerializer.Serialize(request);
@@ -341,7 +341,7 @@ namespace ApiTests
                 Email = request.Email,
                 BirthDate = request.BirthDate,
                 MembershipLevel = null,
-                UserRoles = new List<string> { Role.VISITOR },
+                UserRoles = new List<string> { Role.Visitor },
                 Score = 5
             };
 
@@ -771,7 +771,7 @@ namespace ApiTests
                 Email = "john@example.com",
                 BirthDate = new DateTime(1990, 1, 1),
                 MembershipLevel = 1,
-                UserRoles = new List<string> { Role.VISITOR },
+                UserRoles = new List<string> { Role.Visitor },
                 Score = 100
             };
 
@@ -893,7 +893,7 @@ namespace ApiTests
                 LastName = "Smith",
                 Email = "jane@example.com",
                 MembershipLevel = 0,
-                UserRoles = new List<string> { Role.VISITOR },
+                UserRoles = new List<string> { Role.Visitor },
                 Score = 50
             };
 

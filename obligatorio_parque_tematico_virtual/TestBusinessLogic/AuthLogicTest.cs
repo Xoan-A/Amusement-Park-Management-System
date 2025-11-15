@@ -49,7 +49,7 @@ namespace TestBusinessLogic
             };
             admin.UserRoles = new System.Collections.Generic.List<UserRole>
             {
-                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+                new UserRole { Role = new Role { Name = Role.Administrator } }
             };
 
             _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(admin);
@@ -79,7 +79,7 @@ namespace TestBusinessLogic
             };
             admin.UserRoles = new System.Collections.Generic.List<UserRole>
             {
-                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+                new UserRole { Role = new Role { Name = Role.Administrator } }
             };
 
             _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(admin);
@@ -126,7 +126,7 @@ namespace TestBusinessLogic
             };
             admin.UserRoles = new System.Collections.Generic.List<UserRole>
             {
-                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } }
+                new UserRole { Role = new Role { Name = Role.Administrator } }
             };
 
             _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(admin);
@@ -225,8 +225,8 @@ namespace TestBusinessLogic
             };
             user.UserRoles = new System.Collections.Generic.List<UserRole>
             {
-                new UserRole { Role = new Role { Name = Role.ADMINISTRATOR } },
-                new UserRole { Role = new Role { Name = Role.OPERATOR } }
+                new UserRole { Role = new Role { Name = Role.Administrator } },
+                new UserRole { Role = new Role { Name = Role.Operator } }
             };
 
             _mockUserRepository.Setup(r => r.GetByEmailWithRoles(email)).Returns(user);

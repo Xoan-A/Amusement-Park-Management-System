@@ -57,7 +57,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateEmailUniqueness(email));
             _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(password)).Returns(hashedPassword);
-            _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns(new Role { Name = Role.VISITOR });
+            _mockRoleRepository.Setup(r => r.GetByName(Role.Visitor)).Returns(new Role { Name = Role.Visitor });
 
             User expectedUser = new User
             {
@@ -264,7 +264,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateEmailUniqueness(email));
             _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(plainPassword)).Returns(hashedPassword);
-            _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns(new Role { Name = Role.VISITOR });
+            _mockRoleRepository.Setup(r => r.GetByName(Role.Visitor)).Returns(new Role { Name = Role.Visitor });
 
             User createdUser = new User
             {
@@ -425,7 +425,7 @@ namespace TestBusinessLogic
                 MembershipLevel = MembershipLevel.Standard,
                 UserRoles = new System.Collections.Generic.List<UserRole>
                 {
-                    new UserRole { Role = new Role { Name = Role.VISITOR } }
+                    new UserRole { Role = new Role { Name = Role.Visitor } }
                 },
                 Score = 10
             };
@@ -797,7 +797,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateEmailUniqueness(email));
             _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(password)).Returns(hashedPassword);
-            _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns((Role)null);
+            _mockRoleRepository.Setup(r => r.GetByName(Role.Visitor)).Returns((Role)null);
 
             User createdUser = null;
             _mockUserRepository.Setup(r => r.Create(It.IsAny<User>()))
@@ -817,7 +817,7 @@ namespace TestBusinessLogic
 
             Assert.AreEqual(0, createdUser.UserRoles.Count, "User should have no roles when visitor role is not found");
 
-            _mockRoleRepository.Verify(r => r.GetByName(Role.VISITOR), Times.Once);
+            _mockRoleRepository.Verify(r => r.GetByName(Role.Visitor), Times.Once);
             _mockUserRepository.Verify(r => r.Create(It.IsAny<User>()), Times.Once);
         }
 

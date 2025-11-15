@@ -78,7 +78,7 @@ namespace ApiTests
                 Name = "Admin",
                 LastName = "User",
                 Email = "admin@example.com",
-                UserRoles = new List<string> { Role.ADMINISTRATOR }
+                UserRoles = new List<string> { Role.Administrator }
             };
             string adminToken = tokenLogic.GenerateToken(adminUser);
             _adminClient = _factory.CreateClient();
@@ -91,7 +91,7 @@ namespace ApiTests
                 Name = "Operator",
                 LastName = "User",
                 Email = "operator@example.com",
-                UserRoles = new List<string> { Role.OPERATOR }
+                UserRoles = new List<string> { Role.Operator }
             };
             string operatorToken = tokenLogic.GenerateToken(operatorUser);
             _operatorClient = _factory.CreateClient();

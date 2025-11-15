@@ -571,10 +571,10 @@ namespace TestApi
                 AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 IPasswordLogic passwordLogic = scope.ServiceProvider.GetRequiredService<IPasswordLogic>();
 
-                Role operatorRole = context.Roles.FirstOrDefault(r => r.Name == Role.OPERATOR);
+                Role operatorRole = context.Roles.FirstOrDefault(r => r.Name == Role.Operator);
                 if (operatorRole == null)
                 {
-                    operatorRole = new Role { Name = Role.OPERATOR };
+                    operatorRole = new Role { Name = Role.Operator };
                     context.Roles.Add(operatorRole);
                     context.SaveChanges();
                 }
@@ -659,10 +659,10 @@ namespace TestApi
                 AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 IPasswordLogic passwordLogic = scope.ServiceProvider.GetRequiredService<IPasswordLogic>();
 
-                Role adminRole = context.Roles.FirstOrDefault(r => r.Name == Role.ADMINISTRATOR);
+                Role adminRole = context.Roles.FirstOrDefault(r => r.Name == Role.Administrator);
                 if (adminRole == null)
                 {
-                    adminRole = new Role { Name = Role.ADMINISTRATOR };
+                    adminRole = new Role { Name = Role.Administrator };
                     context.Roles.Add(adminRole);
                     context.SaveChanges();
                 }
