@@ -43,7 +43,8 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
             MinAge = attraction.MinAge,
             MaxCapacity = attraction.MaxCapacity,
             CurrentCapacity = attraction.CurrentCapacity,
-            IsActive = attraction.IsActive
+            IsActive = attraction.IsActive,
+            Incidents = attraction.Incidents
         };
     }
 
@@ -59,7 +60,8 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
             MinAge = attraction.MinAge,
             MaxCapacity = attraction.MaxCapacity,
             CurrentCapacity = attraction.CurrentCapacity,
-            IsActive = attraction.IsActive
+            IsActive = attraction.IsActive,
+            Incidents = attraction.Incidents
         }).ToList();
     }
 

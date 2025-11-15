@@ -45,6 +45,28 @@ public class AttractionLogicTest
     }
 
     [TestMethod]
+    public void GetAttractionById_ShouldReturnAttractionWithIncidents_WhenAttractionHasIncidents()
+    {
+        Attraction expectedAttraction = new Attraction
+        {
+            Name = "Interactive Zone",
+            Description = "A fun interactive attraction",
+            Type = AttractionType.InteractiveZone,
+            MinAge = 8,
+            MaxCapacity = 30,
+            CurrentCapacity = 15,
+        };
+        expectedAttraction.AddIncident("Equipment failure");
+        
+        _mockAttractionRepository.Setup(r => r.GetById(expectedAttraction.Id)).Returns(expectedAttraction);
+        AttractionResponse result = _attractionLogic.GetAttractionById(expectedAttraction.Id);
+
+        Assert.AreEqual(expectedAttraction.Name, result.Name);
+        Assert.AreEqual("Equipment failure", result.Incidents[0]);
+        _mockAttractionRepository.Verify(r => r.GetById(expectedAttraction.Id), Times.Once);
+    }
+
+    [TestMethod]
     public void GetAllAttractions_ShouldReturnListOfAttractions()
     {
         List<Attraction> expectedAttractions = new List<Attraction>
@@ -72,6 +94,31 @@ public class AttractionLogicTest
         List<AttractionResponse> result = _attractionLogic.GetAllAttractions();
 
         Assert.AreEqual(2, result.Count);
+        _mockAttractionRepository.Verify(r => r.GetAll(), Times.Once);
+    }
+
+    [TestMethod]
+    public void GetAllAttractions_ShouldReturnAttractionsWithIncidents_WhenAttractionsHaveIncidents()
+    {
+        List<Attraction> expectedAttractions = new List<Attraction>
+        {
+            new Attraction
+            {
+                Name = "Roller Coaster",
+                Description = "A thrilling ride",
+                Type = AttractionType.RollerCoaster,
+                MinAge = 12,
+                MaxCapacity = 20,
+                CurrentCapacity = 5,
+            }
+        };
+        expectedAttractions[0].AddIncident("Motor failure");
+        
+        _mockAttractionRepository.Setup(r => r.GetAll()).Returns(expectedAttractions);
+        List<AttractionResponse> result = _attractionLogic.GetAllAttractions();
+
+        Assert.AreEqual("Motor failure", result[0].Incidents[0]);
+        Assert.IsFalse(result[0].IsActive);
         _mockAttractionRepository.Verify(r => r.GetAll(), Times.Once);
     }
 

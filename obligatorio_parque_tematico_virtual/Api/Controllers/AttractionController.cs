@@ -24,22 +24,10 @@ public class AttractionController : ControllerBase
     public IActionResult GetAttractions()
     {
         List<AttractionResponse> attractions = _attractionLogic.GetAllAttractions();
-        AllAttractionsResponse response = new AllAttractionsResponse();
-
-        foreach (AttractionResponse attraction in attractions)
+        AllAttractionsResponse response = new AllAttractionsResponse
         {
-            response.Attractions.Add(new AttractionResponse()
-            {
-                Id = attraction.Id,
-                Name = attraction.Name,
-                Description = attraction.Description,
-                Type = attraction.Type.ToString(),
-                MinAge = attraction.MinAge,
-                MaxCapacity = attraction.MaxCapacity,
-                CurrentCapacity = attraction.CurrentCapacity,
-                IsActive = attraction.IsActive
-            });
-        }
+            Attractions = attractions
+        };
 
         return Ok(response);
     }
