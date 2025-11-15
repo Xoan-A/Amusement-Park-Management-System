@@ -11,8 +11,7 @@ import { MaintenanceService } from '../../../core/services/maintenance.service';
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, RouterLink, NavbarComponent],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
   totalAttractions = 0;

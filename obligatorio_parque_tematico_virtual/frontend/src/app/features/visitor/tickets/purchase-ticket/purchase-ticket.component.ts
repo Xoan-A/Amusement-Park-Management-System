@@ -12,8 +12,7 @@ import { EventResponse, TicketType } from '../../../../core/models';
   selector: 'app-purchase-ticket',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, NavbarComponent],
-  templateUrl: './purchase-ticket.component.html',
-  styleUrl: './purchase-ticket.component.scss'
+  templateUrl: './purchase-ticket.component.html'
 })
 export class PurchaseTicketComponent implements OnInit {
   ticketForm: FormGroup;

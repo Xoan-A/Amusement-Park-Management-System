@@ -8,8 +8,7 @@ import { Roles } from '../../../core/models';
   selector: 'app-navbar',
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
-  templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.scss'
+  templateUrl: './navbar.component.html'
 })
 export class NavbarComponent implements OnInit {
   currentUser: any = null;
