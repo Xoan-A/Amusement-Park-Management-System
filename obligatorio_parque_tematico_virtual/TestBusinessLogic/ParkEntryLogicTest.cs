@@ -252,6 +252,8 @@ namespace TestBusinessLogic
                 CurrentCapacity = 10
             };
 
+            user.RegisterEntry(attraction, _currentDateTime);
+
             RegisterExitRequest request = new RegisterExitRequest { userId = userId };
 
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(user);
@@ -318,6 +320,8 @@ namespace TestBusinessLogic
                 MaxCapacity = 50,
                 CurrentCapacity = 0
             };
+
+            user.RegisterEntry(attraction, _currentDateTime);
 
             RegisterExitRequest request = new RegisterExitRequest { userId = userId };
 
