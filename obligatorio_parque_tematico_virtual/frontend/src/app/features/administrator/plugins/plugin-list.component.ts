@@ -145,12 +145,6 @@ import {
                     plugin.author || 'Unknown'
                   }}</span>
                 </p>
-                <p class="mb-0">
-                  <strong>Version:</strong>
-                  <span class="text-muted">{{
-                    plugin.version || '1.0.0'
-                  }}</span>
-                </p>
               </div>
             </div>
             <div class="card-footer bg-transparent">
