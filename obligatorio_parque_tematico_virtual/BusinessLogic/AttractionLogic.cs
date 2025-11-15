@@ -1,4 +1,5 @@
-﻿using Domain;
+﻿using AutoMapper;
+using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using Models.In;
@@ -10,6 +11,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
 {
     private readonly IAttractionRepository _attractionRepository;
     private readonly IReportRepository _reportRepository;
+    private readonly IMapper _mapper;
 
     private readonly int _nameMaxLength = 100;
     private readonly int _maxDescriptionLength = 500;
@@ -20,10 +22,11 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
     private readonly int _minCurrentCapacity = 0;
     private readonly int _noIncidents = 0;
 
-    public AttractionLogic(IAttractionRepository attractionRepository, IReportRepository reportRepository)
+    public AttractionLogic(IAttractionRepository attractionRepository, IReportRepository reportRepository, IMapper mapper)
     {
         _attractionRepository = attractionRepository;
         _reportRepository = reportRepository;
+        _mapper = mapper;
     }
 
     public AttractionResponse GetAttractionById(Guid id)
@@ -34,33 +37,13 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
             throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
         }
 
-        return new AttractionResponse()
-        {
-            Id = attraction.Id,
-            Name = attraction.Name,
-            Description = attraction.Description,
-            Type = attraction.Type.ToString(),
-            MinAge = attraction.MinAge,
-            MaxCapacity = attraction.MaxCapacity,
-            CurrentCapacity = attraction.CurrentCapacity,
-            IsActive = attraction.IsActive
-        };
+        return _mapper.Map<AttractionResponse>(attraction);
     }
 
     public List<AttractionResponse> GetAllAttractions()
     {
         List<Attraction> attractions = _attractionRepository.GetAll();
-        return attractions.Select(attraction => new AttractionResponse()
-        {
-            Id = attraction.Id,
-            Name = attraction.Name,
-            Description = attraction.Description,
-            Type = attraction.Type.ToString(),
-            MinAge = attraction.MinAge,
-            MaxCapacity = attraction.MaxCapacity,
-            CurrentCapacity = attraction.CurrentCapacity,
-            IsActive = attraction.IsActive
-        }).ToList();
+        return _mapper.Map<List<AttractionResponse>>(attractions);
     }
 
     public Guid CreateAttraction(AttractionRequest newAttraction)
@@ -204,17 +187,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         {
             Attraction attraction = group.First().Attraction;
             int visitCount = group.Count();
-            AttractionResponse attractionRes = new AttractionResponse()
-            {
-                Id = attraction.Id,
-                Name = attraction.Name,
-                Description = attraction.Description,
-                Type = attraction.Type.ToString(),
-                MinAge = attraction.MinAge,
-                MaxCapacity = attraction.MaxCapacity,
-                CurrentCapacity = attraction.CurrentCapacity,
-                IsActive = attraction.IsActive
-            };
+            AttractionResponse attractionRes = _mapper.Map<AttractionResponse>(attraction);
             attractionsVisits.AttractionsVisits.Add(new AttractionVisitDetail
             {
                 Attraction = attractionRes,

@@ -1,9 +1,11 @@
+using AutoMapper;
 using Moq;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using BusinessLogic;
 using Models.Out;
+using Models.Mapping;
 
 namespace TestBusinessLogic
 {
@@ -12,6 +14,7 @@ namespace TestBusinessLogic
     {
         private Mock<IUserRepository> _mockUserRepository = null!;
         private Mock<IPasswordLogic> _mockPasswordService = null!;
+        private IMapper _mapper = null!;
         private IAuthLogic _authLogic = null!;
 
         [TestInitialize]
@@ -19,7 +22,14 @@ namespace TestBusinessLogic
         {
             _mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
             _mockPasswordService = new Mock<IPasswordLogic>(MockBehavior.Strict);
-            _authLogic = new AuthLogic(_mockUserRepository.Object, _mockPasswordService.Object);
+
+            var configuration = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<MappingProfile>();
+            });
+            _mapper = configuration.CreateMapper();
+
+            _authLogic = new AuthLogic(_mockUserRepository.Object, _mockPasswordService.Object, _mapper);
         }
 
         [TestMethod]

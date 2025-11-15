@@ -1,3 +1,4 @@
+using AutoMapper;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -17,10 +18,12 @@ namespace BusinessLogic
         private readonly IEventRepository _eventRepository;
         private readonly IDailyScoreLogic _dailyScoreLogic;
         private readonly IDateTimeLogic _dateTimeLogic;
+        private readonly IMapper _mapper;
 
         public UserLogic(IUserRepository userRepository, IPasswordLogic passwordLogic,
             IAttractionRepository attractionRepository, ITicketLogic ticketLogic, IRoleRepository roleRepository,
-            IEventRepository eventRepository, IDailyScoreLogic dailyScoreLogic, IDateTimeLogic dateTimeLogic)
+            IEventRepository eventRepository, IDailyScoreLogic dailyScoreLogic, IDateTimeLogic dateTimeLogic,
+            IMapper mapper)
         {
             _userRepository = userRepository;
             _passwordLogic = passwordLogic;
@@ -30,6 +33,7 @@ namespace BusinessLogic
             _eventRepository = eventRepository;
             _dailyScoreLogic = dailyScoreLogic;
             _dateTimeLogic = dateTimeLogic;
+            _mapper = mapper;
         }
 
         public UserResponse RegisterVisitor(RegisterVisitorRequest request)
@@ -76,17 +80,7 @@ namespace BusinessLogic
 
             User res = _userRepository.Create(visitor);
 
-            return new UserResponse
-            {
-                Id = res.Id,
-                Name = res.Name,
-                LastName = res.LastName,
-                Email = res.Email,
-                BirthDate = res.BirthDate,
-                MembershipLevel = (int?)res.MembershipLevel,
-                UserRoles = res.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                Score = res.Score
-            };
+            return _mapper.Map<UserResponse>(res);
         }
 
         public UserResponse CreateUser(CreateUserRequest request)
@@ -157,17 +151,7 @@ namespace BusinessLogic
             }
 
             User returnedUser = _userRepository.Create(user);
-            return new UserResponse
-            {
-                Id = returnedUser.Id,
-                Name = returnedUser.Name,
-                LastName = returnedUser.LastName,
-                Email = returnedUser.Email,
-                BirthDate = returnedUser.BirthDate,
-                MembershipLevel = (int?)returnedUser.MembershipLevel,
-                UserRoles = returnedUser.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                Score = returnedUser.Score
-            };
+            return _mapper.Map<UserResponse>(returnedUser);
         }
 
         public UserResponse GetUserResponseById(Guid userId)
@@ -178,17 +162,7 @@ namespace BusinessLogic
                 throw new KeyNotFoundException("User not found");
             }
 
-            return new UserResponse
-            {
-                Id = user.Id,
-                Name = user.Name,
-                LastName = user.LastName,
-                Email = user.Email,
-                BirthDate = user.BirthDate,
-                MembershipLevel = (int?)user.MembershipLevel,
-                UserRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                Score = user.Score
-            };
+            return _mapper.Map<UserResponse>(user);
         }
 
         public void RegisterEntry(Guid attractionId, RegisterEntryRequest request)
@@ -258,17 +232,7 @@ namespace BusinessLogic
             List<User> users = _userRepository.GetTopTen();
             return new TopTenResponse
             {
-                TopTenUsers = users.Select(u => new UserResponse
-                {
-                    Id = u.Id,
-                    Name = u.Name,
-                    LastName = u.LastName,
-                    Email = u.Email,
-                    BirthDate = u.BirthDate,
-                    MembershipLevel = (int?)u.MembershipLevel,
-                    UserRoles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                    Score = u.Score
-                }).ToList()
+                TopTenUsers = _mapper.Map<List<UserResponse>>(users)
             };
         }
 
@@ -349,17 +313,7 @@ namespace BusinessLogic
 
             _userRepository.Update(user);
 
-            return new UserResponse
-            {
-                Id = user.Id,
-                Name = user.Name,
-                LastName = user.LastName,
-                Email = user.Email,
-                BirthDate = user.BirthDate,
-                MembershipLevel = (int?)user.MembershipLevel,
-                UserRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                Score = user.Score
-            };
+            return _mapper.Map<UserResponse>(user);
         }
 
         public UserResponse ChangeMembershipLevel(Guid userId, int membershipLevel)
@@ -374,17 +328,7 @@ namespace BusinessLogic
             user.MembershipLevel = (MembershipLevel)membershipLevel;
             _userRepository.Update(user);
 
-            return new UserResponse
-            {
-                Id = user.Id,
-                Name = user.Name,
-                LastName = user.LastName,
-                Email = user.Email,
-                BirthDate = user.BirthDate,
-                MembershipLevel = (int?)user.MembershipLevel,
-                UserRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                Score = user.Score
-            };
+            return _mapper.Map<UserResponse>(user);
         }
 
         private bool ValidateEmail(string email)

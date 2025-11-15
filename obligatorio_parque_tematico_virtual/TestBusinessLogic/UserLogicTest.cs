@@ -1,3 +1,4 @@
+using AutoMapper;
 using Moq;
 using Domain;
 using IBusinessLogic;
@@ -6,6 +7,7 @@ using BusinessLogic;
 using Models.Out;
 using Domain.Exceptions;
 using Models.In;
+using Models.Mapping;
 
 namespace TestBusinessLogic
 {
@@ -20,6 +22,7 @@ namespace TestBusinessLogic
         private Mock<IEventRepository> _mockEventRepository = null!;
         private Mock<IDailyScoreLogic> _mockDailyScoreLogic = null!;
         private Mock<IDateTimeLogic> _mockDateTimeLogic = null!;
+        private IMapper _mapper = null!;
         private IUserLogic _userLogic = null!;
 
         [TestInitialize]
@@ -35,9 +38,15 @@ namespace TestBusinessLogic
             _mockDateTimeLogic = new Mock<IDateTimeLogic>(MockBehavior.Strict);
             _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).Returns(DateTime.Now);
 
+            var configuration = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<MappingProfile>();
+            });
+            _mapper = configuration.CreateMapper();
+
             _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
                 _mockAttractionRepository.Object, _mockTicketLogic.Object, _mockRoleRepository.Object,
-                _mockEventRepository.Object, _mockDailyScoreLogic.Object, _mockDateTimeLogic.Object);
+                _mockEventRepository.Object, _mockDailyScoreLogic.Object, _mockDateTimeLogic.Object, _mapper);
         }
 
         [TestMethod]

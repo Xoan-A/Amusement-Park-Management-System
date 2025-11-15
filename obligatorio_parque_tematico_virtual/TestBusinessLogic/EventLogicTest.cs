@@ -1,10 +1,12 @@
-﻿using Moq;
+﻿using AutoMapper;
+using Moq;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using BusinessLogic;
 using Models.In;
 using Models.Out;
+using Models.Mapping;
 
 namespace TestBusinessLogic;
 
@@ -15,6 +17,7 @@ public class EventLogicTest
     private IEventLogic _eventLogic;
     private Mock<IAttractionLogicEntity> _mockAttractionService;
     private Mock<IDateTimeLogic> _mockDateTimeLogic;
+    private IMapper _mapper;
     private Event baseEvent;
     private EventRequest baseEventRequest;
 
@@ -26,8 +29,14 @@ public class EventLogicTest
         _mockDateTimeLogic = new Mock<IDateTimeLogic>();
         _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).Returns(DateTime.Now);
 
+        var configuration = new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile<MappingProfile>();
+        });
+        _mapper = configuration.CreateMapper();
+
         _eventLogic = new EventLogic(_mockEventRepository.Object, _mockAttractionService.Object,
-            _mockDateTimeLogic.Object);
+            _mockDateTimeLogic.Object, _mapper);
         baseEvent = new Event
         {
             Name = "Base Event",

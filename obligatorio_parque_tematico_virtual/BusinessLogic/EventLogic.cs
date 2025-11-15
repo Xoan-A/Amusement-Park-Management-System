@@ -1,4 +1,5 @@
-﻿using IBusinessLogic;
+﻿using AutoMapper;
+using IBusinessLogic;
 using IDataAccess;
 using Models.Out;
 using Domain;
@@ -11,6 +12,7 @@ public class EventLogic : IEventLogic
     private IEventRepository _eventRepository;
     private IAttractionLogicEntity _attractionLogic;
     private readonly IDateTimeLogic _dateTimeLogic;
+    private readonly IMapper _mapper;
     private const int MinCapacityLimit = 1;
     private const int MaxCapacityLimit = 10000;
     private const int MinHour = 0;
@@ -18,11 +20,12 @@ public class EventLogic : IEventLogic
     private const int MinCost = 1;
 
     public EventLogic(IEventRepository eventRepository, IAttractionLogicEntity attractionLogic,
-        IDateTimeLogic dateTimeLogic)
+        IDateTimeLogic dateTimeLogic, IMapper mapper)
     {
         _eventRepository = eventRepository;
         _attractionLogic = attractionLogic;
         _dateTimeLogic = dateTimeLogic;
+        _mapper = mapper;
     }
 
     public EventResponse GetEventById(Guid expectedEventId)
@@ -33,59 +36,13 @@ public class EventLogic : IEventLogic
             throw new KeyNotFoundException($"No se encontró el evento con id {expectedEventId}");
         }
 
-        EventResponse eventResponse = new EventResponse
-        {
-            Id = eventEntity.Id,
-            Name = eventEntity.Name,
-            Date = eventEntity.Date,
-            Hour = eventEntity.Hour,
-            MaxCapacity = eventEntity.MaxCapacity,
-            CurrentCapacity = eventEntity.CurrentCapacity,
-            Cost = eventEntity.Cost,
-            Attractions = eventEntity.Attractions
-            .Select(ea => new AttractionResponse
-            {
-                Id = ea.Attraction.Id,
-                Name = ea.Attraction.Name,
-                Description = ea.Attraction.Description,
-                Type = ea.Attraction.Type.ToString(),
-                MinAge = ea.Attraction.MinAge,
-                MaxCapacity = ea.Attraction.MaxCapacity,
-                CurrentCapacity = ea.Attraction.CurrentCapacity,
-                IsActive = ea.Attraction.IsActive
-            })
-            .ToList()
-        };
-        return eventResponse;
+        return _mapper.Map<EventResponse>(eventEntity);
     }
 
     public List<EventResponse> GetAllEvents()
     {
         List<Event> events = _eventRepository.GetAll();
-        List<EventResponse> eventResponses = events.Select(eventEntity => new EventResponse
-        {
-            Id = eventEntity.Id,
-            Name = eventEntity.Name,
-            Date = eventEntity.Date,
-            Hour = eventEntity.Hour,
-            MaxCapacity = eventEntity.MaxCapacity,
-            CurrentCapacity = eventEntity.CurrentCapacity,
-            Cost = eventEntity.Cost,
-            Attractions = eventEntity.Attractions
-            .Select(ea => new AttractionResponse
-            {
-                Id = ea.Attraction.Id,
-                Name = ea.Attraction.Name,
-                Description = ea.Attraction.Description,
-                Type = ea.Attraction.Type.ToString(),
-                MinAge = ea.Attraction.MinAge,
-                MaxCapacity = ea.Attraction.MaxCapacity,
-                CurrentCapacity = ea.Attraction.CurrentCapacity,
-                IsActive = ea.Attraction.IsActive
-            })
-            .ToList()
-        }).ToList();
-        return eventResponses;
+        return _mapper.Map<List<EventResponse>>(events);
     }
 
     public Guid CreateEvent(EventRequest newEvent)
