@@ -12,27 +12,20 @@ namespace BusinessLogic
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordLogic _passwordLogic;
-        private readonly IAttractionRepository _attractionRepository;
-        private readonly ITicketLogic _ticketLogic;
         private readonly IRoleRepository _roleRepository;
-        private readonly IEventRepository _eventRepository;
-        private readonly IDailyScoreLogic _dailyScoreLogic;
-        private readonly IDateTimeLogic _dateTimeLogic;
+        private readonly IUserValidationService _validationService;
+        private readonly IParkEntryLogic _parkEntryLogic;
         private readonly IMapper _mapper;
 
         public UserLogic(IUserRepository userRepository, IPasswordLogic passwordLogic,
-            IAttractionRepository attractionRepository, ITicketLogic ticketLogic, IRoleRepository roleRepository,
-            IEventRepository eventRepository, IDailyScoreLogic dailyScoreLogic, IDateTimeLogic dateTimeLogic,
-            IMapper mapper)
+            IRoleRepository roleRepository, IUserValidationService validationService,
+            IParkEntryLogic parkEntryLogic, IMapper mapper)
         {
             _userRepository = userRepository;
             _passwordLogic = passwordLogic;
-            _attractionRepository = attractionRepository;
-            _ticketLogic = ticketLogic;
             _roleRepository = roleRepository;
-            _eventRepository = eventRepository;
-            _dailyScoreLogic = dailyScoreLogic;
-            _dateTimeLogic = dateTimeLogic;
+            _validationService = validationService;
+            _parkEntryLogic = parkEntryLogic;
             _mapper = mapper;
         }
 
@@ -44,20 +37,14 @@ namespace BusinessLogic
             string password = request.Password;
             DateTime birthDate = request.BirthDate;
 
-            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
-                string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-                throw new ArgumentException("Name, last name, email, and password must be provided.");
+            _validationService.ValidateRequiredFields(name, lastName, email, password);
 
-            if (!ValidateEmail(email))
+            if (!_validationService.ValidateEmail(email))
                 throw new ArgumentException("Invalid email format.");
 
-            DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime();
+            _validationService.ValidateBirthDate(birthDate);
 
-            if (birthDate >= currentDateTime)
-                throw new ArgumentException("Birth date cannot be after today.");
-
-            if (!_userRepository.IsEmailUnique(email))
-                throw new ArgumentException("Email is already in use.");
+            _validationService.ValidateEmailUniqueness(email);
 
             string hashedPassword = _passwordLogic.HashPassword(password);
 
@@ -93,25 +80,16 @@ namespace BusinessLogic
             string? membershipLevel = request.MembershipLevel;
             List<string> roles = request.Roles;
 
-            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(lastName) ||
-                string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-            {
-                throw new ArgumentException("Name, last name, email, and password must be provided.");
-            }
+            _validationService.ValidateRequiredFields(name, lastName, email, password);
 
-            if (!ValidateEmail(email))
+            if (!_validationService.ValidateEmail(email))
                 throw new ArgumentException("Invalid email format.");
 
-            if (!_userRepository.IsEmailUnique(email))
-            {
-                throw new ArgumentException("Email is already in use.");
-            }
+            _validationService.ValidateEmailUniqueness(email);
 
             if (birthDate.HasValue)
             {
-                DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime();
-                if (birthDate.Value >= currentDateTime)
-                    throw new ArgumentException("Birth date cannot be after today.");
+                _validationService.ValidateBirthDate(birthDate.Value);
             }
 
             string hashedPassword = _passwordLogic.HashPassword(password);
@@ -127,15 +105,8 @@ namespace BusinessLogic
 
             if (!string.IsNullOrEmpty(membershipLevel))
             {
-                if (Enum.TryParse<MembershipLevel>(membershipLevel, true, out MembershipLevel parsedLevel) &&
-                    Enum.IsDefined(typeof(MembershipLevel), parsedLevel))
-                {
-                    user.MembershipLevel = parsedLevel;
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid membership level.");
-                }
+                _validationService.ValidateMembershipLevel(membershipLevel);
+                user.MembershipLevel = Enum.Parse<MembershipLevel>(membershipLevel, true);
             }
 
             if (roles != null && roles.Count > 0)
@@ -167,64 +138,12 @@ namespace BusinessLogic
 
         public void RegisterEntry(Guid attractionId, RegisterEntryRequest request)
         {
-            Guid? qr = request.Qr;
-            Guid? nfc = request.NFC;
-            Guid userId = request.UserId;
-            Guid? eventId = request.EventId;
-            DateTime enterDate = _dateTimeLogic.GetCurrentDateTime();
-
-            if (qr == null && nfc == null)
-                throw new ArgumentException("QR code or NFC must be provided.");
-
-            Attraction attraction = _attractionRepository.GetById(attractionId);
-            if (attraction == null)
-                throw new ArgumentException("Attraction not found.");
-
-            bool isValidTicket = _ticketLogic.ValidateTicket(qr, nfc, enterDate, eventId, attractionId);
-            if (!isValidTicket)
-                throw new ArgumentException("User does not have a valid ticket.");
-
-            User user = _userRepository.GetById(userId);
-            if (user == null)
-                throw new ArgumentException("User not found.");
-
-
-            if (attraction.CurrentCapacity < attraction.MaxCapacity)
-            {
-                user.RegisterEntry(attraction, enterDate);
-                attraction.CurrentCapacity++;
-                _userRepository.Update(user);
-                _attractionRepository.Update(attraction);
-            }
-            else
-                throw new ArgumentException("Attraction is at full capacity.");
-
-            Event even = _eventRepository.GetEventByAttractionAndDate(attractionId, enterDate.Date);
-
-            _dailyScoreLogic.AddScoreToUser(user, attraction, enterDate, even);
+            _parkEntryLogic.RegisterEntry(attractionId, request);
         }
 
         public void RegisterExit(Guid attractionId, RegisterExitRequest request)
         {
-            Guid userId = request.userId;
-            DateTime exitDate = _dateTimeLogic.GetCurrentDateTime();
-
-            User user = _userRepository.GetById(userId);
-            if (user == null)
-                throw new ArgumentException("User not found.");
-
-            Attraction attraction = _attractionRepository.GetById(attractionId);
-            if (attraction == null)
-                throw new ArgumentException("Attraction not found.");
-
-            user.RegisterExit(attraction, exitDate);
-            _userRepository.Update(user);
-
-            if (attraction.CurrentCapacity > 0)
-            {
-                attraction.CurrentCapacity--;
-                _attractionRepository.Update(attraction);
-            }
+            _parkEntryLogic.RegisterExit(attractionId, request);
         }
 
         public TopTenResponse GetTopTenUsers()
@@ -285,7 +204,7 @@ namespace BusinessLogic
 
             if (!string.IsNullOrWhiteSpace(request.Email))
             {
-                if (!ValidateEmail(request.Email))
+                if (!_validationService.ValidateEmail(request.Email))
                     throw new ArgumentException("Invalid email format.");
 
                 if (!string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
@@ -305,9 +224,7 @@ namespace BusinessLogic
 
             if (request.BirthDate.HasValue)
             {
-                DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime();
-                if (request.BirthDate.Value >= currentDateTime)
-                    throw new ArgumentException("Birth date must be in the past");
+                _validationService.ValidateBirthDate(request.BirthDate.Value);
                 user.BirthDate = request.BirthDate.Value;
             }
 
@@ -329,31 +246,6 @@ namespace BusinessLogic
             _userRepository.Update(user);
 
             return _mapper.Map<UserResponse>(user);
-        }
-
-        private bool ValidateEmail(string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return false;
-
-            if (!email.Contains("@"))
-                return false;
-
-            int atIndex = email.IndexOf("@");
-            if (atIndex == 0 || atIndex == email.Length - 1)
-                return false;
-
-            if (email.IndexOf("@", atIndex + 1) != -1)
-                return false;
-
-            string domain = email.Substring(atIndex + 1);
-            if (!domain.Contains("."))
-                return false;
-
-            if (domain.StartsWith(".") || domain.EndsWith("."))
-                return false;
-
-            return true;
         }
     }
 }

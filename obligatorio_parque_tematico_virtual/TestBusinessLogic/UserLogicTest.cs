@@ -16,12 +16,9 @@ namespace TestBusinessLogic
     {
         private Mock<IUserRepository> _mockUserRepository = null!;
         private Mock<IPasswordLogic> _mockPasswordService = null!;
-        private Mock<IAttractionRepository> _mockAttractionRepository = null!;
-        private Mock<ITicketLogic> _mockTicketLogic = null!;
         private Mock<IRoleRepository> _mockRoleRepository = null!;
-        private Mock<IEventRepository> _mockEventRepository = null!;
-        private Mock<IDailyScoreLogic> _mockDailyScoreLogic = null!;
-        private Mock<IDateTimeLogic> _mockDateTimeLogic = null!;
+        private Mock<IUserValidationService> _mockValidationService = null!;
+        private Mock<IParkEntryLogic> _mockParkEntryLogic = null!;
         private IMapper _mapper = null!;
         private IUserLogic _userLogic = null!;
 
@@ -30,13 +27,9 @@ namespace TestBusinessLogic
         {
             _mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
             _mockPasswordService = new Mock<IPasswordLogic>(MockBehavior.Strict);
-            _mockAttractionRepository = new Mock<IAttractionRepository>(MockBehavior.Strict);
-            _mockTicketLogic = new Mock<ITicketLogic>(MockBehavior.Strict);
             _mockRoleRepository = new Mock<IRoleRepository>(MockBehavior.Strict);
-            _mockEventRepository = new Mock<IEventRepository>(MockBehavior.Strict);
-            _mockDailyScoreLogic = new Mock<IDailyScoreLogic>(MockBehavior.Strict);
-            _mockDateTimeLogic = new Mock<IDateTimeLogic>(MockBehavior.Strict);
-            _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).Returns(DateTime.Now);
+            _mockValidationService = new Mock<IUserValidationService>(MockBehavior.Strict);
+            _mockParkEntryLogic = new Mock<IParkEntryLogic>(MockBehavior.Strict);
 
             var configuration = new MapperConfiguration(cfg =>
             {
@@ -45,8 +38,7 @@ namespace TestBusinessLogic
             _mapper = configuration.CreateMapper();
 
             _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
-                _mockAttractionRepository.Object, _mockTicketLogic.Object, _mockRoleRepository.Object,
-                _mockEventRepository.Object, _mockDailyScoreLogic.Object, _mockDateTimeLogic.Object, _mapper);
+                _mockRoleRepository.Object, _mockValidationService.Object, _mockParkEntryLogic.Object, _mapper);
         }
 
         [TestMethod]
@@ -59,6 +51,10 @@ namespace TestBusinessLogic
             string hashedPassword = "hashedPassword123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(name, lastName, email, password));
+            _mockValidationService.Setup(v => v.ValidateEmail(email)).Returns(true);
+            _mockValidationService.Setup(v => v.ValidateBirthDate(birthDate));
+            _mockValidationService.Setup(v => v.ValidateEmailUniqueness(email));
             _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(password)).Returns(hashedPassword);
             _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns(new Role { Name = Role.VISITOR });
@@ -91,7 +87,7 @@ namespace TestBusinessLogic
             Assert.AreEqual(email, result.Email);
             Assert.AreEqual(birthDate, result.BirthDate);
 
-            _mockUserRepository.Verify(r => r.IsEmailUnique(email), Times.Once);
+            _mockValidationService.Verify(v => v.ValidateEmailUniqueness(email), Times.Once);
             _mockPasswordService.Verify(p => p.HashPassword(password), Times.Once);
             _mockUserRepository.Verify(r => r.Create(It.IsAny<User>()), Times.Once);
         }
@@ -106,6 +102,11 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(name, lastName, email, password));
+            _mockValidationService.Setup(v => v.ValidateEmail(email)).Returns(true);
+            _mockValidationService.Setup(v => v.ValidateBirthDate(birthDate));
+            _mockValidationService.Setup(v => v.ValidateEmailUniqueness(email))
+                .Throws(new ArgumentException("Email must be unique"));
             _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(false);
 
             RegisterVisitorRequest request = new RegisterVisitorRequest
@@ -130,6 +131,9 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(name, lastName, email, password))
+                .Throws(new ArgumentException("Email is required"));
+
             RegisterVisitorRequest request = new RegisterVisitorRequest
             {
                 Name = name,
@@ -151,6 +155,9 @@ namespace TestBusinessLogic
             string email = "john@test.com";
             string password = "";
             DateTime birthDate = new DateTime(1990, 5, 15);
+
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(name, lastName, email, password))
+                .Throws(new ArgumentException("Password is required"));
 
             RegisterVisitorRequest request = new RegisterVisitorRequest
             {
@@ -174,6 +181,9 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(name, lastName, email, password))
+                .Throws(new ArgumentException("Name is required"));
+
             RegisterVisitorRequest request = new RegisterVisitorRequest
             {
                 Name = name,
@@ -195,6 +205,9 @@ namespace TestBusinessLogic
             string email = "john@test.com";
             string password = "password123";
             DateTime birthDate = new DateTime(1990, 5, 15);
+
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(name, lastName, email, password))
+                .Throws(new ArgumentException("Last name is required"));
 
             RegisterVisitorRequest request = new RegisterVisitorRequest
             {
@@ -218,6 +231,11 @@ namespace TestBusinessLogic
             string password = "password123";
             DateTime futureBirthDate = DateTime.Now.AddDays(1);
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(name, lastName, email, password));
+            _mockValidationService.Setup(v => v.ValidateEmail(email)).Returns(true);
+            _mockValidationService.Setup(v => v.ValidateBirthDate(futureBirthDate))
+                .Throws(new ArgumentException("Birth date cannot be in the future"));
+
             RegisterVisitorRequest request = new RegisterVisitorRequest
             {
                 Name = name,
@@ -240,6 +258,10 @@ namespace TestBusinessLogic
             string hashedPassword = "hashedPassword123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(name, lastName, email, plainPassword));
+            _mockValidationService.Setup(v => v.ValidateEmail(email)).Returns(true);
+            _mockValidationService.Setup(v => v.ValidateBirthDate(birthDate));
+            _mockValidationService.Setup(v => v.ValidateEmailUniqueness(email));
             _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(plainPassword)).Returns(hashedPassword);
             _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns(new Role { Name = Role.VISITOR });
@@ -273,1073 +295,16 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void RegisterEntry_ShouldThrowExceptionWhenBothQrAndNfcAreNull()
+        public void RegisterEntry_ShouldDelegateToParkEntryLogic()
         {
-            Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
+            RegisterEntryRequest request = new RegisterEntryRequest { UserId = Guid.NewGuid() };
 
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = null,
-                NFC = null,
-                EventId = null
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void RegisterEntry_ShouldThrowExceptionWhenTicketValidationFails()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(false);
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                EventId = null
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-        }
-
-        [TestMethod]
-        public void RegisterEntry_ShouldCreateNewVisitorReportWhenNoneExists()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
+            _mockParkEntryLogic.Setup(p => p.RegisterEntry(attractionId, request));
 
             _userLogic.RegisterEntry(attractionId, request);
 
-            Assert.AreEqual(1, visitor.VisitorReports.Count);
-            Assert.AreEqual(enterDate.Date, visitor.VisitorReports[0].Date.Date);
-            _mockUserRepository.Verify(r => r.GetById(userId), Times.Once);
-            _mockAttractionRepository.Verify(r => r.GetById(attractionId), Times.Once);
-            _mockTicketLogic.Verify(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()), Times.Once);
-        }
-
-        [TestMethod]
-        public void RegisterEntry_ShouldAddReportToExistingVisitorReport()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId1 = Guid.NewGuid();
-            Guid attractionId2 = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            Attraction attraction1 = new Attraction
-            {
-                Id = attractionId1,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            Attraction attraction2 = new Attraction
-            {
-                Id = attractionId2,
-                Name = "Simulator",
-                Type = AttractionType.Simulator,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).Returns(attraction1);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).Returns(attraction2);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(It.IsAny<Guid>(), enterDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, It.IsAny<Attraction>(), enterDate, null));
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            _userLogic.RegisterEntry(attractionId1, request);
-            _userLogic.RegisterEntry(attractionId2, request);
-
-            Assert.AreEqual(1, visitor.VisitorReports.Count);
-            Assert.AreEqual(2, visitor.VisitorReports[0].Reports.Count);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void RegisterEntry_ShouldThrowExceptionWhenUserNotFound()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns((User)null);
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void RegisterEntry_ShouldThrowExceptionWhenAttractionNotFound()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns((Attraction)null);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-        }
-
-        [TestMethod]
-        public void RegisterEntry_ShouldIncreaseCurrentCapacity()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 5
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-
-            Assert.AreEqual(6, attraction.CurrentCapacity);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void RegisterEntry_ShouldThrowExceptionWhenAttractionIsAtFullCapacity()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 10
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-        }
-
-        [TestMethod]
-        public void RegisterEntry_ShouldAllowEntryWhenCurrentCapacityIsJustBelowMax()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 9
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-
-            Assert.AreEqual(10, attraction.CurrentCapacity);
-            Assert.AreEqual(1, visitor.VisitorReports.Count);
-        }
-
-        [TestMethod]
-        public void RegisterExit_ShouldSetExitTimeForReport()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
-            .Returns(enterDate)
-            .Returns(exitDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, exitDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest entryRequest = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            RegisterExitRequest exitRequest = new RegisterExitRequest
-            {
-                userId = userId
-            };
-
-            _userLogic.RegisterEntry(attractionId, entryRequest);
-            _userLogic.RegisterExit(attractionId, exitRequest);
-
-            Assert.AreEqual(exitDate, visitor.VisitorReports[0].Reports[0].ExitDate);
-            _mockUserRepository.Verify(r => r.GetById(userId), Times.Exactly(2));
-            _mockAttractionRepository.Verify(r => r.GetById(attractionId), Times.Exactly(2));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void RegisterExit_ShouldThrowExceptionWhenUserNotFound()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(exitDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns((User)null);
-
-            RegisterExitRequest request = new RegisterExitRequest
-            {
-                userId = userId
-            };
-
-            _userLogic.RegisterExit(attractionId, request);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void RegisterExit_ShouldThrowExceptionWhenAttractionNotFound()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(exitDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns((Attraction)null);
-
-            RegisterExitRequest request = new RegisterExitRequest
-            {
-                userId = userId
-            };
-
-            _userLogic.RegisterExit(attractionId, request);
-        }
-
-        [TestMethod]
-        public void RegisterExit_ShouldDecreaseCurrentCapacity()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 5
-            };
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
-            .Returns(enterDate)
-            .Returns(exitDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, exitDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest entryRequest = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            RegisterExitRequest exitRequest = new RegisterExitRequest
-            {
-                userId = userId
-            };
-
-            _userLogic.RegisterEntry(attractionId, entryRequest);
-            _userLogic.RegisterExit(attractionId, exitRequest);
-
-            Assert.AreEqual(5, attraction.CurrentCapacity);
-        }
-
-        [TestMethod]
-        public void RegisterExit_ShouldDecreaseCurrentCapacityToZero()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
-            .Returns(enterDate)
-            .Returns(exitDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, exitDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest entryRequest = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            RegisterExitRequest exitRequest = new RegisterExitRequest
-            {
-                userId = userId
-            };
-
-            _userLogic.RegisterEntry(attractionId, entryRequest);
-            _userLogic.RegisterExit(attractionId, exitRequest);
-
-            Assert.AreEqual(0, attraction.CurrentCapacity);
-        }
-
-        [TestMethod]
-        public void RegisterExit_ShouldDecreaseCurrentCapacityFromMaxCapacity()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 9
-            };
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
-            .Returns(enterDate)
-            .Returns(exitDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, exitDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest entryRequest = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            RegisterExitRequest exitRequest = new RegisterExitRequest
-            {
-                userId = userId
-            };
-
-            _userLogic.RegisterEntry(attractionId, entryRequest);
-            _userLogic.RegisterExit(attractionId, exitRequest);
-
-            Assert.AreEqual(9, attraction.CurrentCapacity);
-        }
-
-        [TestMethod]
-        public void RegisterEntry_ShouldWorkWithNfcInsteadOfQr()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(null, userId, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = null,
-                NFC = userId,
-                EventId = null
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-
-            Assert.AreEqual(1, visitor.VisitorReports.Count);
-            Assert.AreEqual(1, attraction.CurrentCapacity);
-            _mockTicketLogic.Verify(t => t.ValidateTicket(null, userId, enterDate, null, It.IsAny<Guid>()), Times.Once);
-        }
-
-        [TestMethod]
-        public void RegisterEntry_ShouldWorkWithEventId()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            Guid eventId = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, eventId, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = eventId
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-
-            Assert.AreEqual(1, visitor.VisitorReports.Count);
-            Assert.AreEqual(1, attraction.CurrentCapacity);
-            _mockTicketLogic.Verify(t => t.ValidateTicket(qrCode, null, enterDate, eventId, It.IsAny<Guid>()),
-                Times.Once);
-        }
-
-        [TestMethod]
-        public void RegisterEntry_ShouldWorkWithBothQrAndEventId()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            Guid eventId = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "Jane",
-                LastName = "Smith",
-                VisitorReports = new List<VisitorReport>()
-            };
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Water Slide",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 20,
-                CurrentCapacity = 5
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, eventId, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = eventId
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-
-            Assert.AreEqual(1, visitor.VisitorReports.Count);
-            Assert.AreEqual(6, attraction.CurrentCapacity);
-            _mockTicketLogic.Verify(t => t.ValidateTicket(qrCode, null, enterDate, eventId, It.IsAny<Guid>()),
-                Times.Once);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void RegisterEntry_ShouldThrowExceptionWhenTicketInvalidForEvent()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            Guid eventId = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, eventId, It.IsAny<Guid>()))
-            .Returns(false);
-
-            RegisterEntryRequest request = new RegisterEntryRequest();
-
-            _userLogic.RegisterEntry(attractionId, request);
-        }
-
-        [TestMethod]
-        public void RegisterEntry_ShouldAddScoreToUser_WhenNoEvent()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                Score = 0
-            };
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-
-            _mockDailyScoreLogic.Verify(s => s.AddScoreToUser(visitor, attraction, enterDate, null), Times.Once);
-        }
-
-        [TestMethod]
-        public void RegisterEntry_ShouldAddScoreToUser_WhenEventExists()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                Score = 10
-            };
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Performance",
-                Type = AttractionType.Performance,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            Event specialEvent = new Event
-            {
-                Id = Guid.NewGuid(),
-                Name = "Special Event",
-                Date = enterDate
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, specialEvent.Id, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns(specialEvent);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, specialEvent));
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = specialEvent.Id
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-
-            _mockDailyScoreLogic.Verify(s => s.AddScoreToUser(visitor, attraction, enterDate, specialEvent),
-                Times.Once);
-        }
-
-        [TestMethod]
-        public void RegisterEntry_ShouldAccumulateScore_OverMultipleEntries()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId1 = Guid.NewGuid();
-            Guid attractionId2 = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate1 = new DateTime(2025, 10, 1, 10, 0, 0);
-            DateTime enterDate2 = new DateTime(2025, 10, 1, 11, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                Score = 0
-            };
-
-            Attraction attraction1 = new Attraction
-            {
-                Id = attractionId1,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            Attraction attraction2 = new Attraction
-            {
-                Id = attractionId2,
-                Name = "Simulator",
-                Type = AttractionType.Simulator,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
-            .Returns(enterDate1)
-            .Returns(enterDate2);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId1)).Returns(attraction1);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId2)).Returns(attraction2);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, It.IsAny<DateTime>(), null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(It.IsAny<Guid>(), It.IsAny<DateTime>()))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d =>
-            d.AddScoreToUser(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<DateTime>(), null));
-
-            RegisterEntryRequest entryRequest = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            RegisterEntryRequest entryRequest2 = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            _userLogic.RegisterEntry(attractionId1, entryRequest);
-            _userLogic.RegisterEntry(attractionId2, entryRequest2);
-
-            _mockDailyScoreLogic.Verify(
-                s => s.AddScoreToUser(It.IsAny<User>(), It.IsAny<Attraction>(), It.IsAny<DateTime>(), null),
-                Times.Exactly(2));
-        }
-
-        [TestMethod]
-        public void RegisterEntry_ShouldAddZeroScore_WhenStrategyReturnsZero()
-        {
-            Guid userId = Guid.NewGuid();
-            Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                Score = 5
-            };
-
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Roller Coaster",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 0
-            };
-
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(enterDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest request = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            _userLogic.RegisterEntry(attractionId, request);
-
-            _mockDailyScoreLogic.Verify(s => s.AddScoreToUser(visitor, attraction, enterDate, null), Times.Once);
+            _mockParkEntryLogic.Verify(p => p.RegisterEntry(attractionId, request), Times.Once);
         }
 
         [TestMethod]
@@ -1475,6 +440,8 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(originalUser);
+            _mockValidationService.Setup(v => v.ValidateEmail("new@example.com")).Returns(true);
+            _mockValidationService.Setup(v => v.ValidateBirthDate(new DateTime(1992, 2, 2)));
             _mockUserRepository.Setup(r => r.IsEmailUnique("new@example.com")).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
@@ -1519,6 +486,7 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(originalUser);
+            _mockValidationService.Setup(v => v.ValidateEmail("same@example.com")).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
@@ -1597,6 +565,7 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(originalUser);
+            _mockValidationService.Setup(v => v.ValidateEmail("new@example.com")).Returns(true);
             _mockUserRepository.Setup(r => r.IsEmailUnique("new@example.com")).Returns(false);
 
             _userLogic.ModifyUser(userId, actorSub, request);
@@ -1659,6 +628,7 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(originalUser);
+            _mockValidationService.Setup(v => v.ValidateEmail("new@example.com")).Returns(true);
             _mockUserRepository.Setup(r => r.IsEmailUnique("new@example.com")).Returns(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
@@ -1767,7 +737,8 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(originalUser);
-            _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(currentDate);
+            _mockValidationService.Setup(v => v.ValidateBirthDate(It.IsAny<DateTime>()))
+                .Throws(new ArgumentException("Birth date cannot be after today."));
 
             _userLogic.ModifyUser(userId, actorSub, request);
         }
@@ -1820,6 +791,10 @@ namespace TestBusinessLogic
             string hashedPassword = "hashedPassword123";
             DateTime birthDate = new DateTime(1990, 5, 15);
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(name, lastName, email, password));
+            _mockValidationService.Setup(v => v.ValidateEmail(email)).Returns(true);
+            _mockValidationService.Setup(v => v.ValidateBirthDate(birthDate));
+            _mockValidationService.Setup(v => v.ValidateEmailUniqueness(email));
             _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(password)).Returns(hashedPassword);
             _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns((Role)null);
@@ -1858,6 +833,9 @@ namespace TestBusinessLogic
                 Roles = null
             };
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
+            _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(true);
+            _mockValidationService.Setup(v => v.ValidateEmailUniqueness(request.Email));
             _mockUserRepository.Setup(r => r.IsEmailUnique(request.Email)).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
 
@@ -1883,6 +861,9 @@ namespace TestBusinessLogic
                 Roles = new List<string> { "Admin", "NonExistent" }
             };
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
+            _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(true);
+            _mockValidationService.Setup(v => v.ValidateEmailUniqueness(request.Email));
             _mockUserRepository.Setup(r => r.IsEmailUnique(request.Email)).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
 
@@ -1902,65 +883,16 @@ namespace TestBusinessLogic
         }
 
         [TestMethod]
-        public void RegisterExit_WhenCapacityIsZero_DoesNotDecreaseCapacity()
+        public void RegisterExit_ShouldDelegateToParkEntryLogic()
         {
-            Guid userId = Guid.NewGuid();
             Guid attractionId = Guid.NewGuid();
-            Guid qrCode = Guid.NewGuid();
-            DateTime enterDate = new DateTime(2025, 10, 1, 10, 0, 0);
-            DateTime exitDate = new DateTime(2025, 10, 1, 15, 30, 0);
+            RegisterExitRequest request = new RegisterExitRequest { userId = Guid.NewGuid() };
 
-            Attraction attraction = new Attraction
-            {
-                Id = attractionId,
-                Name = "Test Attraction",
-                Type = AttractionType.RollerCoaster,
-                MaxCapacity = 10,
-                CurrentCapacity = 1
-            };
+            _mockParkEntryLogic.Setup(p => p.RegisterExit(attractionId, request));
 
-            User visitor = new User
-            {
-                Id = userId,
-                Name = "John",
-                LastName = "Doe",
-                Email = "john@test.com",
-                VisitorReports = new List<VisitorReport>()
-            };
+            _userLogic.RegisterExit(attractionId, request);
 
-            _mockDateTimeLogic.SetupSequence(d => d.GetCurrentDateTime())
-            .Returns(enterDate)
-            .Returns(exitDate);
-            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(visitor);
-            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
-            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, enterDate, null, It.IsAny<Guid>()))
-            .Returns(true);
-            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
-            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, enterDate.Date))
-            .Returns((Event?)null);
-            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, exitDate.Date))
-            .Returns((Event?)null);
-            _mockDailyScoreLogic.Setup(d => d.AddScoreToUser(visitor, attraction, enterDate, null));
-
-            RegisterEntryRequest entryRequest = new RegisterEntryRequest
-            {
-                UserId = userId,
-                Qr = qrCode,
-                NFC = null,
-                EventId = null
-            };
-
-            RegisterExitRequest exitRequest = new RegisterExitRequest
-            {
-                userId = userId
-            };
-
-            _userLogic.RegisterEntry(attractionId, entryRequest);
-            attraction.CurrentCapacity = 0;
-            _userLogic.RegisterExit(attractionId, exitRequest);
-
-            Assert.AreEqual(0, attraction.CurrentCapacity, "Capacity should remain at zero and not go negative");
+            _mockParkEntryLogic.Verify(p => p.RegisterExit(attractionId, request), Times.Once);
         }
 
         [TestMethod]
@@ -1990,6 +922,7 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(originalUser);
+            _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(true);
             _mockUserRepository.Setup(r => r.IsEmailUnique(request.Email)).Returns(true);
             _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("newHashedPassword");
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
@@ -2154,6 +1087,9 @@ namespace TestBusinessLogic
                 BirthDate = new DateTime(1990, 1, 1)
             };
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
+            _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
+
             _userLogic.RegisterVisitor(request);
         }
 
@@ -2169,6 +1105,9 @@ namespace TestBusinessLogic
                 Password = "password123",
                 BirthDate = new DateTime(1990, 1, 1)
             };
+
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
+            _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
 
             _userLogic.RegisterVisitor(request);
         }
@@ -2186,6 +1125,9 @@ namespace TestBusinessLogic
                 BirthDate = new DateTime(1990, 1, 1)
             };
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
+            _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
+
             _userLogic.RegisterVisitor(request);
         }
 
@@ -2201,6 +1143,9 @@ namespace TestBusinessLogic
                 Password = "password123",
                 BirthDate = new DateTime(1990, 1, 1)
             };
+
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
+            _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
 
             _userLogic.RegisterVisitor(request);
         }
@@ -2218,6 +1163,9 @@ namespace TestBusinessLogic
                 BirthDate = new DateTime(1990, 1, 1)
             };
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
+            _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
+
             _userLogic.RegisterVisitor(request);
         }
 
@@ -2234,6 +1182,9 @@ namespace TestBusinessLogic
                 BirthDate = new DateTime(1990, 1, 1)
             };
 
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
+            _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
+
             _userLogic.RegisterVisitor(request);
         }
 
@@ -2249,6 +1200,9 @@ namespace TestBusinessLogic
                 Password = "password123",
                 BirthDate = new DateTime(1990, 1, 1)
             };
+
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
+            _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
 
             _userLogic.RegisterVisitor(request);
         }
@@ -2267,6 +1221,9 @@ namespace TestBusinessLogic
                 Password = "password123",
                 Roles = new List<string>()
             };
+
+            _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
+            _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
 
             _userLogic.CreateUser(request);
         }
@@ -2287,6 +1244,7 @@ namespace TestBusinessLogic
             };
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
+            _mockValidationService.Setup(v => v.ValidateEmail("invalidemail")).Returns(false);
 
             ModifyUserRequest request = new ModifyUserRequest
             {

@@ -21,6 +21,8 @@ public static class ServiceFactory
         services.AddScoped<IStrategyRepository, StrategyRepository>();
         services.AddScoped<IActiveStrategy, ActiveStrategy>();
         services.AddScoped<IAuthLogic, AuthLogic>();
+        services.AddScoped<IUserValidationService, UserValidationService>();
+        services.AddScoped<IParkEntryLogic, ParkEntryLogic>();
         services.AddScoped<IUserLogic, UserLogic>();
         services.AddScoped<ITicketLogic, TicketLogic>();
         services.AddScoped<IAttractionLogic, AttractionLogic>();

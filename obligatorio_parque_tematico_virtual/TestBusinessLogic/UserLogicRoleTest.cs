@@ -16,11 +16,8 @@ public class UserLogicRoleTest
     private Mock<IUserRepository> _mockUserRepository = null!;
     private Mock<IRoleRepository> _mockRoleRepository = null!;
     private Mock<IPasswordLogic> _mockPasswordService = null!;
-    private Mock<IAttractionRepository> _mockAttractionRepository = null!;
-    private Mock<ITicketLogic> _mockTicketLogic = null!;
-    private Mock<IEventRepository> _mockEventRepository = null!;
-    private Mock<IDailyScoreLogic> _mockDailyScoreLogic = null!;
-    private Mock<IDateTimeLogic> _mockDateTimeLogic = null!;
+    private Mock<IUserValidationService> _mockValidationService = null!;
+    private Mock<IParkEntryLogic> _mockParkEntryLogic = null!;
     private IMapper _mapper = null!;
     private IUserLogic _userLogic = null!;
 
@@ -30,12 +27,14 @@ public class UserLogicRoleTest
         _mockUserRepository = new Mock<IUserRepository>();
         _mockRoleRepository = new Mock<IRoleRepository>();
         _mockPasswordService = new Mock<IPasswordLogic>();
-        _mockAttractionRepository = new Mock<IAttractionRepository>();
-        _mockTicketLogic = new Mock<ITicketLogic>();
-        _mockEventRepository = new Mock<IEventRepository>();
-        _mockDailyScoreLogic = new Mock<IDailyScoreLogic>();
-        _mockDateTimeLogic = new Mock<IDateTimeLogic>();
-        _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).Returns(DateTime.Now);
+        _mockValidationService = new Mock<IUserValidationService>();
+        _mockParkEntryLogic = new Mock<IParkEntryLogic>();
+
+        _mockValidationService.Setup(v => v.ValidateRequiredFields(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()));
+        _mockValidationService.Setup(v => v.ValidateEmail(It.IsAny<string>())).Returns(true);
+        _mockValidationService.Setup(v => v.ValidateBirthDate(It.IsAny<DateTime>()));
+        _mockValidationService.Setup(v => v.ValidateEmailUniqueness(It.IsAny<string>()));
+        _mockValidationService.Setup(v => v.ValidateMembershipLevel(It.IsAny<string>()));
 
         var configuration = new MapperConfiguration(cfg =>
         {
@@ -44,8 +43,7 @@ public class UserLogicRoleTest
         _mapper = configuration.CreateMapper();
 
         _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
-            _mockAttractionRepository.Object, _mockTicketLogic.Object, _mockRoleRepository.Object,
-            _mockEventRepository.Object, _mockDailyScoreLogic.Object, _mockDateTimeLogic.Object, _mapper);
+            _mockRoleRepository.Object, _mockValidationService.Object, _mockParkEntryLogic.Object, _mapper);
     }
 
     [TestMethod]
@@ -123,6 +121,9 @@ public class UserLogicRoleTest
             Roles = new List<string> { Role.VISITOR }
         };
 
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("", "Doe", "test@test.com", "password123"))
+            .Throws(new ArgumentException("Name, last name, email, and password must be provided."));
+
         Assert.ThrowsException<ArgumentException>(
             () => _userLogic.CreateUser(request)
         );
@@ -139,6 +140,9 @@ public class UserLogicRoleTest
             Password = "password123",
             Roles = new List<string> { Role.VISITOR }
         };
+
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "", "test@test.com", "password123"))
+            .Throws(new ArgumentException("Name, last name, email, and password must be provided."));
 
         Assert.ThrowsException<ArgumentException>(
             () => _userLogic.CreateUser(request)
@@ -157,6 +161,9 @@ public class UserLogicRoleTest
             Roles = new List<string> { Role.VISITOR }
         };
 
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "Doe", "", "password123"))
+            .Throws(new ArgumentException("Name, last name, email, and password must be provided."));
+
         Assert.ThrowsException<ArgumentException>(
             () => _userLogic.CreateUser(request)
         );
@@ -174,6 +181,9 @@ public class UserLogicRoleTest
             Roles = new List<string> { Role.VISITOR }
         };
 
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "Doe", "test@test.com", ""))
+            .Throws(new ArgumentException("Name, last name, email, and password must be provided."));
+
         Assert.ThrowsException<ArgumentException>(
             () => _userLogic.CreateUser(request)
         );
@@ -182,8 +192,6 @@ public class UserLogicRoleTest
     [TestMethod]
     public void CreateUser_ShouldThrowException_WhenEmailIsNotUnique()
     {
-        _mockUserRepository.Setup(r => r.IsEmailUnique("existing@test.com")).Returns(false);
-
         CreateUserRequest request = new CreateUserRequest
         {
             Name = "John",
@@ -192,6 +200,12 @@ public class UserLogicRoleTest
             Password = "password123",
             Roles = new List<string> { Role.VISITOR }
         };
+
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "Doe", "existing@test.com", "password123"));
+        _mockValidationService.Setup(v => v.ValidateEmail("existing@test.com")).Returns(true);
+        _mockValidationService.Setup(v => v.ValidateEmailUniqueness("existing@test.com"))
+            .Throws(new ArgumentException("Email is already in use."));
+        _mockUserRepository.Setup(r => r.IsEmailUnique("existing@test.com")).Returns(false);
 
         Assert.ThrowsException<ArgumentException>(
             () => _userLogic.CreateUser(request)
@@ -474,7 +488,6 @@ public class UserLogicRoleTest
     public void CreateUser_ShouldThrowException_WhenBirthDateIsInFuture()
     {
         DateTime futureBirthDate = DateTime.Now.AddDays(1);
-        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
 
         CreateUserRequest request = new CreateUserRequest
         {
@@ -485,6 +498,13 @@ public class UserLogicRoleTest
             BirthDate = futureBirthDate,
             Roles = new List<string>()
         };
+
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "Doe", "test@test.com", "password123"));
+        _mockValidationService.Setup(v => v.ValidateEmail("test@test.com")).Returns(true);
+        _mockValidationService.Setup(v => v.ValidateEmailUniqueness("test@test.com"));
+        _mockValidationService.Setup(v => v.ValidateBirthDate(futureBirthDate))
+            .Throws(new ArgumentException("Birth date cannot be after today."));
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
 
         Assert.ThrowsException<ArgumentException>(
             () => _userLogic.CreateUser(request)
@@ -559,9 +579,6 @@ public class UserLogicRoleTest
     [TestMethod]
     public void CreateUser_ShouldThrowException_WhenMembershipLevelIsNumericButNotDefined()
     {
-        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
-        _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
-
         CreateUserRequest request = new CreateUserRequest
         {
             Name = "John",
@@ -571,6 +588,14 @@ public class UserLogicRoleTest
             MembershipLevel = "99",
             Roles = new List<string>()
         };
+
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "Doe", "test@test.com", "password123"));
+        _mockValidationService.Setup(v => v.ValidateEmail("test@test.com")).Returns(true);
+        _mockValidationService.Setup(v => v.ValidateEmailUniqueness("test@test.com"));
+        _mockValidationService.Setup(v => v.ValidateMembershipLevel("99"))
+            .Throws(new ArgumentException("Invalid membership level."));
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
+        _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
 
         Assert.ThrowsException<ArgumentException>(
             () => _userLogic.CreateUser(request)
