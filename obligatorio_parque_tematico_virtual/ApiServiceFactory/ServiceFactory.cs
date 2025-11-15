@@ -6,6 +6,7 @@ using DataAccess.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Models.Mapping;
 
 namespace ApiServiceFactory;
 
@@ -13,6 +14,8 @@ public static class ServiceFactory
 {
     public static void AddServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddAutoMapper(typeof(MappingProfile));
+
         services.AddSingleton<IPasswordLogic, PasswordLogic>();
         services.AddSingleton<ITokenLogic, TokenLogic>();
         services.AddScoped<IStrategyRepository, StrategyRepository>();
