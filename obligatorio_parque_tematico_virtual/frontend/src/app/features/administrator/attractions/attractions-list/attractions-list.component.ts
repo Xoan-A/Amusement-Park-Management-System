@@ -11,8 +11,7 @@ import { EnumToDisplayPipe } from '../../../../shared/pipes/enum-to-display.pipe
   selector: 'app-attractions-list',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, NavbarComponent, EnumToDisplayPipe],
-  templateUrl: './attractions-list.component.html',
-  styleUrl: './attractions-list.component.scss'
+  templateUrl: './attractions-list.component.html'
 })
 export class AttractionsListComponent implements OnInit {
   attractions: AttractionResponse[] = [];

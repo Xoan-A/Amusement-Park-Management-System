@@ -10,8 +10,7 @@ import { ChartConfiguration } from 'chart.js';
   selector: 'app-reports',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, NavbarComponent, BaseChartDirective],
-  templateUrl: './reports.component.html',
-  styleUrl: './reports.component.scss'
+  templateUrl: './reports.component.html'
 })
 export class ReportsComponent implements OnInit {
   dateRangeForm: FormGroup;

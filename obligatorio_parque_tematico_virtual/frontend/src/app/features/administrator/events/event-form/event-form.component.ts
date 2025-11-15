@@ -11,8 +11,7 @@ import { AttractionResponse } from '../../../../core/models';
   selector: 'app-event-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent],
-  templateUrl: './event-form.component.html',
-  styleUrl: './event-form.component.scss'
+  templateUrl: './event-form.component.html'
 })
 export class EventFormComponent implements OnInit {
   eventForm: FormGroup;
