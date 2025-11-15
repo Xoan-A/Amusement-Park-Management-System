@@ -5,7 +5,7 @@ import { NavbarComponent } from '../../../shared/components/navbar/navbar.compon
 import { TicketService } from '../../../core/services/ticket.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ScoreHistoryService } from '../../../core/services/score-history.service';
-import { TicketResponse, ScoreHistoryResponse } from '../../../core/models';
+import { TicketResponse, ScoreHistoryResponse, TicketType } from '../../../core/models';
 
 @Component({
   selector: 'app-dashboard',
@@ -77,7 +77,7 @@ import { TicketResponse, ScoreHistoryResponse } from '../../../core/models';
                           <span class="badge" [class.bg-success]="score.points > 0" [class.bg-danger]="score.points < 0">
                             {{ score.points > 0 ? '+' + score.points : score.points }}
                           </span>
-                          <small class="ms-2">{{ score.description }}</small>
+                          <small class="ms-2">{{ score.origin }} - {{ score.strategyName }}</small>
                         </div>
                         <small class="text-muted">{{ score.createdAt | date:'short' }}</small>
                       </div>
@@ -115,8 +115,8 @@ import { TicketResponse, ScoreHistoryResponse } from '../../../core/models';
                         <tr>
                           <td>{{ ticket.visitDate | date:'short' }}</td>
                           <td>
-                            <span class="badge" [class.bg-primary]="ticket.type === 0" [class.bg-success]="ticket.type === 1">
-                              {{ ticket.type === 0 ? 'General' : 'Event Special' }}
+                            <span class="badge" [class.bg-primary]="ticket.type === ticketType.General" [class.bg-success]="ticket.type === ticketType.EventSpecial">
+                              {{ ticket.type === ticketType.General ? 'General' : 'Event Special' }}
                             </span>
                           </td>
                         </tr>
@@ -139,6 +139,7 @@ import { TicketResponse, ScoreHistoryResponse } from '../../../core/models';
 export class DashboardComponent implements OnInit {
   tickets: TicketResponse[] = [];
   recentScores: ScoreHistoryResponse[] = [];
+  ticketType = TicketType;
   totalScore = 0;
 
   constructor(

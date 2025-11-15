@@ -76,7 +76,7 @@ export class PurchaseTicketComponent implements OnInit {
     const ticketData = {
       visitorId: userId,
       visitDate: this.ticketForm.value.visitDate,
-      type: parseInt(this.ticketForm.value.type),
+      ticketType: parseInt(this.ticketForm.value.type),
       eventId: this.ticketForm.value.eventId || undefined
     };
 

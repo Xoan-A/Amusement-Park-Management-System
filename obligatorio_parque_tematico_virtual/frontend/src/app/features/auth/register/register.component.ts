@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { MembershipLevel } from '../../../core/models';
 
 @Component({
   selector: 'app-register',
@@ -17,7 +16,6 @@ export class RegisterComponent {
   errorMessage: string = '';
   successMessage: string = '';
   loading: boolean = false;
-  membershipLevels = Object.values(MembershipLevel);
 
   constructor(
     private fb: FormBuilder,
@@ -30,8 +28,7 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
-      birthDate: ['', Validators.required],
-      membershipLevel: [MembershipLevel.Standard]
+      birthDate: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
   }
 
@@ -102,9 +99,5 @@ export class RegisterComponent {
 
   get birthDate() {
     return this.registerForm.get('birthDate');
-  }
-
-  get membershipLevel() {
-    return this.registerForm.get('membershipLevel');
   }
 }

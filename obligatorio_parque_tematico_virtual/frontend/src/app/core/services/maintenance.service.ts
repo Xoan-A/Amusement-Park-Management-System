@@ -2,8 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { MaintenanceScheduleRequest, MaintenanceRecordRequest, UpdateStatusRequest } from '../models/requests';
-import { MaintenanceScheduleResponse, MaintenanceRecordResponse, MessageResponse } from '../models/responses';
+import { MaintenanceScheduleRequest, UpdateStatusRequest } from '../models/requests';
+import { MaintenanceScheduleResponse, MessageResponse } from '../models/responses';
 
 @Injectable({
   providedIn: 'root'
@@ -50,44 +50,5 @@ export class MaintenanceService {
 
   deleteSchedule(id: string): Observable<MessageResponse> {
     return this.http.delete<MessageResponse>(`${this.apiUrl}/schedules/${id}`);
-  }
-
-  // Record endpoints
-  recordMaintenance(request: MaintenanceRecordRequest): Observable<MessageResponse> {
-    return this.http.post<MessageResponse>(`${this.apiUrl}/records`, request);
-  }
-
-  getAllRecords(params?: { attractionId?: string; maintenanceType?: string; dateFrom?: string; dateTo?: string }): Observable<MaintenanceRecordResponse[]> {
-    let httpParams = new HttpParams();
-    if (params?.attractionId) httpParams = httpParams.set('attractionId', params.attractionId);
-    if (params?.maintenanceType) httpParams = httpParams.set('maintenanceType', params.maintenanceType);
-    if (params?.dateFrom) httpParams = httpParams.set('dateFrom', params.dateFrom);
-    if (params?.dateTo) httpParams = httpParams.set('dateTo', params.dateTo);
-
-    return this.http.get<MaintenanceRecordResponse[]>(`${this.apiUrl}/records`, { params: httpParams });
-  }
-
-  getRecordById(id: string): Observable<MaintenanceRecordResponse> {
-    return this.http.get<MaintenanceRecordResponse>(`${this.apiUrl}/records/${id}`);
-  }
-
-  getRecordsByAttraction(attractionId: string, dateFrom?: string, dateTo?: string): Observable<MaintenanceRecordResponse[]> {
-    let params = new HttpParams();
-    if (dateFrom) params = params.set('dateFrom', dateFrom);
-    if (dateTo) params = params.set('dateTo', dateTo);
-
-    return this.http.get<MaintenanceRecordResponse[]>(`${this.apiUrl}/records/attraction/${attractionId}`, { params });
-  }
-
-  getRecordsByOperator(operatorId: string): Observable<MaintenanceRecordResponse[]> {
-    return this.http.get<MaintenanceRecordResponse[]>(`${this.apiUrl}/records/operator/${operatorId}`);
-  }
-
-  getUnscheduledRecords(): Observable<MaintenanceRecordResponse[]> {
-    return this.http.get<MaintenanceRecordResponse[]>(`${this.apiUrl}/records/unscheduled`);
-  }
-
-  completeMaintenance(scheduleId: string, request: MaintenanceRecordRequest): Observable<MessageResponse> {
-    return this.http.post<MessageResponse>(`${this.apiUrl}/schedules/${scheduleId}/complete`, request);
   }
 }

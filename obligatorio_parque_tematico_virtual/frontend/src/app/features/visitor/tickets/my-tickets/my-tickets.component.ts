@@ -5,7 +5,7 @@ import { QRCodeComponent } from 'angularx-qrcode';
 import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { TicketService } from '../../../../core/services/ticket.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { TicketResponse } from '../../../../core/models';
+import { TicketResponse, TicketType } from '../../../../core/models';
 
 @Component({
   selector: 'app-my-tickets',
@@ -49,8 +49,8 @@ import { TicketResponse } from '../../../../core/models';
                     <p class="mb-1"><strong>Visit Date:</strong> {{ ticket.visitDate | date:'short' }}</p>
                     <p class="mb-1">
                       <strong>Type:</strong>
-                      <span class="badge" [class.bg-primary]="ticket.type === 0" [class.bg-success]="ticket.type === 1">
-                        {{ ticket.type === 0 ? 'General' : 'Event Special' }}
+                      <span class="badge" [class.bg-primary]="ticket.type === ticketType.General" [class.bg-success]="ticket.type === ticketType.EventSpecial">
+                        {{ ticket.type === ticketType.General ? 'General' : 'Event Special' }}
                       </span>
                     </p>
                     <p class="mb-0"><strong>QR Code:</strong> {{ ticket.qrCode }}</p>
@@ -68,6 +68,7 @@ import { TicketResponse } from '../../../../core/models';
 export class MyTicketsComponent implements OnInit {
   tickets: TicketResponse[] = [];
   loading = true;
+  ticketType = TicketType;
 
   constructor(
     private ticketService: TicketService,

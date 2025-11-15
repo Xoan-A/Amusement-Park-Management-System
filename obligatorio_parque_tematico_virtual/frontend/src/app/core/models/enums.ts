@@ -31,13 +31,6 @@ export enum MaintenanceStatus {
   Cancelled = 'Cancelled'
 }
 
-export enum MaintenanceType {
-  Inspection = 'Inspection',
-  Cleaning = 'Cleaning',
-  Repair = 'Repair',
-  SafetyCheck = 'SafetyCheck'
-}
-
 export enum ScoreOrigin {
   AttractionVisit = 'AttractionVisit',
   EventParticipation = 'EventParticipation',

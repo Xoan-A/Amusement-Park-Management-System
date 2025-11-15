@@ -5,7 +5,7 @@ import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { TicketService } from '../../../core/services/ticket.service';
-import { AttractionResponse, TicketResponse } from '../../../core/models';
+import { AttractionResponse, TicketResponse, TicketType } from '../../../core/models';
 
 @Component({
   selector: 'app-entry-exit',
@@ -117,7 +117,7 @@ import { AttractionResponse, TicketResponse } from '../../../core/models';
               <p class="mb-1"><strong>ID:</strong> {{ scannedTicket.id }}</p>
               <p class="mb-1"><strong>Visitor:</strong> {{ scannedTicket.visitorName }} {{ scannedTicket.visitorLastName }}</p>
               <p class="mb-1"><strong>Visit Date:</strong> {{ scannedTicket.visitDate | date:'short' }}</p>
-              <p class="mb-0"><strong>Type:</strong> {{ scannedTicket.type === 0 ? 'General' : 'Event Special' }}</p>
+              <p class="mb-0"><strong>Type:</strong> {{ scannedTicket.type === ticketType.General ? 'General' : 'Event Special' }}</p>
             </div>
 
             <div class="mb-3">
@@ -204,6 +204,7 @@ export class EntryExitComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
   loading = false;
+  ticketType = TicketType;
 
   inputMethod: 'manual' | 'camera' = 'manual';
   manualTicketId = '';
@@ -309,18 +310,7 @@ export class EntryExitComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    // Format current local datetime as ISO string WITHOUT timezone conversion
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const localDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-
     const request = {
-      enterDate: localDateTimeString,
       userId: this.scannedTicket.visitorId,
       qr: this.scannedTicket.qrCode,
       eventId: this.scannedTicket.eventId || undefined
@@ -347,19 +337,8 @@ export class EntryExitComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    // Format current local datetime as ISO string WITHOUT timezone conversion
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const localDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-
     const request = {
-      userId: this.scannedTicket.visitorId,
-      exitDate: localDateTimeString
+      userId: this.scannedTicket.visitorId
     };
 
     this.attractionService.registerExit(this.selectedAttractionId, request).subscribe({

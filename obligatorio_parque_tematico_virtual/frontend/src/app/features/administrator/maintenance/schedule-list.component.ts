@@ -103,7 +103,7 @@ import { MaintenanceStatus } from '../../../core/models/enums';
                   <tr>
                     <th>Attraction</th>
                     <th>Scheduled Date</th>
-                    <th>Type</th>
+                    <th>Duration</th>
                     <th>Description</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -119,7 +119,7 @@ import { MaintenanceStatus } from '../../../core/models/enums';
                           <span class="badge bg-danger ms-2">OVERDUE</span>
                         }
                       </td>
-                      <td>{{ schedule.maintenanceType }}</td>
+                      <td>{{ schedule.estimatedDuration }}h</td>
                       <td>{{ schedule.description }}</td>
                       <td>
                         <span [class]="getStatusBadgeClass(schedule.status)">
