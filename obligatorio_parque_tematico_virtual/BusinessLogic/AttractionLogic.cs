@@ -34,7 +34,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         Attraction attraction = _attractionRepository.GetById(id);
         if (attraction == null)
         {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
+            throw new KeyNotFoundException($"Attraction with id {id} not found");
         }
 
         return _mapper.Map<AttractionResponse>(attraction);
@@ -76,7 +76,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         Attraction attraction = _attractionRepository.GetById(id);
         if (attraction == null)
         {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
+            throw new KeyNotFoundException($"Attraction with id {id} not found");
         }
 
         if (!Enum.TryParse<AttractionType>(existingAttraction.Type, out AttractionType attractionType) ||
@@ -99,7 +99,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         Attraction attraction = _attractionRepository.GetById(id);
         if (attraction == null)
         {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
+            throw new KeyNotFoundException($"Attraction with id {id} not found");
         }
 
         _attractionRepository.Delete(attraction);
@@ -115,7 +115,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         Attraction attraction = _attractionRepository.GetById(id);
         if (attraction == null)
         {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
+            throw new KeyNotFoundException($"Attraction with id {id} not found");
         }
 
         return new CapacityResponse()
@@ -131,12 +131,12 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         Attraction attraction = _attractionRepository.GetById(attractionId);
         if (attraction == null)
         {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+            throw new KeyNotFoundException($"Attraction with id {attractionId} not found");
         }
 
         if (attraction.Incidents.Count == _noIncidents)
         {
-            throw new KeyNotFoundException($"La atracción con id {attractionId} no tiene incidencias");
+            throw new KeyNotFoundException($"Attraction with id {attractionId} has no incidents");
         }
 
         return attraction.Incidents;
@@ -147,7 +147,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         Attraction attraction = _attractionRepository.GetById(attractionId);
         if (attraction == null)
         {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+            throw new KeyNotFoundException($"Attraction with id {attractionId} not found");
         }
 
         attraction.AddIncident(incidence);
@@ -159,7 +159,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         Attraction attraction = _attractionRepository.GetById(attractionId);
         if (attraction == null)
         {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+            throw new KeyNotFoundException($"Attraction with id {attractionId} not found");
         }
 
         attraction.RemoveIncident(incidence);
@@ -173,7 +173,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
 
         if (startDate > endDate)
         {
-            throw new ArgumentException("La fecha de inicio no puede ser posterior a la fecha de fin.");
+            throw new ArgumentException("Start date cannot be after end date.");
         }
 
         List<Report> reports = _reportRepository.GetAllReports();
