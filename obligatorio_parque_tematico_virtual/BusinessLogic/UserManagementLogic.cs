@@ -8,7 +8,7 @@ using Domain.Exceptions;
 
 namespace BusinessLogic
 {
-    public class UserLogic : IUserLogic
+    public class UserManagementLogic : IUserManagementLogic
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordLogic _passwordLogic;
@@ -17,7 +17,7 @@ namespace BusinessLogic
         private readonly IParkEntryLogic _parkEntryLogic;
         private readonly IMapper _mapper;
 
-        public UserLogic(IUserRepository userRepository, IPasswordLogic passwordLogic,
+        public UserManagementLogic(IUserRepository userRepository, IPasswordLogic passwordLogic,
             IRoleRepository roleRepository, IUserValidationService validationService,
             IParkEntryLogic parkEntryLogic, IMapper mapper)
         {

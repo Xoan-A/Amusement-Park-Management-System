@@ -20,7 +20,7 @@ namespace TestBusinessLogic
         private Mock<IUserValidationService> _mockValidationService = null!;
         private Mock<IParkEntryLogic> _mockParkEntryLogic = null!;
         private IMapper _mapper = null!;
-        private IUserLogic _userLogic = null!;
+        private IUserManagementLogic _userManagementLogic = null!;
 
         [TestInitialize]
         public void Setup()
@@ -37,7 +37,7 @@ namespace TestBusinessLogic
             });
             _mapper = configuration.CreateMapper();
 
-            _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
+            _userManagementLogic = new UserManagementLogic(_mockUserRepository.Object, _mockPasswordService.Object,
                 _mockRoleRepository.Object, _mockValidationService.Object, _mockParkEntryLogic.Object, _mapper);
         }
 
@@ -80,7 +80,7 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            UserResponse result = _userLogic.RegisterVisitor(request);
+            UserResponse result = _userManagementLogic.RegisterVisitor(request);
 
             Assert.AreEqual(name, result.Name);
             Assert.AreEqual(lastName, result.LastName);
@@ -118,7 +118,7 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -143,7 +143,7 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -168,7 +168,7 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -193,7 +193,7 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -218,7 +218,7 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -245,7 +245,7 @@ namespace TestBusinessLogic
                 BirthDate = futureBirthDate
             };
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -288,7 +288,7 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            UserResponse result = _userLogic.RegisterVisitor(request);
+            UserResponse result = _userManagementLogic.RegisterVisitor(request);
 
             Assert.IsNotNull(result);
             _mockPasswordService.Verify(p => p.HashPassword(plainPassword), Times.Once);
@@ -302,7 +302,7 @@ namespace TestBusinessLogic
 
             _mockParkEntryLogic.Setup(p => p.RegisterEntry(attractionId, request));
 
-            _userLogic.RegisterEntry(attractionId, request);
+            _userManagementLogic.RegisterEntry(attractionId, request);
 
             _mockParkEntryLogic.Verify(p => p.RegisterEntry(attractionId, request), Times.Once);
         }
@@ -326,7 +326,7 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetTopTen()).Returns(expectedUsers);
 
-            TopTenResponse result = _userLogic.GetTopTenUsers();
+            TopTenResponse result = _userManagementLogic.GetTopTenUsers();
 
             Assert.AreEqual(10, result.TopTenUsers.Count);
             Assert.AreEqual(100, result.TopTenUsers[0].Score);
@@ -341,7 +341,7 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetTopTen()).Returns(emptyList);
 
-            TopTenResponse result = _userLogic.GetTopTenUsers();
+            TopTenResponse result = _userManagementLogic.GetTopTenUsers();
 
             Assert.AreEqual(0, result.TopTenUsers.Count);
             _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
@@ -359,7 +359,7 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetTopTen()).Returns(expectedUsers);
 
-            TopTenResponse result = _userLogic.GetTopTenUsers();
+            TopTenResponse result = _userManagementLogic.GetTopTenUsers();
 
             Assert.AreEqual(3, result.TopTenUsers.Count);
             Assert.AreEqual(50, result.TopTenUsers[0].Score);
@@ -377,7 +377,7 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetTopTen()).Returns(expectedUsers);
 
-            _userLogic.GetTopTenUsers();
+            _userManagementLogic.GetTopTenUsers();
 
             _mockUserRepository.Verify(r => r.GetTopTen(), Times.Once);
         }
@@ -401,7 +401,7 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetTopTen()).Returns(expectedUsers);
 
-            TopTenResponse result = _userLogic.GetTopTenUsers();
+            TopTenResponse result = _userManagementLogic.GetTopTenUsers();
 
             Assert.AreEqual(10, result.TopTenUsers.Count);
             Assert.AreEqual(110, result.TopTenUsers[0].Score);
@@ -446,7 +446,7 @@ namespace TestBusinessLogic
             _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-            UserResponse response = _userLogic.ModifyUser(userId, actorSub, request);
+            UserResponse response = _userManagementLogic.ModifyUser(userId, actorSub, request);
 
             Assert.AreEqual(userId, response.Id);
             Assert.AreEqual(request.Email, response.Email);
@@ -490,7 +490,7 @@ namespace TestBusinessLogic
             _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("hashed");
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-            _userLogic.ModifyUser(userId, actorSub, request);
+            _userManagementLogic.ModifyUser(userId, actorSub, request);
 
             _mockUserRepository.Verify(r => r.IsEmailUnique(It.IsAny<string>()), Times.Never);
             _mockUserRepository.Verify(
@@ -510,7 +510,7 @@ namespace TestBusinessLogic
                 Password = "p"
             };
 
-            _userLogic.ModifyUser(userId, Guid.Empty, request);
+            _userManagementLogic.ModifyUser(userId, Guid.Empty, request);
         }
 
         [TestMethod]
@@ -527,7 +527,7 @@ namespace TestBusinessLogic
                 Password = "p"
             };
 
-            _userLogic.ModifyUser(userId, actorSub, request);
+            _userManagementLogic.ModifyUser(userId, actorSub, request);
         }
 
         [TestMethod]
@@ -546,7 +546,7 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns((User)null);
 
-            _userLogic.ModifyUser(userId, actorSub, request);
+            _userManagementLogic.ModifyUser(userId, actorSub, request);
         }
 
         [TestMethod]
@@ -568,7 +568,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateEmail("new@example.com")).Returns(true);
             _mockUserRepository.Setup(r => r.IsEmailUnique("new@example.com")).Returns(false);
 
-            _userLogic.ModifyUser(userId, actorSub, request);
+            _userManagementLogic.ModifyUser(userId, actorSub, request);
         }
 
         [TestMethod]
@@ -594,7 +594,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(originalUser);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-            UserResponse response = _userLogic.ModifyUser(userId, actorSub, request);
+            UserResponse response = _userManagementLogic.ModifyUser(userId, actorSub, request);
 
             Assert.AreEqual("NewName", response.Name);
             Assert.AreEqual("OldLastName", response.LastName);
@@ -632,7 +632,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.IsEmailUnique("new@example.com")).Returns(true);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-            UserResponse response = _userLogic.ModifyUser(userId, actorSub, request);
+            UserResponse response = _userManagementLogic.ModifyUser(userId, actorSub, request);
 
             Assert.AreEqual("OldName", response.Name);
             Assert.AreEqual("OldLastName", response.LastName);
@@ -669,7 +669,7 @@ namespace TestBusinessLogic
             _mockPasswordService.Setup(p => p.HashPassword("newPassword123")).Returns("newHashedPassword");
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-            UserResponse response = _userLogic.ModifyUser(userId, actorSub, request);
+            UserResponse response = _userManagementLogic.ModifyUser(userId, actorSub, request);
 
             Assert.AreEqual("OldName", response.Name);
             Assert.AreEqual("OldLastName", response.LastName);
@@ -702,7 +702,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(originalUser);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-            UserResponse response = _userLogic.ModifyUser(userId, actorSub, request);
+            UserResponse response = _userManagementLogic.ModifyUser(userId, actorSub, request);
 
             Assert.AreEqual("OldName", response.Name);
             Assert.AreEqual("OldLastName", response.LastName);
@@ -740,7 +740,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateBirthDate(It.IsAny<DateTime>()))
                 .Throws(new ArgumentException("Birth date cannot be after today."));
 
-            _userLogic.ModifyUser(userId, actorSub, request);
+            _userManagementLogic.ModifyUser(userId, actorSub, request);
         }
 
         [TestMethod]
@@ -760,7 +760,7 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(expectedUser);
 
-            UserResponse result = _userLogic.GetUserResponseById(userId);
+            UserResponse result = _userManagementLogic.GetUserResponseById(userId);
 
             Assert.AreEqual(userId, result.Id);
             Assert.AreEqual("John", result.Name);
@@ -778,7 +778,7 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns((User)null);
 
-            _userLogic.GetUserResponseById(userId);
+            _userManagementLogic.GetUserResponseById(userId);
         }
 
         [TestMethod]
@@ -813,7 +813,7 @@ namespace TestBusinessLogic
                 BirthDate = birthDate
             };
 
-            UserResponse result = _userLogic.RegisterVisitor(request);
+            UserResponse result = _userManagementLogic.RegisterVisitor(request);
 
             Assert.AreEqual(0, createdUser.UserRoles.Count, "User should have no roles when visitor role is not found");
 
@@ -844,7 +844,7 @@ namespace TestBusinessLogic
             .Callback<User>(u => createdUser = u)
             .Returns((User u) => u);
 
-            _userLogic.CreateUser(request);
+            _userManagementLogic.CreateUser(request);
 
             Assert.AreEqual(0, createdUser.UserRoles.Count);
         }
@@ -876,7 +876,7 @@ namespace TestBusinessLogic
             .Callback<User>(u => createdUser = u)
             .Returns((User u) => u);
 
-            _userLogic.CreateUser(request);
+            _userManagementLogic.CreateUser(request);
 
             Assert.AreEqual(1, createdUser.UserRoles.Count);
             Assert.AreEqual("Admin", createdUser.UserRoles.First().Role.Name);
@@ -890,7 +890,7 @@ namespace TestBusinessLogic
 
             _mockParkEntryLogic.Setup(p => p.RegisterExit(attractionId, request));
 
-            _userLogic.RegisterExit(attractionId, request);
+            _userManagementLogic.RegisterExit(attractionId, request);
 
             _mockParkEntryLogic.Verify(p => p.RegisterExit(attractionId, request), Times.Once);
         }
@@ -927,7 +927,7 @@ namespace TestBusinessLogic
             _mockPasswordService.Setup(p => p.HashPassword(request.Password)).Returns("newHashedPassword");
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-            _userLogic.ModifyUser(userId, actorSubClaim, request);
+            _userManagementLogic.ModifyUser(userId, actorSubClaim, request);
 
             Assert.AreEqual(originalBirthDate, originalUser.BirthDate,
                 "BirthDate should not change when null is provided");
@@ -955,7 +955,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-            UserResponse result = _userLogic.ChangeMembershipLevel(userId, newMembershipLevel);
+            UserResponse result = _userManagementLogic.ChangeMembershipLevel(userId, newMembershipLevel);
 
             Assert.AreEqual(userId, result.Id);
             Assert.AreEqual(1, result.MembershipLevel);
@@ -984,7 +984,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-            UserResponse result = _userLogic.ChangeMembershipLevel(userId, newMembershipLevel);
+            UserResponse result = _userManagementLogic.ChangeMembershipLevel(userId, newMembershipLevel);
 
             Assert.AreEqual(2, result.MembershipLevel);
             Assert.AreEqual(MembershipLevel.VIP, user.MembershipLevel);
@@ -1011,7 +1011,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-            UserResponse result = _userLogic.ChangeMembershipLevel(userId, newMembershipLevel);
+            UserResponse result = _userManagementLogic.ChangeMembershipLevel(userId, newMembershipLevel);
 
             Assert.AreEqual(0, result.MembershipLevel);
             Assert.AreEqual(MembershipLevel.Standard, user.MembershipLevel);
@@ -1024,7 +1024,7 @@ namespace TestBusinessLogic
             Guid userId = Guid.NewGuid();
             int invalidMembershipLevel = 999;
 
-            _userLogic.ChangeMembershipLevel(userId, invalidMembershipLevel);
+            _userManagementLogic.ChangeMembershipLevel(userId, invalidMembershipLevel);
         }
 
         [TestMethod]
@@ -1034,7 +1034,7 @@ namespace TestBusinessLogic
             Guid userId = Guid.NewGuid();
             int negativeMembershipLevel = -1;
 
-            _userLogic.ChangeMembershipLevel(userId, negativeMembershipLevel);
+            _userManagementLogic.ChangeMembershipLevel(userId, negativeMembershipLevel);
         }
 
         [TestMethod]
@@ -1046,7 +1046,7 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns((User)null);
 
-            _userLogic.ChangeMembershipLevel(userId, newMembershipLevel);
+            _userManagementLogic.ChangeMembershipLevel(userId, newMembershipLevel);
         }
 
         [TestMethod]
@@ -1068,7 +1068,7 @@ namespace TestBusinessLogic
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-            _userLogic.ChangeMembershipLevel(userId, newMembershipLevel);
+            _userManagementLogic.ChangeMembershipLevel(userId, newMembershipLevel);
 
             _mockUserRepository.Verify(r => r.GetByIdWithRoles(userId), Times.Once);
             _mockUserRepository.Verify(r => r.Update(user), Times.Once);
@@ -1090,7 +1090,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
             _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -1109,7 +1109,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
             _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -1128,7 +1128,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
             _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -1147,7 +1147,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
             _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -1166,7 +1166,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
             _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -1185,7 +1185,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
             _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -1204,7 +1204,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
             _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
 
-            _userLogic.RegisterVisitor(request);
+            _userManagementLogic.RegisterVisitor(request);
         }
 
         [TestMethod]
@@ -1225,7 +1225,7 @@ namespace TestBusinessLogic
             _mockValidationService.Setup(v => v.ValidateRequiredFields(request.Name, request.LastName, request.Email, request.Password));
             _mockValidationService.Setup(v => v.ValidateEmail(request.Email)).Returns(false);
 
-            _userLogic.CreateUser(request);
+            _userManagementLogic.CreateUser(request);
         }
 
         [TestMethod]
@@ -1251,7 +1251,7 @@ namespace TestBusinessLogic
                 Email = "invalidemail"
             };
 
-            _userLogic.ModifyUser(userId, userId, request);
+            _userManagementLogic.ModifyUser(userId, userId, request);
         }
     }
 }

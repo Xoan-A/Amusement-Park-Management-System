@@ -22,14 +22,14 @@ public class AttractionControllerTest
     private HttpClient _operatorClient = null!;
     private HttpClient _visitorClient = null!;
     private Mock<IAttractionLogic> _mockAttractionService = null!;
-    private Mock<IUserLogic> _mockUserLogic = null!;
+    private Mock<IUserManagementLogic> _mockUserManagementLogic = null!;
     private SqliteConnection _connection = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _mockAttractionService = new Mock<IAttractionLogic>();
-        _mockUserLogic = new Mock<IUserLogic>();
+        _mockUserManagementLogic = new Mock<IUserManagementLogic>();
 
         _connection = new SqliteConnection("DataSource=:memory:");
         _connection.Open();
@@ -49,7 +49,7 @@ public class AttractionControllerTest
                 options.UseSqlite(_connection));
 
                 services.AddSingleton(_mockAttractionService.Object);
-                services.AddSingleton(_mockUserLogic.Object);
+                services.AddSingleton(_mockUserManagementLogic.Object);
             });
         });
 
@@ -359,7 +359,7 @@ public class AttractionControllerTest
             UserId = userId
         };
 
-        _mockUserLogic.Setup(s =>
+        _mockUserManagementLogic.Setup(s =>
         s.RegisterEntry(userId, requestBody))
         ;
 
@@ -377,7 +377,7 @@ public class AttractionControllerTest
             });
 
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(
+        _mockUserManagementLogic.Verify(
             s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
 
@@ -397,7 +397,7 @@ public class AttractionControllerTest
         HttpResponseMessage response = _ = _client.PutAsync($"/api/attractions/entry/{attractionId}", content).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
-        _mockUserLogic.Verify(
+        _mockUserManagementLogic.Verify(
             s => s.RegisterEntry(It.IsAny<Guid>(), It.IsAny<RegisterEntryRequest>()), Times.Never);
     }
 
@@ -414,7 +414,7 @@ public class AttractionControllerTest
             Qr = qrCode
         };
 
-        _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
+        _mockUserManagementLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
         ;
 
         StringContent content =
@@ -431,7 +431,7 @@ public class AttractionControllerTest
             });
 
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
+        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -446,7 +446,7 @@ public class AttractionControllerTest
             NFC = userId
         };
 
-        _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
+        _mockUserManagementLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
         ;
 
         StringContent content =
@@ -463,7 +463,7 @@ public class AttractionControllerTest
             });
 
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
+        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -481,7 +481,7 @@ public class AttractionControllerTest
             EventId = eventId
         };
 
-        _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
+        _mockUserManagementLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
         ;
 
         StringContent content =
@@ -498,7 +498,7 @@ public class AttractionControllerTest
             });
 
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
+        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -515,7 +515,7 @@ public class AttractionControllerTest
             EventId = eventId
         };
 
-        _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
+        _mockUserManagementLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
         ;
 
         StringContent content =
@@ -532,7 +532,7 @@ public class AttractionControllerTest
             });
 
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
+        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -548,7 +548,7 @@ public class AttractionControllerTest
             Qr = qrCode
         };
 
-        _mockUserLogic.Setup(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()))
+        _mockUserManagementLogic.Setup(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()))
         .Throws(new ArgumentException("User does not have a valid ticket."));
 
         StringContent content =
@@ -556,7 +556,7 @@ public class AttractionControllerTest
         HttpResponseMessage response =
         _ = _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content).Result;
 
-        _mockUserLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
+        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }
 
@@ -571,7 +571,7 @@ public class AttractionControllerTest
             userId = userId
         };
 
-        _mockUserLogic.Setup(s => s.RegisterExit(attractionId, requestBody))
+        _mockUserManagementLogic.Setup(s => s.RegisterExit(attractionId, requestBody))
         ;
 
         StringContent content =
@@ -587,7 +587,7 @@ public class AttractionControllerTest
             });
 
         Assert.AreEqual("Exit registered successfully", messageResponse.Message);
-        _mockUserLogic.Verify(s => s.RegisterExit(attractionId, It.IsAny<RegisterExitRequest>()), Times.Once);
+        _mockUserManagementLogic.Verify(s => s.RegisterExit(attractionId, It.IsAny<RegisterExitRequest>()), Times.Once);
     }
 
     [TestMethod]
@@ -606,7 +606,7 @@ public class AttractionControllerTest
         HttpResponseMessage response = _ = _client.PutAsync($"/api/attractions/exit/{attractionId}", content).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
-        _mockUserLogic.Verify(s => s.RegisterExit(It.IsAny<Guid>(), It.IsAny<RegisterExitRequest>()),
+        _mockUserManagementLogic.Verify(s => s.RegisterExit(It.IsAny<Guid>(), It.IsAny<RegisterExitRequest>()),
             Times.Never);
     }
 
@@ -659,8 +659,8 @@ public class AttractionControllerTest
         Attraction attraction1 = new Attraction
         {
             Id = attraction1Id,
-            Name = "Montaña Rusa",
-            Description = "Una atracción emocionante",
+            Name = "Montaï¿½a Rusa",
+            Description = "Una atracciï¿½n emocionante",
             Type = AttractionType.RollerCoaster,
             MinAge = 12,
             MaxCapacity = 50,

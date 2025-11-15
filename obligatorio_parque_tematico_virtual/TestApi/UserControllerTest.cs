@@ -26,14 +26,14 @@ namespace ApiTests
         private HttpClient _client = null!;
         private HttpClient _adminClient = null!;
         private HttpClient _operatorClient = null!;
-        private Mock<IUserLogic> _mockUserLogic = null!;
+        private Mock<IUserManagementLogic> _mockUserManagementLogic = null!;
         private Mock<IClaimsLogic> _mockClaimsLogic = null!;
         private SqliteConnection _connection = null!;
 
         [TestInitialize]
         public void Setup()
         {
-            _mockUserLogic = new Mock<IUserLogic>();
+            _mockUserManagementLogic = new Mock<IUserManagementLogic>();
             _mockClaimsLogic = new Mock<IClaimsLogic>();
 
             _mockClaimsLogic.Setup(c => c.GetCurrentUserId(It.IsAny<ClaimsPrincipal>()))
@@ -56,7 +56,7 @@ namespace ApiTests
                     services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlite(_connection));
 
-                    services.AddSingleton(_mockUserLogic.Object);
+                    services.AddSingleton(_mockUserManagementLogic.Object);
                     services.AddSingleton(_mockClaimsLogic.Object);
                 });
             });
@@ -131,7 +131,7 @@ namespace ApiTests
                 Role = Role.OPERATOR
             };
 
-            _mockUserLogic.Setup(u => u.AddRoleToUser(userId, Role.OPERATOR))
+            _mockUserManagementLogic.Setup(u => u.AddRoleToUser(userId, Role.OPERATOR))
             ;
 
             string json = JsonSerializer.Serialize(request);
@@ -151,7 +151,7 @@ namespace ApiTests
 
             Assert.IsTrue(messageResponse.Message.Contains(Role.OPERATOR));
 
-            _mockUserLogic.Verify(u => u.AddRoleToUser(userId, Role.OPERATOR), Times.Once);
+            _mockUserManagementLogic.Verify(u => u.AddRoleToUser(userId, Role.OPERATOR), Times.Once);
         }
 
         [TestMethod]
@@ -169,7 +169,7 @@ namespace ApiTests
             HttpResponseMessage response = _ = _client.PutAsync($"/api/users/{userId}/roles", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(u => u.AddRoleToUser(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
+            _mockUserManagementLogic.Verify(u => u.AddRoleToUser(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod]
@@ -188,7 +188,7 @@ namespace ApiTests
                 Score = 0
             };
 
-            _mockUserLogic.Setup(u => u.GetUserResponseById(userId)).Returns(expected);
+            _mockUserManagementLogic.Setup(u => u.GetUserResponseById(userId)).Returns(expected);
 
             HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/users/{userId}").Result;
 
@@ -206,7 +206,7 @@ namespace ApiTests
             Assert.AreEqual(expected.Name, userResponse.Name);
             CollectionAssert.AreEquivalent(expected.UserRoles.ToList(), userResponse.UserRoles.ToList());
 
-            _mockUserLogic.Verify(u => u.GetUserResponseById(userId), Times.Once);
+            _mockUserManagementLogic.Verify(u => u.GetUserResponseById(userId), Times.Once);
         }
 
         [TestMethod]
@@ -217,7 +217,7 @@ namespace ApiTests
             HttpResponseMessage response = _ = _client.GetAsync($"/api/users/{userId}").Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(u => u.GetUserResponseById(It.IsAny<Guid>()), Times.Never);
+            _mockUserManagementLogic.Verify(u => u.GetUserResponseById(It.IsAny<Guid>()), Times.Never);
         }
 
         [TestMethod]
@@ -246,7 +246,7 @@ namespace ApiTests
                 Score = 0
             };
 
-            _mockUserLogic
+            _mockUserManagementLogic
             .Setup(u => u.CreateUser(It.Is<CreateUserRequest>(r =>
             r.Name == request.Name &&
             r.LastName == request.LastName &&
@@ -271,7 +271,7 @@ namespace ApiTests
             Assert.AreEqual(created.Email, userResponse.Email);
             CollectionAssert.AreEquivalent(created.UserRoles.ToList(), userResponse.UserRoles.ToList());
 
-            _mockUserLogic.Verify(u => u.CreateUser(It.IsAny<CreateUserRequest>()), Times.Once);
+            _mockUserManagementLogic.Verify(u => u.CreateUser(It.IsAny<CreateUserRequest>()), Times.Once);
         }
 
         [TestMethod]
@@ -294,7 +294,7 @@ namespace ApiTests
             HttpResponseMessage response = _ = _client.PostAsync("/api/users", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(u => u.CreateUser(It.IsAny<CreateUserRequest>()), Times.Never);
+            _mockUserManagementLogic.Verify(u => u.CreateUser(It.IsAny<CreateUserRequest>()), Times.Never);
         }
 
         [TestMethod]
@@ -345,7 +345,7 @@ namespace ApiTests
                 Score = 5
             };
 
-            _mockUserLogic
+            _mockUserManagementLogic
             .Setup(l => l.ModifyUser(
                 It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
             .Returns(expected);
@@ -366,7 +366,7 @@ namespace ApiTests
 
             Assert.AreEqual(expected.Id, parsed.Id);
             Assert.AreEqual(expected.Email, parsed.Email);
-            _mockUserLogic.Verify(
+            _mockUserManagementLogic.Verify(
                 l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()), Times.Once);
         }
 
@@ -387,7 +387,7 @@ namespace ApiTests
             HttpResponseMessage response = _ = _client.PutAsync($"/api/users/{userId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(
+            _mockUserManagementLogic.Verify(
                 l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()), Times.Never);
         }
 
@@ -426,7 +426,7 @@ namespace ApiTests
                 Password = "p"
             };
 
-            _mockUserLogic
+            _mockUserManagementLogic
             .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
             .Throws(new ForbiddenException("You cannot modify another user"));
 
@@ -436,7 +436,7 @@ namespace ApiTests
             HttpResponseMessage response = _ = authedClient.PutAsync($"/api/users/{routeUserId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
-            _mockUserLogic.Verify(
+            _mockUserManagementLogic.Verify(
                 l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()), Times.Once);
         }
 
@@ -475,7 +475,7 @@ namespace ApiTests
                 Password = "p"
             };
 
-            _mockUserLogic
+            _mockUserManagementLogic
             .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
             .Throws(new UnauthorizedException("Invalid token"));
 
@@ -522,7 +522,7 @@ namespace ApiTests
                 Password = "p"
             };
 
-            _mockUserLogic
+            _mockUserManagementLogic
             .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
             .Throws(new KeyNotFoundException("User not found"));
 
@@ -569,7 +569,7 @@ namespace ApiTests
                 Password = "p"
             };
 
-            _mockUserLogic
+            _mockUserManagementLogic
             .Setup(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()))
             .Throws(new ArgumentException("Name cannot be empty"));
 
@@ -629,7 +629,7 @@ namespace ApiTests
             HttpResponseMessage response = _ = authedClient.PutAsync($"/api/users/{userId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()),
+            _mockUserManagementLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()),
                 Times.Never);
         }
 
@@ -683,7 +683,7 @@ namespace ApiTests
             HttpResponseMessage response = _ = authedClient.PutAsync($"/api/users/{userId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()),
+            _mockUserManagementLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()),
                 Times.Never);
         }
 
@@ -705,7 +705,7 @@ namespace ApiTests
         public void GetUserById_UserNotFound_ReturnsNotFound()
         {
             Guid userId = Guid.NewGuid();
-            _mockUserLogic.Setup(l => l.GetUserResponseById(userId))
+            _mockUserManagementLogic.Setup(l => l.GetUserResponseById(userId))
             .Throws(new KeyNotFoundException("User not found"));
 
             HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/users/{userId}").Result;
@@ -750,7 +750,7 @@ namespace ApiTests
             HttpResponseMessage response = _ = client.PutAsync($"/api/users/{userId}", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()),
+            _mockUserManagementLogic.Verify(l => l.ModifyUser(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<ModifyUserRequest>()),
                 Times.Never);
         }
 
@@ -775,7 +775,7 @@ namespace ApiTests
                 Score = 100
             };
 
-            _mockUserLogic.Setup(u => u.ChangeMembershipLevel(userId, 1))
+            _mockUserManagementLogic.Setup(u => u.ChangeMembershipLevel(userId, 1))
             .Returns(expectedResponse);
 
             string json = JsonSerializer.Serialize(request);
@@ -796,7 +796,7 @@ namespace ApiTests
             Assert.AreEqual(1, userResponse.MembershipLevel);
             Assert.AreEqual("John", userResponse.Name);
 
-            _mockUserLogic.Verify(u => u.ChangeMembershipLevel(userId, 1), Times.Once);
+            _mockUserManagementLogic.Verify(u => u.ChangeMembershipLevel(userId, 1), Times.Once);
         }
 
         [TestMethod]
@@ -814,7 +814,7 @@ namespace ApiTests
             HttpResponseMessage response = _ = _client.PutAsync($"/api/users/{userId}/membership", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserLogic.Verify(u => u.ChangeMembershipLevel(It.IsAny<Guid>(), It.IsAny<int>()), Times.Never);
+            _mockUserManagementLogic.Verify(u => u.ChangeMembershipLevel(It.IsAny<Guid>(), It.IsAny<int>()), Times.Never);
         }
 
         [TestMethod]
@@ -832,7 +832,7 @@ namespace ApiTests
             HttpResponseMessage response = _ = _operatorClient.PutAsync($"/api/users/{userId}/membership", content).Result;
 
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
-            _mockUserLogic.Verify(u => u.ChangeMembershipLevel(It.IsAny<Guid>(), It.IsAny<int>()), Times.Never);
+            _mockUserManagementLogic.Verify(u => u.ChangeMembershipLevel(It.IsAny<Guid>(), It.IsAny<int>()), Times.Never);
         }
 
         [TestMethod]
@@ -844,7 +844,7 @@ namespace ApiTests
                 MembershipLevel = 2
             };
 
-            _mockUserLogic.Setup(u => u.ChangeMembershipLevel(userId, 2))
+            _mockUserManagementLogic.Setup(u => u.ChangeMembershipLevel(userId, 2))
             .Throws(new KeyNotFoundException("User not found."));
 
             string json = JsonSerializer.Serialize(request);
@@ -853,7 +853,7 @@ namespace ApiTests
             HttpResponseMessage response = _ = _adminClient.PutAsync($"/api/users/{userId}/membership", content).Result;
 
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
-            _mockUserLogic.Verify(u => u.ChangeMembershipLevel(userId, 2), Times.Once);
+            _mockUserManagementLogic.Verify(u => u.ChangeMembershipLevel(userId, 2), Times.Once);
         }
 
         [TestMethod]
@@ -865,7 +865,7 @@ namespace ApiTests
                 MembershipLevel = 999
             };
 
-            _mockUserLogic.Setup(u => u.ChangeMembershipLevel(userId, 999))
+            _mockUserManagementLogic.Setup(u => u.ChangeMembershipLevel(userId, 999))
             .Throws(new ArgumentException("Invalid membership level."));
 
             string json = JsonSerializer.Serialize(request);
@@ -874,7 +874,7 @@ namespace ApiTests
             HttpResponseMessage response = _ = _adminClient.PutAsync($"/api/users/{userId}/membership", content).Result;
 
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
-            _mockUserLogic.Verify(u => u.ChangeMembershipLevel(userId, 999), Times.Once);
+            _mockUserManagementLogic.Verify(u => u.ChangeMembershipLevel(userId, 999), Times.Once);
         }
 
         [TestMethod]
@@ -897,7 +897,7 @@ namespace ApiTests
                 Score = 50
             };
 
-            _mockUserLogic.Setup(u => u.ChangeMembershipLevel(userId, 0))
+            _mockUserManagementLogic.Setup(u => u.ChangeMembershipLevel(userId, 0))
             .Returns(expectedResponse);
 
             string json = JsonSerializer.Serialize(request);
@@ -916,7 +916,7 @@ namespace ApiTests
 
             Assert.AreEqual(0, userResponse.MembershipLevel);
 
-            _mockUserLogic.Verify(u => u.ChangeMembershipLevel(userId, 0), Times.Once);
+            _mockUserManagementLogic.Verify(u => u.ChangeMembershipLevel(userId, 0), Times.Once);
         }
     }
 }

@@ -11,9 +11,9 @@ namespace Api.Controllers;
 public class AttractionController : ControllerBase
 {
     private readonly IAttractionLogic _attractionLogic;
-    private readonly IUserLogic _userService;
+    private readonly IUserManagementLogic _userService;
 
-    public AttractionController(IAttractionLogic attractionLogic, IUserLogic userService)
+    public AttractionController(IAttractionLogic attractionLogic, IUserManagementLogic userService)
     {
         _attractionLogic = attractionLogic;
         _userService = userService;
