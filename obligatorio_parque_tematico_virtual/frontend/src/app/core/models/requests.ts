@@ -36,6 +36,10 @@ export interface AddRolesRequest {
   role: string;
 }
 
+export interface SetDateTimeRequest {
+  dateTime: string;
+}
+
 export interface AttractionRequest {
   name: string;
   description: string;

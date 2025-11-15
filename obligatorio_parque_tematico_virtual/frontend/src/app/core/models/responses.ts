@@ -18,6 +18,10 @@ export interface MessageResponse {
   message: string;
 }
 
+export interface DateTimeResponse {
+  currentDateTime: string;
+}
+
 export interface UserResponse {
   id: string;
   name: string;
