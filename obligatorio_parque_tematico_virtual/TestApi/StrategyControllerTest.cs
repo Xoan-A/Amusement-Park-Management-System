@@ -25,7 +25,7 @@ namespace ApiTests
         private HttpClient _adminClient = null!;
         private HttpClient _operatorClient = null!;
         private Mock<IActiveStrategy> _mockActiveStrategy = null!;
-        private Mock<IUserLogic> _mockUserLogic = null!;
+        private Mock<IUserManagementLogic> _mockUserManagementLogic = null!;
 
         [TestInitialize]
         public void Setup()
@@ -34,7 +34,7 @@ namespace ApiTests
             _connection.Open();
 
             _mockActiveStrategy = new Mock<IActiveStrategy>();
-            _mockUserLogic = new Mock<IUserLogic>();
+            _mockUserManagementLogic = new Mock<IUserManagementLogic>();
 
             _factory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
@@ -49,7 +49,7 @@ namespace ApiTests
                     options.UseSqlite(_connection));
 
                     services.AddSingleton(_mockActiveStrategy.Object);
-                    services.AddSingleton(_mockUserLogic.Object);
+                    services.AddSingleton(_mockUserManagementLogic.Object);
                 });
             });
 
@@ -78,7 +78,7 @@ namespace ApiTests
                 Name = "Admin",
                 LastName = "User",
                 Email = "admin@example.com",
-                UserRoles = new List<string> { Role.ADMINISTRATOR }
+                UserRoles = new List<string> { Role.Administrator }
             };
             string adminToken = tokenLogic.GenerateToken(adminUser);
             _adminClient = _factory.CreateClient();
@@ -91,7 +91,7 @@ namespace ApiTests
                 Name = "Operator",
                 LastName = "User",
                 Email = "operator@example.com",
-                UserRoles = new List<string> { Role.OPERATOR }
+                UserRoles = new List<string> { Role.Operator }
             };
             string operatorToken = tokenLogic.GenerateToken(operatorUser);
             _operatorClient = _factory.CreateClient();
@@ -387,7 +387,7 @@ namespace ApiTests
                 }
             };
 
-            _mockUserLogic.Setup(x => x.GetTopTenUsers()).Returns(topTenResponse);
+            _mockUserManagementLogic.Setup(x => x.GetTopTenUsers()).Returns(topTenResponse);
 
             HttpResponseMessage response = _ = _adminClient.GetAsync("/api/strategy/topTen").Result;
 
@@ -401,7 +401,7 @@ namespace ApiTests
             Assert.AreEqual(10, result.TopTenUsers.Count);
             Assert.AreEqual(100, result.TopTenUsers[0].Score);
             Assert.AreEqual(10, result.TopTenUsers[9].Score);
-            _mockUserLogic.Verify(x => x.GetTopTenUsers(), Times.Once);
+            _mockUserManagementLogic.Verify(x => x.GetTopTenUsers(), Times.Once);
         }
 
         [TestMethod]
@@ -420,7 +420,7 @@ namespace ApiTests
                 TopTenUsers = new List<UserResponse>()
             };
 
-            _mockUserLogic.Setup(x => x.GetTopTenUsers()).Returns(topTenResponse);
+            _mockUserManagementLogic.Setup(x => x.GetTopTenUsers()).Returns(topTenResponse);
 
             HttpResponseMessage response = _ = _adminClient.GetAsync("/api/strategy/topTen").Result;
 
@@ -456,7 +456,7 @@ namespace ApiTests
                 }
             };
 
-            _mockUserLogic.Setup(x => x.GetTopTenUsers()).Returns(topTenResponse);
+            _mockUserManagementLogic.Setup(x => x.GetTopTenUsers()).Returns(topTenResponse);
 
             HttpResponseMessage response = _ = _adminClient.GetAsync("/api/strategy/topTen").Result;
 
@@ -494,7 +494,7 @@ namespace ApiTests
                 }
             };
 
-            _mockUserLogic.Setup(x => x.GetTopTenUsers()).Returns(topTenResponse);
+            _mockUserManagementLogic.Setup(x => x.GetTopTenUsers()).Returns(topTenResponse);
 
             HttpResponseMessage response = _ = _adminClient.GetAsync("/api/strategy/topTen").Result;
 

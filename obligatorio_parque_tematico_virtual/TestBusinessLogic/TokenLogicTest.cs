@@ -34,7 +34,7 @@ namespace TestBusinessLogic
                 Name = "Admin",
                 LastName = "User",
                 Email = "admin@test.com",
-                UserRoles = new List<string> { Role.ADMINISTRATOR }
+                UserRoles = new List<string> { Role.Administrator }
             };
 
             string token = _tokenLogic.GenerateToken(admin);
@@ -58,7 +58,7 @@ namespace TestBusinessLogic
                 Name = "Operator",
                 LastName = "User",
                 Email = "operator@test.com",
-                UserRoles = new List<string> { Role.OPERATOR }
+                UserRoles = new List<string> { Role.Operator }
             };
 
             string token = _tokenLogic.GenerateToken(op);
@@ -81,7 +81,7 @@ namespace TestBusinessLogic
                 Email = "visitor@test.com",
                 BirthDate = new DateTime(1990, 1, 1),
                 MembershipLevel = (int)Domain.MembershipLevel.Premium,
-                UserRoles = new List<string> { Role.VISITOR }
+                UserRoles = new List<string> { Role.Visitor }
             };
 
             string token = _tokenLogic.GenerateToken(visitor);
@@ -103,7 +103,7 @@ namespace TestBusinessLogic
                 Name = "Test",
                 LastName = "User",
                 Email = "test@test.com",
-                UserRoles = new List<string> { Role.ADMINISTRATOR }
+                UserRoles = new List<string> { Role.Administrator }
             };
 
             string token = _tokenLogic.GenerateToken(admin);
@@ -124,7 +124,7 @@ namespace TestBusinessLogic
                 Name = "Test",
                 LastName = "User",
                 Email = "test@test.com",
-                UserRoles = new List<string> { Role.ADMINISTRATOR }
+                UserRoles = new List<string> { Role.Administrator }
             };
 
             string token1 = _tokenLogic.GenerateToken(admin);
@@ -142,7 +142,7 @@ namespace TestBusinessLogic
                 Name = "Multi",
                 LastName = "Role",
                 Email = "multi@test.com",
-                UserRoles = new List<string> { Role.ADMINISTRATOR, Role.OPERATOR }
+                UserRoles = new List<string> { Role.Administrator, Role.Operator }
             };
 
             string token = _tokenLogic.GenerateToken(user);
@@ -165,7 +165,7 @@ namespace TestBusinessLogic
                 Name = "Single",
                 LastName = "Role",
                 Email = "single@test.com",
-                UserRoles = new List<string> { Role.VISITOR }
+                UserRoles = new List<string> { Role.Visitor }
             };
 
             string token = _tokenLogic.GenerateToken(user);

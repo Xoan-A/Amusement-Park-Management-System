@@ -12,12 +12,12 @@ namespace Api.Controllers;
 public class StrategyController : ControllerBase
 {
     private readonly IActiveStrategy _activeStrategy;
-    private readonly IUserLogic _userLogic;
+    private readonly IUserManagementLogic _userManagementLogic;
 
-    public StrategyController(IActiveStrategy activeStrategy, IUserLogic userLogic)
+    public StrategyController(IActiveStrategy activeStrategy, IUserManagementLogic userManagementLogic)
     {
         _activeStrategy = activeStrategy;
-        _userLogic = userLogic;
+        _userManagementLogic = userManagementLogic;
     }
 
     [HttpGet]
@@ -52,7 +52,7 @@ public class StrategyController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public IActionResult GetTopTen()
     {
-        TopTenResponse response = _userLogic.GetTopTenUsers();
+        TopTenResponse response = _userManagementLogic.GetTopTenUsers();
         return Ok(response);
     }
 }

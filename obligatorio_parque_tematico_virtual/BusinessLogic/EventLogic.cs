@@ -1,4 +1,5 @@
-﻿using IBusinessLogic;
+﻿using AutoMapper;
+using IBusinessLogic;
 using IDataAccess;
 using Models.Out;
 using Domain;
@@ -11,6 +12,7 @@ public class EventLogic : IEventLogic
     private IEventRepository _eventRepository;
     private IAttractionLogicEntity _attractionLogic;
     private readonly IDateTimeLogic _dateTimeLogic;
+    private readonly IMapper _mapper;
     private const int MinCapacityLimit = 1;
     private const int MaxCapacityLimit = 10000;
     private const int MinHour = 0;
@@ -18,11 +20,12 @@ public class EventLogic : IEventLogic
     private const int MinCost = 1;
 
     public EventLogic(IEventRepository eventRepository, IAttractionLogicEntity attractionLogic,
-        IDateTimeLogic dateTimeLogic)
+        IDateTimeLogic dateTimeLogic, IMapper mapper)
     {
         _eventRepository = eventRepository;
         _attractionLogic = attractionLogic;
         _dateTimeLogic = dateTimeLogic;
+        _mapper = mapper;
     }
 
     public EventResponse GetEventById(Guid expectedEventId)
@@ -30,62 +33,16 @@ public class EventLogic : IEventLogic
         Event eventEntity = _eventRepository.GetById(expectedEventId);
         if (eventEntity == null)
         {
-            throw new KeyNotFoundException($"No se encontró el evento con id {expectedEventId}");
+            throw new KeyNotFoundException($"Event with id {expectedEventId} not found");
         }
 
-        EventResponse eventResponse = new EventResponse
-        {
-            Id = eventEntity.Id,
-            Name = eventEntity.Name,
-            Date = eventEntity.Date,
-            Hour = eventEntity.Hour,
-            MaxCapacity = eventEntity.MaxCapacity,
-            CurrentCapacity = eventEntity.CurrentCapacity,
-            Cost = eventEntity.Cost,
-            Attractions = eventEntity.Attractions
-            .Select(ea => new AttractionResponse
-            {
-                Id = ea.Attraction.Id,
-                Name = ea.Attraction.Name,
-                Description = ea.Attraction.Description,
-                Type = ea.Attraction.Type.ToString(),
-                MinAge = ea.Attraction.MinAge,
-                MaxCapacity = ea.Attraction.MaxCapacity,
-                CurrentCapacity = ea.Attraction.CurrentCapacity,
-                IsActive = ea.Attraction.IsActive
-            })
-            .ToList()
-        };
-        return eventResponse;
+        return _mapper.Map<EventResponse>(eventEntity);
     }
 
     public List<EventResponse> GetAllEvents()
     {
         List<Event> events = _eventRepository.GetAll();
-        List<EventResponse> eventResponses = events.Select(eventEntity => new EventResponse
-        {
-            Id = eventEntity.Id,
-            Name = eventEntity.Name,
-            Date = eventEntity.Date,
-            Hour = eventEntity.Hour,
-            MaxCapacity = eventEntity.MaxCapacity,
-            CurrentCapacity = eventEntity.CurrentCapacity,
-            Cost = eventEntity.Cost,
-            Attractions = eventEntity.Attractions
-            .Select(ea => new AttractionResponse
-            {
-                Id = ea.Attraction.Id,
-                Name = ea.Attraction.Name,
-                Description = ea.Attraction.Description,
-                Type = ea.Attraction.Type.ToString(),
-                MinAge = ea.Attraction.MinAge,
-                MaxCapacity = ea.Attraction.MaxCapacity,
-                CurrentCapacity = ea.Attraction.CurrentCapacity,
-                IsActive = ea.Attraction.IsActive
-            })
-            .ToList()
-        }).ToList();
-        return eventResponses;
+        return _mapper.Map<List<EventResponse>>(events);
     }
 
     public Guid CreateEvent(EventRequest newEvent)
@@ -108,7 +65,7 @@ public class EventLogic : IEventLogic
                 Attraction attraction = _attractionLogic.GetAttractionEntityById(attractionId);
                 if (attraction == null)
                 {
-                    throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+                    throw new KeyNotFoundException($"Attraction with id {attractionId} not found");
                 }
 
                 eventEntity.AddAttraction(attraction);
@@ -124,7 +81,7 @@ public class EventLogic : IEventLogic
         Event eventEntity = _eventRepository.GetById(eventId);
         if (eventEntity == null)
         {
-            throw new KeyNotFoundException($"No se encontró el evento con id {eventId}");
+            throw new KeyNotFoundException($"Event with id {eventId} not found");
         }
 
         _eventRepository.Delete(eventEntity);
@@ -133,21 +90,21 @@ public class EventLogic : IEventLogic
     private void ValidateEventRequest(EventRequest newEvent)
     {
         if (string.IsNullOrWhiteSpace(newEvent.Name))
-            throw new ArgumentException("El nombre del evento no puede estar vacío.");
+            throw new ArgumentException("Event name cannot be empty.");
         if (!IsEventNameUnique(newEvent.Name))
-            throw new ArgumentException("El nombre del evento ya existe.");
+            throw new ArgumentException("Event name already exists.");
 
         DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime();
         if (newEvent.Date <= currentDateTime)
-            throw new ArgumentException("La fecha del evento debe ser futura.");
+            throw new ArgumentException("Event date must be in the future.");
 
         if (newEvent.Hour < MinHour || newEvent.Hour > MaxHour)
-            throw new ArgumentException("La hora debe estar entre 0 y 23.");
+            throw new ArgumentException("Hour must be between 0 and 23.");
         if (newEvent.MaxCapacity <= MinCapacityLimit || newEvent.MaxCapacity > MaxCapacityLimit)
             throw new ArgumentException(
-                $"La capacidad máxima debe ser mayor a 0 y menor o igual a {MaxCapacityLimit}.");
+                $"Max capacity must be greater than 0 and less than or equal to {MaxCapacityLimit}.");
         if (newEvent.Cost <= MinCost)
-            throw new ArgumentException("El coste debe ser mayor a 0.");
+            throw new ArgumentException("Cost must be greater than 0.");
     }
 
     private bool IsEventNameUnique(string name)

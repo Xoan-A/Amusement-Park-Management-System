@@ -11,12 +11,12 @@ namespace Api.Controllers;
 [Route("api/users")]
 public class UserController : ControllerBase
 {
-    private readonly IUserLogic _userLogic;
+    private readonly IUserManagementLogic _userManagementLogic;
     private readonly IClaimsLogic _claimsLogic;
 
-    public UserController(IUserLogic userLogic, IClaimsLogic claimsLogic)
+    public UserController(IUserManagementLogic userManagementLogic, IClaimsLogic claimsLogic)
     {
-        _userLogic = userLogic;
+        _userManagementLogic = userManagementLogic;
         _claimsLogic = claimsLogic;
     }
 
@@ -24,7 +24,7 @@ public class UserController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public IActionResult GetUserById(Guid userId)
     {
-        UserResponse user = _userLogic.GetUserResponseById(userId);
+        UserResponse user = _userManagementLogic.GetUserResponseById(userId);
         return Ok(user);
     }
 
@@ -32,7 +32,7 @@ public class UserController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public IActionResult CreateUser([FromBody] CreateUserRequest request)
     {
-        UserResponse user = _userLogic.CreateUser(request);
+        UserResponse user = _userManagementLogic.CreateUser(request);
         return CreatedAtAction(nameof(GetUserById), new { userId = user.Id }, user);
     }
 
@@ -40,7 +40,7 @@ public class UserController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public IActionResult AddRoleToUser(Guid userId, [FromBody] AddRolesRequest request)
     {
-        _userLogic.AddRoleToUser(userId, request.Role);
+        _userManagementLogic.AddRoleToUser(userId, request.Role);
 
         MessageResponse response = new MessageResponse
         {
@@ -55,7 +55,7 @@ public class UserController : ControllerBase
     public IActionResult ModifyUser(Guid userId, [FromBody] ModifyUserRequest request)
     {
         Guid userTokenId = _claimsLogic.GetCurrentUserId(User);
-        UserResponse updated = _userLogic.ModifyUser(userId, userTokenId, request);
+        UserResponse updated = _userManagementLogic.ModifyUser(userId, userTokenId, request);
         return Ok(updated);
     }
 
@@ -63,7 +63,7 @@ public class UserController : ControllerBase
     [Authorize(Roles = "Administrator")]
     public IActionResult ChangeMembershipLevel(Guid userId, [FromBody] ChangeMembershipLevelRequest request)
     {
-        UserResponse updated = _userLogic.ChangeMembershipLevel(userId, request.MembershipLevel);
+        UserResponse updated = _userManagementLogic.ChangeMembershipLevel(userId, request.MembershipLevel);
         return Ok(updated);
     }
 }

@@ -1,3 +1,4 @@
+using AutoMapper;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -9,11 +10,13 @@ namespace BusinessLogic
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordLogic _passwordLogic;
+        private readonly IMapper _mapper;
 
-        public AuthLogic(IUserRepository userRepository, IPasswordLogic passwordLogic)
+        public AuthLogic(IUserRepository userRepository, IPasswordLogic passwordLogic, IMapper mapper)
         {
             _userRepository = userRepository;
             _passwordLogic = passwordLogic;
+            _mapper = mapper;
         }
 
         public UserResponse Login(string email, string password)
@@ -29,19 +32,7 @@ namespace BusinessLogic
             if (!isPasswordValid)
                 throw new ArgumentException("Invalid email or password.");
 
-            UserResponse userResponse = new UserResponse()
-            {
-                Id = user.Id,
-                Email = user.Email,
-                Name = user.Name,
-                LastName = user.LastName,
-                UserRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                BirthDate = user.BirthDate,
-                MembershipLevel = (int?)user.MembershipLevel,
-                Score = user.Score
-            };
-
-            return userResponse;
+            return _mapper.Map<UserResponse>(user);
         }
     }
 }

@@ -1,3 +1,4 @@
+using AutoMapper;
 using Moq;
 using Domain;
 using IBusinessLogic;
@@ -5,6 +6,7 @@ using IDataAccess;
 using BusinessLogic;
 using Models.In;
 using Models.Out;
+using Models.Mapping;
 
 namespace TestBusinessLogic;
 
@@ -14,12 +16,10 @@ public class UserLogicRoleTest
     private Mock<IUserRepository> _mockUserRepository = null!;
     private Mock<IRoleRepository> _mockRoleRepository = null!;
     private Mock<IPasswordLogic> _mockPasswordService = null!;
-    private Mock<IAttractionRepository> _mockAttractionRepository = null!;
-    private Mock<ITicketLogic> _mockTicketLogic = null!;
-    private Mock<IEventRepository> _mockEventRepository = null!;
-    private Mock<IDailyScoreLogic> _mockDailyScoreLogic = null!;
-    private Mock<IDateTimeLogic> _mockDateTimeLogic = null!;
-    private IUserLogic _userLogic = null!;
+    private Mock<IUserValidationService> _mockValidationService = null!;
+    private Mock<IParkEntryLogic> _mockParkEntryLogic = null!;
+    private IMapper _mapper = null!;
+    private IUserManagementLogic _userManagementLogic = null!;
 
     [TestInitialize]
     public void Setup()
@@ -27,16 +27,23 @@ public class UserLogicRoleTest
         _mockUserRepository = new Mock<IUserRepository>();
         _mockRoleRepository = new Mock<IRoleRepository>();
         _mockPasswordService = new Mock<IPasswordLogic>();
-        _mockAttractionRepository = new Mock<IAttractionRepository>();
-        _mockTicketLogic = new Mock<ITicketLogic>();
-        _mockEventRepository = new Mock<IEventRepository>();
-        _mockDailyScoreLogic = new Mock<IDailyScoreLogic>();
-        _mockDateTimeLogic = new Mock<IDateTimeLogic>();
-        _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).Returns(DateTime.Now);
+        _mockValidationService = new Mock<IUserValidationService>();
+        _mockParkEntryLogic = new Mock<IParkEntryLogic>();
 
-        _userLogic = new UserLogic(_mockUserRepository.Object, _mockPasswordService.Object,
-            _mockAttractionRepository.Object, _mockTicketLogic.Object, _mockRoleRepository.Object,
-            _mockEventRepository.Object, _mockDailyScoreLogic.Object, _mockDateTimeLogic.Object);
+        _mockValidationService.Setup(v => v.ValidateRequiredFields(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()));
+        _mockValidationService.Setup(v => v.ValidateEmail(It.IsAny<string>())).Returns(true);
+        _mockValidationService.Setup(v => v.ValidateBirthDate(It.IsAny<DateTime>()));
+        _mockValidationService.Setup(v => v.ValidateEmailUniqueness(It.IsAny<string>()));
+        _mockValidationService.Setup(v => v.ValidateMembershipLevel(It.IsAny<string>()));
+
+        var configuration = new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile<MappingProfile>();
+        });
+        _mapper = configuration.CreateMapper();
+
+        _userManagementLogic = new UserManagementLogic(_mockUserRepository.Object, _mockPasswordService.Object,
+            _mockRoleRepository.Object, _mockValidationService.Object, _mockParkEntryLogic.Object, _mapper);
     }
 
     [TestMethod]
@@ -48,11 +55,11 @@ public class UserLogicRoleTest
         string password = "password123";
         DateTime birthDate = new DateTime(1990, 1, 1);
 
-        Role visitorRole = new Role { Id = 3, Name = Role.VISITOR };
+        Role visitorRole = new Role { Id = 3, Name = Role.Visitor };
 
         _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
         _mockPasswordService.Setup(p => p.HashPassword(password)).Returns("hashedPassword");
-        _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns(visitorRole);
+        _mockRoleRepository.Setup(r => r.GetByName(Role.Visitor)).Returns(visitorRole);
         _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).Returns((User u) => u);
 
         RegisterVisitorRequest request = new RegisterVisitorRequest
@@ -64,10 +71,10 @@ public class UserLogicRoleTest
             BirthDate = birthDate
         };
 
-        UserResponse result = _userLogic.RegisterVisitor(request);
+        UserResponse result = _userManagementLogic.RegisterVisitor(request);
 
         Assert.AreEqual(email, result.Email);
-        _mockRoleRepository.Verify(r => r.GetByName(Role.VISITOR), Times.Once);
+        _mockRoleRepository.Verify(r => r.GetByName(Role.Visitor), Times.Once);
     }
 
     [TestMethod]
@@ -77,15 +84,15 @@ public class UserLogicRoleTest
         string lastName = "User";
         string email = "admin@test.com";
         string password = "password123";
-        string[] roles = new[] { Role.ADMINISTRATOR, Role.OPERATOR };
+        string[] roles = new[] { Role.Administrator, Role.Operator };
 
-        Role adminRole = new Role { Id = 1, Name = Role.ADMINISTRATOR };
-        Role operatorRole = new Role { Id = 2, Name = Role.OPERATOR };
+        Role adminRole = new Role { Id = 1, Name = Role.Administrator };
+        Role operatorRole = new Role { Id = 2, Name = Role.Operator };
 
         _mockUserRepository.Setup(r => r.IsEmailUnique(email)).Returns(true);
         _mockPasswordService.Setup(p => p.HashPassword(password)).Returns("hashedPassword");
-        _mockRoleRepository.Setup(r => r.GetByName(Role.ADMINISTRATOR)).Returns(adminRole);
-        _mockRoleRepository.Setup(r => r.GetByName(Role.OPERATOR)).Returns(operatorRole);
+        _mockRoleRepository.Setup(r => r.GetByName(Role.Administrator)).Returns(adminRole);
+        _mockRoleRepository.Setup(r => r.GetByName(Role.Operator)).Returns(operatorRole);
         _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).Returns((User u) => u);
 
         CreateUserRequest request = new CreateUserRequest
@@ -97,7 +104,7 @@ public class UserLogicRoleTest
             Roles = roles.ToList()
         };
 
-        UserResponse result = _userLogic.CreateUser(request);
+        UserResponse result = _userManagementLogic.CreateUser(request);
 
         Assert.AreEqual(2, result.UserRoles.Count);
     }
@@ -111,11 +118,14 @@ public class UserLogicRoleTest
             LastName = "Doe",
             Email = "test@test.com",
             Password = "password123",
-            Roles = new List<string> { Role.VISITOR }
+            Roles = new List<string> { Role.Visitor }
         };
 
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("", "Doe", "test@test.com", "password123"))
+            .Throws(new ArgumentException("Name, last name, email, and password must be provided."));
+
         Assert.ThrowsException<ArgumentException>(
-            () => _userLogic.CreateUser(request)
+            () => _userManagementLogic.CreateUser(request)
         );
     }
 
@@ -128,11 +138,14 @@ public class UserLogicRoleTest
             LastName = "",
             Email = "test@test.com",
             Password = "password123",
-            Roles = new List<string> { Role.VISITOR }
+            Roles = new List<string> { Role.Visitor }
         };
 
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "", "test@test.com", "password123"))
+            .Throws(new ArgumentException("Name, last name, email, and password must be provided."));
+
         Assert.ThrowsException<ArgumentException>(
-            () => _userLogic.CreateUser(request)
+            () => _userManagementLogic.CreateUser(request)
         );
     }
 
@@ -145,11 +158,14 @@ public class UserLogicRoleTest
             LastName = "Doe",
             Email = "",
             Password = "password123",
-            Roles = new List<string> { Role.VISITOR }
+            Roles = new List<string> { Role.Visitor }
         };
 
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "Doe", "", "password123"))
+            .Throws(new ArgumentException("Name, last name, email, and password must be provided."));
+
         Assert.ThrowsException<ArgumentException>(
-            () => _userLogic.CreateUser(request)
+            () => _userManagementLogic.CreateUser(request)
         );
     }
 
@@ -162,30 +178,37 @@ public class UserLogicRoleTest
             LastName = "Doe",
             Email = "test@test.com",
             Password = "",
-            Roles = new List<string> { Role.VISITOR }
+            Roles = new List<string> { Role.Visitor }
         };
 
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "Doe", "test@test.com", ""))
+            .Throws(new ArgumentException("Name, last name, email, and password must be provided."));
+
         Assert.ThrowsException<ArgumentException>(
-            () => _userLogic.CreateUser(request)
+            () => _userManagementLogic.CreateUser(request)
         );
     }
 
     [TestMethod]
     public void CreateUser_ShouldThrowException_WhenEmailIsNotUnique()
     {
-        _mockUserRepository.Setup(r => r.IsEmailUnique("existing@test.com")).Returns(false);
-
         CreateUserRequest request = new CreateUserRequest
         {
             Name = "John",
             LastName = "Doe",
             Email = "existing@test.com",
             Password = "password123",
-            Roles = new List<string> { Role.VISITOR }
+            Roles = new List<string> { Role.Visitor }
         };
 
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "Doe", "existing@test.com", "password123"));
+        _mockValidationService.Setup(v => v.ValidateEmail("existing@test.com")).Returns(true);
+        _mockValidationService.Setup(v => v.ValidateEmailUniqueness("existing@test.com"))
+            .Throws(new ArgumentException("Email is already in use."));
+        _mockUserRepository.Setup(r => r.IsEmailUnique("existing@test.com")).Returns(false);
+
         Assert.ThrowsException<ArgumentException>(
-            () => _userLogic.CreateUser(request)
+            () => _userManagementLogic.CreateUser(request)
         );
     }
 
@@ -209,7 +232,7 @@ public class UserLogicRoleTest
             Roles = null
         };
 
-        UserResponse result = _userLogic.CreateUser(request);
+        UserResponse result = _userManagementLogic.CreateUser(request);
 
         _mockPasswordService.Verify(p => p.HashPassword(plainPassword), Times.Once);
     }
@@ -230,7 +253,7 @@ public class UserLogicRoleTest
             Roles = null
         };
 
-        UserResponse result = _userLogic.CreateUser(request);
+        UserResponse result = _userManagementLogic.CreateUser(request);
 
         Assert.AreEqual(0, result.UserRoles.Count);
     }
@@ -251,7 +274,7 @@ public class UserLogicRoleTest
             Roles = new List<string>()
         };
 
-        UserResponse result = _userLogic.CreateUser(request);
+        UserResponse result = _userManagementLogic.CreateUser(request);
 
         Assert.AreEqual(0, result.UserRoles.Count);
     }
@@ -273,7 +296,7 @@ public class UserLogicRoleTest
             Roles = new List<string>() { "InvalidRole" }
         };
 
-        UserResponse result = _userLogic.CreateUser(request);
+        UserResponse result = _userManagementLogic.CreateUser(request);
 
         Assert.AreEqual(0, result.UserRoles.Count);
     }
@@ -281,11 +304,11 @@ public class UserLogicRoleTest
     [TestMethod]
     public void CreateUser_ShouldCreateUserWithSingleRole()
     {
-        Role visitorRole = new Role { Id = 3, Name = Role.VISITOR };
+        Role visitorRole = new Role { Id = 3, Name = Role.Visitor };
 
         _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
         _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
-        _mockRoleRepository.Setup(r => r.GetByName(Role.VISITOR)).Returns(visitorRole);
+        _mockRoleRepository.Setup(r => r.GetByName(Role.Visitor)).Returns(visitorRole);
         _mockUserRepository.Setup(r => r.Create(It.IsAny<User>())).Returns((User u) => u);
 
         CreateUserRequest request = new CreateUserRequest
@@ -294,20 +317,20 @@ public class UserLogicRoleTest
             LastName = "Doe",
             Email = "test@test.com",
             Password = "password123",
-            Roles = new List<string>() { Role.VISITOR }
+            Roles = new List<string>() { Role.Visitor }
         };
 
-        UserResponse result = _userLogic.CreateUser(request);
+        UserResponse result = _userManagementLogic.CreateUser(request);
 
         Assert.AreEqual(1, result.UserRoles.Count);
-        Assert.AreEqual(Role.VISITOR, result.UserRoles.First());
+        Assert.AreEqual(Role.Visitor, result.UserRoles.First());
     }
 
     [TestMethod]
     public void AddRoleToUser_ShouldAddRoleSuccessfully()
     {
         Guid userId = Guid.NewGuid();
-        string roleName = Role.OPERATOR;
+        string roleName = Role.Operator;
 
         User user = new User
         {
@@ -318,13 +341,13 @@ public class UserLogicRoleTest
             UserRoles = new List<UserRole>()
         };
 
-        Role operatorRole = new Role { Id = 2, Name = Role.OPERATOR };
+        Role operatorRole = new Role { Id = 2, Name = Role.Operator };
 
         _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(user);
         _mockRoleRepository.Setup(r => r.GetByName(roleName)).Returns(operatorRole);
         _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-        _userLogic.AddRoleToUser(userId, roleName);
+        _userManagementLogic.AddRoleToUser(userId, roleName);
 
         Assert.AreEqual(1, user.UserRoles.Count);
         Assert.AreEqual(operatorRole, user.UserRoles.First().Role);
@@ -335,12 +358,12 @@ public class UserLogicRoleTest
     public void AddRoleToUser_ShouldThrowException_WhenUserNotFound()
     {
         Guid userId = Guid.NewGuid();
-        string roleName = Role.OPERATOR;
+        string roleName = Role.Operator;
 
         _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns((User)null);
 
         Assert.ThrowsException<ArgumentException>(
-            () => _userLogic.AddRoleToUser(userId, roleName),
+            () => _userManagementLogic.AddRoleToUser(userId, roleName),
             "User not found."
         );
 
@@ -366,7 +389,7 @@ public class UserLogicRoleTest
         _mockRoleRepository.Setup(r => r.GetByName(roleName)).Returns((Role)null);
 
         Assert.ThrowsException<ArgumentException>(
-            () => _userLogic.AddRoleToUser(userId, roleName),
+            () => _userManagementLogic.AddRoleToUser(userId, roleName),
             "Role not found."
         );
 
@@ -377,9 +400,9 @@ public class UserLogicRoleTest
     public void AddRoleToUser_ShouldThrowException_WhenUserAlreadyHasRole()
     {
         Guid userId = Guid.NewGuid();
-        string roleName = Role.VISITOR;
+        string roleName = Role.Visitor;
 
-        Role visitorRole = new Role { Id = 3, Name = Role.VISITOR };
+        Role visitorRole = new Role { Id = 3, Name = Role.Visitor };
 
         User user = new User
         {
@@ -397,7 +420,7 @@ public class UserLogicRoleTest
         _mockRoleRepository.Setup(r => r.GetByName(roleName)).Returns(visitorRole);
 
         Assert.ThrowsException<ArgumentException>(
-            () => _userLogic.AddRoleToUser(userId, roleName),
+            () => _userManagementLogic.AddRoleToUser(userId, roleName),
             "User already has that role."
         );
 
@@ -409,10 +432,10 @@ public class UserLogicRoleTest
     public void AddRoleToUser_ShouldAddSecondRole_WhenUserHasDifferentRole()
     {
         Guid userId = Guid.NewGuid();
-        string newRoleName = Role.ADMINISTRATOR;
+        string newRoleName = Role.Administrator;
 
-        Role visitorRole = new Role { Id = 3, Name = Role.VISITOR };
-        Role adminRole = new Role { Id = 1, Name = Role.ADMINISTRATOR };
+        Role visitorRole = new Role { Id = 3, Name = Role.Visitor };
+        Role adminRole = new Role { Id = 1, Name = Role.Administrator };
 
         User user = new User
         {
@@ -430,7 +453,7 @@ public class UserLogicRoleTest
         _mockRoleRepository.Setup(r => r.GetByName(newRoleName)).Returns(adminRole);
         _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
 
-        _userLogic.AddRoleToUser(userId, newRoleName);
+        _userManagementLogic.AddRoleToUser(userId, newRoleName);
 
         Assert.AreEqual(2, user.UserRoles.Count);
         Assert.IsTrue(user.UserRoles.Any(ur => ur.Role == visitorRole));
@@ -456,7 +479,7 @@ public class UserLogicRoleTest
             Roles = new List<string>()
         };
 
-        UserResponse result = _userLogic.CreateUser(request);
+        UserResponse result = _userManagementLogic.CreateUser(request);
 
         Assert.AreEqual(birthDate, result.BirthDate);
     }
@@ -465,7 +488,6 @@ public class UserLogicRoleTest
     public void CreateUser_ShouldThrowException_WhenBirthDateIsInFuture()
     {
         DateTime futureBirthDate = DateTime.Now.AddDays(1);
-        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
 
         CreateUserRequest request = new CreateUserRequest
         {
@@ -477,8 +499,15 @@ public class UserLogicRoleTest
             Roles = new List<string>()
         };
 
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "Doe", "test@test.com", "password123"));
+        _mockValidationService.Setup(v => v.ValidateEmail("test@test.com")).Returns(true);
+        _mockValidationService.Setup(v => v.ValidateEmailUniqueness("test@test.com"));
+        _mockValidationService.Setup(v => v.ValidateBirthDate(futureBirthDate))
+            .Throws(new ArgumentException("Birth date cannot be after today."));
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
+
         Assert.ThrowsException<ArgumentException>(
-            () => _userLogic.CreateUser(request)
+            () => _userManagementLogic.CreateUser(request)
         );
     }
 
@@ -499,7 +528,7 @@ public class UserLogicRoleTest
             Roles = new List<string>()
         };
 
-        UserResponse result = _userLogic.CreateUser(request);
+        UserResponse result = _userManagementLogic.CreateUser(request);
 
         Assert.AreEqual((int)MembershipLevel.Premium, result.MembershipLevel);
     }
@@ -521,7 +550,7 @@ public class UserLogicRoleTest
             Roles = new List<string>()
         };
 
-        UserResponse result = _userLogic.CreateUser(request);
+        UserResponse result = _userManagementLogic.CreateUser(request);
 
         Assert.AreEqual((int)MembershipLevel.VIP, result.MembershipLevel);
     }
@@ -543,16 +572,13 @@ public class UserLogicRoleTest
         };
 
         Assert.ThrowsException<ArgumentException>(
-            () => _userLogic.CreateUser(request)
+            () => _userManagementLogic.CreateUser(request)
         );
     }
 
     [TestMethod]
     public void CreateUser_ShouldThrowException_WhenMembershipLevelIsNumericButNotDefined()
     {
-        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
-        _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
-
         CreateUserRequest request = new CreateUserRequest
         {
             Name = "John",
@@ -563,8 +589,16 @@ public class UserLogicRoleTest
             Roles = new List<string>()
         };
 
+        _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "Doe", "test@test.com", "password123"));
+        _mockValidationService.Setup(v => v.ValidateEmail("test@test.com")).Returns(true);
+        _mockValidationService.Setup(v => v.ValidateEmailUniqueness("test@test.com"));
+        _mockValidationService.Setup(v => v.ValidateMembershipLevel("99"))
+            .Throws(new ArgumentException("Invalid membership level."));
+        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
+        _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
+
         Assert.ThrowsException<ArgumentException>(
-            () => _userLogic.CreateUser(request)
+            () => _userManagementLogic.CreateUser(request)
         );
     }
 }

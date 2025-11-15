@@ -3,7 +3,7 @@ using Models.Out;
 
 namespace IBusinessLogic
 {
-    public interface IUserLogic
+    public interface IUserManagementLogic
     {
         UserResponse RegisterVisitor(RegisterVisitorRequest registerVisitorRequest);
         UserResponse CreateUser(CreateUserRequest request);

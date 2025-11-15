@@ -19,14 +19,14 @@ namespace ApiTests
         private WebApplicationFactory<Program> _factory = null!;
         private HttpClient _client = null!;
         private Mock<IAuthLogic> _mockAuthLogic = null!;
-        private Mock<IUserLogic> _mockUserLogic = null!;
+        private Mock<IUserManagementLogic> _mockUserManagementLogic = null!;
         private SqliteConnection _connection = null!;
 
         [TestInitialize]
         public void Setup()
         {
             _mockAuthLogic = new Mock<IAuthLogic>();
-            _mockUserLogic = new Mock<IUserLogic>();
+            _mockUserManagementLogic = new Mock<IUserManagementLogic>();
 
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
@@ -44,7 +44,7 @@ namespace ApiTests
                     options.UseSqlite(_connection));
 
                     services.AddSingleton(_mockAuthLogic.Object);
-                    services.AddSingleton(_mockUserLogic.Object);
+                    services.AddSingleton(_mockUserManagementLogic.Object);
                 });
             });
 
@@ -81,7 +81,7 @@ namespace ApiTests
                 Name = "Admin",
                 LastName = "User",
                 Email = "admin@test.com",
-                UserRoles = new List<string> { Domain.Role.ADMINISTRATOR }
+                UserRoles = new List<string> { Domain.Role.Administrator }
             };
 
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
@@ -99,7 +99,7 @@ namespace ApiTests
 
             Assert.AreEqual("admin@test.com", loginResponse.Email);
             Assert.AreEqual(1, loginResponse.Roles.Length);
-            Assert.AreEqual(Domain.Role.ADMINISTRATOR, loginResponse.Roles[0]);
+            Assert.AreEqual(Domain.Role.Administrator, loginResponse.Roles[0]);
         }
 
         [TestMethod]
@@ -130,7 +130,7 @@ namespace ApiTests
                 UserRoles = new List<string>()
             };
 
-            _mockUserLogic.Setup(x => x.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
+            _mockUserManagementLogic.Setup(x => x.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
             .Returns(userResponse);
 
             string json = JsonSerializer.Serialize(request);
@@ -213,7 +213,7 @@ namespace ApiTests
                 BirthDate = new DateTime(1990, 1, 1)
             };
 
-            _mockUserLogic.Setup(x => x.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
+            _mockUserManagementLogic.Setup(x => x.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
             .Throws(new ArgumentException("Email already exists."));
 
             string json = JsonSerializer.Serialize(request);

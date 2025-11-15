@@ -52,9 +52,9 @@ namespace DataAccess.Context
                 .HasForeignKey(ur => ur.RoleId);
 
             modelBuilder.Entity<Role>().HasData(
-                new Role { Id = 1, Name = Role.ADMINISTRATOR },
-                new Role { Id = 2, Name = Role.OPERATOR },
-                new Role { Id = 3, Name = Role.VISITOR }
+                new Role { Id = 1, Name = Role.Administrator },
+                new Role { Id = 2, Name = Role.Operator },
+                new Role { Id = 3, Name = Role.Visitor }
             );
 
             Guid adminId = Guid.Parse("11111111-1111-1111-1111-111111111111");
