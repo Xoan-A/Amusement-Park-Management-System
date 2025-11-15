@@ -6,7 +6,6 @@ import { NavbarComponent } from '../../../shared/components/navbar/navbar.compon
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { AttractionResponse, AllAttractionsResponse } from '../../../core/models/responses';
-import { MaintenanceType } from '../../../core/models/enums';
 
 @Component({
   selector: 'app-schedule-form',
@@ -66,23 +65,29 @@ import { MaintenanceType } from '../../../core/models/enums';
                   }
                 </div>
 
-                <!-- Maintenance Type -->
+                <!-- Estimated Duration -->
                 <div class="mb-3">
-                  <label for="maintenanceType" class="form-label">Maintenance Type *</label>
-                  <select
-                    id="maintenanceType"
-                    class="form-select"
-                    formControlName="maintenanceType"
-                    [class.is-invalid]="scheduleForm.get('maintenanceType')?.invalid && scheduleForm.get('maintenanceType')?.touched">
-                    <option value="">Select maintenance type</option>
-                    <option value="Inspection">Inspection</option>
-                    <option value="Cleaning">Cleaning</option>
-                    <option value="Repair">Repair</option>
-                    <option value="SafetyCheck">Safety Check</option>
-                  </select>
-                  @if (scheduleForm.get('maintenanceType')?.invalid && scheduleForm.get('maintenanceType')?.touched) {
+                  <label for="estimatedDuration" class="form-label">Estimated Duration (hours) *</label>
+                  <input
+                    type="number"
+                    id="estimatedDuration"
+                    class="form-control"
+                    formControlName="estimatedDuration"
+                    min="1"
+                    max="24"
+                    placeholder="Enter duration in hours"
+                    [class.is-invalid]="scheduleForm.get('estimatedDuration')?.invalid && scheduleForm.get('estimatedDuration')?.touched">
+                  @if (scheduleForm.get('estimatedDuration')?.invalid && scheduleForm.get('estimatedDuration')?.touched) {
                     <div class="invalid-feedback">
-                      Maintenance type is required.
+                      @if (scheduleForm.get('estimatedDuration')?.errors?.['required']) {
+                        Estimated duration is required.
+                      }
+                      @if (scheduleForm.get('estimatedDuration')?.errors?.['min']) {
+                        Duration must be at least 1 hour.
+                      }
+                      @if (scheduleForm.get('estimatedDuration')?.errors?.['max']) {
+                        Duration cannot exceed 24 hours.
+                      }
                     </div>
                   }
                 </div>
@@ -151,7 +156,7 @@ export class ScheduleFormComponent implements OnInit {
     this.scheduleForm = this.fb.group({
       attractionId: ['', Validators.required],
       scheduledDate: ['', Validators.required],
-      maintenanceType: ['', Validators.required],
+      estimatedDuration: ['', [Validators.required, Validators.min(1), Validators.max(24)]],
       description: ['', [Validators.required, Validators.minLength(10)]]
     });
   }
@@ -180,7 +185,7 @@ export class ScheduleFormComponent implements OnInit {
     const request = {
       attractionId: formValue.attractionId,
       scheduledDate: formValue.scheduledDate,
-      maintenanceType: formValue.maintenanceType,
+      estimatedDuration: parseInt(formValue.estimatedDuration, 10),
       description: formValue.description
     };
 

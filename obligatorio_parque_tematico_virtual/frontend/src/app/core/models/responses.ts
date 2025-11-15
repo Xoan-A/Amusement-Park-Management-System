@@ -1,4 +1,4 @@
-import { AttractionType, MembershipLevel, TicketType, MaintenanceStatus, MaintenanceType, ScoreOrigin } from './enums';
+import { AttractionType, MembershipLevel, TicketType, MaintenanceStatus, ScoreOrigin } from './enums';
 
 export interface LoginResponse {
   token: string;
@@ -29,7 +29,7 @@ export interface UserResponse {
   email: string;
   birthDate?: string;
   membershipLevel?: MembershipLevel;
-  roles: string[];
+  userRoles: string[];
   score: number;
 }
 
@@ -160,37 +160,21 @@ export interface MaintenanceScheduleResponse {
   attractionId: string;
   attractionName: string;
   scheduledDate: string;
-  maintenanceType: MaintenanceType;
   description: string;
-  status: MaintenanceStatus;
-  createdAt: string;
-  createdBy?: string;
-}
-
-export interface MaintenanceRecordResponse {
-  id: string;
-  maintenanceScheduleId?: string;
-  attractionId: string;
-  attractionName: string;
-  performedDate: string;
-  performedBy: string;
-  performedByName: string;
-  maintenanceType: MaintenanceType;
-  description: string;
-  durationMinutes: number;
-  notes?: string;
+  estimatedDuration: number;
+  status: string;
+  isOverdue: boolean;
 }
 
 export interface ScoreHistoryResponse {
   id: string;
-  createdAt: string;
+  visitorId: string;
+  visitorName?: string;
   points: number;
   origin: ScoreOrigin;
   strategyName: string;
-  description: string;
   relatedEntityId?: string;
-  visitorId?: string;
-  visitorName?: string;
+  createdAt: string;
 }
 
 export interface PluginResponse {

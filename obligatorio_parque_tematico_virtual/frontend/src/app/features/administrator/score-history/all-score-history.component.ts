@@ -133,7 +133,6 @@ import { ScoreOrigin } from '../../../core/models/enums';
                     <th>Points</th>
                     <th>Origin</th>
                     <th>Strategy</th>
-                    <th>Description</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -152,7 +151,6 @@ import { ScoreOrigin } from '../../../core/models/enums';
                         </span>
                       </td>
                       <td>{{ record.strategyName }}</td>
-                      <td>{{ record.description }}</td>
                     </tr>
                   }
                 </tbody>
@@ -270,14 +268,13 @@ export class AllScoreHistoryComponent implements OnInit {
   }
 
   exportToCSV() {
-    const headers = ['Date', 'Visitor', 'Points', 'Origin', 'Strategy', 'Description'];
+    const headers = ['Date', 'Visitor', 'Points', 'Origin', 'Strategy'];
     const rows = this.filteredHistory.map(r => [
       new Date(r.createdAt).toLocaleString(),
       r.visitorName || 'Unknown',
       r.points.toString(),
       this.formatOrigin(r.origin),
-      r.strategyName,
-      r.description
+      r.strategyName
     ]);
 
     const csvContent = [

@@ -1,304 +1,398 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
-import { AttractionService } from '../../../core/services/attraction.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { MaintenanceScheduleResponse, AttractionResponse, AllAttractionsResponse } from '../../../core/models/responses';
+import { MaintenanceScheduleResponse } from '../../../core/models/responses';
 
 @Component({
   selector: 'app-operator-maintenance',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent],
+  imports: [CommonModule, NavbarComponent],
   template: `
     <app-navbar></app-navbar>
     <div class="container mt-4">
-      <h2 class="mb-4">Record Maintenance Work</h2>
+      <h2 class="mb-4">Maintenance Schedules</h2>
 
-      <!-- Pending Schedules -->
+      @if (errorMessage) {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          {{ errorMessage }}
+          <button type="button" class="btn-close" (click)="errorMessage = null"></button>
+        </div>
+      }
+
+      @if (successMessage) {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          {{ successMessage }}
+          <button type="button" class="btn-close" (click)="successMessage = null"></button>
+        </div>
+      }
+
+      <!-- Filter Buttons -->
+      <div class="mb-3">
+        <button class="btn btn-outline-danger me-2" (click)="toggleOverdue()">
+          <i class="bi bi-exclamation-triangle"></i>
+          {{ showOverdue ? 'Hide' : 'Show' }} Overdue
+          @if (overdueSchedules.length > 0) {
+            <span class="badge bg-danger ms-1">{{ overdueSchedules.length }}</span>
+          }
+        </button>
+        <button class="btn btn-outline-info" (click)="toggleUpcoming()">
+          <i class="bi bi-calendar-event"></i>
+          {{ showUpcoming ? 'Hide' : 'Show' }} Upcoming (7 days)
+          @if (upcomingSchedules.length > 0) {
+            <span class="badge bg-info ms-1">{{ upcomingSchedules.length }}</span>
+          }
+        </button>
+      </div>
+
+      <!-- Overdue Schedules -->
+      @if (showOverdue) {
+        <div class="card mb-4 border-danger">
+          <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">
+              <i class="bi bi-exclamation-triangle"></i> Overdue Maintenance
+              <span class="badge bg-white text-danger ms-2">{{ overdueSchedules.length }}</span>
+            </h5>
+          </div>
+          <div class="card-body">
+            @if (loadingOverdue) {
+              <div class="text-center py-3">
+                <div class="spinner-border text-danger" role="status"></div>
+                <p class="mt-2">Loading overdue schedules...</p>
+              </div>
+            }
+
+            @if (!loadingOverdue && overdueSchedules.length > 0) {
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Attraction</th>
+                      <th>Scheduled Date</th>
+                      <th>Duration</th>
+                      <th>Description</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (schedule of overdueSchedules; track schedule.id) {
+                      <tr class="table-danger">
+                        <td>{{ schedule.attractionName }}</td>
+                        <td>
+                          {{ schedule.scheduledDate | date:'short' }}
+                          <span class="badge bg-danger ms-2">OVERDUE</span>
+                        </td>
+                        <td>{{ schedule.estimatedDuration }}h</td>
+                        <td>{{ schedule.description }}</td>
+                        <td>
+                          <span class="badge bg-warning">{{ schedule.status }}</span>
+                        </td>
+                        <td>
+                          <button
+                            class="btn btn-sm btn-success"
+                            (click)="completeMaintenance(schedule.id)"
+                            [disabled]="loading"
+                            title="Mark as completed">
+                            <i class="bi bi-check-circle"></i> Complete
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+
+            @if (!loadingOverdue && overdueSchedules.length === 0) {
+              <p class="text-success mb-0">
+                <i class="bi bi-check-circle"></i> No overdue maintenance schedules!
+              </p>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Upcoming Schedules -->
+      @if (showUpcoming) {
+        <div class="card mb-4 border-info">
+          <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+              <i class="bi bi-calendar-event"></i> Upcoming Maintenance (Next 7 days)
+              <span class="badge bg-white text-info ms-2">{{ upcomingSchedules.length }}</span>
+            </h5>
+          </div>
+          <div class="card-body">
+            @if (loadingUpcoming) {
+              <div class="text-center py-3">
+                <div class="spinner-border text-info" role="status"></div>
+                <p class="mt-2">Loading upcoming schedules...</p>
+              </div>
+            }
+
+            @if (!loadingUpcoming && upcomingSchedules.length > 0) {
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Attraction</th>
+                      <th>Scheduled Date</th>
+                      <th>Duration</th>
+                      <th>Description</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (schedule of upcomingSchedules; track schedule.id) {
+                      <tr>
+                        <td>{{ schedule.attractionName }}</td>
+                        <td>{{ schedule.scheduledDate | date:'short' }}</td>
+                        <td>{{ schedule.estimatedDuration }}h</td>
+                        <td>{{ schedule.description }}</td>
+                        <td>
+                          <span class="badge bg-warning">{{ schedule.status }}</span>
+                        </td>
+                        <td>
+                          <button
+                            class="btn btn-sm btn-success"
+                            (click)="completeMaintenance(schedule.id)"
+                            [disabled]="loading"
+                            title="Mark as completed">
+                            <i class="bi bi-check-circle"></i> Complete
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+
+            @if (!loadingUpcoming && upcomingSchedules.length === 0) {
+              <p class="text-muted mb-0">No upcoming maintenance scheduled for the next 7 days.</p>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Active Schedules -->
       <div class="card mb-4">
         <div class="card-header">
           <h5 class="mb-0">
-            <i class="bi bi-calendar-check"></i> Pending Maintenance Schedules
-            <span class="badge bg-warning ms-2">{{ pendingSchedules.length }}</span>
+            <i class="bi bi-gear-fill"></i> Active Maintenance (In Progress)
+            <span class="badge bg-primary ms-2">{{ activeSchedules.length }}</span>
           </h5>
         </div>
         <div class="card-body">
           @if (loadingSchedules) {
-            <div class="text-center">
-              <div class="spinner-border spinner-border-sm" role="status"></div>
-              <span class="ms-2">Loading...</span>
+            <div class="text-center py-3">
+              <div class="spinner-border" role="status"></div>
+              <p class="mt-2">Loading schedules...</p>
             </div>
           }
 
-          @if (!loadingSchedules && pendingSchedules.length > 0) {
-            <div class="list-group">
-              @for (schedule of pendingSchedules; track schedule.id) {
-                <a href="javascript:void(0)"
-                   class="list-group-item list-group-item-action"
-                   (click)="selectSchedule(schedule)">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">{{ schedule.attractionName }}</h6>
-                    <small>{{ schedule.scheduledDate | date:'short' }}</small>
-                  </div>
-                  <p class="mb-1">{{ schedule.description }}</p>
-                  <small class="text-muted">Type: {{ schedule.maintenanceType }}</small>
-                </a>
-              }
+          @if (!loadingSchedules && activeSchedules.length > 0) {
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Attraction</th>
+                    <th>Scheduled Date</th>
+                    <th>Duration</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (schedule of activeSchedules; track schedule.id) {
+                    <tr [class.table-danger]="schedule.isOverdue">
+                      <td>{{ schedule.attractionName }}</td>
+                      <td>
+                        {{ schedule.scheduledDate | date:'short' }}
+                        @if (schedule.isOverdue) {
+                          <span class="badge bg-danger ms-2">OVERDUE</span>
+                        }
+                      </td>
+                      <td>{{ schedule.estimatedDuration }}h</td>
+                      <td>{{ schedule.description }}</td>
+                      <td>
+                        <span class="badge bg-primary">{{ schedule.status }}</span>
+                      </td>
+                      <td>
+                        <button
+                          class="btn btn-sm btn-success"
+                          (click)="completeMaintenance(schedule.id)"
+                          [disabled]="loading"
+                          title="Mark as completed">
+                          <i class="bi bi-check-circle"></i> Complete
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
             </div>
           }
 
-          @if (!loadingSchedules && pendingSchedules.length === 0) {
-            <p class="text-muted mb-0">No pending maintenance schedules.</p>
+          @if (!loadingSchedules && activeSchedules.length === 0) {
+            <p class="text-muted mb-0">No active maintenance in progress.</p>
           }
         </div>
       </div>
 
-      <!-- Record Maintenance Form -->
+      <!-- Completed Schedules -->
       <div class="card">
         <div class="card-header">
           <h5 class="mb-0">
-            @if (selectedSchedule) {
-              Complete Scheduled Maintenance
-            } @else {
-              Record Unscheduled Maintenance
-            }
+            <i class="bi bi-check-circle"></i> Recently Completed Maintenance
           </h5>
         </div>
         <div class="card-body">
-          @if (selectedSchedule) {
-            <div class="alert alert-info mb-3">
-              <strong>Scheduled Maintenance:</strong> {{ selectedSchedule.attractionName }} - {{ selectedSchedule.description }}
-              <button type="button" class="btn-close float-end" (click)="clearSelection()"></button>
+          @if (loadingCompleted) {
+            <div class="text-center py-3">
+              <div class="spinner-border spinner-border-sm" role="status"></div>
             </div>
           }
 
-          @if (errorMessage) {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-              {{ errorMessage }}
-              <button type="button" class="btn-close" (click)="errorMessage = null"></button>
-            </div>
-          }
-
-          @if (successMessage) {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-              {{ successMessage }}
-              <button type="button" class="btn-close" (click)="successMessage = null"></button>
-            </div>
-          }
-
-          <form [formGroup]="maintenanceForm" (ngSubmit)="onSubmit()">
-            <!-- Attraction Selection (only for unscheduled) -->
-            @if (!selectedSchedule) {
-              <div class="mb-3">
-                <label for="attractionId" class="form-label">Attraction *</label>
-                <select
-                  id="attractionId"
-                  class="form-select"
-                  formControlName="attractionId"
-                  [class.is-invalid]="maintenanceForm.get('attractionId')?.invalid && maintenanceForm.get('attractionId')?.touched">
-                  <option value="">Select an attraction</option>
-                  @for (attraction of attractions; track attraction.id) {
-                    <option [value]="attraction.id">{{ attraction.name }}</option>
+          @if (!loadingCompleted && completedSchedules.length > 0) {
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Attraction</th>
+                    <th>Scheduled Date</th>
+                    <th>Duration</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (schedule of completedSchedules; track schedule.id) {
+                    <tr>
+                      <td>{{ schedule.attractionName }}</td>
+                      <td>{{ schedule.scheduledDate | date:'short' }}</td>
+                      <td>{{ schedule.estimatedDuration }}h</td>
+                      <td>{{ schedule.description }}</td>
+                      <td>
+                        <span class="badge bg-success">{{ schedule.status }}</span>
+                      </td>
+                    </tr>
                   }
-                </select>
-                @if (maintenanceForm.get('attractionId')?.invalid && maintenanceForm.get('attractionId')?.touched) {
-                  <div class="invalid-feedback">Attraction is required.</div>
-                }
-              </div>
-
-              <div class="mb-3">
-                <label for="maintenanceType" class="form-label">Maintenance Type *</label>
-                <select
-                  id="maintenanceType"
-                  class="form-select"
-                  formControlName="maintenanceType"
-                  [class.is-invalid]="maintenanceForm.get('maintenanceType')?.invalid && maintenanceForm.get('maintenanceType')?.touched">
-                  <option value="">Select type</option>
-                  <option value="Inspection">Inspection</option>
-                  <option value="Cleaning">Cleaning</option>
-                  <option value="Repair">Repair</option>
-                  <option value="SafetyCheck">Safety Check</option>
-                </select>
-                @if (maintenanceForm.get('maintenanceType')?.invalid && maintenanceForm.get('maintenanceType')?.touched) {
-                  <div class="invalid-feedback">Maintenance type is required.</div>
-                }
-              </div>
-            }
-
-            <!-- Performed Date -->
-            <div class="mb-3">
-              <label for="performedDate" class="form-label">Performed Date & Time *</label>
-              <input
-                type="datetime-local"
-                id="performedDate"
-                class="form-control"
-                formControlName="performedDate"
-                [class.is-invalid]="maintenanceForm.get('performedDate')?.invalid && maintenanceForm.get('performedDate')?.touched">
-              @if (maintenanceForm.get('performedDate')?.invalid && maintenanceForm.get('performedDate')?.touched) {
-                <div class="invalid-feedback">Performed date is required.</div>
-              }
+                </tbody>
+              </table>
             </div>
+          }
 
-            <!-- Duration -->
-            <div class="mb-3">
-              <label for="durationMinutes" class="form-label">Duration (minutes) *</label>
-              <input
-                type="number"
-                id="durationMinutes"
-                class="form-control"
-                formControlName="durationMinutes"
-                min="1"
-                placeholder="e.g., 30"
-                [class.is-invalid]="maintenanceForm.get('durationMinutes')?.invalid && maintenanceForm.get('durationMinutes')?.touched">
-              @if (maintenanceForm.get('durationMinutes')?.invalid && maintenanceForm.get('durationMinutes')?.touched) {
-                <div class="invalid-feedback">
-                  Duration is required and must be at least 1 minute.
-                </div>
-              }
-            </div>
-
-            <!-- Description -->
-            <div class="mb-3">
-              <label for="description" class="form-label">Work Description *</label>
-              <textarea
-                id="description"
-                class="form-control"
-                rows="3"
-                formControlName="description"
-                placeholder="Describe the maintenance work performed..."
-                [class.is-invalid]="maintenanceForm.get('description')?.invalid && maintenanceForm.get('description')?.touched"></textarea>
-              @if (maintenanceForm.get('description')?.invalid && maintenanceForm.get('description')?.touched) {
-                <div class="invalid-feedback">
-                  Description is required (minimum 10 characters).
-                </div>
-              }
-            </div>
-
-            <!-- Notes -->
-            <div class="mb-3">
-              <label for="notes" class="form-label">Additional Notes</label>
-              <textarea
-                id="notes"
-                class="form-control"
-                rows="2"
-                formControlName="notes"
-                placeholder="Any additional observations or comments..."></textarea>
-            </div>
-
-            <!-- Buttons -->
-            <div class="d-flex justify-content-between">
-              @if (selectedSchedule) {
-                <button type="button" class="btn btn-secondary" (click)="clearSelection()" [disabled]="loading">
-                  Cancel
-                </button>
-              } @else {
-                <div></div>
-              }
-              <button type="submit" class="btn btn-primary" [disabled]="maintenanceForm.invalid || loading">
-                @if (loading) {
-                  <span class="spinner-border spinner-border-sm me-2"></span>
-                  Recording...
-                } @else {
-                  <i class="bi bi-check-circle"></i> Record Maintenance
-                }
-              </button>
-            </div>
-          </form>
+          @if (!loadingCompleted && completedSchedules.length === 0) {
+            <p class="text-muted mb-0">No completed maintenance schedules.</p>
+          }
         </div>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    .table-danger {
+      background-color: #f8d7da !important;
+    }
+  `]
 })
 export class OperatorMaintenanceComponent implements OnInit {
-  private fb = inject(FormBuilder);
   private maintenanceService = inject(MaintenanceService);
-  private attractionService = inject(AttractionService);
-  private authService = inject(AuthService);
 
-  maintenanceForm!: FormGroup;
-  pendingSchedules: MaintenanceScheduleResponse[] = [];
-  attractions: AttractionResponse[] = [];
-  selectedSchedule: MaintenanceScheduleResponse | null = null;
+  activeSchedules: MaintenanceScheduleResponse[] = [];
+  completedSchedules: MaintenanceScheduleResponse[] = [];
+  overdueSchedules: MaintenanceScheduleResponse[] = [];
+  upcomingSchedules: MaintenanceScheduleResponse[] = [];
 
   loading = false;
   loadingSchedules = false;
+  loadingCompleted = false;
+  loadingOverdue = false;
+  loadingUpcoming = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
 
+  showOverdue = false;
+  showUpcoming = false;
+
   ngOnInit() {
-    this.initForm();
-    this.loadAttractions();
-    this.loadPendingSchedules();
-    this.setDefaultDateTime();
+    this.loadActiveSchedules();
+    this.loadCompletedSchedules();
   }
 
-  initForm() {
-    this.maintenanceForm = this.fb.group({
-      attractionId: ['', Validators.required],
-      maintenanceType: ['', Validators.required],
-      performedDate: ['', Validators.required],
-      durationMinutes: ['', [Validators.required, Validators.min(1)]],
-      description: ['', [Validators.required, Validators.minLength(10)]],
-      notes: ['']
-    });
-  }
-
-  setDefaultDateTime() {
-    const now = new Date();
-    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-      .toISOString()
-      .slice(0, 16);
-    this.maintenanceForm.patchValue({ performedDate: localDateTime });
-  }
-
-  loadAttractions() {
-    this.attractionService.getAll().subscribe({
-      next: (response: AllAttractionsResponse) => {
-        this.attractions = response.attractions;
-      },
-      error: () => {
-        this.errorMessage = 'Failed to load attractions.';
-      }
-    });
-  }
-
-  loadPendingSchedules() {
+  loadActiveSchedules() {
     this.loadingSchedules = true;
-    this.maintenanceService.getAllSchedules({ status: 'Pending' }).subscribe({
+    this.maintenanceService.getAllSchedules({ status: 'InProgress' }).subscribe({
       next: (schedules) => {
-        this.pendingSchedules = schedules;
+        this.activeSchedules = schedules;
         this.loadingSchedules = false;
       },
       error: () => {
+        this.errorMessage = 'Failed to load active schedules.';
         this.loadingSchedules = false;
       }
     });
   }
 
-  selectSchedule(schedule: MaintenanceScheduleResponse) {
-    this.selectedSchedule = schedule;
-    this.maintenanceForm.patchValue({
-      attractionId: schedule.attractionId,
-      maintenanceType: schedule.maintenanceType,
-      description: `Completed: ${schedule.description}`
+  loadCompletedSchedules() {
+    this.loadingCompleted = true;
+    this.maintenanceService.getAllSchedules({ status: 'Completed' }).subscribe({
+      next: (schedules) => {
+        this.completedSchedules = schedules.slice(0, 10);
+        this.loadingCompleted = false;
+      },
+      error: () => {
+        this.loadingCompleted = false;
+      }
     });
-    this.maintenanceForm.get('attractionId')?.disable();
-    this.maintenanceForm.get('maintenanceType')?.disable();
   }
 
-  clearSelection() {
-    this.selectedSchedule = null;
-    this.maintenanceForm.reset();
-    this.setDefaultDateTime();
-    this.maintenanceForm.get('attractionId')?.enable();
-    this.maintenanceForm.get('maintenanceType')?.enable();
+  loadOverdueSchedules() {
+    this.loadingOverdue = true;
+    this.maintenanceService.getOverdueSchedules().subscribe({
+      next: (schedules) => {
+        this.overdueSchedules = schedules;
+        this.loadingOverdue = false;
+      },
+      error: () => {
+        this.errorMessage = 'Failed to load overdue schedules.';
+        this.loadingOverdue = false;
+      }
+    });
   }
 
-  onSubmit() {
-    if (this.maintenanceForm.invalid) {
-      this.maintenanceForm.markAllAsTouched();
+  loadUpcomingSchedules() {
+    this.loadingUpcoming = true;
+    this.maintenanceService.getUpcomingSchedules(7).subscribe({
+      next: (schedules) => {
+        this.upcomingSchedules = schedules;
+        this.loadingUpcoming = false;
+      },
+      error: () => {
+        this.errorMessage = 'Failed to load upcoming schedules.';
+        this.loadingUpcoming = false;
+      }
+    });
+  }
+
+  toggleOverdue() {
+    this.showOverdue = !this.showOverdue;
+    if (this.showOverdue && this.overdueSchedules.length === 0) {
+      this.loadOverdueSchedules();
+    }
+  }
+
+  toggleUpcoming() {
+    this.showUpcoming = !this.showUpcoming;
+    if (this.showUpcoming && this.upcomingSchedules.length === 0) {
+      this.loadUpcomingSchedules();
+    }
+  }
+
+  completeMaintenance(scheduleId: string) {
+    if (!confirm('Mark this maintenance schedule as completed?')) {
       return;
     }
 
@@ -306,33 +400,18 @@ export class OperatorMaintenanceComponent implements OnInit {
     this.errorMessage = null;
     this.successMessage = null;
 
-    const formValue = this.maintenanceForm.getRawValue();
-    const request = {
-      attractionId: formValue.attractionId,
-      maintenanceScheduleId: this.selectedSchedule?.id,
-      performedDate: formValue.performedDate,
-      maintenanceType: formValue.maintenanceType,
-      description: formValue.description,
-      durationMinutes: formValue.durationMinutes,
-      notes: formValue.notes || undefined
-    };
-
-    const observable = this.selectedSchedule
-      ? this.maintenanceService.completeMaintenance(this.selectedSchedule.id, request)
-      : this.maintenanceService.recordMaintenance(request);
-
-    observable.subscribe({
+    this.maintenanceService.updateScheduleStatus(scheduleId, { status: 'Completed' }).subscribe({
       next: (response) => {
         this.loading = false;
-        this.successMessage = response.message || 'Maintenance recorded successfully!';
-        this.maintenanceForm.reset();
-        this.setDefaultDateTime();
-        this.clearSelection();
-        this.loadPendingSchedules();
+        this.successMessage = response.message || 'Maintenance completed successfully!';
+        this.loadActiveSchedules();
+        this.loadCompletedSchedules();
+        if (this.showOverdue) this.loadOverdueSchedules();
+        if (this.showUpcoming) this.loadUpcomingSchedules();
       },
       error: (error) => {
         this.loading = false;
-        this.errorMessage = error.error?.message || 'Failed to record maintenance.';
+        this.errorMessage = error.error?.message || 'Failed to complete maintenance.';
       }
     });
   }

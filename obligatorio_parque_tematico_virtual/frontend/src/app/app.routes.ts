@@ -79,10 +79,6 @@ export const routes: Routes = [
         loadComponent: () => import('./features/administrator/maintenance/schedule-form.component').then(m => m.ScheduleFormComponent)
       },
       {
-        path: 'maintenance/records',
-        loadComponent: () => import('./features/administrator/maintenance/maintenance-records.component').then(m => m.MaintenanceRecordsComponent)
-      },
-      {
         path: 'score-history',
         loadComponent: () => import('./features/administrator/score-history/all-score-history.component').then(m => m.AllScoreHistoryComponent)
       },
