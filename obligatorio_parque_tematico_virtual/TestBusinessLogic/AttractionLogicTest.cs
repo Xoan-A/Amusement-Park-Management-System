@@ -25,14 +25,12 @@ public class AttractionLogicTest
         _mockAttractionRepository = new Mock<IAttractionRepository>();
         _mockReportRepository = new Mock<IReportRepository>();
 
-        var configuration = new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<MappingProfile>();
-        });
+        var configuration = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
         _mapper = configuration.CreateMapper();
 
         _attractionLogic = new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object, _mapper);
-        _attractionLogicEntity = new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object, _mapper);
+        _attractionLogicEntity =
+        new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object, _mapper);
     }
 
     [TestMethod]
@@ -67,7 +65,7 @@ public class AttractionLogicTest
             CurrentCapacity = 15,
         };
         expectedAttraction.AddIncident("Equipment failure");
-        
+
         _mockAttractionRepository.Setup(r => r.GetById(expectedAttraction.Id)).Returns(expectedAttraction);
         AttractionResponse result = _attractionLogic.GetAttractionById(expectedAttraction.Id);
 
@@ -123,7 +121,7 @@ public class AttractionLogicTest
             }
         };
         expectedAttractions[0].AddIncident("Motor failure");
-        
+
         _mockAttractionRepository.Setup(r => r.GetAll()).Returns(expectedAttractions);
         List<AttractionResponse> result = _attractionLogic.GetAllAttractions();
 
