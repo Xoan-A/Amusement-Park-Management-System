@@ -1,0 +1,111 @@
+<app-navbar></app-navbar>
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">
+            <i class="bi bi-clock-history"></i> Server Date/Time Management
+          </h3>
+        </div>
+        <div class="card-body">
+          <!-- Current Server Time Display -->
+          <div class="alert alert-info mb-4">
+            <h5 class="alert-heading">
+              <i class="bi bi-info-circle"></i> Current Server Date/Time
+            </h5>
+            <hr>
+            <p class="mb-0 fs-4">
+              {{ formatDateTime(currentDateTime) }}
+            </p>
+          </div>
+
+          <!-- Success Message -->
+          @if (successMessage) {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <i class="bi bi-check-circle"></i> {{ successMessage }}
+              <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+            </div>
+          }
+
+          <!-- Error Message -->
+          @if (errorMessage) {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
+              <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+            </div>
+          }
+
+          <!-- Date/Time Form -->
+          <form [formGroup]="dateTimeForm" (ngSubmit)="onSubmit()">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="date" class="form-label fw-bold">Date</label>
+                <input
+                  type="date"
+                  id="date"
+                  class="form-control"
+                  formControlName="date"
+                  [class.is-invalid]="dateTimeForm.get('date')?.invalid && dateTimeForm.get('date')?.touched"
+                >
+                <div class="invalid-feedback">
+                  Date is required
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="time" class="form-label fw-bold">Time (Hour)</label>
+                <input
+                  type="number"
+                  id="time"
+                  class="form-control"
+                  formControlName="time"
+                  min="0"
+                  max="23"
+                  placeholder="0-23"
+                  [class.is-invalid]="dateTimeForm.get('time')?.invalid && dateTimeForm.get('time')?.touched"
+                >
+                <div class="invalid-feedback">
+                  Hour is required (0-23)
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end">
+              <button
+                type="button"
+                class="btn btn-outline-primary"
+                (click)="loadCurrentDateTime()"
+                [disabled]="loading"
+              >
+                <i class="bi bi-arrow-repeat"></i> Refresh
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="dateTimeForm.invalid || loading"
+              >
+                @if (loading) {
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                }
+                <i class="bi bi-save"></i> Update Server Time
+              </button>
+            </div>
+          </form>
+
+          <!-- Info Box -->
+          <div class="alert alert-warning mt-4">
+            <h6 class="alert-heading">
+              <i class="bi bi-exclamation-circle"></i> Important Information
+            </h6>
+            <ul class="mb-0">
+              <li>Changing the server time will affect all time-dependent operations</li>
+              <li>This includes score calculations, event scheduling, and maintenance tasks</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

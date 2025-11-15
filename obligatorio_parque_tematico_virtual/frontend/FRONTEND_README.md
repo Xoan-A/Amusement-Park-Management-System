@@ -47,6 +47,7 @@ Complete Angular 19.2.2 frontend implementation for the theme park management sy
 - ✅ Loading spinner
 - ✅ Unauthorized access page
 - ✅ Custom pipes for enum display
+- ✅ Date/Time management component (accessible to all roles)
 
 ## Project Structure
 

@@ -14,6 +14,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent)
   },
   {
+    path: 'datetime',
+    loadComponent: () => import('./shared/components/datetime-management/datetime-management.component').then(m => m.DateTimeManagementComponent)
+  },
+  {
     path: 'admin',
     canActivate: [authGuard, roleGuard],
     data: { roles: [Roles.ADMINISTRATOR] },
