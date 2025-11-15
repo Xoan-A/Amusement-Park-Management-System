@@ -5,19 +5,26 @@ import { environment } from '../../../environments/environment';
 import { PluginResponse } from '../models/responses';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PluginService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/plugins`;
 
-  // Get all available plugins
   getAvailablePlugins(): Observable<PluginResponse[]> {
     return this.http.get<PluginResponse[]>(this.apiUrl);
   }
 
-  // Get specific plugin by name
   getPluginByName(name: string): Observable<PluginResponse> {
     return this.http.get<PluginResponse>(`${this.apiUrl}/${name}`);
+  }
+
+  uploadPlugin(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('dllFile', file, file.name);
+    return this.http.post(this.apiUrl, formData, {
+      observe: 'response',
+      responseType: 'text' as 'json',
+    });
   }
 }
