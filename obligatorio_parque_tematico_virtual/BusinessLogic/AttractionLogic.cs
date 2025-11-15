@@ -129,38 +129,6 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         return _attractionRepository.GetById(expectedAttractionId);
     }
 
-    public CapacityResponse GetCapacity(Guid id)
-    {
-        Attraction attraction = _attractionRepository.GetById(id);
-        if (attraction == null)
-        {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
-        }
-
-        return new CapacityResponse()
-        {
-            Id = attraction.Id,
-            Capacity = attraction.MaxCapacity,
-            CurrentCapacity = attraction.CurrentCapacity
-        };
-    }
-
-    public List<string> GetAttractionIncidents(Guid attractionId)
-    {
-        Attraction attraction = _attractionRepository.GetById(attractionId);
-        if (attraction == null)
-        {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
-        }
-
-        if (attraction.Incidents.Count == _noIncidents)
-        {
-            throw new KeyNotFoundException($"La atracción con id {attractionId} no tiene incidencias");
-        }
-
-        return attraction.Incidents;
-    }
-
     public void AddIncident(Guid attractionId, string incidence)
     {
         Attraction attraction = _attractionRepository.GetById(attractionId);

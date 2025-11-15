@@ -12,7 +12,5 @@ public interface IAttractionLogic
     void DeleteAttraction(Guid id);
     void AddIncident(Guid id, string incident);
     void RemoveIncident(Guid id, string incident);
-    List<string> GetAttractionIncidents(Guid id);
-    CapacityResponse GetCapacity(Guid id);
     AttractionsVisitResponse GetAllAttractionsVisits(AttractionsVisitsRequest request);
 }

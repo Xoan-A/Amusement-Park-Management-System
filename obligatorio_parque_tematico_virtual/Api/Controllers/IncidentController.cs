@@ -16,14 +16,6 @@ public class IncidentController : ControllerBase
         _attractionLogic = attractionLogic;
     }
 
-    [HttpGet]
-    [Authorize(Roles = "Operator")]
-    public IActionResult GetAttractionIncidents(Guid id)
-    {
-        List<string> incidents = _attractionLogic.GetAttractionIncidents(id);
-        return Ok(incidents);
-    }
-
     [HttpPut]
     [Authorize(Roles = "Operator")]
     public IActionResult AddIncident(Guid id, [FromBody] IncidentRequest request)

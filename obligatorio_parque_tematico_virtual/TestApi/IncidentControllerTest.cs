@@ -101,28 +101,6 @@ public class IncidentControllerTest
     }
 
     [TestMethod]
-    public void GetAttractionIncidents_ValidRequest_ReturnsIncidents()
-    {
-        List<string> incidents = new List<string> { "Incidente1" };
-        _mockService.Setup(s => s.GetAttractionIncidents(_attractionId)).Returns(incidents);
-        HttpResponseMessage response = _ = _operatorClient.GetAsync($"/api/incidents/{_attractionId}").Result;
-        response.EnsureSuccessStatusCode();
-        string content = response.Content.ReadAsStringAsync().Result;
-        List<string>? result = JsonSerializer.Deserialize<List<string>>(content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        Assert.AreEqual(1, result.Count);
-        Assert.AreEqual("Incidente1", result[0]);
-    }
-
-    [TestMethod]
-    public void GetAttractionIncidents_AttractionNotFound_ReturnsNotFound()
-    {
-        _mockService.Setup(s => s.GetAttractionIncidents(_attractionId)).Throws(new KeyNotFoundException());
-        HttpResponseMessage response = _ = _operatorClient.GetAsync($"/api/incidents/{_attractionId}").Result;
-        Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
-    }
-
-    [TestMethod]
     public void AddIncident_ValidRequest_AddsIncident()
     {
         _mockService.Setup(s => s.AddIncident(_attractionId, "Incidente"));

@@ -100,14 +100,6 @@ public class AttractionController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("capacity/{id}")]
-    [Authorize(Roles = "Administrator")]
-    public IActionResult GetCapacity(Guid id)
-    {
-        CapacityResponse capacity = _attractionLogic.GetCapacity(id);
-        return Ok(capacity);
-    }
-
     [HttpGet("visits")]
     [Authorize(Roles = "Administrator")]
     public IActionResult GetAttractionsVisits([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
