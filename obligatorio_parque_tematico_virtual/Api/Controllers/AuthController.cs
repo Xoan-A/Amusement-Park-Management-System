@@ -10,13 +10,13 @@ namespace Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthLogic _authLogic;
-        private readonly IUserLogic _userLogic;
+        private readonly IUserManagementLogic _userManagementLogic;
         private readonly ITokenLogic _tokenLogic;
 
-        public AuthController(IAuthLogic authLogic, IUserLogic userLogic, ITokenLogic tokenLogic)
+        public AuthController(IAuthLogic authLogic, IUserManagementLogic userManagementLogic, ITokenLogic tokenLogic)
         {
             _authLogic = authLogic;
-            _userLogic = userLogic;
+            _userManagementLogic = userManagementLogic;
             _tokenLogic = tokenLogic;
         }
 
@@ -43,7 +43,7 @@ namespace Api.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterVisitorRequest request)
         {
-            UserResponse visitor = _userLogic.RegisterVisitor(request);
+            UserResponse visitor = _userManagementLogic.RegisterVisitor(request);
 
             RegisterResponse response = new RegisterResponse
             {

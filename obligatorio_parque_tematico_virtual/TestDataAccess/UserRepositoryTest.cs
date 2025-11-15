@@ -43,7 +43,7 @@ namespace TestDataAccess
                 Email = "newadmin@test.com",
                 Password = "hashedPassword"
             };
-            Role adminRole = _context.Roles.First(r => r.Name == Role.ADMINISTRATOR);
+            Role adminRole = _context.Roles.First(r => r.Name == Role.Administrator);
             admin.UserRoles = new System.Collections.Generic.List<UserRole>
             {
                 new UserRole { RoleId = adminRole.Id }
@@ -65,7 +65,7 @@ namespace TestDataAccess
                 Email = "newoperator@test.com",
                 Password = "password"
             };
-            Role operatorRole = _context.Roles.First(r => r.Name == Role.OPERATOR);
+            Role operatorRole = _context.Roles.First(r => r.Name == Role.Operator);
             op.UserRoles = new System.Collections.Generic.List<UserRole>
             {
                 new UserRole { RoleId = operatorRole.Id }
@@ -99,7 +99,7 @@ namespace TestDataAccess
                 Email = "existing@test.com",
                 Password = "password"
             };
-            Role adminRole = _context.Roles.First(r => r.Name == Role.ADMINISTRATOR);
+            Role adminRole = _context.Roles.First(r => r.Name == Role.Administrator);
             admin.UserRoles = new System.Collections.Generic.List<UserRole>
             {
                 new UserRole { RoleId = adminRole.Id }
@@ -135,7 +135,7 @@ namespace TestDataAccess
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            Role adminRole = _context.Roles.First(r => r.Name == Role.ADMINISTRATOR);
+            Role adminRole = _context.Roles.First(r => r.Name == Role.Administrator);
             UserRole userRole = new UserRole { UserId = user.Id, RoleId = adminRole.Id };
             _context.UserRoles.Add(userRole);
             _context.SaveChanges();
@@ -144,7 +144,7 @@ namespace TestDataAccess
 
             Assert.AreEqual(user.Id, result.Id);
             Assert.AreEqual(1, result.UserRoles.Count);
-            Assert.AreEqual(Role.ADMINISTRATOR, result.UserRoles.First().Role.Name);
+            Assert.AreEqual(Role.Administrator, result.UserRoles.First().Role.Name);
         }
 
         [TestMethod]
@@ -162,7 +162,7 @@ namespace TestDataAccess
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
             UserRole userRole = new UserRole { UserId = user.Id, RoleId = visitorRole.Id };
             _context.UserRoles.Add(userRole);
             _context.SaveChanges();
@@ -171,7 +171,7 @@ namespace TestDataAccess
 
             Assert.AreEqual("test@test.com", result.Email);
             Assert.AreEqual(1, result.UserRoles.Count);
-            Assert.AreEqual(Role.VISITOR, result.UserRoles.First().Role.Name);
+            Assert.AreEqual(Role.Visitor, result.UserRoles.First().Role.Name);
         }
 
         [TestMethod]
@@ -180,7 +180,7 @@ namespace TestDataAccess
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
-            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
 
             for (int i = 1; i <= 15; i++)
             {
@@ -231,7 +231,7 @@ namespace TestDataAccess
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
-            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
 
             for (int i = 1; i <= 5; i++)
             {
@@ -267,7 +267,7 @@ namespace TestDataAccess
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
-            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
 
             for (int i = 1; i <= 10; i++)
             {
@@ -303,7 +303,7 @@ namespace TestDataAccess
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
-            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
 
             for (int i = 1; i <= 12; i++)
             {
@@ -337,8 +337,8 @@ namespace TestDataAccess
         [TestMethod]
         public void GetTopTen_ShouldOnlyReturnUsersWithVisitorRole()
         {
-            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
-            Role adminRole = _context.Roles.First(r => r.Name == Role.ADMINISTRATOR);
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
+            Role adminRole = _context.Roles.First(r => r.Name == Role.Administrator);
 
             User visitorWithRole = new User
             {
@@ -573,7 +573,7 @@ namespace TestDataAccess
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
             UserRole userRole = new UserRole { UserId = user.Id, RoleId = visitorRole.Id };
             user.UserRoles.Add(userRole);
 
@@ -581,7 +581,7 @@ namespace TestDataAccess
 
             User? updatedUser = _userRepository.GetByIdWithRoles(user.Id);
             Assert.AreEqual(1, updatedUser.UserRoles.Count);
-            Assert.AreEqual(Role.VISITOR, updatedUser.UserRoles.First().Role.Name);
+            Assert.AreEqual(Role.Visitor, updatedUser.UserRoles.First().Role.Name);
         }
 
         [TestMethod]

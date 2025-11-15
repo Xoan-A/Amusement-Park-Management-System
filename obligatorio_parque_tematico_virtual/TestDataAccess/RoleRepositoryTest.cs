@@ -35,9 +35,9 @@ public class RoleRepositoryTest
     [TestMethod]
     public void GetByName_ShouldReturnRole_WhenRoleExists()
     {
-        Role? role = _repository.GetByName(Role.ADMINISTRATOR);
+        Role? role = _repository.GetByName(Role.Administrator);
 
-        Assert.AreEqual(Role.ADMINISTRATOR, role.Name);
+        Assert.AreEqual(Role.Administrator, role.Name);
     }
 
     [TestMethod]
@@ -51,7 +51,7 @@ public class RoleRepositoryTest
     [TestMethod]
     public void SeedData_ShouldContainAdministratorRole()
     {
-        Role? role = _repository.GetByName(Role.ADMINISTRATOR);
+        Role? role = _repository.GetByName(Role.Administrator);
 
         Assert.AreEqual("Administrator", role.Name);
     }
@@ -59,16 +59,16 @@ public class RoleRepositoryTest
     [TestMethod]
     public void SeedData_ShouldContainOperatorRole()
     {
-        Role? role = _repository.GetByName(Role.OPERATOR);
+        Role? role = _repository.GetByName(Role.Operator);
 
-        Assert.AreEqual("Operator", role.Name);
+        Assert.AreEqual(Role.Operator, role.Name);
     }
 
     [TestMethod]
     public void SeedData_ShouldContainVisitorRole()
     {
-        Role? role = _repository.GetByName(Role.VISITOR);
+        Role? role = _repository.GetByName(Role.Visitor);
 
-        Assert.AreEqual("Visitor", role.Name);
+        Assert.AreEqual(Role.Visitor, role.Name);
     }
 }

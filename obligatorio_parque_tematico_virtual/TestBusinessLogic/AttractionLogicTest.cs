@@ -1,10 +1,12 @@
-﻿using Moq;
+﻿using AutoMapper;
+using Moq;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using BusinessLogic;
 using Models.In;
 using Models.Out;
+using Models.Mapping;
 
 namespace TestBusinessLogic;
 
@@ -13,6 +15,7 @@ public class AttractionLogicTest
 {
     private Mock<IAttractionRepository> _mockAttractionRepository;
     private Mock<IReportRepository> _mockReportRepository;
+    private IMapper _mapper;
     private IAttractionLogic _attractionLogic;
     private IAttractionLogicEntity _attractionLogicEntity;
 
@@ -21,8 +24,15 @@ public class AttractionLogicTest
     {
         _mockAttractionRepository = new Mock<IAttractionRepository>();
         _mockReportRepository = new Mock<IReportRepository>();
-        _attractionLogic = new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object);
-        _attractionLogicEntity = new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object);
+
+        var configuration = new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile<MappingProfile>();
+        });
+        _mapper = configuration.CreateMapper();
+
+        _attractionLogic = new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object, _mapper);
+        _attractionLogicEntity = new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object, _mapper);
     }
 
     [TestMethod]

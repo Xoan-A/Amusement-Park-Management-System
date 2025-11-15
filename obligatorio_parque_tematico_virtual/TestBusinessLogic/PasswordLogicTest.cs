@@ -110,5 +110,75 @@ namespace TestBusinessLogic
 
             Assert.IsFalse(result);
         }
+
+        [TestMethod]
+        public void ValidatePassword_ShouldReturnTrue_WhenPasswordMeetsAllRequirements()
+        {
+            string validPassword = "Password123";
+
+            bool result = _passwordLogic.ValidatePassword(validPassword);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void ValidatePassword_ShouldReturnFalse_WhenPasswordIsTooShort()
+        {
+            string shortPassword = "Pass1";
+
+            bool result = _passwordLogic.ValidatePassword(shortPassword);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void ValidatePassword_ShouldReturnFalse_WhenPasswordHasNoUppercase()
+        {
+            string noUppercasePassword = "password123";
+
+            bool result = _passwordLogic.ValidatePassword(noUppercasePassword);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void ValidatePassword_ShouldReturnFalse_WhenPasswordHasNoLowercase()
+        {
+            string noLowercasePassword = "PASSWORD123";
+
+            bool result = _passwordLogic.ValidatePassword(noLowercasePassword);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void ValidatePassword_ShouldReturnFalse_WhenPasswordHasNoNumber()
+        {
+            string noNumberPassword = "PasswordABC";
+
+            bool result = _passwordLogic.ValidatePassword(noNumberPassword);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void ValidatePassword_ShouldReturnTrue_WhenPasswordIsExactlyEightCharacters()
+        {
+            string eightCharPassword = "Pass1234";
+
+            bool result = _passwordLogic.ValidatePassword(eightCharPassword);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void ValidatePassword_ShouldReturnTrue_WhenPasswordHasSpecialCharacters()
+        {
+            string specialCharPassword = "Pass@123";
+
+            bool result = _passwordLogic.ValidatePassword(specialCharPassword);
+
+            Assert.IsTrue(result);
+        }
     }
 }
