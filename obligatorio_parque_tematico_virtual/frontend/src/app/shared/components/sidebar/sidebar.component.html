@@ -1,0 +1,222 @@
+<div class="sidebar" [class.collapsed]="isCollapsed">
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+    <div class="d-flex align-items-center justify-content-between">
+      @if (!isCollapsed) {
+        <h5 class="mb-0 text-white">🎢 Parque Temático</h5>
+      }
+      <button class="btn btn-sm btn-link text-white toggle-btn" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+        <span class="toggle-icon">{{ isCollapsed ? '☰' : '✕' }}</span>
+      </button>
+    </div>
+
+    <!-- Role Switcher (only visible if user has multiple roles) -->
+    @if (hasMultipleRoles && !isCollapsed) {
+      <div class="role-switcher mt-3">
+        <label class="form-label text-white-50 small mb-1">Active Role</label>
+        <select class="form-select form-select-sm" [value]="activeRole || ''" (change)="switchRole($event)">
+          @for (role of availableRoles; track role) {
+            <option [value]="role">{{ getRoleName(role) }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    <!-- User Info -->
+    @if (currentUser && !isCollapsed) {
+      <div class="user-info mt-3">
+        <div class="text-white-50 small">Welcome,</div>
+        <div class="text-white fw-bold">{{ currentUser.name }}</div>
+      </div>
+    }
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar-nav">
+    <ul class="nav flex-column">
+      <!-- Administrator Menu -->
+      @if (isAdmin) {
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/dashboard" routerLinkActive="active" [title]="isCollapsed ? 'Dashboard' : ''">
+            <span class="nav-icon">📊</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Dashboard</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/attractions" routerLinkActive="active" [title]="isCollapsed ? 'Attractions' : ''">
+            <span class="nav-icon">🎢</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Attractions</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/events" routerLinkActive="active" [title]="isCollapsed ? 'Events' : ''">
+            <span class="nav-icon">🎉</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Events</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/users" routerLinkActive="active" [title]="isCollapsed ? 'Users' : ''">
+            <span class="nav-icon">👥</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Users</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/reports" routerLinkActive="active" [title]="isCollapsed ? 'Reports' : ''">
+            <span class="nav-icon">📈</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Reports</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/strategy" routerLinkActive="active" [title]="isCollapsed ? 'Strategy' : ''">
+            <span class="nav-icon">🎯</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Strategy</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/maintenance/schedules" routerLinkActive="active" [title]="isCollapsed ? 'Maintenance' : ''">
+            <span class="nav-icon">🔧</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Maintenance</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/score-history" routerLinkActive="active" [title]="isCollapsed ? 'Score History' : ''">
+            <span class="nav-icon">⭐</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Score History</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/plugins" routerLinkActive="active" [title]="isCollapsed ? 'Plugins' : ''">
+            <span class="nav-icon">🔌</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Plugins</span>
+            }
+          </a>
+        </li>
+      }
+
+      <!-- Operator Menu -->
+      @if (isOperator) {
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/operator/dashboard" routerLinkActive="active" [title]="isCollapsed ? 'Dashboard' : ''">
+            <span class="nav-icon">📊</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Dashboard</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/operator/entry-exit" routerLinkActive="active" [title]="isCollapsed ? 'Entry/Exit' : ''">
+            <span class="nav-icon">🚪</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Entry/Exit</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/operator/incidents" routerLinkActive="active" [title]="isCollapsed ? 'Incidents' : ''">
+            <span class="nav-icon">⚠️</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Incidents</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/operator/maintenance" routerLinkActive="active" [title]="isCollapsed ? 'Maintenance' : ''">
+            <span class="nav-icon">🔧</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Maintenance</span>
+            }
+          </a>
+        </li>
+      }
+
+      <!-- Visitor Menu -->
+      @if (isVisitor) {
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/dashboard" routerLinkActive="active" [title]="isCollapsed ? 'Dashboard' : ''">
+            <span class="nav-icon">📊</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Dashboard</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/attractions" routerLinkActive="active" [title]="isCollapsed ? 'Attractions' : ''">
+            <span class="nav-icon">🎢</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Attractions</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/events" routerLinkActive="active" [title]="isCollapsed ? 'Events' : ''">
+            <span class="nav-icon">🎉</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Events</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/tickets" routerLinkActive="active" [title]="isCollapsed ? 'My Tickets' : ''">
+            <span class="nav-icon">🎫</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">My Tickets</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/profile" routerLinkActive="active" [title]="isCollapsed ? 'Profile' : ''">
+            <span class="nav-icon">👤</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Profile</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/score-history" routerLinkActive="active" [title]="isCollapsed ? 'Score History' : ''">
+            <span class="nav-icon">⭐</span>
+            @if (!isCollapsed) {
+              <span class="nav-text">Score History</span>
+            }
+          </a>
+        </li>
+      }
+
+      <!-- Common Menu Items -->
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/datetime" routerLinkActive="active" [title]="isCollapsed ? 'Date/Time' : ''">
+          <span class="nav-icon">🕒</span>
+          @if (!isCollapsed) {
+            <span class="nav-text">Date/Time</span>
+          }
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Sidebar Footer -->
+  <div class="sidebar-footer">
+    <button class="btn btn-danger btn-sm w-100" (click)="logout()" [title]="isCollapsed ? 'Logout' : ''">
+      <span class="nav-icon">🚪</span>
+      @if (!isCollapsed) {
+        <span>Logout</span>
+      }
+    </button>
+  </div>
+</div>
