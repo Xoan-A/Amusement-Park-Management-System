@@ -5,6 +5,7 @@ import { RewardService } from '../../../core/services/reward.service';
 import { RedemptionService } from '../../../core/services/redemption.service';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { MembershipService } from '../../../core/services/membership.service';
 import { RewardResponse, MembershipLevel } from '../../../core/models';
 import { ConfirmationModalComponent } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { ToastService } from '../../../core/services/toast.service';
@@ -150,6 +151,7 @@ export class BrowseRewardsComponent implements OnInit {
     private redemptionService: RedemptionService,
     private userService: UserService,
     private authService: AuthService,
+    private membershipService: MembershipService,
     private toastService: ToastService
   ) {}
 
@@ -239,28 +241,10 @@ export class BrowseRewardsComponent implements OnInit {
   }
 
   getMembershipBadgeClass(level: MembershipLevel): string {
-    switch (level) {
-      case MembershipLevel.VIP:
-        return 'bg-warning text-dark';
-      case MembershipLevel.Premium:
-        return 'bg-primary';
-      case MembershipLevel.Standard:
-        return 'bg-secondary';
-      default:
-        return 'bg-secondary';
-    }
+    return this.membershipService.getBadgeClass(level);
   }
 
   getMembershipLevelName(level: MembershipLevel): string {
-    switch (level) {
-      case MembershipLevel.VIP:
-        return 'VIP';
-      case MembershipLevel.Premium:
-        return 'Premium';
-      case MembershipLevel.Standard:
-        return 'Standard';
-      default:
-        return 'Unknown';
-    }
+    return this.membershipService.getLevelName(level);
   }
 }
