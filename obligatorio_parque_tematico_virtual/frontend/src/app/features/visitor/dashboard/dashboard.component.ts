@@ -22,7 +22,9 @@ import { TicketResponse, ScoreHistoryResponse } from '../../../core/models';
             <div class="card-body">
               <h5 class="card-title">My Tickets</h5>
               <p class="display-4 text-primary">{{ tickets.length }}</p>
-              <a routerLink="/visitor/tickets" class="btn btn-primary btn-sm">View All</a>
+              <a routerLink="/visitor/tickets" class="btn btn-primary btn-sm"
+                >View All</a
+              >
             </div>
           </div>
         </div>
@@ -31,7 +33,11 @@ import { TicketResponse, ScoreHistoryResponse } from '../../../core/models';
             <div class="card-body">
               <h5 class="card-title">My Total Score</h5>
               <p class="display-4 text-success">{{ totalScore }}</p>
-              <a routerLink="/visitor/score-history" class="btn btn-success btn-sm">View History</a>
+              <a
+                routerLink="/visitor/score-history"
+                class="btn btn-success btn-sm"
+                >View History</a
+              >
             </div>
           </div>
         </div>
@@ -41,8 +47,14 @@ import { TicketResponse, ScoreHistoryResponse } from '../../../core/models';
               <h5 class="card-title">Browse</h5>
               <p class="my-3">Explore our attractions and events</p>
               <div class="d-flex gap-2 justify-content-center">
-                <a routerLink="/visitor/attractions" class="btn btn-success btn-sm">Attractions</a>
-                <a routerLink="/visitor/events" class="btn btn-info btn-sm">Events</a>
+                <a
+                  routerLink="/visitor/attractions"
+                  class="btn btn-success btn-sm"
+                  >Attractions</a
+                >
+                <a routerLink="/visitor/events" class="btn btn-info btn-sm"
+                  >Events</a
+                >
               </div>
             </div>
           </div>
@@ -52,7 +64,11 @@ import { TicketResponse, ScoreHistoryResponse } from '../../../core/models';
             <div class="card-body">
               <h5 class="card-title">Quick Purchase</h5>
               <p class="my-3">Buy tickets now</p>
-              <a routerLink="/visitor/tickets/purchase" class="btn btn-warning btn-sm">Purchase Ticket</a>
+              <a
+                routerLink="/visitor/tickets/purchase"
+                class="btn btn-warning btn-sm"
+                >Purchase Ticket</a
+              >
             </div>
           </div>
         </div>
@@ -66,27 +82,46 @@ import { TicketResponse, ScoreHistoryResponse } from '../../../core/models';
             </div>
             <div class="card-body">
               @if (recentScores.length === 0) {
-                <p class="text-muted">No score activity yet. Start visiting attractions to earn points!</p>
-                <a routerLink="/visitor/attractions" class="btn btn-primary">Browse Attractions</a>
+              <p class="text-muted">
+                No score activity yet. Start visiting attractions to earn
+                points!
+              </p>
+              <a routerLink="/visitor/attractions" class="btn btn-primary"
+                >Browse Attractions</a
+              >
               } @else {
-                <div class="list-group">
-                  @for (score of recentScores; track score.id) {
-                    <div class="list-group-item">
-                      <div class="d-flex w-100 justify-content-between align-items-center">
-                        <div>
-                          <span class="badge" [class.bg-success]="score.points > 0" [class.bg-danger]="score.points < 0">
-                            {{ score.points > 0 ? '+' + score.points : score.points }}
-                          </span>
-                          <small class="ms-2">{{ score.description }}</small>
-                        </div>
-                        <small class="text-muted">{{ score.createdAt | date:'short' }}</small>
-                      </div>
+              <div class="list-group">
+                @for (score of recentScores; track score.id) {
+                <div class="list-group-item">
+                  <div
+                    class="d-flex w-100 justify-content-between align-items-center"
+                  >
+                    <div>
+                      <span
+                        class="badge"
+                        [class.bg-success]="score.points > 0"
+                        [class.bg-danger]="score.points < 0"
+                      >
+                        {{
+                          score.points > 0 ? '+' + score.points : score.points
+                        }}
+                      </span>
+                      <small class="ms-2">{{ score.description }}</small>
                     </div>
-                  }
+                    <small class="text-muted">{{
+                      score.createdAt | date : 'short'
+                    }}</small>
+                  </div>
                 </div>
-                <div class="mt-2">
-                  <a routerLink="/visitor/score-history" class="btn btn-sm btn-outline-primary">View Full History</a>
-                </div>
+                }
+              </div>
+              <div class="mt-2">
+                <a
+                  routerLink="/visitor/score-history"
+                  class="btn btn-sm btn-outline-primary"
+                  >View Full History</a
+                >
+              </div>
               }
             </div>
           </div>
@@ -99,34 +134,44 @@ import { TicketResponse, ScoreHistoryResponse } from '../../../core/models';
             </div>
             <div class="card-body">
               @if (tickets.length === 0) {
-                <p class="text-muted">You haven't purchased any tickets yet.</p>
-                <a routerLink="/visitor/tickets/purchase" class="btn btn-primary">Purchase Your First Ticket</a>
+              <p class="text-muted">You haven't purchased any tickets yet.</p>
+              <a routerLink="/visitor/tickets/purchase" class="btn btn-primary"
+                >Purchase Your First Ticket</a
+              >
               } @else {
-                <div class="table-responsive">
-                  <table class="table table-sm">
-                    <thead>
-                      <tr>
-                        <th>Visit Date</th>
-                        <th>Type</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @for (ticket of tickets.slice(0, 5); track ticket.id) {
-                        <tr>
-                          <td>{{ ticket.visitDate | date:'short' }}</td>
-                          <td>
-                            <span class="badge" [class.bg-primary]="ticket.type === 0" [class.bg-success]="ticket.type === 1">
-                              {{ ticket.type === 0 ? 'General' : 'Event Special' }}
-                            </span>
-                          </td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
-                <div class="mt-2">
-                  <a routerLink="/visitor/tickets" class="btn btn-sm btn-outline-primary">View All Tickets</a>
-                </div>
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Visit Date</th>
+                      <th>Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (ticket of tickets.slice(0, 5); track ticket.id) {
+                    <tr>
+                      <td>{{ ticket.visitDate | date : 'short' }}</td>
+                      <td>
+                        <span
+                          class="badge"
+                          [class.bg-primary]="ticket.type === 0"
+                          [class.bg-success]="ticket.type === 1"
+                        >
+                          {{ ticket.type === 0 ? 'General' : 'Event Special' }}
+                        </span>
+                      </td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <div class="mt-2">
+                <a
+                  routerLink="/visitor/tickets"
+                  class="btn btn-sm btn-outline-primary"
+                  >View All Tickets</a
+                >
+              </div>
               }
             </div>
           </div>
@@ -134,7 +179,7 @@ import { TicketResponse, ScoreHistoryResponse } from '../../../core/models';
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class DashboardComponent implements OnInit {
   tickets: TicketResponse[] = [];
@@ -162,24 +207,28 @@ export class DashboardComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading tickets', error);
-      }
+      },
     });
   }
 
   loadScoreHistory(): void {
     this.scoreHistoryService.getMyScoreHistory().subscribe({
       next: (history) => {
-        // Sort by date descending and take the 5 most recent
         this.recentScores = history
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
           .slice(0, 5);
 
-        // Calculate total score
-        this.totalScore = history.reduce((sum, record) => sum + record.points, 0);
+        this.totalScore = history.reduce(
+          (sum, record) => sum + record.points,
+          0
+        );
       },
       error: (error) => {
         console.error('Error loading score history', error);
-      }
+      },
     });
   }
 }

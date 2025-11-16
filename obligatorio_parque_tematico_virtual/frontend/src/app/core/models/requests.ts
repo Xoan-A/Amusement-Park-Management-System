@@ -89,6 +89,7 @@ export interface SetDateTimeRequest {
 
 export interface StrategyRequest {
   strategyName: string;
+  n?: number;
 }
 
 export interface RewardRequest {

@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { PluginService } from '../../../core/services/plugin.service';
@@ -12,7 +13,7 @@ import {
 @Component({
   selector: 'app-plugin-list',
   standalone: true,
-  imports: [CommonModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   template: `
     <app-navbar></app-navbar>
     <div class="container mt-4">
@@ -124,7 +125,7 @@ import {
         @for (plugin of plugins; track plugin.name) {
         <div class="col-md-6 mb-4">
           <div
-            class="card h-100"
+            class="card h-100 d-flex flex-column"
             [class.border-primary]="plugin.name === currentStrategy?.name"
           >
             <div
@@ -135,19 +136,27 @@ import {
               <span class="badge bg-success">Active</span>
               }
             </div>
-            <div class="card-body">
-              <p class="card-text">{{ plugin.description }}</p>
-
-              <div class="mt-3">
-                <p class="mb-1">
-                  <strong>Author:</strong>
-                  <span class="text-muted">{{
-                    plugin.author || 'Unknown'
-                  }}</span>
-                </p>
-              </div>
+            @if (plugin.name.toLowerCase() === 'combo') {
+            <div class="card-body flex-grow-1">
+              <label for="nValue-{{ plugin.name }}" class="form-label">
+                N Value (time window in minutes):
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                id="nValue-{{ plugin.name }}"
+                [(ngModel)]="comboNValue"
+                min="1"
+                placeholder="Enter N value (e.g., 30)"
+              />
+              @if (comboNValueError) {
+              <small class="text-danger d-block mt-1">{{
+                comboNValueError
+              }}</small>
+              }
             </div>
-            <div class="card-footer bg-transparent">
+            }
+            <div class="card-footer bg-transparent mt-auto">
               @if (plugin.name !== currentStrategy?.name) {
               <button
                 class="btn btn-outline-primary btn-sm"
@@ -175,7 +184,8 @@ import {
         <hr />
         <p class="mb-0">
           To add new scoring strategy plugins, place .dll files in the
-          <code>/Plugins</code> directory and restart the application.
+          <code>/BusinessLogic/Plugins</code> directory or use the Plugin
+          uploader above.
         </p>
       </div>
       }
@@ -193,7 +203,13 @@ import {
             <code>IConcreteStrategy</code> interface.
           </p>
           <ul class="mb-0">
-            <li>Plugins are loaded from the <code>/Plugins</code> directory</li>
+            <li>
+              Plugins are loaded from the
+              <code>/BusinessLogic/Plugins</code> directory
+            </li>
+            <li>
+              You can use the file uploader from above to upload plugin dlls.
+            </li>
             <li>
               Strategies are discovered automatically using .NET Reflection
             </li>
@@ -220,6 +236,8 @@ export class PluginListComponent implements OnInit {
   selectedFile: File | null = null;
   uploading = false;
   successMessage: string | null = null;
+  comboNValue: number | null = null;
+  comboNValueError: string | null = null;
 
   ngOnInit() {
     this.loadCurrentStrategy();
@@ -231,9 +249,7 @@ export class PluginListComponent implements OnInit {
       next: (strategy: StrategyResponse) => {
         this.currentStrategy = strategy;
       },
-      error: () => {
-        // Strategy might not be set yet, that's okay
-      },
+      error: () => {},
     });
   }
 
@@ -254,22 +270,41 @@ export class PluginListComponent implements OnInit {
   }
 
   activatePlugin(pluginName: string) {
-    if (
-      !confirm(
-        `Are you sure you want to activate the "${pluginName}" strategy?`
-      )
-    )
-      return;
+    this.errorMessage = null;
+    this.comboNValueError = null;
 
-    this.strategyService.setStrategy({ strategyName: pluginName }).subscribe({
-      next: () => {
-        alert(`Strategy "${pluginName}" activated successfully!`);
-        this.loadCurrentStrategy();
-      },
-      error: () => {
-        this.errorMessage = `Failed to activate strategy "${pluginName}".`;
-      },
-    });
+    if (pluginName.toLowerCase() === 'combo') {
+      if (!this.comboNValue || this.comboNValue <= 0) {
+        this.comboNValueError =
+          'Please enter a valid N value (positive number).';
+        return;
+      }
+
+      const n = this.comboNValue;
+
+      this.strategyService
+        .setStrategy({ strategyName: pluginName, n })
+        .subscribe({
+          next: () => {
+            this.successMessage = `Strategy "${pluginName}" activated successfully with N=${n} minutes!`;
+            this.loadCurrentStrategy();
+            this.comboNValue = null;
+          },
+          error: () => {
+            this.errorMessage = `Failed to activate strategy "${pluginName}".`;
+          },
+        });
+    } else {
+      this.strategyService.setStrategy({ strategyName: pluginName }).subscribe({
+        next: () => {
+          this.successMessage = `Strategy "${pluginName}" activated successfully!`;
+          this.loadCurrentStrategy();
+        },
+        error: () => {
+          this.errorMessage = `Failed to activate strategy "${pluginName}".`;
+        },
+      });
+    }
   }
 
   navigateToStrategySelection() {
