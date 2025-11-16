@@ -10,8 +10,7 @@ import { EventResponse } from '../../../../core/models';
   selector: 'app-events-list',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, NavbarComponent],
-  templateUrl: './events-list.component.html',
-  styleUrl: './events-list.component.scss'
+  templateUrl: './events-list.component.html'
 })
 export class EventsListComponent implements OnInit {
   events: EventResponse[] = [];

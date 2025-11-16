@@ -1,4 +1,4 @@
-import { AttractionType, MembershipLevel, TicketType, MaintenanceType } from './enums';
+import { AttractionType, MembershipLevel, TicketType } from './enums';
 
 export interface LoginRequest {
   email: string;
@@ -10,8 +10,7 @@ export interface RegisterVisitorRequest {
   lastName: string;
   email: string;
   password: string;
-  birthDate?: string;
-  membershipLevel?: MembershipLevel;
+  birthDate: string;
 }
 
 export interface CreateUserRequest {
@@ -36,6 +35,10 @@ export interface AddRolesRequest {
   role: string;
 }
 
+export interface SetDateTimeRequest {
+  dateTime: string;
+}
+
 export interface AttractionRequest {
   name: string;
   description: string;
@@ -57,12 +60,11 @@ export interface EventRequest {
 export interface PurchaseTicketRequest {
   visitorId: string;
   visitDate: string;
-  type: TicketType;
+  ticketType: TicketType;
   eventId?: string;
 }
 
 export interface RegisterEntryRequest {
-  enterDate: string;
   userId: string;
   qr?: string;
   nfc?: string;
@@ -71,7 +73,6 @@ export interface RegisterEntryRequest {
 
 export interface RegisterExitRequest {
   userId: string;
-  exitDate: string;
 }
 
 export interface IncidentRequest {
@@ -107,18 +108,8 @@ export interface RedeemRewardRequest {
 export interface MaintenanceScheduleRequest {
   attractionId: string;
   scheduledDate: string;
-  maintenanceType: MaintenanceType;
   description: string;
-}
-
-export interface MaintenanceRecordRequest {
-  attractionId: string;
-  maintenanceScheduleId?: string;
-  performedDate: string;
-  maintenanceType: MaintenanceType;
-  description: string;
-  durationMinutes: number;
-  notes?: string;
+  estimatedDuration: number;
 }
 
 export interface UpdateStatusRequest {

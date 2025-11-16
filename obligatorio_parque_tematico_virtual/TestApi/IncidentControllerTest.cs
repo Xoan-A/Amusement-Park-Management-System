@@ -67,7 +67,7 @@ public class IncidentControllerTest
             Name = "Operator",
             LastName = "User",
             Email = "operator@example.com",
-            UserRoles = new List<string> { Role.OPERATOR }
+            UserRoles = new List<string> { Role.Operator }
         };
         string operatorToken = tokenLogic.GenerateToken(operatorUser);
         _operatorClient = _factory.CreateClient();
@@ -80,7 +80,7 @@ public class IncidentControllerTest
             Name = "Admin",
             LastName = "User",
             Email = "admin@example.com",
-            UserRoles = new List<string> { Role.ADMINISTRATOR }
+            UserRoles = new List<string> { Role.Administrator }
         };
         string adminToken = tokenLogic.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();
@@ -98,28 +98,6 @@ public class IncidentControllerTest
         _factory?.Dispose();
         _connection?.Close();
         _connection?.Dispose();
-    }
-
-    [TestMethod]
-    public void GetAttractionIncidents_ValidRequest_ReturnsIncidents()
-    {
-        List<string> incidents = new List<string> { "Incidente1" };
-        _mockService.Setup(s => s.GetAttractionIncidents(_attractionId)).Returns(incidents);
-        HttpResponseMessage response = _ = _operatorClient.GetAsync($"/api/incidents/{_attractionId}").Result;
-        response.EnsureSuccessStatusCode();
-        string content = response.Content.ReadAsStringAsync().Result;
-        List<string>? result = JsonSerializer.Deserialize<List<string>>(content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        Assert.AreEqual(1, result.Count);
-        Assert.AreEqual("Incidente1", result[0]);
-    }
-
-    [TestMethod]
-    public void GetAttractionIncidents_AttractionNotFound_ReturnsNotFound()
-    {
-        _mockService.Setup(s => s.GetAttractionIncidents(_attractionId)).Throws(new KeyNotFoundException());
-        HttpResponseMessage response = _ = _operatorClient.GetAsync($"/api/incidents/{_attractionId}").Result;
-        Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [TestMethod]

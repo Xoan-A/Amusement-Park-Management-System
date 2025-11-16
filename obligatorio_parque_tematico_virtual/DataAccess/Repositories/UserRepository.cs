@@ -55,7 +55,7 @@ namespace DataAccess.Repositories
         public List<User> GetTopTen()
         {
             return _context.Users
-            .Where(u => u.UserRoles.Any(ur => ur.Role.Name == Role.VISITOR))
+            .Where(u => u.UserRoles.Any(ur => ur.Role.Name == Role.Visitor))
             .OrderByDescending(u => u.DailyScore)
             .Take(10)
             .ToList();
@@ -80,6 +80,14 @@ namespace DataAccess.Repositories
             }
 
             _context.SaveChanges();
+        }
+
+        public List<User> GetAllUsers()
+        {
+            return _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .ToList();
         }
     }
 }

@@ -3,7 +3,7 @@ using Models.Out;
 
 namespace IBusinessLogic
 {
-    public interface IUserLogic
+    public interface IUserManagementLogic
     {
         UserResponse RegisterVisitor(RegisterVisitorRequest registerVisitorRequest);
         UserResponse CreateUser(CreateUserRequest request);
@@ -14,5 +14,6 @@ namespace IBusinessLogic
         UserResponse GetUserResponseById(Guid userId);
         UserResponse ModifyUser(Guid userId, Guid userTokenId, ModifyUserRequest request);
         UserResponse ChangeMembershipLevel(Guid userId, int membershipLevel);
+        List<UserResponse> GetAllUsers();
     }
 }

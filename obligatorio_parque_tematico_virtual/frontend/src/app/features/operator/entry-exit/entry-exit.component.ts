@@ -1,16 +1,16 @@
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { TicketService } from '../../../core/services/ticket.service';
-import { AttractionResponse, TicketResponse } from '../../../core/models';
-import { BrowserMultiFormatReader, IScannerControls } from '@zxing/browser';
+import { AttractionResponse, TicketResponse, TicketType } from '../../../core/models';
 
 @Component({
   selector: 'app-entry-exit',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, ZXingScannerModule, NavbarComponent],
   template: `
     <app-navbar></app-navbar>
     <div class="container mt-4">
@@ -95,7 +95,12 @@ import { BrowserMultiFormatReader, IScannerControls } from '@zxing/browser';
               }
 
               <div class="scanner-container" style="max-width: 500px; margin: 0 auto;">
-                <video #videoElement style="width: 100%; border: 2px solid #ccc; border-radius: 8px;"></video>
+                <zxing-scanner
+                  [device]="selectedDevice"
+                  (scanSuccess)="onScanSuccess($event)"
+                  (permissionResponse)="onPermissionResponse($event)"
+                  (camerasFound)="onCamerasFound($event)"
+                ></zxing-scanner>
               </div>
 
               @if (hasDevices === false) {
@@ -112,7 +117,7 @@ import { BrowserMultiFormatReader, IScannerControls } from '@zxing/browser';
               <p class="mb-1"><strong>ID:</strong> {{ scannedTicket.id }}</p>
               <p class="mb-1"><strong>Visitor:</strong> {{ scannedTicket.visitorName }} {{ scannedTicket.visitorLastName }}</p>
               <p class="mb-1"><strong>Visit Date:</strong> {{ scannedTicket.visitDate | date:'short' }}</p>
-              <p class="mb-0"><strong>Type:</strong> {{ scannedTicket.type === 0 ? 'General' : 'Event Special' }}</p>
+              <p class="mb-0"><strong>Type:</strong> {{ scannedTicket.type === ticketType.General ? 'General' : 'Event Special' }}</p>
             </div>
 
             <div class="mb-3">
@@ -194,13 +199,12 @@ import { BrowserMultiFormatReader, IScannerControls } from '@zxing/browser';
     }
   `]
 })
-export class EntryExitComponent implements OnInit, OnDestroy {
-  @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
-
+export class EntryExitComponent implements OnInit {
   attractions: AttractionResponse[] = [];
   successMessage = '';
   errorMessage = '';
   loading = false;
+  ticketType = TicketType;
 
   inputMethod: 'manual' | 'camera' = 'manual';
   manualTicketId = '';
@@ -212,9 +216,6 @@ export class EntryExitComponent implements OnInit, OnDestroy {
   hasDevices?: boolean;
   hasPermission?: boolean;
 
-  private codeReader?: BrowserMultiFormatReader;
-  private scannerControls?: IScannerControls;
-
   constructor(
     private attractionService: AttractionService,
     private ticketService: TicketService
@@ -222,10 +223,6 @@ export class EntryExitComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadAttractions();
-  }
-
-  ngOnDestroy(): void {
-    this.stopScanner();
   }
 
   loadAttractions(): void {
@@ -240,62 +237,9 @@ export class EntryExitComponent implements OnInit, OnDestroy {
     });
   }
 
-  async setInputMethod(method: 'manual' | 'camera'): Promise<void> {
+  setInputMethod(method: 'manual' | 'camera'): void {
     this.inputMethod = method;
     this.resetScanner();
-
-    if (method === 'camera') {
-      await this.initScanner();
-    } else {
-      this.stopScanner();
-    }
-  }
-
-  async initScanner(): Promise<void> {
-    try {
-      this.codeReader = new BrowserMultiFormatReader();
-      const devices = await BrowserMultiFormatReader.listVideoInputDevices();
-      this.availableDevices = devices;
-      this.hasDevices = devices && devices.length > 0;
-
-      if (this.hasDevices) {
-        this.selectedDevice = devices[0];
-        this.startScanning();
-      } else {
-        this.errorMessage = 'No camera devices found';
-      }
-      this.hasPermission = true;
-    } catch (error) {
-      console.error('Error initializing scanner:', error);
-      this.hasPermission = false;
-      this.errorMessage = 'Camera permission denied or not available';
-    }
-  }
-
-  async startScanning(): Promise<void> {
-    if (!this.codeReader || !this.selectedDevice || !this.videoElement) return;
-
-    try {
-      this.scannerControls = await this.codeReader.decodeFromVideoDevice(
-        this.selectedDevice.deviceId,
-        this.videoElement.nativeElement,
-        (result, error) => {
-          if (result) {
-            this.onScanSuccess(result.getText());
-          }
-        }
-      );
-    } catch (error) {
-      console.error('Error starting scanner:', error);
-      this.errorMessage = 'Failed to start camera';
-    }
-  }
-
-  stopScanner(): void {
-    if (this.scannerControls) {
-      this.scannerControls.stop();
-      this.scannerControls = undefined;
-    }
   }
 
   lookupTicket(): void {
@@ -318,14 +262,27 @@ export class EntryExitComponent implements OnInit, OnDestroy {
     });
   }
 
-  async onDeviceSelectChange(event: Event): Promise<void> {
+  onCamerasFound(devices: MediaDeviceInfo[]): void {
+    this.availableDevices = devices;
+    this.hasDevices = devices && devices.length > 0;
+    if (this.hasDevices) {
+      this.selectedDevice = devices[0];
+    }
+  }
+
+  onDeviceSelectChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     const deviceId = target.value;
     const device = this.availableDevices.find(d => d.deviceId === deviceId);
     if (device) {
       this.selectedDevice = device;
-      this.stopScanner();
-      await this.startScanning();
+    }
+  }
+
+  onPermissionResponse(hasPermission: boolean): void {
+    this.hasPermission = hasPermission;
+    if (!hasPermission) {
+      this.errorMessage = 'Camera permission denied. Please use manual input.';
     }
   }
 
@@ -353,18 +310,7 @@ export class EntryExitComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.errorMessage = '';
 
-    // Format current local datetime as ISO string WITHOUT timezone conversion
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const localDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-
     const request = {
-      enterDate: localDateTimeString,
       userId: this.scannedTicket.visitorId,
       qr: this.scannedTicket.qrCode,
       eventId: this.scannedTicket.eventId || undefined
@@ -391,19 +337,8 @@ export class EntryExitComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.errorMessage = '';
 
-    // Format current local datetime as ISO string WITHOUT timezone conversion
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const localDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-
     const request = {
-      userId: this.scannedTicket.visitorId,
-      exitDate: localDateTimeString
+      userId: this.scannedTicket.visitorId
     };
 
     this.attractionService.registerExit(this.selectedAttractionId, request).subscribe({
@@ -425,6 +360,5 @@ export class EntryExitComponent implements OnInit, OnDestroy {
     this.scannedTicket = null;
     this.selectedAttractionId = '';
     this.manualTicketId = '';
-    this.stopScanner();
   }
 }

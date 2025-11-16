@@ -74,7 +74,7 @@ public class RewardControllerTest
             Name = "Admin",
             LastName = "User",
             Email = "admin@example.com",
-            UserRoles = new List<string> { Role.ADMINISTRATOR }
+            UserRoles = new List<string> { Role.Administrator }
         };
         string adminToken = tokenService.GenerateToken(adminUser);
         _adminClient = _factory.CreateClient();
@@ -87,7 +87,7 @@ public class RewardControllerTest
             Name = "Visitor",
             LastName = "User",
             Email = "visitor@example.com",
-            UserRoles = new List<string> { Role.VISITOR }
+            UserRoles = new List<string> { Role.Visitor }
         };
         string visitorToken = tokenService.GenerateToken(visitorUser);
         _visitorClient = _factory.CreateClient();

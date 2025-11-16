@@ -1,4 +1,4 @@
-namespace BusinessLogic
+namespace IBusinessLogic
 {
     public interface IDateObserver
     {

@@ -40,7 +40,7 @@ namespace ApiTests
             mockTicketLogic.Setup(t => t.PurchaseTicket(It.IsAny<PurchaseTicketRequest>()))
             .Returns(ticketWithNullVisitor);
 
-            Mock<IUserLogic> mockUserLogic = new Mock<IUserLogic>();
+            Mock<IUserManagementLogic> mockUserManagementLogic = new Mock<IUserManagementLogic>();
             Mock<IAuthLogic> mockAuthLogic = new Mock<IAuthLogic>();
 
             UserResponse visitor = new UserResponse
@@ -49,10 +49,10 @@ namespace ApiTests
                 Name = "Test",
                 LastName = "Visitor",
                 Email = "test@test.com",
-                UserRoles = new List<string> { Role.VISITOR }
+                UserRoles = new List<string> { Role.Visitor }
             };
 
-            mockUserLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
+            mockUserManagementLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
             .Returns(visitor);
 
             mockAuthLogic.Setup(a => a.Login(It.IsAny<string>(), It.IsAny<string>()))
@@ -72,7 +72,7 @@ namespace ApiTests
                     if (ticketDescriptor != null) services.Remove(ticketDescriptor);
 
                     ServiceDescriptor userDescriptor = services.SingleOrDefault(
-                        d => d.ServiceType == typeof(IUserLogic));
+                        d => d.ServiceType == typeof(IUserManagementLogic));
                     if (userDescriptor != null) services.Remove(userDescriptor);
 
                     ServiceDescriptor authDescriptor = services.SingleOrDefault(
@@ -81,7 +81,7 @@ namespace ApiTests
 
                     services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
                     services.AddSingleton(mockTicketLogic.Object);
-                    services.AddSingleton(mockUserLogic.Object);
+                    services.AddSingleton(mockUserManagementLogic.Object);
                     services.AddSingleton(mockAuthLogic.Object);
                 });
             });
@@ -181,7 +181,7 @@ namespace ApiTests
             mockTicketLogic.Setup(t => t.GetTicketById(It.IsAny<Guid>()))
             .Returns(ticketWithNullVisitor);
 
-            Mock<IUserLogic> mockUserLogic = new Mock<IUserLogic>();
+            Mock<IUserManagementLogic> mockUserManagementLogic = new Mock<IUserManagementLogic>();
             Mock<IAuthLogic> mockAuthLogic = new Mock<IAuthLogic>();
 
             UserResponse visitor = new UserResponse
@@ -190,10 +190,10 @@ namespace ApiTests
                 Name = "Test",
                 LastName = "Visitor",
                 Email = "test2@test.com",
-                UserRoles = new List<string> { Role.VISITOR }
+                UserRoles = new List<string> { Role.Visitor }
             };
 
-            mockUserLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
+            mockUserManagementLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
             .Returns(visitor);
 
             mockAuthLogic.Setup(a => a.Login(It.IsAny<string>(), It.IsAny<string>()))
@@ -213,7 +213,7 @@ namespace ApiTests
                     if (ticketDescriptor != null) services.Remove(ticketDescriptor);
 
                     ServiceDescriptor userDescriptor = services.SingleOrDefault(
-                        d => d.ServiceType == typeof(IUserLogic));
+                        d => d.ServiceType == typeof(IUserManagementLogic));
                     if (userDescriptor != null) services.Remove(userDescriptor);
 
                     ServiceDescriptor authDescriptor = services.SingleOrDefault(
@@ -222,7 +222,7 @@ namespace ApiTests
 
                     services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
                     services.AddSingleton(mockTicketLogic.Object);
-                    services.AddSingleton(mockUserLogic.Object);
+                    services.AddSingleton(mockUserManagementLogic.Object);
                     services.AddSingleton(mockAuthLogic.Object);
                 });
             });
@@ -310,7 +310,7 @@ namespace ApiTests
             mockTicketLogic.Setup(t => t.GetTicketByQRCode(qrCode))
             .Returns(ticketWithNullVisitor);
 
-            Mock<IUserLogic> mockUserLogic = new Mock<IUserLogic>();
+            Mock<IUserManagementLogic> mockUserManagementLogic = new Mock<IUserManagementLogic>();
             Mock<IAuthLogic> mockAuthLogic = new Mock<IAuthLogic>();
 
             UserResponse visitor = new UserResponse
@@ -319,10 +319,10 @@ namespace ApiTests
                 Name = "Test",
                 LastName = "Visitor",
                 Email = "test3@test.com",
-                UserRoles = new List<string> { Role.VISITOR }
+                UserRoles = new List<string> { Role.Visitor }
             };
 
-            mockUserLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
+            mockUserManagementLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
             .Returns(visitor);
 
             mockAuthLogic.Setup(a => a.Login(It.IsAny<string>(), It.IsAny<string>()))
@@ -342,7 +342,7 @@ namespace ApiTests
                     if (ticketDescriptor != null) services.Remove(ticketDescriptor);
 
                     ServiceDescriptor userDescriptor = services.SingleOrDefault(
-                        d => d.ServiceType == typeof(IUserLogic));
+                        d => d.ServiceType == typeof(IUserManagementLogic));
                     if (userDescriptor != null) services.Remove(userDescriptor);
 
                     ServiceDescriptor authDescriptor = services.SingleOrDefault(
@@ -351,7 +351,7 @@ namespace ApiTests
 
                     services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
                     services.AddSingleton(mockTicketLogic.Object);
-                    services.AddSingleton(mockUserLogic.Object);
+                    services.AddSingleton(mockUserManagementLogic.Object);
                     services.AddSingleton(mockAuthLogic.Object);
                 });
             });
@@ -442,7 +442,7 @@ namespace ApiTests
             mockTicketLogic.Setup(t => t.GetVisitorTickets(visitorId))
             .Returns(ticketsWithNullVisitor);
 
-            Mock<IUserLogic> mockUserLogic = new Mock<IUserLogic>();
+            Mock<IUserManagementLogic> mockUserManagementLogic = new Mock<IUserManagementLogic>();
             Mock<IAuthLogic> mockAuthLogic = new Mock<IAuthLogic>();
 
             UserResponse visitor = new UserResponse
@@ -451,10 +451,10 @@ namespace ApiTests
                 Name = "Test",
                 LastName = "Visitor",
                 Email = "test4@test.com",
-                UserRoles = new List<string> { Role.VISITOR }
+                UserRoles = new List<string> { Role.Visitor }
             };
 
-            mockUserLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
+            mockUserManagementLogic.Setup(u => u.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
             .Returns(visitor);
 
             mockAuthLogic.Setup(a => a.Login(It.IsAny<string>(), It.IsAny<string>()))
@@ -474,7 +474,7 @@ namespace ApiTests
                     if (ticketDescriptor != null) services.Remove(ticketDescriptor);
 
                     ServiceDescriptor userDescriptor = services.SingleOrDefault(
-                        d => d.ServiceType == typeof(IUserLogic));
+                        d => d.ServiceType == typeof(IUserManagementLogic));
                     if (userDescriptor != null) services.Remove(userDescriptor);
 
                     ServiceDescriptor authDescriptor = services.SingleOrDefault(
@@ -483,7 +483,7 @@ namespace ApiTests
 
                     services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
                     services.AddSingleton(mockTicketLogic.Object);
-                    services.AddSingleton(mockUserLogic.Object);
+                    services.AddSingleton(mockUserManagementLogic.Object);
                     services.AddSingleton(mockAuthLogic.Object);
                 });
             });

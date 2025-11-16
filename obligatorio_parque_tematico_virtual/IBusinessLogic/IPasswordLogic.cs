@@ -4,5 +4,6 @@ namespace IBusinessLogic
     {
         string HashPassword(string password);
         bool VerifyPassword(string password, string hashedPassword);
+        bool ValidatePassword(string password);
     }
 }

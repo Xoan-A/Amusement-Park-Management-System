@@ -142,7 +142,6 @@ import { ScoreOrigin } from '../../../core/models/enums';
                     <th>Points</th>
                     <th>Category</th>
                     <th>Strategy</th>
-                    <th>Description</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -162,7 +161,6 @@ import { ScoreOrigin } from '../../../core/models/enums';
                       <td>
                         <small class="text-muted">{{ record.strategyName }}</small>
                       </td>
-                      <td>{{ record.description }}</td>
                     </tr>
                   }
                 </tbody>

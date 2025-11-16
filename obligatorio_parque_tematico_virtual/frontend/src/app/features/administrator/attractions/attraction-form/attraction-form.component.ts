@@ -10,8 +10,7 @@ import { AttractionType } from '../../../../core/models';
   selector: 'app-attraction-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent],
-  templateUrl: './attraction-form.component.html',
-  styleUrl: './attraction-form.component.scss'
+  templateUrl: './attraction-form.component.html'
 })
 export class AttractionFormComponent implements OnInit {
   attractionForm: FormGroup;

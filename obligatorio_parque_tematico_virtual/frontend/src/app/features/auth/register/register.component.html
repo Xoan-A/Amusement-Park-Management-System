@@ -152,19 +152,6 @@
                   </div>
                 }
               </div>
-
-              <div class="col-md-6 mb-3">
-                <label for="membershipLevel" class="form-label">Membership Level</label>
-                <select
-                  class="form-select"
-                  id="membershipLevel"
-                  formControlName="membershipLevel"
-                >
-                  @for (level of membershipLevels; track level) {
-                    <option [value]="level">{{ level }}</option>
-                  }
-                </select>
-              </div>
             </div>
 
             <button
