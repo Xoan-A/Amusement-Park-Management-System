@@ -77,7 +77,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/strategy" routerLinkActive="active" [title]="isCollapsed ? 'Strategy' : ''">
+          <a class="nav-link" routerLink="/admin/plugins" routerLinkActive="active" [title]="isCollapsed ? 'Strategy' : ''">
             <i class="nav-icon bi bi-bullseye"></i>
             @if (!isCollapsed) {
               <span class="nav-text">Strategy</span>
@@ -97,14 +97,6 @@
             <i class="nav-icon bi bi-star-fill"></i>
             @if (!isCollapsed) {
               <span class="nav-text">Score History</span>
-            }
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/plugins" routerLinkActive="active" [title]="isCollapsed ? 'Plugins' : ''">
-            <i class="nav-icon bi bi-plugin"></i>
-            @if (!isCollapsed) {
-              <span class="nav-text">Plugins</span>
             }
           </a>
         </li>
