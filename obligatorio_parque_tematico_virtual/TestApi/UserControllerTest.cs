@@ -188,7 +188,7 @@ namespace ApiTests
                 Score = 0
             };
 
-            _mockUserManagementLogic.Setup(u => u.GetUserResponseById(userId)).Returns(expected);
+            _mockUserManagementLogic.Setup(u => u.GetUserResponseById(userId, It.IsAny<Guid>(), true)).Returns(expected);
 
             HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/users/{userId}").Result;
 
@@ -206,7 +206,7 @@ namespace ApiTests
             Assert.AreEqual(expected.Name, userResponse.Name);
             CollectionAssert.AreEquivalent(expected.UserRoles.ToList(), userResponse.UserRoles.ToList());
 
-            _mockUserManagementLogic.Verify(u => u.GetUserResponseById(userId), Times.Once);
+            _mockUserManagementLogic.Verify(u => u.GetUserResponseById(userId, It.IsAny<Guid>(), true), Times.Once);
         }
 
         [TestMethod]
@@ -217,7 +217,82 @@ namespace ApiTests
             HttpResponseMessage response = _ = _client.GetAsync($"/api/users/{userId}").Result;
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-            _mockUserManagementLogic.Verify(u => u.GetUserResponseById(It.IsAny<Guid>()), Times.Never);
+            _mockUserManagementLogic.Verify(u => u.GetUserResponseById(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<bool>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void GetUserById_UserAccessingTheirOwnData_ReturnsOk()
+        {
+            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
+            Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+            {
+                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+                Issuer = "ParqueTematico",
+                Audience = "ParqueTematico",
+                ExpirationHours = 1
+            });
+            TokenLogic tokenService = new TokenLogic(jwtSettings);
+
+            Guid userId = Guid.NewGuid();
+            UserResponse user = new UserResponse
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@example.com",
+                UserRoles = new List<string> { Role.Visitor }
+            };
+            string token = tokenService.GenerateToken(user);
+            HttpClient userClient = _factory.CreateClient();
+            userClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            _mockClaimsLogic.Setup(c => c.GetCurrentUserId(It.IsAny<ClaimsPrincipal>())).Returns(userId);
+            _mockUserManagementLogic.Setup(u => u.GetUserResponseById(userId, userId, false)).Returns(user);
+
+            HttpResponseMessage response = _ = userClient.GetAsync($"/api/users/{userId}").Result;
+
+            response.EnsureSuccessStatusCode();
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            _mockUserManagementLogic.Verify(u => u.GetUserResponseById(userId, userId, false), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetUserById_UserAccessingOtherUserData_ReturnsForbidden()
+        {
+            Microsoft.Extensions.Options.IOptions<Models.JwtSettings> jwtSettings =
+            Microsoft.Extensions.Options.Options.Create(new Models.JwtSettings
+            {
+                SecretKey = "MySecretKeyForJWTTokenGeneration1234567890",
+                Issuer = "ParqueTematico",
+                Audience = "ParqueTematico",
+                ExpirationHours = 1
+            });
+            TokenLogic tokenService = new TokenLogic(jwtSettings);
+
+            Guid userId = Guid.NewGuid();
+            Guid currentUserId = Guid.NewGuid();
+            UserResponse user = new UserResponse
+            {
+                Id = currentUserId,
+                Name = "Current",
+                LastName = "User",
+                Email = "current@example.com",
+                UserRoles = new List<string> { Role.Visitor }
+            };
+            string token = tokenService.GenerateToken(user);
+            HttpClient userClient = _factory.CreateClient();
+            userClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            _mockClaimsLogic.Setup(c => c.GetCurrentUserId(It.IsAny<ClaimsPrincipal>())).Returns(currentUserId);
+            _mockUserManagementLogic.Setup(u => u.GetUserResponseById(userId, currentUserId, false))
+            .Throws(new ForbiddenException("You cannot access another user's data"));
+
+            HttpResponseMessage response = _ = userClient.GetAsync($"/api/users/{userId}").Result;
+
+            Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+            _mockUserManagementLogic.Verify(u => u.GetUserResponseById(userId, currentUserId, false), Times.Once);
         }
 
         [TestMethod]
@@ -705,7 +780,7 @@ namespace ApiTests
         public void GetUserById_UserNotFound_ReturnsNotFound()
         {
             Guid userId = Guid.NewGuid();
-            _mockUserManagementLogic.Setup(l => l.GetUserResponseById(userId))
+            _mockUserManagementLogic.Setup(l => l.GetUserResponseById(userId, It.IsAny<Guid>(), true))
             .Throws(new KeyNotFoundException("User not found"));
 
             HttpResponseMessage response = _ = _adminClient.GetAsync($"/api/users/{userId}").Result;

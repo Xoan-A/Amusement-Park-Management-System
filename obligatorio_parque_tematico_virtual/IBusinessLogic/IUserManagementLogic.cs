@@ -11,7 +11,7 @@ namespace IBusinessLogic
         void RegisterExit(Guid id, RegisterExitRequest request);
         TopTenResponse GetTopTenUsers();
         void AddRoleToUser(Guid userId, string role);
-        UserResponse GetUserResponseById(Guid userId);
+        UserResponse GetUserResponseById(Guid userId, Guid currentUserId, bool isAdmin);
         UserResponse ModifyUser(Guid userId, Guid userTokenId, ModifyUserRequest request);
         UserResponse ChangeMembershipLevel(Guid userId, int membershipLevel);
         List<UserResponse> GetAllUsers();

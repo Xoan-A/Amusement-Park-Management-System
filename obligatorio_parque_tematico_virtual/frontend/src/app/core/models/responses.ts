@@ -174,6 +174,7 @@ export interface ScoreHistoryResponse {
   origin: ScoreOrigin;
   strategyName: string;
   relatedEntityId?: string;
+  relatedEntityName?: string;
   createdAt: string;
 }
 

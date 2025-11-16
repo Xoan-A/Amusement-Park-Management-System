@@ -9,5 +9,6 @@ public class ScoreHistoryModelOut
     public string Origin { get; set; }
     public string StrategyName { get; set; }
     public Guid? RelatedEntityId { get; set; }
+    public string? RelatedEntityName { get; set; }
     public DateTime CreatedAt { get; set; }
 }

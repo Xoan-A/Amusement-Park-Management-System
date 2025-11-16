@@ -151,58 +151,56 @@ import { ScoreOrigin } from '../../../core/models/enums';
 
       <!-- History Timeline -->
       @if (!loading && filteredHistory.length > 0) {
-      <div class="card">
-        <div class="card-header">
-          <h5 class="mb-0">
-            <i class="bi bi-clock-history"></i> Activity Timeline
-            <span class="badge bg-secondary ms-2"
-              >{{ filteredHistory.length }} records</span
-            >
-          </h5>
-        </div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Date & Time</th>
-                  <th>Points</th>
-                  <th>Category</th>
-                  <th>Strategy</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (record of filteredHistory; track record.id) {
-                <tr>
-                  <td>{{ record.createdAt | date : 'medium' }}</td>
-                  <td>
-                    <span
-                      class="badge"
-                      [class]="getPointsBadgeClass(record.points)"
-                    >
-                      {{
-                        record.points > 0 ? '+' + record.points : record.points
-                      }}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      class="badge"
-                      [class]="getOriginBadgeClass(record.origin)"
-                    >
-                      {{ formatOrigin(record.origin) }}
-                    </span>
-                  </td>
-                  <td>
-                    <small class="text-muted">{{ record.strategyName }}</small>
-                  </td>
-                </tr>
-                }
-              </tbody>
-            </table>
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="bi bi-clock-history"></i> Activity Timeline
+              <span class="badge bg-secondary ms-2">{{ filteredHistory.length }} records</span>
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Date & Time</th>
+                    <th>Points</th>
+                    <th>Category</th>
+                    <th>Related Entity</th>
+                    <th>Strategy</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (record of filteredHistory; track record.id) {
+                    <tr>
+                      <td>{{ record.createdAt | date:'medium' }}</td>
+                      <td>
+                        <span class="badge" [class]="getPointsBadgeClass(record.points)">
+                          {{ record.points > 0 ? '+' + record.points : record.points }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge" [class]="getOriginBadgeClass(record.origin)">
+                          {{ formatOrigin(record.origin) }}
+                        </span>
+                      </td>
+                      <td>
+                        @if (record.relatedEntityName) {
+                          <small>{{ record.relatedEntityName }}</small>
+                        } @else {
+                          <small class="text-muted">—</small>
+                        }
+                      </td>
+                      <td>
+                        <small class="text-muted">{{ record.strategyName }}</small>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
       }
 
       <!-- No Results -->

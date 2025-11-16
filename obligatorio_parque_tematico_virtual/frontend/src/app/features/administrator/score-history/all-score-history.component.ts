@@ -141,47 +141,50 @@ import { ScoreOrigin } from '../../../core/models/enums';
 
       <!-- History Table -->
       @if (!loading && filteredHistory.length > 0) {
-      <div class="card">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Visitor</th>
-                  <th>Points</th>
-                  <th>Origin</th>
-                  <th>Strategy</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (record of filteredHistory; track record.id) {
-                <tr>
-                  <td>{{ record.createdAt | date : 'short' }}</td>
-                  <td>{{ record.visitorName || 'Unknown' }}</td>
-                  <td>
-                    <span [class]="getPointsClass(record.points)">
-                      {{
-                        record.points > 0 ? '+' + record.points : record.points
-                      }}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      class="badge"
-                      [class]="getOriginBadgeClass(record.origin)"
-                    >
-                      {{ formatOrigin(record.origin) }}
-                    </span>
-                  </td>
-                  <td>{{ record.strategyName }}</td>
-                </tr>
-                }
-              </tbody>
-            </table>
+        <div class="card">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Visitor</th>
+                    <th>Points</th>
+                    <th>Origin</th>
+                    <th>Related Entity</th>
+                    <th>Strategy</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (record of filteredHistory; track record.id) {
+                    <tr>
+                      <td>{{ record.createdAt | date:'short' }}</td>
+                      <td>{{ record.visitorName || 'Unknown' }}</td>
+                      <td>
+                        <span [class]="getPointsClass(record.points)">
+                          {{ record.points > 0 ? '+' + record.points : record.points }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge" [class]="getOriginBadgeClass(record.origin)">
+                          {{ formatOrigin(record.origin) }}
+                        </span>
+                      </td>
+                      <td>
+                        @if (record.relatedEntityName) {
+                          <small>{{ record.relatedEntityName }}</small>
+                        } @else {
+                          <small class="text-muted">—</small>
+                        }
+                      </td>
+                      <td>{{ record.strategyName }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
       }
 
       <!-- No Results -->

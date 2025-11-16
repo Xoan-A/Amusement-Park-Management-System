@@ -10,6 +10,7 @@ namespace Domain
         public int Points { get; set; }
         public ScoreOrigin Origin { get; set; }
         public Guid? RelatedEntityId { get; set; }
+        public string? RelatedEntityName { get; set; }
 
         public string StrategyName
         {
