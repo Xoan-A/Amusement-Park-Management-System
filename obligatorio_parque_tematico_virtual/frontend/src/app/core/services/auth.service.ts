@@ -13,6 +13,9 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<LoginResponse | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
+  private activeRoleSubject = new BehaviorSubject<string | null>(null);
+  public activeRole$ = this.activeRoleSubject.asObservable();
+
   constructor(private http: HttpClient, private router: Router) {
     this.loadUserFromStorage();
   }
@@ -25,6 +28,14 @@ export class AuthService {
       try {
         const user = JSON.parse(userStr);
         this.currentUserSubject.next(user);
+
+        // Restore active role from sessionStorage or initialize with highest privilege
+        const storedActiveRole = sessionStorage.getItem('activeRole');
+        if (storedActiveRole && user.roles?.includes(storedActiveRole)) {
+          this.activeRoleSubject.next(storedActiveRole);
+        } else {
+          this.initializeActiveRole(user.roles || []);
+        }
       } catch (error) {
         this.logout();
       }
@@ -38,6 +49,9 @@ export class AuthService {
           localStorage.setItem('token', response.token);
           localStorage.setItem('user', JSON.stringify(response));
           this.currentUserSubject.next(response);
+
+          // Initialize active role with highest privilege
+          this.initializeActiveRole(response.roles || []);
         }
       })
     );
@@ -50,7 +64,9 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    sessionStorage.removeItem('activeRole');
     this.currentUserSubject.next(null);
+    this.activeRoleSubject.next(null);
     this.router.navigate(['/login']);
   }
 
@@ -68,15 +84,15 @@ export class AuthService {
   }
 
   isAdministrator(): boolean {
-    return this.hasRole(Roles.ADMINISTRATOR);
+    return this.activeRoleSubject.value === Roles.ADMINISTRATOR;
   }
 
   isOperator(): boolean {
-    return this.hasRole(Roles.OPERATOR);
+    return this.activeRoleSubject.value === Roles.OPERATOR;
   }
 
   isVisitor(): boolean {
-    return this.hasRole(Roles.VISITOR);
+    return this.activeRoleSubject.value === Roles.VISITOR;
   }
 
   getCurrentUser(): LoginResponse | null {
@@ -89,13 +105,129 @@ export class AuthService {
   }
 
   getDashboardRoute(): string {
-    if (this.isAdministrator()) {
+    const activeRole = this.activeRoleSubject.value;
+
+    if (activeRole === Roles.ADMINISTRATOR) {
       return '/admin/dashboard';
-    } else if (this.isOperator()) {
+    } else if (activeRole === Roles.OPERATOR) {
       return '/operator/dashboard';
-    } else if (this.isVisitor()) {
+    } else if (activeRole === Roles.VISITOR) {
       return '/visitor/dashboard';
     }
     return '/login';
+  }
+
+  // Active Role Management Methods
+
+  /**
+   * Initialize active role with highest privilege role
+   * Priority: Administrator > Operator > Visitor
+   */
+  initializeActiveRole(roles: string[]): void {
+    if (!roles || roles.length === 0) {
+      return;
+    }
+
+    let selectedRole: string;
+
+    if (roles.includes(Roles.ADMINISTRATOR)) {
+      selectedRole = Roles.ADMINISTRATOR;
+    } else if (roles.includes(Roles.OPERATOR)) {
+      selectedRole = Roles.OPERATOR;
+    } else if (roles.includes(Roles.VISITOR)) {
+      selectedRole = Roles.VISITOR;
+    } else {
+      selectedRole = roles[0];
+    }
+
+    this.setActiveRole(selectedRole);
+  }
+
+  /**
+   * Set the active role and persist to sessionStorage
+   */
+  setActiveRole(role: string): void {
+    const userRoles = this.getUserRoles();
+
+    if (!userRoles.includes(role)) {
+      console.error(`User does not have role: ${role}`);
+      return;
+    }
+
+    sessionStorage.setItem('activeRole', role);
+    this.activeRoleSubject.next(role);
+  }
+
+  /**
+   * Get the current active role
+   */
+  getActiveRole(): string | null {
+    return this.activeRoleSubject.value;
+  }
+
+  /**
+   * Get all available roles for the current user
+   */
+  getAvailableRoles(): string[] {
+    return this.getUserRoles();
+  }
+
+  /**
+   * Check if user has multiple roles
+   */
+  hasMultipleRoles(): boolean {
+    return this.getUserRoles().length > 1;
+  }
+
+  /**
+   * Switch to a different role and navigate appropriately
+   */
+  switchRole(newRole: string): void {
+    const currentRoute = this.router.url;
+    const userRoles = this.getUserRoles();
+
+    if (!userRoles.includes(newRole)) {
+      console.error(`Cannot switch to role: ${newRole}. User does not have this role.`);
+      return;
+    }
+
+    // Set the new active role
+    this.setActiveRole(newRole);
+
+    // Check if current route is accessible with new role
+    const rolePrefix = this.getRolePrefixFromRoute(currentRoute);
+    const newRolePrefix = this.getRolePrefixForRole(newRole);
+
+    // If current page doesn't match new role, redirect to new role's dashboard
+    if (rolePrefix && rolePrefix !== newRolePrefix) {
+      this.router.navigate([this.getDashboardRoute()]);
+    }
+    // Otherwise, stay on current page (user has access with new role)
+  }
+
+  /**
+   * Get role prefix from current route (e.g., '/admin/dashboard' -> 'admin')
+   */
+  private getRolePrefixFromRoute(route: string): string | null {
+    if (route.startsWith('/admin/')) return 'admin';
+    if (route.startsWith('/operator/')) return 'operator';
+    if (route.startsWith('/visitor/')) return 'visitor';
+    return null;
+  }
+
+  /**
+   * Get route prefix for a given role
+   */
+  private getRolePrefixForRole(role: string): string {
+    switch (role) {
+      case Roles.ADMINISTRATOR:
+        return 'admin';
+      case Roles.OPERATOR:
+        return 'operator';
+      case Roles.VISITOR:
+        return 'visitor';
+      default:
+        return '';
+    }
   }
 }
