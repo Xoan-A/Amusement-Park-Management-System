@@ -5,12 +5,11 @@ import { Router } from '@angular/router';
 import { PluginService } from '../../../core/services/plugin.service';
 import { StrategyService } from '../../../core/services/strategy.service';
 import { PluginResponse, StrategyResponse } from '../../../core/models/responses';
-import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-plugin-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmationModalComponent],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">

@@ -1,24 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { CommonModule } from '@angular/common';
-import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { RouterLink } from '@angular/router';
-import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { RewardService } from '../../../core/services/reward.service';
-import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { RedemptionService } from '../../../core/services/redemption.service';
-import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { UserService } from '../../../core/services/user.service';
-import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { AuthService } from '../../../core/services/auth.service';
-import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { RewardResponse, MembershipLevel } from '../../../core/models';
-import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-browse-rewards',
   standalone: true,
-  imports: [ConfirmationModalComponent, CommonModule, RouterLink, ],
+  imports: [CommonModule, RouterLink],
   template: `
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -144,8 +136,6 @@ export class BrowseRewardsComponent implements OnInit {
   userMembershipLevel: MembershipLevel | null = null;
   userId: string = '';
   loading = false;
-  showDeleteModal = false;
-  itemToDelete: any = null;
   errorMessage = '';
   successMessage = '';
   redeeming: string | null = null;
@@ -177,22 +167,16 @@ export class BrowseRewardsComponent implements OnInit {
 
   loadRewards(): void {
     this.loading = true;
-  showDeleteModal = false;
-  itemToDelete: any = null;
     this.errorMessage = '';
 
     this.rewardService.getAvailable().subscribe({
       next: (rewards) => {
         this.rewards = rewards;
         this.loading = false;
-  showDeleteModal = false;
-  itemToDelete: any = null;
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Failed to load rewards';
         this.loading = false;
-  showDeleteModal = false;
-  itemToDelete: any = null;
       }
     });
   }
