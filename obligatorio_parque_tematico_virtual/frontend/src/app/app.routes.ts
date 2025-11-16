@@ -34,6 +34,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/administrator/attractions/attractions-list/attractions-list.component').then(m => m.AttractionsListComponent)
       },
       {
+        path: 'attractions/visits',
+        loadComponent: () => import('./features/administrator/attractions/attraction-visits/attraction-visits.component').then(m => m.AttractionVisitsComponent)
+      },
+      {
         path: 'attractions/new',
         loadComponent: () => import('./features/administrator/attractions/attraction-form/attraction-form.component').then(m => m.AttractionFormComponent)
       },
@@ -52,13 +56,6 @@ export const routes: Routes = [
       {
         path: 'users',
         loadComponent: () => import('./features/administrator/users/users-list/users-list.component').then(m => m.UsersListComponent)
-      },
-      {
-        path: 'reports',
-        loadComponent: () =>
-          import('./features/administrator/reports/reports.component').then(
-            (m) => m.ReportsComponent
-          ),
       },
       {
         path: 'rewards',

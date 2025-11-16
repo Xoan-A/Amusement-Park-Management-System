@@ -31,7 +31,7 @@ export class EventFormComponent implements OnInit {
       name: ['', [Validators.required, Validators.minLength(3)]],
       date: ['', Validators.required],
       hour: [0, [Validators.required, Validators.min(0), Validators.max(23)]],
-      maxCapacity: [1, [Validators.required, Validators.min(1)]],
+      maxCapacity: [2, [Validators.required, Validators.min(2), Validators.max(10000)]],
       cost: [0, [Validators.required, Validators.min(0)]]
     });
   }

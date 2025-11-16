@@ -32,8 +32,7 @@ export class AttractionFormComponent implements OnInit {
       description: ['', [Validators.required, Validators.minLength(10)]],
       type: [AttractionType.RollerCoaster, Validators.required],
       minAge: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
-      maxCapacity: [1, [Validators.required, Validators.min(1)]],
-      currentCapacity: [0, [Validators.min(0)]]
+      maxCapacity: [1, [Validators.required, Validators.min(1)]]
     });
   }
 
@@ -56,8 +55,7 @@ export class AttractionFormComponent implements OnInit {
           description: attraction.description,
           type: attraction.type,
           minAge: attraction.minAge,
-          maxCapacity: attraction.maxCapacity,
-          currentCapacity: attraction.currentCapacity
+          maxCapacity: attraction.maxCapacity
         });
         this.loading = false;
       },

@@ -98,11 +98,11 @@ export interface StrategyResponse {
 }
 
 export interface TopTenResponse {
-  visitors: TopVisitor[];
+  topTenUsers: UserResponseData[];
 }
 
-export interface TopVisitor {
-  visitorId: string;
+export interface UserResponseData {
+  id: string;
   name: string;
   lastName: string;
   email: string;
@@ -110,16 +110,12 @@ export interface TopVisitor {
 }
 
 export interface AttractionsVisitResponse {
-  startDate: string;
-  endDate: string;
   attractionsVisits: AttractionVisitDetail[];
 }
 
 export interface AttractionVisitDetail {
-  attractionId: string;
-  attractionName: string;
-  totalVisits: number;
-  averageStayMinutes: number;
+  attraction: AttractionResponse;
+  visitCount: number;
 }
 
 export interface RewardResponse {

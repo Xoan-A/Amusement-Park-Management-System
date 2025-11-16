@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from '../../../../core/services/user.service';
-import { Roles } from '../../../../core/models';
+import { StrategyService } from '../../../../core/services/strategy.service';
+import { Roles, UserResponseData } from '../../../../core/models';
 
-@Component({
+  @Component({
   selector: 'app-users-list',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ],
@@ -61,16 +62,58 @@ import { Roles } from '../../../../core/models';
           </form>
         </div>
       </div>
+
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Top Ten Daily Ranking</h5>
+        </div>
+        <div class="card-body">
+          @if (loadingTopTen) {
+            <p class="text-muted">Loading top ten ranking...</p>
+          } @else if (topTenData && topTenData.length > 0) {
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of topTenData; let i = $index; track item.id) {
+                    <tr>
+                      <td>{{ i + 1 }}</td>
+                      <td>{{ item.name }} {{ item.lastName }}</td>
+                      <td>{{ item.email }}</td>
+                      <td>{{ item.score }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <p class="text-muted">No data available.</p>
+          }
+        </div>
+      </div>
     </div>
   `
 })
-export class UsersListComponent {
+export class UsersListComponent implements OnInit {
   userForm: FormGroup;
   loading = false;
+  loadingTopTen = false;
   errorMessage = '';
   successMessage = '';
+  topTenData: UserResponseData[] | null = null;
 
-  constructor(private fb: FormBuilder, private userService: UserService) {
+  constructor(
+    private fb: FormBuilder,
+    private userService: UserService,
+    private strategyService: StrategyService
+  ) {
     this.userForm = this.fb.group({
       name: ['', Validators.required],
       lastName: ['', Validators.required],
@@ -78,6 +121,10 @@ export class UsersListComponent {
       password: ['', [Validators.required, Validators.minLength(6)]],
       role: ['Administrator', Validators.required]
     });
+  }
+
+  ngOnInit(): void {
+    this.loadTopTen();
   }
 
   createUser(): void {
@@ -101,6 +148,20 @@ export class UsersListComponent {
       error: (error) => {
         this.errorMessage = error.error?.message || 'Failed to create user';
         this.loading = false;
+      }
+    });
+  }
+
+  loadTopTen(): void {
+    this.loadingTopTen = true;
+    this.strategyService.getTopTen().subscribe({
+      next: (response) => {
+        this.topTenData = response.topTenUsers;
+        this.loadingTopTen = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Failed to load top ten';
+        this.loadingTopTen = false;
       }
     });
   }
