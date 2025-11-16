@@ -15,12 +15,6 @@
             </div>
           }
 
-          @if (successMessage) {
-            <div class="alert alert-success">
-              {{ successMessage }}
-            </div>
-          }
-
           <form [formGroup]="attractionForm" (ngSubmit)="onSubmit()">
             <div class="mb-3">
               <label for="name" class="form-label">Attraction Name *</label>

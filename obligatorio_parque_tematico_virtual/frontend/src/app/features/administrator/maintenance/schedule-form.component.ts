@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { AttractionResponse, AllAttractionsResponse } from '../../../core/models/responses';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-schedule-form',
@@ -139,6 +140,7 @@ export class ScheduleFormComponent implements OnInit {
   private maintenanceService = inject(MaintenanceService);
   private attractionService = inject(AttractionService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   scheduleForm!: FormGroup;
   attractions: AttractionResponse[] = [];
@@ -190,7 +192,7 @@ export class ScheduleFormComponent implements OnInit {
     this.maintenanceService.createSchedule(request).subscribe({
       next: (response) => {
         this.loading = false;
-        alert(response.message || 'Maintenance scheduled successfully!');
+        this.toastService.showSuccess(response.message || 'Maintenance scheduled successfully!');
         this.router.navigate(['/admin/maintenance/schedules']);
       },
       error: (error) => {

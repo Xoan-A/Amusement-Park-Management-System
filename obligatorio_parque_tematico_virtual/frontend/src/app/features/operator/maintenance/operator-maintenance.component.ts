@@ -2,11 +2,13 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { MaintenanceScheduleResponse } from '../../../core/models/responses';
+import { ConfirmationModalComponent } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-operator-maintenance',
   standalone: true,
-  imports: [CommonModule, ],
+  imports: [CommonModule, ConfirmationModalComponent],
   template: `
     <div class="container mt-4">
       <h2 class="mb-4">Maintenance Schedules</h2>
@@ -15,13 +17,6 @@ import { MaintenanceScheduleResponse } from '../../../core/models/responses';
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
           {{ errorMessage }}
           <button type="button" class="btn-close" (click)="errorMessage = null"></button>
-        </div>
-      }
-
-      @if (successMessage) {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-          {{ successMessage }}
-          <button type="button" class="btn-close" (click)="successMessage = null"></button>
         </div>
       }
 
@@ -289,6 +284,14 @@ import { MaintenanceScheduleResponse } from '../../../core/models/responses';
         </div>
       </div>
     </div>
+
+    <app-confirmation-modal
+      [show]="showCompleteModal"
+      title="Complete Maintenance"
+      message="Mark this maintenance schedule as completed?"
+      (confirmed)="confirmComplete()"
+      (cancelled)="cancelComplete()">
+    </app-confirmation-modal>
   `,
   styles: [`
     .table-danger {
@@ -298,6 +301,7 @@ import { MaintenanceScheduleResponse } from '../../../core/models/responses';
 })
 export class OperatorMaintenanceComponent implements OnInit {
   private maintenanceService = inject(MaintenanceService);
+  private toastService = inject(ToastService);
 
   activeSchedules: MaintenanceScheduleResponse[] = [];
   completedSchedules: MaintenanceScheduleResponse[] = [];
@@ -310,10 +314,11 @@ export class OperatorMaintenanceComponent implements OnInit {
   loadingOverdue = false;
   loadingUpcoming = false;
   errorMessage: string | null = null;
-  successMessage: string | null = null;
 
   showOverdue = false;
   showUpcoming = false;
+  showCompleteModal = false;
+  scheduleToComplete: string | null = null;
 
   ngOnInit() {
     this.loadActiveSchedules();
@@ -390,27 +395,38 @@ export class OperatorMaintenanceComponent implements OnInit {
   }
 
   completeMaintenance(scheduleId: string) {
-    if (!confirm('Mark this maintenance schedule as completed?')) {
-      return;
+    this.scheduleToComplete = scheduleId;
+    this.showCompleteModal = true;
+  }
+
+  confirmComplete() {
+    if (this.scheduleToComplete) {
+      this.loading = true;
+
+      this.maintenanceService.updateScheduleStatus(this.scheduleToComplete, { status: 'Completed' }).subscribe({
+        next: (response) => {
+          this.loading = false;
+          this.toastService.showSuccess(response.message || 'Maintenance completed successfully!');
+          this.loadActiveSchedules();
+          this.loadCompletedSchedules();
+          if (this.showOverdue) this.loadOverdueSchedules();
+          if (this.showUpcoming) this.loadUpcomingSchedules();
+          this.scheduleToComplete = null;
+          this.showCompleteModal = false;
+          this.errorMessage = null;
+        },
+        error: (error) => {
+          this.loading = false;
+          this.errorMessage = error.error?.message || 'Failed to complete maintenance.';
+          this.scheduleToComplete = null;
+          this.showCompleteModal = false;
+        }
+      });
     }
+  }
 
-    this.loading = true;
-    this.errorMessage = null;
-    this.successMessage = null;
-
-    this.maintenanceService.updateScheduleStatus(scheduleId, { status: 'Completed' }).subscribe({
-      next: (response) => {
-        this.loading = false;
-        this.successMessage = response.message || 'Maintenance completed successfully!';
-        this.loadActiveSchedules();
-        this.loadCompletedSchedules();
-        if (this.showOverdue) this.loadOverdueSchedules();
-        if (this.showUpcoming) this.loadUpcomingSchedules();
-      },
-      error: (error) => {
-        this.loading = false;
-        this.errorMessage = error.error?.message || 'Failed to complete maintenance.';
-      }
-    });
+  cancelComplete() {
+    this.scheduleToComplete = null;
+    this.showCompleteModal = false;
   }
 }

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { AttractionService } from '../../../../core/services/attraction.service';
 import { AttractionType } from '../../../../core/models';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-attraction-form',
@@ -18,13 +19,13 @@ export class AttractionFormComponent implements OnInit {
   attractionId: string | null = null;
   attractionTypes = Object.values(AttractionType);
   errorMessage = '';
-  successMessage = '';
 
   constructor(
     private fb: FormBuilder,
     private attractionService: AttractionService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toastService: ToastService
   ) {
     this.attractionForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
@@ -76,14 +77,13 @@ export class AttractionFormComponent implements OnInit {
 
     this.loading = true;
     this.errorMessage = '';
-    this.successMessage = '';
 
     const attractionData = this.attractionForm.value;
 
     if (this.isEditMode && this.attractionId) {
       this.attractionService.update(this.attractionId, attractionData).subscribe({
         next: () => {
-          this.successMessage = 'Attraction updated successfully!';
+          this.toastService.showSuccess('Attraction updated successfully!');
           setTimeout(() => this.router.navigate(['/admin/attractions']), 1500);
         },
         error: (error) => {
@@ -94,7 +94,7 @@ export class AttractionFormComponent implements OnInit {
     } else {
       this.attractionService.create(attractionData).subscribe({
         next: () => {
-          this.successMessage = 'Attraction created successfully!';
+          this.toastService.showSuccess('Attraction created successfully!');
           setTimeout(() => this.router.navigate(['/admin/attractions']), 1500);
         },
         error: (error) => {

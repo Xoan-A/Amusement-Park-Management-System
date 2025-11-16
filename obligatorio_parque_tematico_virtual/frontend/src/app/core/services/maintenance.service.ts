@@ -87,4 +87,11 @@ export class MaintenanceService {
   deleteSchedule(id: string): Observable<MessageResponse> {
     return this.http.delete<MessageResponse>(`${this.apiUrl}/schedules/${id}`);
   }
+
+  completeSchedule(scheduleId: string): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(
+      `${this.apiUrl}/schedules/${scheduleId}/complete`,
+      {}
+    );
+  }
 }

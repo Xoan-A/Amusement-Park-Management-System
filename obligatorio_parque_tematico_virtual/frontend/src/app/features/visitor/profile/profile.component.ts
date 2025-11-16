@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { MembershipLevel } from '../../../core/models';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-profile',
@@ -19,11 +20,11 @@ import { MembershipLevel } from '../../../core/models';
             <div class="card-body">
               <h5 class="card-title mb-4">Edit Profile</h5>
 
-              @if (successMessage) {
-                <div class="alert alert-success">{{ successMessage }}</div>
-              }
               @if (errorMessage) {
-                <div class="alert alert-danger">{{ errorMessage }}</div>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  {{ errorMessage }}
+                  <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+                </div>
               }
 
               <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
@@ -73,14 +74,14 @@ import { MembershipLevel } from '../../../core/models';
 export class ProfileComponent implements OnInit {
   profileForm: FormGroup;
   loading = false;
-  successMessage = '';
   errorMessage = '';
   membershipLevel: MembershipLevel = MembershipLevel.Standard;
 
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastService: ToastService
   ) {
     this.profileForm = this.fb.group({
       name: [''],
@@ -119,7 +120,6 @@ export class ProfileComponent implements OnInit {
   updateProfile(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.successMessage = '';
 
     const userId = this.authService.getUserId();
     if (!userId) {
@@ -130,7 +130,7 @@ export class ProfileComponent implements OnInit {
 
     this.userService.update(userId, this.profileForm.value).subscribe({
       next: () => {
-        this.successMessage = 'Profile updated successfully!';
+        this.toastService.showSuccess('Profile updated successfully!');
         this.loading = false;
       },
       error: (error) => {

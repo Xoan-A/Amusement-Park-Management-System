@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { IncidentService } from '../../../core/services/incident.service';
 import { AttractionResponse } from '../../../core/models';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-incidents',
@@ -13,11 +14,11 @@ import { AttractionResponse } from '../../../core/models';
     <div class="container mt-4">
       <h1 class="mb-4">Incident Management</h1>
 
-      @if (successMessage) {
-        <div class="alert alert-success">{{ successMessage }}</div>
-      }
       @if (errorMessage) {
-        <div class="alert alert-danger">{{ errorMessage }}</div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          {{ errorMessage }}
+          <button type="button" class="btn-close" (click)="errorMessage = null"></button>
+        </div>
       }
 
       <div class="row">
@@ -78,12 +79,12 @@ import { AttractionResponse } from '../../../core/models';
 export class IncidentsComponent implements OnInit {
   attractions: AttractionResponse[] = [];
   newIncidents: { [key: string]: string } = {};
-  successMessage = '';
-  errorMessage = '';
+  errorMessage: string | null = null;
 
   constructor(
     private attractionService: AttractionService,
-    private incidentService: IncidentService
+    private incidentService: IncidentService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -105,14 +106,13 @@ export class IncidentsComponent implements OnInit {
 
     this.incidentService.addIncident(attractionId, { incident }).subscribe({
       next: () => {
-        this.successMessage = 'Incident added successfully!';
+        this.toastService.showSuccess('Incident added successfully!');
         this.newIncidents[attractionId] = '';
         this.loadAttractions();
-        setTimeout(() => this.successMessage = '', 3000);
+        this.errorMessage = null;
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Failed to add incident';
-        setTimeout(() => this.errorMessage = '', 3000);
       }
     });
   }
@@ -120,13 +120,12 @@ export class IncidentsComponent implements OnInit {
   removeIncident(attractionId: string, incident: string): void {
     this.incidentService.removeIncident(attractionId, { incident }).subscribe({
       next: () => {
-        this.successMessage = 'Incident removed successfully!';
+        this.toastService.showSuccess('Incident removed successfully!');
         this.loadAttractions();
-        setTimeout(() => this.successMessage = '', 3000);
+        this.errorMessage = null;
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Failed to remove incident';
-        setTimeout(() => this.errorMessage = '', 3000);
       }
     });
   }

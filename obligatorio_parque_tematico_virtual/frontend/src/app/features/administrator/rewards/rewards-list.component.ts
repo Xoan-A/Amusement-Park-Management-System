@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { RewardService } from '../../../core/services/reward.service';
 import { RewardResponse, MembershipLevel } from '../../../core/models';
+import { ConfirmationModalComponent } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-rewards-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, ],
+  imports: [CommonModule, RouterLink, ConfirmationModalComponent],
   template: `
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -21,13 +23,6 @@ import { RewardResponse, MembershipLevel } from '../../../core/models';
         <div class="alert alert-danger alert-dismissible">
           {{ errorMessage }}
           <button type="button" class="btn-close" (click)="errorMessage=''"></button>
-        </div>
-      }
-
-      @if (successMessage) {
-        <div class="alert alert-success alert-dismissible">
-          {{ successMessage }}
-          <button type="button" class="btn-close" (click)="successMessage=''"></button>
         </div>
       }
 
@@ -102,6 +97,14 @@ import { RewardResponse, MembershipLevel } from '../../../core/models';
         }
       }
     </div>
+
+    <app-confirmation-modal
+      [show]="showDeleteModal"
+      title="Delete Reward"
+      [message]="deleteMessage"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()">
+    </app-confirmation-modal>
   `,
   styles: [`
     .table-responsive {
@@ -115,10 +118,15 @@ export class RewardsListComponent implements OnInit {
   rewards: RewardResponse[] = [];
   loading = false;
   errorMessage = '';
-  successMessage = '';
   deleting: string | null = null;
+  showDeleteModal = false;
+  deleteMessage = '';
+  rewardToDelete: RewardResponse | null = null;
 
-  constructor(private rewardService: RewardService) {}
+  constructor(
+    private rewardService: RewardService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.loadRewards();
@@ -141,25 +149,37 @@ export class RewardsListComponent implements OnInit {
   }
 
   deleteReward(reward: RewardResponse): void {
-    if (!confirm(`Are you sure you want to delete "${reward.name}"?`)) {
-      return;
+    this.rewardToDelete = reward;
+    this.deleteMessage = `Are you sure you want to delete "${reward.name}"?`;
+    this.showDeleteModal = true;
+  }
+
+  confirmDelete(): void {
+    if (this.rewardToDelete) {
+      this.deleting = this.rewardToDelete.id;
+      this.errorMessage = '';
+
+      this.rewardService.delete(this.rewardToDelete.id).subscribe({
+        next: () => {
+          this.toastService.showSuccess(`Reward "${this.rewardToDelete!.name}" deleted successfully!`);
+          this.deleting = null;
+          this.loadRewards();
+          this.rewardToDelete = null;
+          this.showDeleteModal = false;
+        },
+        error: (error) => {
+          this.errorMessage = error.error?.message || 'Failed to delete reward';
+          this.deleting = null;
+          this.rewardToDelete = null;
+          this.showDeleteModal = false;
+        }
+      });
     }
+  }
 
-    this.deleting = reward.id;
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    this.rewardService.delete(reward.id).subscribe({
-      next: () => {
-        this.successMessage = `Reward "${reward.name}" deleted successfully!`;
-        this.deleting = null;
-        this.loadRewards();
-      },
-      error: (error) => {
-        this.errorMessage = error.error?.message || 'Failed to delete reward';
-        this.deleting = null;
-      }
-    });
+  cancelDelete(): void {
+    this.rewardToDelete = null;
+    this.showDeleteModal = false;
   }
 
   getMembershipBadgeClass(level: MembershipLevel): string {

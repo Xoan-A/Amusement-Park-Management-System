@@ -10,11 +10,13 @@ import {
   AllAttractionsResponse,
 } from '../../../core/models/responses';
 import { MaintenanceStatus } from '../../../core/models/enums';
+import { ConfirmationModalComponent } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-schedule-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmationModalComponent],
   template: `
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -106,16 +108,7 @@ import { MaintenanceStatus } from '../../../core/models/enums';
       </div>
 
       <!-- Alerts -->
-      @if (successMessage) {
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ successMessage }}
-        <button
-          type="button"
-          class="btn-close"
-          (click)="successMessage = null"
-        ></button>
-      </div>
-      } @if (errorMessage) {
+      @if (errorMessage) {
       <div class="alert alert-danger alert-dismissible fade show" role="alert">
         {{ errorMessage }}
         <button
@@ -187,7 +180,7 @@ import { MaintenanceStatus } from '../../../core/models/enums';
                     } @if (schedule.status === 'InProgress') {
                     <button
                       class="btn btn-sm btn-primary me-1"
-                      (click)="navigateToComplete(schedule.id)"
+                      (click)="completeMaintenance(schedule.id)"
                       title="Complete"
                     >
                       <i class="bi bi-check-circle"></i>
@@ -220,6 +213,22 @@ import { MaintenanceStatus } from '../../../core/models/enums';
       </div>
       }
     </div>
+
+    <app-confirmation-modal
+      [show]="showDeleteModal"
+      title="Delete Schedule"
+      message="Are you sure you want to delete this schedule?"
+      (confirmed)="confirmDeleteSchedule()"
+      (cancelled)="cancelDeleteSchedule()">
+    </app-confirmation-modal>
+
+    <app-confirmation-modal
+      [show]="showCompleteModal"
+      title="Complete Maintenance"
+      message="Mark this maintenance schedule as completed?"
+      (confirmed)="confirmCompleteMaintenance()"
+      (cancelled)="cancelCompleteMaintenance()">
+    </app-confirmation-modal>
   `,
   styles: [
     `
@@ -233,17 +242,22 @@ export class ScheduleListComponent implements OnInit {
   private maintenanceService = inject(MaintenanceService);
   private attractionService = inject(AttractionService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   schedules: MaintenanceScheduleResponse[] = [];
   attractions: AttractionResponse[] = [];
   loading = false;
-  successMessage: string | null = null;
   errorMessage: string | null = null;
 
   selectedAttractionId = '';
   selectedStatus = '';
   dateFrom = '';
   dateTo = '';
+
+  showDeleteModal = false;
+  showCompleteModal = false;
+  scheduleToDelete: string | null = null;
+  scheduleToComplete: string | null = null;
 
   ngOnInit() {
     this.loadAttractions();
@@ -331,7 +345,7 @@ export class ScheduleListComponent implements OnInit {
       .updateScheduleStatus(scheduleId, { status })
       .subscribe({
         next: (response) => {
-          this.successMessage = response.message;
+          this.toastService.showSuccess(response.message || 'Schedule status updated successfully');
           this.loadSchedules();
         },
         error: () => {
@@ -341,29 +355,63 @@ export class ScheduleListComponent implements OnInit {
   }
 
   deleteSchedule(scheduleId: string) {
-    if (!confirm('Are you sure you want to delete this schedule?')) return;
+    this.scheduleToDelete = scheduleId;
+    this.showDeleteModal = true;
+  }
 
-    this.maintenanceService.deleteSchedule(scheduleId).subscribe({
-      next: (response) => {
-        this.successMessage = response.message;
-        this.loadSchedules();
-      },
-      error: () => {
-        this.errorMessage = 'Failed to delete schedule.';
-      },
-    });
+  confirmDeleteSchedule() {
+    if (this.scheduleToDelete) {
+      this.maintenanceService.deleteSchedule(this.scheduleToDelete).subscribe({
+        next: (response) => {
+          this.toastService.showSuccess(response.message || 'Schedule deleted successfully');
+          this.loadSchedules();
+          this.scheduleToDelete = null;
+          this.showDeleteModal = false;
+        },
+        error: () => {
+          this.errorMessage = 'Failed to delete schedule.';
+          this.scheduleToDelete = null;
+          this.showDeleteModal = false;
+        },
+      });
+    }
+  }
+
+  cancelDeleteSchedule() {
+    this.scheduleToDelete = null;
+    this.showDeleteModal = false;
   }
 
   navigateToCreateSchedule() {
     this.router.navigate(['/admin/maintenance/schedules/create']);
   }
 
-  navigateToComplete(scheduleId: string) {
-    this.router.navigate([
-      '/admin/maintenance/schedules',
-      scheduleId,
-      'complete',
-    ]);
+  completeMaintenance(scheduleId: string) {
+    this.scheduleToComplete = scheduleId;
+    this.showCompleteModal = true;
+  }
+
+  confirmCompleteMaintenance() {
+    if (this.scheduleToComplete) {
+      this.maintenanceService.completeSchedule(this.scheduleToComplete).subscribe({
+        next: (response) => {
+          this.toastService.showSuccess(response.message || 'Maintenance completed successfully!');
+          this.loadSchedules();
+          this.scheduleToComplete = null;
+          this.showCompleteModal = false;
+        },
+        error: () => {
+          this.errorMessage = 'Failed to complete maintenance.';
+          this.scheduleToComplete = null;
+          this.showCompleteModal = false;
+        },
+      });
+    }
+  }
+
+  cancelCompleteMaintenance() {
+    this.scheduleToComplete = null;
+    this.showCompleteModal = false;
   }
 
   isOverdue(schedule: MaintenanceScheduleResponse): boolean {

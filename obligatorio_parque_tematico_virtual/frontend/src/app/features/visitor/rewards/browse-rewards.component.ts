@@ -6,11 +6,13 @@ import { RedemptionService } from '../../../core/services/redemption.service';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { RewardResponse, MembershipLevel } from '../../../core/models';
+import { ConfirmationModalComponent } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-browse-rewards',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ConfirmationModalComponent],
   template: `
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -27,13 +29,6 @@ import { RewardResponse, MembershipLevel } from '../../../core/models';
         <div class="alert alert-danger alert-dismissible">
           {{ errorMessage }}
           <button type="button" class="btn-close" (click)="errorMessage=''"></button>
-        </div>
-      }
-
-      @if (successMessage) {
-        <div class="alert alert-success alert-dismissible">
-          {{ successMessage }}
-          <button type="button" class="btn-close" (click)="successMessage=''"></button>
         </div>
       }
 
@@ -117,6 +112,14 @@ import { RewardResponse, MembershipLevel } from '../../../core/models';
         }
       }
     </div>
+
+    <app-confirmation-modal
+      [show]="showRedeemModal"
+      title="Redeem Reward"
+      [message]="redeemMessage"
+      (confirmed)="confirmRedeem()"
+      (cancelled)="cancelRedeem()">
+    </app-confirmation-modal>
   `,
   styles: [`
     .card {
@@ -137,14 +140,17 @@ export class BrowseRewardsComponent implements OnInit {
   userId: string = '';
   loading = false;
   errorMessage = '';
-  successMessage = '';
   redeeming: string | null = null;
+  showRedeemModal = false;
+  redeemMessage = '';
+  rewardToRedeem: RewardResponse | null = null;
 
   constructor(
     private rewardService: RewardService,
     private redemptionService: RedemptionService,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -182,26 +188,38 @@ export class BrowseRewardsComponent implements OnInit {
   }
 
   redeemReward(reward: RewardResponse): void {
-    if (!confirm(`Redeem "${reward.name}" for ${reward.pointsCost} points?`)) {
-      return;
+    this.rewardToRedeem = reward;
+    this.redeemMessage = `Redeem "${reward.name}" for ${reward.pointsCost} points?`;
+    this.showRedeemModal = true;
+  }
+
+  confirmRedeem(): void {
+    if (this.rewardToRedeem) {
+      this.redeeming = this.rewardToRedeem.id;
+      this.errorMessage = '';
+
+      this.redemptionService.redeemReward({ rewardId: this.rewardToRedeem.id }).subscribe({
+        next: (redemption) => {
+          this.toastService.showSuccess(`Successfully redeemed "${this.rewardToRedeem!.name}"! ${redemption.pointsSpent} points spent.`);
+          this.redeeming = null;
+          this.userPoints -= redemption.pointsSpent;
+          this.loadRewards();
+          this.rewardToRedeem = null;
+          this.showRedeemModal = false;
+        },
+        error: (error) => {
+          this.errorMessage = error.error?.message || 'Failed to redeem reward';
+          this.redeeming = null;
+          this.rewardToRedeem = null;
+          this.showRedeemModal = false;
+        }
+      });
     }
+  }
 
-    this.redeeming = reward.id;
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    this.redemptionService.redeemReward({ rewardId: reward.id }).subscribe({
-      next: (redemption) => {
-        this.successMessage = `Successfully redeemed "${reward.name}"! ${redemption.pointsSpent} points spent.`;
-        this.redeeming = null;
-        this.userPoints -= redemption.pointsSpent;
-        this.loadRewards();
-      },
-      error: (error) => {
-        this.errorMessage = error.error?.message || 'Failed to redeem reward';
-        this.redeeming = null;
-      }
-    });
+  cancelRedeem(): void {
+    this.rewardToRedeem = null;
+    this.showRedeemModal = false;
   }
 
   hasEnoughPoints(reward: RewardResponse): boolean {

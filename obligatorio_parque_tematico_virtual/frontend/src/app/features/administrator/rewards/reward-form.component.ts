@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { RewardService } from '../../../core/services/reward.service';
 import { MembershipLevel } from '../../../core/models';
 import { CreateRewardResponse, RewardResponse } from '../../../core/models/responses';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-reward-form',
@@ -145,7 +146,8 @@ export class RewardFormComponent implements OnInit {
     private fb: FormBuilder,
     private rewardService: RewardService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toastService: ToastService
   ) {
     this.rewardForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
@@ -202,7 +204,9 @@ export class RewardFormComponent implements OnInit {
 
     operation.subscribe({
       next: () => {
-        this.router.navigate(['/admin/rewards']);
+        const message = this.isEditMode ? 'Reward updated successfully!' : 'Reward created successfully!';
+        this.toastService.showSuccess(message);
+        setTimeout(() => this.router.navigate(['/admin/rewards']), 1500);
       },
       error: (error: any) => {
         this.errorMessage = error.error?.message || `Failed to ${this.isEditMode ? 'update' : 'create'} reward`;

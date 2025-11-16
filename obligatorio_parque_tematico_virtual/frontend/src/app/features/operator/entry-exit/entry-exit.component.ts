@@ -5,6 +5,7 @@ import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { TicketService } from '../../../core/services/ticket.service';
 import { AttractionResponse, TicketResponse, TicketType } from '../../../core/models';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-entry-exit',
@@ -14,12 +15,6 @@ import { AttractionResponse, TicketResponse, TicketType } from '../../../core/mo
     <div class="container mt-4">
       <h1 class="mb-4">Visitor Entry/Exit Management</h1>
 
-      @if (successMessage) {
-        <div class="alert alert-success alert-dismissible">
-          {{ successMessage }}
-          <button type="button" class="btn-close" (click)="successMessage=''"></button>
-        </div>
-      }
       @if (errorMessage) {
         <div class="alert alert-danger alert-dismissible">
           {{ errorMessage }}
@@ -199,7 +194,6 @@ import { AttractionResponse, TicketResponse, TicketType } from '../../../core/mo
 })
 export class EntryExitComponent implements OnInit {
   attractions: AttractionResponse[] = [];
-  successMessage = '';
   errorMessage = '';
   loading = false;
   ticketType = TicketType;
@@ -216,7 +210,8 @@ export class EntryExitComponent implements OnInit {
 
   constructor(
     private attractionService: AttractionService,
-    private ticketService: TicketService
+    private ticketService: TicketService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -250,8 +245,7 @@ export class EntryExitComponent implements OnInit {
       next: (ticket) => {
         this.scannedTicket = ticket;
         this.loading = false;
-        this.successMessage = 'Ticket found successfully!';
-        setTimeout(() => this.successMessage = '', 3000);
+        this.toastService.showSuccess('Ticket found successfully!');
       },
       error: (error) => {
         this.loading = false;
@@ -292,8 +286,7 @@ export class EntryExitComponent implements OnInit {
       next: (ticket) => {
         this.scannedTicket = ticket;
         this.loading = false;
-        this.successMessage = 'QR code scanned successfully!';
-        setTimeout(() => this.successMessage = '', 3000);
+        this.toastService.showSuccess('QR code scanned successfully!');
       },
       error: (error) => {
         this.loading = false;
@@ -316,11 +309,10 @@ export class EntryExitComponent implements OnInit {
 
     this.attractionService.registerEntry(this.selectedAttractionId, request).subscribe({
       next: () => {
-        this.successMessage = 'Visitor entry registered successfully!';
+        this.toastService.showSuccess('Visitor entry registered successfully!');
         this.loading = false;
         this.loadAttractions();
         this.resetScanner();
-        setTimeout(() => this.successMessage = '', 3000);
       },
       error: (error) => {
         this.errorMessage = error.error?.message || error.error?.Message || 'Failed to register entry';
@@ -341,11 +333,10 @@ export class EntryExitComponent implements OnInit {
 
     this.attractionService.registerExit(this.selectedAttractionId, request).subscribe({
       next: () => {
-        this.successMessage = 'Visitor exit registered successfully!';
+        this.toastService.showSuccess('Visitor exit registered successfully!');
         this.loading = false;
         this.loadAttractions();
         this.resetScanner();
-        setTimeout(() => this.successMessage = '', 3000);
       },
       error: (error) => {
         this.errorMessage = error.error?.message || error.error?.Message || 'Failed to register exit';

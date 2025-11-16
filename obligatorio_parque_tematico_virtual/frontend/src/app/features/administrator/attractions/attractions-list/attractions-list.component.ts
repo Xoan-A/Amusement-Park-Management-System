@@ -6,6 +6,7 @@ import { AttractionService } from '../../../../core/services/attraction.service'
 import { AttractionResponse, AttractionType } from '../../../../core/models';
 import { EnumToDisplayPipe } from '../../../../shared/pipes/enum-to-display.pipe';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-attractions-list',
@@ -22,8 +23,12 @@ export class AttractionsListComponent implements OnInit {
   attractionTypes = Object.values(AttractionType);
   showDeleteModal = false;
   attractionToDelete: string | null = null;
+  errorMessage: string | null = null;
 
-  constructor(private attractionService: AttractionService) {}
+  constructor(
+    private attractionService: AttractionService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.loadAttractions();
@@ -65,13 +70,15 @@ export class AttractionsListComponent implements OnInit {
     if (this.attractionToDelete) {
       this.attractionService.delete(this.attractionToDelete).subscribe({
         next: () => {
+          this.toastService.showSuccess('Attraction deleted successfully');
           this.loadAttractions();
           this.attractionToDelete = null;
           this.showDeleteModal = false;
+          this.errorMessage = null;
         },
         error: (error) => {
           console.error('Error deleting attraction', error);
-          alert('Failed to delete attraction');
+          this.errorMessage = error.error?.message || 'Failed to delete attraction';
           this.attractionToDelete = null;
           this.showDeleteModal = false;
         }
