@@ -24,6 +24,8 @@ export class IncidentService {
   }
 
   removeIncident(attractionId: string, incident: IncidentRequest): Observable<MessageResponse> {
-    return this.http.delete<MessageResponse>(`${this.apiUrl}/${attractionId}`, { body: incident });
+    return this.http.delete<MessageResponse>(
+      `${this.apiUrl}/${attractionId}?incident=${encodeURIComponent(incident.incident)}`
+    );
   }
 }
