@@ -95,3 +95,13 @@
     </div>
   }
 </div>
+<app-confirmation-modal
+  [show]="showDeleteModal"
+  title="Delete Attraction"
+  message="Are you sure you want to delete this attraction? This action cannot be undone."
+  confirmText="Delete"
+  cancelText="Cancel"
+  confirmButtonClass="btn-danger"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()">
+</app-confirmation-modal>

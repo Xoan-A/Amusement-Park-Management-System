@@ -77,3 +77,4 @@
     </div>
   }
 </div>
+<app-confirmation-modal [show]="showDeleteModal" title="Delete Event" message="Are you sure you want to delete this event?" (confirmed)="confirmDelete()" (cancelled)="cancelDelete()"></app-confirmation-modal>

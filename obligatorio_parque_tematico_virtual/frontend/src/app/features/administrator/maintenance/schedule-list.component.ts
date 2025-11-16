@@ -1,16 +1,24 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { CommonModule } from '@angular/common';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { FormsModule } from '@angular/forms';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { Router } from '@angular/router';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { AttractionService } from '../../../core/services/attraction.service';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { MaintenanceScheduleResponse, AttractionResponse, AllAttractionsResponse } from '../../../core/models/responses';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { MaintenanceStatus } from '../../../core/models/enums';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-schedule-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ],
+  imports: [ConfirmationModalComponent, CommonModule, FormsModule, ],
   template: `
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -175,6 +183,8 @@ export class ScheduleListComponent implements OnInit {
   schedules: MaintenanceScheduleResponse[] = [];
   attractions: AttractionResponse[] = [];
   loading = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
   successMessage: string | null = null;
   errorMessage: string | null = null;
 
@@ -202,6 +212,8 @@ export class ScheduleListComponent implements OnInit {
 
   loadSchedules() {
     this.loading = true;
+  showDeleteModal = false;
+  itemToDelete: any = null;
     this.errorMessage = null;
 
     const params: any = {};
@@ -214,40 +226,56 @@ export class ScheduleListComponent implements OnInit {
       next: (schedules) => {
         this.schedules = schedules;
         this.loading = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       },
       error: (error) => {
         this.errorMessage = 'Failed to load maintenance schedules.';
         this.loading = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       }
     });
   }
 
   showOverdueOnly() {
     this.loading = true;
+  showDeleteModal = false;
+  itemToDelete: any = null;
     this.clearFilterValues();
     this.maintenanceService.getOverdueSchedules().subscribe({
       next: (schedules) => {
         this.schedules = schedules;
         this.loading = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       },
       error: () => {
         this.errorMessage = 'Failed to load overdue schedules.';
         this.loading = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       }
     });
   }
 
   showUpcomingOnly() {
     this.loading = true;
+  showDeleteModal = false;
+  itemToDelete: any = null;
     this.clearFilterValues();
     this.maintenanceService.getUpcomingSchedules(7).subscribe({
       next: (schedules) => {
         this.schedules = schedules;
         this.loading = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       },
       error: () => {
         this.errorMessage = 'Failed to load upcoming schedules.';
         this.loading = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       }
     });
   }

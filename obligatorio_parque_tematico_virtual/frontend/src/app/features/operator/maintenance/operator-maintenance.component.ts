@@ -1,12 +1,16 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { CommonModule } from '@angular/common';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { MaintenanceScheduleResponse } from '../../../core/models/responses';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-operator-maintenance',
   standalone: true,
-  imports: [CommonModule, ],
+  imports: [ConfirmationModalComponent, CommonModule, ],
   template: `
     <div class="container mt-4">
       <h2 class="mb-4">Maintenance Schedules</h2>
@@ -305,10 +309,20 @@ export class OperatorMaintenanceComponent implements OnInit {
   upcomingSchedules: MaintenanceScheduleResponse[] = [];
 
   loading = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
   loadingSchedules = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
   loadingCompleted = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
   loadingOverdue = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
   loadingUpcoming = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
   errorMessage: string | null = null;
   successMessage: string | null = null;
 
@@ -322,55 +336,79 @@ export class OperatorMaintenanceComponent implements OnInit {
 
   loadActiveSchedules() {
     this.loadingSchedules = true;
+  showDeleteModal = false;
+  itemToDelete: any = null;
     this.maintenanceService.getAllSchedules({ status: 'InProgress' }).subscribe({
       next: (schedules) => {
         this.activeSchedules = schedules;
         this.loadingSchedules = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       },
       error: () => {
         this.errorMessage = 'Failed to load active schedules.';
         this.loadingSchedules = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       }
     });
   }
 
   loadCompletedSchedules() {
     this.loadingCompleted = true;
+  showDeleteModal = false;
+  itemToDelete: any = null;
     this.maintenanceService.getAllSchedules({ status: 'Completed' }).subscribe({
       next: (schedules) => {
         this.completedSchedules = schedules.slice(0, 10);
         this.loadingCompleted = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       },
       error: () => {
         this.loadingCompleted = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       }
     });
   }
 
   loadOverdueSchedules() {
     this.loadingOverdue = true;
+  showDeleteModal = false;
+  itemToDelete: any = null;
     this.maintenanceService.getOverdueSchedules().subscribe({
       next: (schedules) => {
         this.overdueSchedules = schedules;
         this.loadingOverdue = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       },
       error: () => {
         this.errorMessage = 'Failed to load overdue schedules.';
         this.loadingOverdue = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       }
     });
   }
 
   loadUpcomingSchedules() {
     this.loadingUpcoming = true;
+  showDeleteModal = false;
+  itemToDelete: any = null;
     this.maintenanceService.getUpcomingSchedules(7).subscribe({
       next: (schedules) => {
         this.upcomingSchedules = schedules;
         this.loadingUpcoming = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       },
       error: () => {
         this.errorMessage = 'Failed to load upcoming schedules.';
         this.loadingUpcoming = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
       }
     });
   }
@@ -395,12 +433,16 @@ export class OperatorMaintenanceComponent implements OnInit {
     }
 
     this.loading = true;
+  showDeleteModal = false;
+  itemToDelete: any = null;
     this.errorMessage = null;
     this.successMessage = null;
 
     this.maintenanceService.updateScheduleStatus(scheduleId, { status: 'Completed' }).subscribe({
       next: (response) => {
         this.loading = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
         this.successMessage = response.message || 'Maintenance completed successfully!';
         this.loadActiveSchedules();
         this.loadCompletedSchedules();
@@ -409,6 +451,8 @@ export class OperatorMaintenanceComponent implements OnInit {
       },
       error: (error) => {
         this.loading = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
         this.errorMessage = error.error?.message || 'Failed to complete maintenance.';
       }
     });
