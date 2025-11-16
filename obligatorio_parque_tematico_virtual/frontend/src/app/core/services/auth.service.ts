@@ -3,10 +3,16 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment.development';
-import { LoginRequest, LoginResponse, RegisterVisitorRequest, RegisterResponse, Roles } from '../models';
+import {
+  LoginRequest,
+  LoginResponse,
+  RegisterVisitorRequest,
+  RegisterResponse,
+  Roles,
+} from '../models';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private apiUrl = environment.apiUrl;
@@ -29,7 +35,6 @@ export class AuthService {
         const user = JSON.parse(userStr);
         this.currentUserSubject.next(user);
 
-        // Restore active role from sessionStorage or initialize with highest privilege
         const storedActiveRole = sessionStorage.getItem('activeRole');
         if (storedActiveRole && user.roles?.includes(storedActiveRole)) {
           this.activeRoleSubject.next(storedActiveRole);
@@ -43,22 +48,26 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials).pipe(
-      tap(response => {
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('user', JSON.stringify(response));
-          this.currentUserSubject.next(response);
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials)
+      .pipe(
+        tap((response) => {
+          if (response.token) {
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('user', JSON.stringify(response));
+            this.currentUserSubject.next(response);
 
-          // Initialize active role with highest privilege
-          this.initializeActiveRole(response.roles || []);
-        }
-      })
-    );
+            this.initializeActiveRole(response.roles || []);
+          }
+        })
+      );
   }
 
   register(registerData: RegisterVisitorRequest): Observable<RegisterResponse> {
-    return this.http.post<RegisterResponse>(`${this.apiUrl}/auth/register`, registerData);
+    return this.http.post<RegisterResponse>(
+      `${this.apiUrl}/auth/register`,
+      registerData
+    );
   }
 
   logout(): void {
@@ -117,12 +126,6 @@ export class AuthService {
     return '/login';
   }
 
-  // Active Role Management Methods
-
-  /**
-   * Initialize active role with highest privilege role
-   * Priority: Administrator > Operator > Visitor
-   */
   initializeActiveRole(roles: string[]): void {
     if (!roles || roles.length === 0) {
       return;
@@ -187,22 +190,20 @@ export class AuthService {
     const userRoles = this.getUserRoles();
 
     if (!userRoles.includes(newRole)) {
-      console.error(`Cannot switch to role: ${newRole}. User does not have this role.`);
+      console.error(
+        `Cannot switch to role: ${newRole}. User does not have this role.`
+      );
       return;
     }
 
-    // Set the new active role
     this.setActiveRole(newRole);
 
-    // Check if current route is accessible with new role
     const rolePrefix = this.getRolePrefixFromRoute(currentRoute);
     const newRolePrefix = this.getRolePrefixForRole(newRole);
 
-    // If current page doesn't match new role, redirect to new role's dashboard
     if (rolePrefix && rolePrefix !== newRolePrefix) {
       this.router.navigate([this.getDashboardRoute()]);
     }
-    // Otherwise, stay on current page (user has access with new role)
   }
 
   /**
