@@ -77,7 +77,7 @@ public class UserManagementLogic : IUserManagementLogic
         string email = request.Email;
         string password = request.Password;
         DateTime? birthDate = request.BirthDate;
-        string? membershipLevel = request.MembershipLevel;
+        int? membershipLevel = request.MembershipLevel;
         List<string> roles = request.Roles;
 
         _validationService.ValidateRequiredFields(name, lastName, email, password);
@@ -103,10 +103,10 @@ public class UserManagementLogic : IUserManagementLogic
             BirthDate = birthDate
         };
 
-        if (!string.IsNullOrEmpty(membershipLevel))
+        if (membershipLevel.HasValue)
         {
-            _validationService.ValidateMembershipLevel(membershipLevel);
-            user.MembershipLevel = Enum.Parse<MembershipLevel>(membershipLevel, true);
+            _validationService.ValidateMembershipLevel(membershipLevel.Value);
+            user.MembershipLevel = (MembershipLevel)membershipLevel.Value;
         }
 
         if (roles != null && roles.Count > 0)
@@ -125,8 +125,13 @@ public class UserManagementLogic : IUserManagementLogic
         return _mapper.Map<UserResponse>(returnedUser);
     }
 
-    public UserResponse GetUserResponseById(Guid userId)
+    public UserResponse GetUserResponseById(Guid userId, Guid currentUserId, bool isAdmin)
     {
+        if (userId != currentUserId && !isAdmin)
+        {
+            throw new ForbiddenException("You cannot access another user's data");
+        }
+
         User user = _userRepository.GetByIdWithRoles(userId);
         if (user == null)
         {

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { IncidentService } from '../../../core/services/incident.service';
 import { AttractionResponse } from '../../../core/models';
@@ -9,9 +8,8 @@ import { AttractionResponse } from '../../../core/models';
 @Component({
   selector: 'app-incidents',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h1 class="mb-4">Incident Management</h1>
 

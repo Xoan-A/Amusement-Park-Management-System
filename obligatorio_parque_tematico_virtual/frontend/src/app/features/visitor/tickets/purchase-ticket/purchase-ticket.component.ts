@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router } from '@angular/router';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { TicketService } from '../../../../core/services/ticket.service';
 import { EventService } from '../../../../core/services/event.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -11,8 +15,8 @@ import { EventResponse, TicketType } from '../../../../core/models';
 @Component({
   selector: 'app-purchase-ticket',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent],
-  templateUrl: './purchase-ticket.component.html'
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './purchase-ticket.component.html',
 })
 export class PurchaseTicketComponent implements OnInit {
   ticketForm: FormGroup;
@@ -31,15 +35,14 @@ export class PurchaseTicketComponent implements OnInit {
     this.ticketForm = this.fb.group({
       visitDate: ['', Validators.required],
       type: [TicketType.General, Validators.required],
-      eventId: ['']
+      eventId: [''],
     });
   }
 
   ngOnInit(): void {
     this.loadEvents();
 
-    // Watch type changes
-    this.ticketForm.get('type')?.valueChanges.subscribe(type => {
+    this.ticketForm.get('type')?.valueChanges.subscribe((type) => {
       const eventControl = this.ticketForm.get('eventId');
       if (type === TicketType.EventSpecial) {
         eventControl?.setValidators(Validators.required);
@@ -56,7 +59,7 @@ export class PurchaseTicketComponent implements OnInit {
       next: (events) => {
         this.events = events || [];
       },
-      error: (error) => console.error('Error loading events', error)
+      error: (error) => console.error('Error loading events', error),
     });
   }
 
@@ -76,7 +79,7 @@ export class PurchaseTicketComponent implements OnInit {
       visitorId: userId,
       visitDate: this.ticketForm.value.visitDate,
       ticketType: parseInt(this.ticketForm.value.type),
-      eventId: this.ticketForm.value.eventId || undefined
+      eventId: this.ticketForm.value.eventId || undefined,
     };
 
     this.ticketService.purchase(ticketData).subscribe({
@@ -87,7 +90,7 @@ export class PurchaseTicketComponent implements OnInit {
       error: (error) => {
         this.errorMessage = error.error?.message || 'Failed to purchase ticket';
         this.loading = false;
-      }
+      },
     });
   }
 }

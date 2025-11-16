@@ -418,5 +418,45 @@ namespace TestBusinessLogic
             Assert.AreEqual(ScoreOrigin.Redemption, capturedScoreHistory.Origin);
             Assert.AreEqual(reward.Id, capturedScoreHistory.RelatedEntityId);
         }
+
+        [TestMethod]
+        public void RedeemReward_CreatesScoreHistoryWithRewardName()
+        {
+            DateTime testDateTime = new DateTime(2025, 11, 7, 10, 0, 0);
+            User visitor = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = "Jane",
+                LastName = "Smith",
+                Email = "jane@test.com",
+                DailyScore = 750,
+                Password = "hashedpassword",
+                Score = 2000,
+                MembershipLevel = MembershipLevel.VIP
+            };
+
+            Reward reward = new Reward
+            {
+                Id = Guid.NewGuid(),
+                Name = "Free Popcorn Bucket",
+                Description = "Large popcorn bucket for free",
+                PointsCost = 300,
+                AvailableQuantity = 50,
+                RequiredMembershipLevel = MembershipLevel.Standard
+            };
+
+            ScoreHistory? capturedScoreHistory = null;
+            SetupSuccessfulRedemption(visitor, reward, testDateTime);
+            _mockScoreHistoryRepository.Setup(r => r.Create(It.IsAny<ScoreHistory>()))
+                .Callback<ScoreHistory>(sh => capturedScoreHistory = sh);
+
+            RedemptionHistoryModelOut result = _redemptionLogic.RedeemReward(visitor.Id, reward.Id);
+
+            _mockScoreHistoryRepository.Verify(r => r.Create(It.IsAny<ScoreHistory>()), Times.Once);
+            Assert.AreEqual("Free Popcorn Bucket", capturedScoreHistory.RelatedEntityName,
+                "El nombre de la recompensa debe guardarse en RelatedEntityName");
+            Assert.AreEqual(ScoreOrigin.Redemption, capturedScoreHistory.Origin);
+            Assert.AreEqual("RedemptionStrategy", capturedScoreHistory.StrategyName);
+        }
     }
 }

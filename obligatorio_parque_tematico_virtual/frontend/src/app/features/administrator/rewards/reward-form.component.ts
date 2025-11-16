@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { RewardService } from '../../../core/services/reward.service';
 import { MembershipLevel } from '../../../core/models';
 import { CreateRewardResponse, RewardResponse } from '../../../core/models/responses';
@@ -11,9 +10,8 @@ import { CreateRewardResponse, RewardResponse } from '../../../core/models/respo
 @Component({
   selector: 'app-reward-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent],
+  imports: [CommonModule, ReactiveFormsModule, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <div class="row justify-content-center">
         <div class="col-md-8">

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
@@ -9,7 +8,7 @@ import { ChartConfiguration } from 'chart.js';
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent, BaseChartDirective],
+  imports: [CommonModule, ReactiveFormsModule,  BaseChartDirective],
   templateUrl: './reports.component.html'
 })
 export class ReportsComponent implements OnInit {
@@ -68,9 +67,9 @@ export class ReportsComponent implements OnInit {
   }
 
   updateChart(data: any): void {
-    if (data && data.attractionVisits) {
-      this.barChartData.labels = data.attractionVisits.map((v: any) => v.attractionName);
-      this.barChartData.datasets[0].data = data.attractionVisits.map((v: any) => v.totalVisits);
+    if (data && data.attractionsVisits) {
+      this.barChartData.labels = data.attractionsVisits.map((v: any) => v.attractionName);
+      this.barChartData.datasets[0].data = data.attractionsVisits.map((v: any) => v.totalVisits);
     }
   }
 }

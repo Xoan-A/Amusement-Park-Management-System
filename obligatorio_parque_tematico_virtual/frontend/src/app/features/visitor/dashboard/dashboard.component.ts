@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { TicketService } from '../../../core/services/ticket.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ScoreHistoryService } from '../../../core/services/score-history.service';
@@ -10,9 +9,8 @@ import { TicketResponse, ScoreHistoryResponse, TicketType } from '../../../core/
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, RouterLink, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h1 class="mb-4">Visitor Dashboard</h1>
 
@@ -72,14 +70,19 @@ import { TicketResponse, ScoreHistoryResponse, TicketType } from '../../../core/
                 <div class="list-group">
                   @for (score of recentScores; track score.id) {
                     <div class="list-group-item">
-                      <div class="d-flex w-100 justify-content-between align-items-center">
-                        <div>
+                      <div class="d-flex w-100 justify-content-between align-items-start">
+                        <div class="flex-grow-1">
                           <span class="badge" [class.bg-success]="score.points > 0" [class.bg-danger]="score.points < 0">
                             {{ score.points > 0 ? '+' + score.points : score.points }}
                           </span>
                           <small class="ms-2">{{ score.origin }} - {{ score.strategyName }}</small>
+                          @if (score.relatedEntityName) {
+                            <div class="mt-1">
+                              <small class="text-muted d-block">{{ score.relatedEntityName }}</small>
+                            </div>
+                          }
                         </div>
-                        <small class="text-muted">{{ score.createdAt | date:'short' }}</small>
+                        <small class="text-muted ms-2" style="white-space: nowrap;">{{ score.createdAt | date:'short' }}</small>
                       </div>
                     </div>
                   }

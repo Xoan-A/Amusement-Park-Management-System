@@ -2,18 +2,20 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { AttractionService } from '../../../core/services/attraction.service';
-import { MaintenanceScheduleResponse, AttractionResponse, AllAttractionsResponse } from '../../../core/models/responses';
+import {
+  MaintenanceScheduleResponse,
+  AttractionResponse,
+  AllAttractionsResponse,
+} from '../../../core/models/responses';
 import { MaintenanceStatus } from '../../../core/models/enums';
 
 @Component({
   selector: 'app-schedule-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, FormsModule],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Maintenance Schedules</h2>
@@ -27,17 +29,29 @@ import { MaintenanceStatus } from '../../../core/models/enums';
         <div class="card-body">
           <div class="row">
             <div class="col-md-3">
-              <label for="attractionFilter" class="form-label">Attraction</label>
-              <select id="attractionFilter" class="form-select" [(ngModel)]="selectedAttractionId" (change)="loadSchedules()">
+              <label for="attractionFilter" class="form-label"
+                >Attraction</label
+              >
+              <select
+                id="attractionFilter"
+                class="form-select"
+                [(ngModel)]="selectedAttractionId"
+                (change)="loadSchedules()"
+              >
                 <option value="">All Attractions</option>
                 @for (attraction of attractions; track attraction.id) {
-                  <option [value]="attraction.id">{{ attraction.name }}</option>
+                <option [value]="attraction.id">{{ attraction.name }}</option>
                 }
               </select>
             </div>
             <div class="col-md-3">
               <label for="statusFilter" class="form-label">Status</label>
-              <select id="statusFilter" class="form-select" [(ngModel)]="selectedStatus" (change)="loadSchedules()">
+              <select
+                id="statusFilter"
+                class="form-select"
+                [(ngModel)]="selectedStatus"
+                (change)="loadSchedules()"
+              >
                 <option value="">All Statuses</option>
                 <option value="Pending">Pending</option>
                 <option value="InProgress">In Progress</option>
@@ -47,22 +61,43 @@ import { MaintenanceStatus } from '../../../core/models/enums';
             </div>
             <div class="col-md-3">
               <label for="dateFrom" class="form-label">From Date</label>
-              <input type="date" id="dateFrom" class="form-control" [(ngModel)]="dateFrom" (change)="loadSchedules()">
+              <input
+                type="date"
+                id="dateFrom"
+                class="form-control"
+                [(ngModel)]="dateFrom"
+                (change)="loadSchedules()"
+              />
             </div>
             <div class="col-md-3">
               <label for="dateTo" class="form-label">To Date</label>
-              <input type="date" id="dateTo" class="form-control" [(ngModel)]="dateTo" (change)="loadSchedules()">
+              <input
+                type="date"
+                id="dateTo"
+                class="form-control"
+                [(ngModel)]="dateTo"
+                (change)="loadSchedules()"
+              />
             </div>
           </div>
           <div class="row mt-3">
             <div class="col-md-12">
-              <button class="btn btn-secondary btn-sm me-2" (click)="showOverdueOnly()">
+              <button
+                class="btn btn-secondary btn-sm me-2"
+                (click)="showOverdueOnly()"
+              >
                 <i class="bi bi-exclamation-triangle"></i> Show Overdue
               </button>
-              <button class="btn btn-secondary btn-sm me-2" (click)="showUpcomingOnly()">
+              <button
+                class="btn btn-secondary btn-sm me-2"
+                (click)="showUpcomingOnly()"
+              >
                 <i class="bi bi-calendar-event"></i> Show Upcoming (7 days)
               </button>
-              <button class="btn btn-outline-secondary btn-sm" (click)="clearFilters()">
+              <button
+                class="btn btn-outline-secondary btn-sm"
+                (click)="clearFilters()"
+              >
                 <i class="bi bi-x-circle"></i> Clear Filters
               </button>
             </div>
@@ -72,102 +107,127 @@ import { MaintenanceStatus } from '../../../core/models/enums';
 
       <!-- Alerts -->
       @if (successMessage) {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-          {{ successMessage }}
-          <button type="button" class="btn-close" (click)="successMessage = null"></button>
-        </div>
-      }
-      @if (errorMessage) {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-          {{ errorMessage }}
-          <button type="button" class="btn-close" (click)="errorMessage = null"></button>
-        </div>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ successMessage }}
+        <button
+          type="button"
+          class="btn-close"
+          (click)="successMessage = null"
+        ></button>
+      </div>
+      } @if (errorMessage) {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ errorMessage }}
+        <button
+          type="button"
+          class="btn-close"
+          (click)="errorMessage = null"
+        ></button>
+      </div>
       }
 
       <!-- Loading -->
       @if (loading) {
-        <div class="text-center my-5">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
+      <div class="text-center my-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
         </div>
+      </div>
       }
 
       <!-- Schedules Table -->
       @if (!loading && schedules.length > 0) {
-        <div class="card">
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                    <th>Attraction</th>
-                    <th>Scheduled Date</th>
-                    <th>Duration</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (schedule of schedules; track schedule.id) {
-                    <tr [class.table-danger]="isOverdue(schedule)">
-                      <td>{{ schedule.attractionName }}</td>
-                      <td>
-                        {{ schedule.scheduledDate | date:'short' }}
-                        @if (isOverdue(schedule)) {
-                          <span class="badge bg-danger ms-2">OVERDUE</span>
-                        }
-                      </td>
-                      <td>{{ schedule.estimatedDuration }}h</td>
-                      <td>{{ schedule.description }}</td>
-                      <td>
-                        <span [class]="getStatusBadgeClass(schedule.status)">
-                          {{ schedule.status }}
-                        </span>
-                      </td>
-                      <td>
-                        @if (schedule.status === 'Pending') {
-                          <button class="btn btn-sm btn-success me-1" (click)="updateStatus(schedule.id, 'InProgress')" title="Start">
-                            <i class="bi bi-play-circle"></i>
-                          </button>
-                          <button class="btn btn-sm btn-warning me-1" (click)="updateStatus(schedule.id, 'Cancelled')" title="Cancel">
-                            <i class="bi bi-x-circle"></i>
-                          </button>
-                        }
-                        @if (schedule.status === 'InProgress') {
-                          <button class="btn btn-sm btn-primary me-1" (click)="navigateToComplete(schedule.id)" title="Complete">
-                            <i class="bi bi-check-circle"></i>
-                          </button>
-                        }
-                        @if (schedule.status === 'Pending' || schedule.status === 'Cancelled') {
-                          <button class="btn btn-sm btn-danger" (click)="deleteSchedule(schedule.id)" title="Delete">
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        }
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Attraction</th>
+                  <th>Scheduled Date</th>
+                  <th>Duration</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (schedule of schedules; track schedule.id) {
+                <tr [class.table-danger]="isOverdue(schedule)">
+                  <td>{{ schedule.attractionName }}</td>
+                  <td>
+                    {{ schedule.scheduledDate | date : 'short' }}
+                    @if (isOverdue(schedule)) {
+                    <span class="badge bg-danger ms-2">OVERDUE</span>
+                    }
+                  </td>
+                  <td>{{ schedule.estimatedDuration }}h</td>
+                  <td>{{ schedule.description }}</td>
+                  <td>
+                    <span [class]="getStatusBadgeClass(schedule.status)">
+                      {{ schedule.status }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (schedule.status === 'Pending') {
+                    <button
+                      class="btn btn-sm btn-success me-1"
+                      (click)="updateStatus(schedule.id, 'InProgress')"
+                      title="Start"
+                    >
+                      <i class="bi bi-play-circle"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm btn-warning me-1"
+                      (click)="updateStatus(schedule.id, 'Cancelled')"
+                      title="Cancel"
+                    >
+                      <i class="bi bi-x-circle"></i>
+                    </button>
+                    } @if (schedule.status === 'InProgress') {
+                    <button
+                      class="btn btn-sm btn-primary me-1"
+                      (click)="navigateToComplete(schedule.id)"
+                      title="Complete"
+                    >
+                      <i class="bi bi-check-circle"></i>
+                    </button>
+                    } @if (schedule.status === 'Pending' || schedule.status ===
+                    'Cancelled') {
+                    <button
+                      class="btn btn-sm btn-danger"
+                      (click)="deleteSchedule(schedule.id)"
+                      title="Delete"
+                    >
+                      <i class="bi bi-trash"></i>
+                    </button>
+                    }
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
           </div>
         </div>
+      </div>
       }
 
       <!-- No Results -->
       @if (!loading && schedules.length === 0) {
-        <div class="alert alert-info">
-          <i class="bi bi-info-circle"></i> No maintenance schedules found. Click "Schedule Maintenance" to create one.
-        </div>
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No maintenance schedules found. Click
+        "Schedule Maintenance" to create one.
+      </div>
       }
     </div>
   `,
-  styles: [`
-    .table-danger {
-      background-color: #f8d7da !important;
-    }
-  `]
+  styles: [
+    `
+      .table-danger {
+        background-color: #f8d7da !important;
+      }
+    `,
+  ],
 })
 export class ScheduleListComponent implements OnInit {
   private maintenanceService = inject(MaintenanceService);
@@ -180,7 +240,6 @@ export class ScheduleListComponent implements OnInit {
   successMessage: string | null = null;
   errorMessage: string | null = null;
 
-  // Filters
   selectedAttractionId = '';
   selectedStatus = '';
   dateFrom = '';
@@ -198,7 +257,7 @@ export class ScheduleListComponent implements OnInit {
       },
       error: () => {
         this.errorMessage = 'Failed to load attractions.';
-      }
+      },
     });
   }
 
@@ -207,7 +266,8 @@ export class ScheduleListComponent implements OnInit {
     this.errorMessage = null;
 
     const params: any = {};
-    if (this.selectedAttractionId) params.attractionId = this.selectedAttractionId;
+    if (this.selectedAttractionId)
+      params.attractionId = this.selectedAttractionId;
     if (this.selectedStatus) params.status = this.selectedStatus;
     if (this.dateFrom) params.dateFrom = this.dateFrom;
     if (this.dateTo) params.dateTo = this.dateTo;
@@ -220,7 +280,7 @@ export class ScheduleListComponent implements OnInit {
       error: (error) => {
         this.errorMessage = 'Failed to load maintenance schedules.';
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -235,7 +295,7 @@ export class ScheduleListComponent implements OnInit {
       error: () => {
         this.errorMessage = 'Failed to load overdue schedules.';
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -250,7 +310,7 @@ export class ScheduleListComponent implements OnInit {
       error: () => {
         this.errorMessage = 'Failed to load upcoming schedules.';
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -267,15 +327,17 @@ export class ScheduleListComponent implements OnInit {
   }
 
   updateStatus(scheduleId: string, status: string) {
-    this.maintenanceService.updateScheduleStatus(scheduleId, { status }).subscribe({
-      next: (response) => {
-        this.successMessage = response.message;
-        this.loadSchedules();
-      },
-      error: () => {
-        this.errorMessage = 'Failed to update schedule status.';
-      }
-    });
+    this.maintenanceService
+      .updateScheduleStatus(scheduleId, { status })
+      .subscribe({
+        next: (response) => {
+          this.successMessage = response.message;
+          this.loadSchedules();
+        },
+        error: () => {
+          this.errorMessage = 'Failed to update schedule status.';
+        },
+      });
   }
 
   deleteSchedule(scheduleId: string) {
@@ -288,7 +350,7 @@ export class ScheduleListComponent implements OnInit {
       },
       error: () => {
         this.errorMessage = 'Failed to delete schedule.';
-      }
+      },
     });
   }
 
@@ -297,7 +359,11 @@ export class ScheduleListComponent implements OnInit {
   }
 
   navigateToComplete(scheduleId: string) {
-    this.router.navigate(['/admin/maintenance/schedules', scheduleId, 'complete']);
+    this.router.navigate([
+      '/admin/maintenance/schedules',
+      scheduleId,
+      'complete',
+    ]);
   }
 
   isOverdue(schedule: MaintenanceScheduleResponse): boolean {
@@ -309,11 +375,16 @@ export class ScheduleListComponent implements OnInit {
 
   getStatusBadgeClass(status: string): string {
     switch (status) {
-      case 'Pending': return 'badge bg-warning';
-      case 'InProgress': return 'badge bg-info';
-      case 'Completed': return 'badge bg-success';
-      case 'Cancelled': return 'badge bg-secondary';
-      default: return 'badge bg-secondary';
+      case 'Pending':
+        return 'badge bg-warning';
+      case 'InProgress':
+        return 'badge bg-info';
+      case 'Completed':
+        return 'badge bg-success';
+      case 'Cancelled':
+        return 'badge bg-secondary';
+      default:
+        return 'badge bg-secondary';
     }
   }
 }

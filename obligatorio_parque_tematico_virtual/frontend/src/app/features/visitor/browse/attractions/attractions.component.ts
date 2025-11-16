@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../../core/services/attraction.service';
 import { AttractionResponse } from '../../../../core/models';
 import { EnumToDisplayPipe } from '../../../../shared/pipes/enum-to-display.pipe';
@@ -9,9 +8,8 @@ import { EnumToDisplayPipe } from '../../../../shared/pipes/enum-to-display.pipe
 @Component({
   selector: 'app-attractions',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, EnumToDisplayPipe],
+  imports: [CommonModule, FormsModule,  EnumToDisplayPipe],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h1 class="mb-4">Browse Attractions</h1>
 

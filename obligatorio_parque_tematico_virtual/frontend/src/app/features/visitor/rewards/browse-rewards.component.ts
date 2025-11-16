@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { RewardService } from '../../../core/services/reward.service';
 import { RedemptionService } from '../../../core/services/redemption.service';
 import { UserService } from '../../../core/services/user.service';
@@ -11,9 +10,8 @@ import { RewardResponse, MembershipLevel } from '../../../core/models';
 @Component({
   selector: 'app-browse-rewards',
   standalone: true,
-  imports: [CommonModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, RouterLink],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Available Rewards</h1>
@@ -211,16 +209,9 @@ export class BrowseRewardsComponent implements OnInit {
   }
 
   meetsMembershipRequirement(reward: RewardResponse): boolean {
-    if (!reward.requiredMembershipLevel) return true;
-    if (!this.userMembershipLevel) return false;
-
-    const levels = {
-      [MembershipLevel.Standard]: 1,
-      [MembershipLevel.Premium]: 2,
-      [MembershipLevel.VIP]: 3
-    };
-
-    return levels[this.userMembershipLevel] >= levels[reward.requiredMembershipLevel];
+    if (reward.requiredMembershipLevel === undefined || reward.requiredMembershipLevel === null) return true;
+    if (this.userMembershipLevel === null) return false;
+    return this.userMembershipLevel >= reward.requiredMembershipLevel;
   }
 
   canRedeem(reward: RewardResponse): boolean {

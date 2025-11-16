@@ -288,5 +288,76 @@ namespace TestBusinessLogic
                 r => r.GetByVisitorAndDateRange(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()),
                 Times.Never);
         }
+
+        [TestMethod]
+        public void GetMyScoreHistory_WithRelatedEntityName_MapsCorrectly()
+        {
+            List<ScoreHistory> histories = new List<ScoreHistory>
+            {
+                new ScoreHistory
+                {
+                    Id = Guid.NewGuid(),
+                    VisitorId = _visitorId,
+                    Visitor = new User
+                    {
+                        Id = _visitorId,
+                        Name = "Test User",
+                        LastName = "Name",
+                        Email = "test@test.com",
+                        Password = "pass",
+                        BirthDate = DateTime.Now.AddYears(-25)
+                    },
+                    Points = 100,
+                    Origin = ScoreOrigin.AttractionVisit,
+                    RelatedEntityId = Guid.NewGuid(),
+                    RelatedEntityName = "Roller Coaster",
+                    StrategyName = "PerAttraction",
+                    CreatedAt = DateTime.UtcNow
+                }
+            };
+
+            _mockRepository.Setup(r => r.GetByVisitor(_visitorId)).Returns(histories);
+
+            List<ScoreHistoryModelOut> result = _scoreHistoryLogic.GetMyScoreHistory(_visitorId);
+
+            Assert.AreEqual("Roller Coaster", result[0].RelatedEntityName);
+            Assert.AreEqual(ScoreOrigin.AttractionVisit.ToString(), result[0].Origin);
+        }
+
+        [TestMethod]
+        public void GetMyScoreHistory_WithNullRelatedEntityName_MapsNull()
+        {
+            List<ScoreHistory> histories = new List<ScoreHistory>
+            {
+                new ScoreHistory
+                {
+                    Id = Guid.NewGuid(),
+                    VisitorId = _visitorId,
+                    Visitor = new User
+                    {
+                        Id = _visitorId,
+                        Name = "Test User",
+                        LastName = "Name",
+                        Email = "test@test.com",
+                        Password = "pass",
+                        BirthDate = DateTime.Now.AddYears(-25)
+                    },
+                    Points = 50,
+                    Origin = ScoreOrigin.SpecialMission,
+                    RelatedEntityId = null,
+                    RelatedEntityName = null,
+                    StrategyName = "SpecialMissionStrategy",
+                    CreatedAt = DateTime.UtcNow
+                }
+            };
+
+            _mockRepository.Setup(r => r.GetByVisitor(_visitorId)).Returns(histories);
+
+            List<ScoreHistoryModelOut> result = _scoreHistoryLogic.GetMyScoreHistory(_visitorId);
+
+            Assert.AreEqual(1, result.Count);
+            Assert.IsNull(result[0].RelatedEntityName);
+            Assert.IsNull(result[0].RelatedEntityId);
+        }
     }
 }

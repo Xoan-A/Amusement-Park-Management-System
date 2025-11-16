@@ -747,6 +747,7 @@ namespace TestBusinessLogic
         public void GetUserResponseById_ShouldReturnUserResponse_WhenUserExists()
         {
             Guid userId = Guid.NewGuid();
+            Guid currentUserId = userId;
             User expectedUser = new User
             {
                 Id = userId,
@@ -760,7 +761,7 @@ namespace TestBusinessLogic
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(expectedUser);
 
-            UserResponse result = _userManagementLogic.GetUserResponseById(userId);
+            UserResponse result = _userManagementLogic.GetUserResponseById(userId, currentUserId, false);
 
             Assert.AreEqual(userId, result.Id);
             Assert.AreEqual("John", result.Name);
@@ -775,10 +776,48 @@ namespace TestBusinessLogic
         public void GetUserResponseById_ShouldThrowKeyNotFoundException_WhenUserNotFound()
         {
             Guid userId = Guid.NewGuid();
+            Guid currentUserId = userId;
 
             _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns((User)null);
 
-            _userManagementLogic.GetUserResponseById(userId);
+            _userManagementLogic.GetUserResponseById(userId, currentUserId, false);
+        }
+
+        [TestMethod]
+        public void GetUserResponseById_AdminCanAccessAnyUser_WhenIsAdminTrue()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid currentUserId = Guid.NewGuid();
+            User expectedUser = new User
+            {
+                Id = userId,
+                Name = "John",
+                LastName = "Doe",
+                Email = "john@test.com",
+                BirthDate = new DateTime(1990, 5, 15),
+                MembershipLevel = MembershipLevel.Premium,
+                Score = 100
+            };
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(expectedUser);
+
+            UserResponse result = _userManagementLogic.GetUserResponseById(userId, currentUserId, true);
+
+            Assert.AreEqual(userId, result.Id);
+            Assert.AreEqual("John", result.Name);
+            _mockUserRepository.Verify(r => r.GetByIdWithRoles(userId), Times.Once);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ForbiddenException))]
+        public void GetUserResponseById_ShouldThrowForbiddenException_WhenUserTriesToAccessOtherUserData()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid currentUserId = Guid.NewGuid();
+
+            _mockUserRepository.Setup(r => r.GetByIdWithRoles(userId)).Returns(new User { Id = userId });
+
+            _userManagementLogic.GetUserResponseById(userId, currentUserId, false);
         }
 
         [TestMethod]

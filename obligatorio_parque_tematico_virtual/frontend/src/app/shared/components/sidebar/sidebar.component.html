@@ -1,0 +1,214 @@
+<div class="sidebar" [class.collapsed]="isCollapsed">
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+    <div class="d-flex align-items-center justify-content-between">
+      @if (!isCollapsed) {
+        <h5 class="mb-0 text-white">Parque Temático</h5>
+      }
+      <button class="btn btn-sm btn-link text-white toggle-btn" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+        <i class="bi" [class.bi-list]="isCollapsed" [class.bi-x-lg]="!isCollapsed"></i>
+      </button>
+    </div>
+
+    <!-- Role Switcher (only visible if user has multiple roles) -->
+    @if (hasMultipleRoles && !isCollapsed) {
+      <div class="role-switcher mt-3">
+        <label class="form-label text-white-50 small mb-1">Active Role</label>
+        <select class="form-select form-select-sm" (change)="switchRole($event)">
+          @for (role of availableRoles; track role) {
+            <option [value]="role" [selected]="role === activeRole">{{ getRoleName(role) }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    <!-- User Info -->
+    @if (currentUser && !isCollapsed) {
+      <div class="user-info mt-3">
+        <div class="text-white-50 small">Welcome,</div>
+        <div class="text-white fw-bold">{{ currentUser.name }}</div>
+      </div>
+    }
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar-nav">
+    <ul class="nav flex-column">
+      <!-- Administrator Menu -->
+      @if (isAdmin) {
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/dashboard" routerLinkActive="active" [title]="isCollapsed ? 'Dashboard' : ''">
+            <i class="nav-icon bi bi-speedometer2"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Dashboard</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/attractions" routerLinkActive="active" [title]="isCollapsed ? 'Attractions' : ''">
+            <i class="nav-icon bi bi-stars"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Attractions</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/events" routerLinkActive="active" [title]="isCollapsed ? 'Events' : ''">
+            <i class="nav-icon bi bi-calendar-event"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Events</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/users" routerLinkActive="active" [title]="isCollapsed ? 'Users' : ''">
+            <i class="nav-icon bi bi-people"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Users</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/reports" routerLinkActive="active" [title]="isCollapsed ? 'Reports' : ''">
+            <i class="nav-icon bi bi-graph-up"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Reports</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/plugins" routerLinkActive="active" [title]="isCollapsed ? 'Strategy' : ''">
+            <i class="nav-icon bi bi-bullseye"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Strategy</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/maintenance/schedules" routerLinkActive="active" [title]="isCollapsed ? 'Maintenance' : ''">
+            <i class="nav-icon bi bi-tools"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Maintenance</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/score-history" routerLinkActive="active" [title]="isCollapsed ? 'Score History' : ''">
+            <i class="nav-icon bi bi-star-fill"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Score History</span>
+            }
+          </a>
+        </li>
+      }
+
+      <!-- Operator Menu -->
+      @if (isOperator) {
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/operator/dashboard" routerLinkActive="active" [title]="isCollapsed ? 'Dashboard' : ''">
+            <i class="nav-icon bi bi-speedometer2"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Dashboard</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/operator/entry-exit" routerLinkActive="active" [title]="isCollapsed ? 'Entry/Exit' : ''">
+            <i class="nav-icon bi bi-door-open"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Entry/Exit</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/operator/incidents" routerLinkActive="active" [title]="isCollapsed ? 'Incidents' : ''">
+            <i class="nav-icon bi bi-exclamation-triangle"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Incidents</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/operator/maintenance" routerLinkActive="active" [title]="isCollapsed ? 'Maintenance' : ''">
+            <i class="nav-icon bi bi-tools"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Maintenance</span>
+            }
+          </a>
+        </li>
+      }
+
+      <!-- Visitor Menu -->
+      @if (isVisitor) {
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/dashboard" routerLinkActive="active" [title]="isCollapsed ? 'Dashboard' : ''">
+            <i class="nav-icon bi bi-speedometer2"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Dashboard</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/attractions" routerLinkActive="active" [title]="isCollapsed ? 'Attractions' : ''">
+            <i class="nav-icon bi bi-stars"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Attractions</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/events" routerLinkActive="active" [title]="isCollapsed ? 'Events' : ''">
+            <i class="nav-icon bi bi-calendar-event"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Events</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/tickets" routerLinkActive="active" [title]="isCollapsed ? 'My Tickets' : ''">
+            <i class="nav-icon bi bi-ticket-perforated"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">My Tickets</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/profile" routerLinkActive="active" [title]="isCollapsed ? 'Profile' : ''">
+            <i class="nav-icon bi bi-person"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Profile</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/score-history" routerLinkActive="active" [title]="isCollapsed ? 'Score History' : ''">
+            <i class="nav-icon bi bi-star-fill"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Score History</span>
+            }
+          </a>
+        </li>
+      }
+
+      <!-- Common Menu Items -->
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/datetime" routerLinkActive="active" [title]="isCollapsed ? 'Date/Time' : ''">
+          <i class="nav-icon bi bi-clock"></i>
+          @if (!isCollapsed) {
+            <span class="nav-text">Date/Time</span>
+          }
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Sidebar Footer -->
+  <div class="sidebar-footer">
+    <button class="btn btn-secondary btn-sm w-100" (click)="logout()" [title]="isCollapsed ? 'Logout' : ''">
+      <i class="bi bi-box-arrow-right"></i>
+      @if (!isCollapsed) {
+        <span class="ms-2">Logout</span>
+      }
+    </button>
+  </div>
+</div>

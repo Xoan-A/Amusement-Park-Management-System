@@ -50,6 +50,7 @@ namespace BusinessLogic
                 Origin = h.Origin.ToString(),
                 StrategyName = h.StrategyName,
                 RelatedEntityId = h.RelatedEntityId,
+                RelatedEntityName = h.RelatedEntityName,
                 CreatedAt = h.CreatedAt
             }).ToList();
         }

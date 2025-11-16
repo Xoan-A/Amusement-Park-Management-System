@@ -2,16 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { RedemptionService } from '../../../core/services/redemption.service';
 import { RedemptionHistoryResponse } from '../../../core/models';
 
 @Component({
   selector: 'app-my-redemptions',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>My Redemption History</h1>

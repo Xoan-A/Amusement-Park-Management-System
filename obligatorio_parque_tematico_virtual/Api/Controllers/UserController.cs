@@ -21,10 +21,13 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{userId}")]
-    [Authorize(Roles = "Administrator")]
+    [Authorize]
     public IActionResult GetUserById(Guid userId)
     {
-        UserResponse user = _userManagementLogic.GetUserResponseById(userId);
+        Guid currentUserId = _claimsLogic.GetCurrentUserId(User);
+        bool isAdmin = User.IsInRole("Administrator");
+
+        UserResponse user = _userManagementLogic.GetUserResponseById(userId, currentUserId, isAdmin);
         return Ok(user);
     }
 
