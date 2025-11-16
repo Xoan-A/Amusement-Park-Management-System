@@ -8,6 +8,6 @@ public class CreateUserRequest
     public string Email { get; set; }
     public string Password { get; set; }
     public DateTime? BirthDate { get; set; }
-    public string? MembershipLevel { get; set; }
+    public int? MembershipLevel { get; set; }
     public List<string> Roles { get; set; }
 }

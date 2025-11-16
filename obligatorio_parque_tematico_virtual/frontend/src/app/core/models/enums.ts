@@ -6,9 +6,9 @@ export enum AttractionType {
 }
 
 export enum MembershipLevel {
-  Standard = 'Standard',
-  Premium = 'Premium',
-  VIP = 'VIP'
+  Standard = 0,
+  Premium = 1,
+  VIP = 2
 }
 
 export enum TicketType {

@@ -6,6 +6,7 @@ import {
   CreateUserRequest,
   ModifyUserRequest,
   AddRolesRequest,
+  ChangeMembershipLevelRequest,
   UserResponse,
   MessageResponse
 } from '../models';
@@ -32,5 +33,9 @@ export class UserService {
 
   addRole(userId: string, role: AddRolesRequest): Observable<MessageResponse> {
     return this.http.put<MessageResponse>(`${this.apiUrl}/${userId}/roles`, role);
+  }
+
+  changeMembershipLevel(userId: string, request: ChangeMembershipLevelRequest): Observable<MessageResponse> {
+    return this.http.put<MessageResponse>(`${this.apiUrl}/${userId}/membership`, request);
   }
 }

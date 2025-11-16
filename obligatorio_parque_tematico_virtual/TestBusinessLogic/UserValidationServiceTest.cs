@@ -204,7 +204,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ValidateMembershipLevel_ShouldNotThrow_WhenMembershipLevelIsValid()
         {
-            string validLevel = "Premium";
+            int validLevel = 1;
 
             _validationService.ValidateMembershipLevel(validLevel);
         }
@@ -212,7 +212,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ValidateMembershipLevel_ShouldThrowArgumentException_WhenMembershipLevelIsInvalid()
         {
-            string invalidLevel = "InvalidLevel";
+            int invalidLevel = 999;
 
             ArgumentException exception = Assert.ThrowsException<ArgumentException>(
                 () => _validationService.ValidateMembershipLevel(invalidLevel)
@@ -224,7 +224,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ValidateMembershipLevel_ShouldNotThrow_WhenMembershipLevelIsStandard()
         {
-            string standardLevel = "Standard";
+            int standardLevel = 0;
 
             _validationService.ValidateMembershipLevel(standardLevel);
         }
@@ -232,7 +232,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void ValidateMembershipLevel_ShouldNotThrow_WhenMembershipLevelIsVIP()
         {
-            string vipLevel = "VIP";
+            int vipLevel = 2;
 
             _validationService.ValidateMembershipLevel(vipLevel);
         }

@@ -211,16 +211,9 @@ export class BrowseRewardsComponent implements OnInit {
   }
 
   meetsMembershipRequirement(reward: RewardResponse): boolean {
-    if (!reward.requiredMembershipLevel) return true;
-    if (!this.userMembershipLevel) return false;
-
-    const levels = {
-      [MembershipLevel.Standard]: 1,
-      [MembershipLevel.Premium]: 2,
-      [MembershipLevel.VIP]: 3
-    };
-
-    return levels[this.userMembershipLevel] >= levels[reward.requiredMembershipLevel];
+    if (reward.requiredMembershipLevel === undefined || reward.requiredMembershipLevel === null) return true;
+    if (this.userMembershipLevel === null) return false;
+    return this.userMembershipLevel >= reward.requiredMembershipLevel;
   }
 
   canRedeem(reward: RewardResponse): boolean {
