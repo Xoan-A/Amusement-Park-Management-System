@@ -93,13 +93,29 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const user = this.authService.getCurrentUser();
-    if (user) {
+    const userId = this.authService.getUserId();
+    if (!userId) {
+      this.errorMessage = 'User not authenticated';
+      return;
+    }
+
+    this.loading = true;
+    this.userService.getById(userId).subscribe({
+      next: (user) => {
         this.profileForm.patchValue({
           name: user.name,
-          email: user.email
-      });
-    }
+          lastName: user.lastName,
+          email: user.email,
+          birthDate: this.formatDateForInput(user.birthDate)
+        });
+        this.membershipLevel = user.membershipLevel || MembershipLevel.Standard;
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Failed to load profile';
+        this.loading = false;
+      }
+    });
   }
 
   updateProfile(): void {
@@ -150,5 +166,27 @@ export class ProfileComponent implements OnInit {
       default:
         return 'bg-secondary';
     }
+  }
+
+  formatDateForInput(date: string | Date | undefined): string {
+    if (!date) return '';
+
+    let dateObj: Date;
+
+    if (typeof date === 'string') {
+      dateObj = new Date(date);
+    } else {
+      dateObj = new Date(date);
+    }
+
+    if (isNaN(dateObj.getTime())) {
+      return '';
+    }
+
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   }
 }
