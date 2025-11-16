@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
@@ -9,7 +8,7 @@ import { ChartConfiguration } from 'chart.js';
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent, BaseChartDirective],
+  imports: [CommonModule, ReactiveFormsModule,  BaseChartDirective],
   templateUrl: './reports.component.html'
 })
 export class ReportsComponent implements OnInit {

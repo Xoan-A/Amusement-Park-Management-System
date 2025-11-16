@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { TicketService } from '../../../core/services/ticket.service';
 import { AttractionResponse, TicketResponse, TicketType } from '../../../core/models';
@@ -10,7 +9,7 @@ import { AttractionResponse, TicketResponse, TicketType } from '../../../core/mo
 @Component({
   selector: 'app-entry-exit',
   standalone: true,
-  imports: [CommonModule, FormsModule, ZXingScannerModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, ZXingScannerModule, ],
   template: `
     <app-navbar></app-navbar>
     <div class="container mt-4">

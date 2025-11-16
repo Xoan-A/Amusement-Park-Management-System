@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { RewardService } from '../../../core/services/reward.service';
 import { RewardResponse, MembershipLevel } from '../../../core/models';
 
 @Component({
   selector: 'app-rewards-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, RouterLink, ],
   template: `
     <app-navbar></app-navbar>
     <div class="container mt-4">

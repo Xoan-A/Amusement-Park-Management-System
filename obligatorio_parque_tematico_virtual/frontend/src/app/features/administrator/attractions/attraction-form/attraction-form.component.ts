@@ -2,14 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../../core/services/attraction.service';
 import { AttractionType } from '../../../../core/models';
 
 @Component({
   selector: 'app-attraction-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ],
   templateUrl: './attraction-form.component.html'
 })
 export class AttractionFormComponent implements OnInit {

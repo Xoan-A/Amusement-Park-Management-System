@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { AttractionResponse } from '../../../core/models';
@@ -9,7 +8,7 @@ import { AttractionResponse } from '../../../core/models';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, RouterLink, ],
   template: `
     <app-navbar></app-navbar>
     <div class="container mt-4">

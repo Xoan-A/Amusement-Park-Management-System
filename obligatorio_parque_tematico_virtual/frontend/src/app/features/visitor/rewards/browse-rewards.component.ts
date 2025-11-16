@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { RewardService } from '../../../core/services/reward.service';
 import { RedemptionService } from '../../../core/services/redemption.service';
 import { UserService } from '../../../core/services/user.service';
@@ -11,7 +10,7 @@ import { RewardResponse, MembershipLevel } from '../../../core/models';
 @Component({
   selector: 'app-browse-rewards',
   standalone: true,
-  imports: [CommonModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, RouterLink, ],
   template: `
     <app-navbar></app-navbar>
     <div class="container mt-4">

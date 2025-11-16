@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { TicketService } from '../../../../core/services/ticket.service';
 import { EventService } from '../../../../core/services/event.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -11,7 +10,7 @@ import { EventResponse, TicketType } from '../../../../core/models';
 @Component({
   selector: 'app-purchase-ticket',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent],
+  imports: [CommonModule, ReactiveFormsModule, ],
   templateUrl: './purchase-ticket.component.html'
 })
 export class PurchaseTicketComponent implements OnInit {

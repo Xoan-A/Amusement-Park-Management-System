@@ -1,7 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { ScoreHistoryService } from '../../../core/services/score-history.service';
 import { ScoreHistoryResponse } from '../../../core/models/responses';
 import { ScoreOrigin } from '../../../core/models/enums';
@@ -9,7 +8,7 @@ import { ScoreOrigin } from '../../../core/models/enums';
 @Component({
   selector: 'app-score-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, ],
   template: `
     <app-navbar></app-navbar>
     <div class="container mt-4">

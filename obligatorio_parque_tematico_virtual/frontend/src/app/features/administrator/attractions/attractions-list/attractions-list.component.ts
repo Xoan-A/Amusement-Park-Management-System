@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../../core/services/attraction.service';
 import { AttractionResponse, AttractionType } from '../../../../core/models';
 import { EnumToDisplayPipe } from '../../../../shared/pipes/enum-to-display.pipe';
@@ -10,7 +9,7 @@ import { EnumToDisplayPipe } from '../../../../shared/pipes/enum-to-display.pipe
 @Component({
   selector: 'app-attractions-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, NavbarComponent, EnumToDisplayPipe],
+  imports: [CommonModule, RouterLink, FormsModule,  EnumToDisplayPipe],
   templateUrl: './attractions-list.component.html'
 })
 export class AttractionsListComponent implements OnInit {

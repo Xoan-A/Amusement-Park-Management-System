@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { EventService } from '../../../../core/services/event.service';
 import { EventResponse } from '../../../../core/models';
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, ],
   template: `
     <app-navbar></app-navbar>
     <div class="container mt-4">

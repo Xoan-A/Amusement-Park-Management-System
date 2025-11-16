@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { EventService } from '../../../../core/services/event.service';
 import { AttractionService } from '../../../../core/services/attraction.service';
 import { AttractionResponse } from '../../../../core/models';
@@ -10,7 +9,7 @@ import { AttractionResponse } from '../../../../core/models';
 @Component({
   selector: 'app-event-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ],
   templateUrl: './event-form.component.html'
 })
 export class EventFormComponent implements OnInit {

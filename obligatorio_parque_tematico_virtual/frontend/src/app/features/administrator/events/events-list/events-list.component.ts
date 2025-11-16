@@ -2,14 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { EventService } from '../../../../core/services/event.service';
 import { EventResponse } from '../../../../core/models';
 
 @Component({
   selector: 'app-events-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, NavbarComponent],
+  imports: [CommonModule, RouterLink, FormsModule, ],
   templateUrl: './events-list.component.html'
 })
 export class EventsListComponent implements OnInit {
