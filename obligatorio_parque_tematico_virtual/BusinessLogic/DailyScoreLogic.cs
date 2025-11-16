@@ -38,6 +38,7 @@ namespace BusinessLogic
                 UserId = user.Id,
                 AttractionId = attraction.Id,
                 IsSpecialEvent = attractionEvent != null,
+                EnterDate = currentDateTime
             };
 
             int score = _activeStrategy.CalculateScore(user, attraction, strategyRequest);
