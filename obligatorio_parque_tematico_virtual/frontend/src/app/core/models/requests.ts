@@ -48,7 +48,6 @@ export interface AttractionRequest {
   type: AttractionType;
   minAge: number;
   maxCapacity: number;
-  currentCapacity?: number;
 }
 
 export interface EventRequest {
