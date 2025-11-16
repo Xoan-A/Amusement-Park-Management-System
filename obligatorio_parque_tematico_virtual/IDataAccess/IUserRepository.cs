@@ -12,5 +12,6 @@ namespace IDataAccess
         List<User> GetTopTen();
         void ResetScores();
         void Update(User user);
+        List<User> GetAllUsers();
     }
 }

@@ -918,5 +918,67 @@ namespace ApiTests
 
             _mockUserManagementLogic.Verify(u => u.ChangeMembershipLevel(userId, 0), Times.Once);
         }
+
+        [TestMethod]
+        public void GetAllUsers_WithAdminRole_ReturnsOk()
+        {
+            List<UserResponse> expectedUsers = new List<UserResponse>
+            {
+                new UserResponse
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "User1",
+                    LastName = "Test1",
+                    Email = "user1@test.com",
+                    UserRoles = new List<string> { Role.Visitor },
+                    Score = 100
+                },
+                new UserResponse
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "User2",
+                    LastName = "Test2",
+                    Email = "user2@test.com",
+                    UserRoles = new List<string> { Role.Administrator },
+                    Score = 50
+                }
+            };
+
+            _mockUserManagementLogic.Setup(u => u.GetAllUsers()).Returns(expectedUsers);
+
+            HttpResponseMessage response = _ = _adminClient.GetAsync("/api/users").Result;
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            string responseContent = response.Content.ReadAsStringAsync().Result;
+            List<UserResponse>? userResponses = JsonSerializer.Deserialize<List<UserResponse>>(responseContent,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            Assert.AreEqual("User1", userResponses[0].Name);
+            Assert.AreEqual("User2", userResponses[1].Name);
+
+            _mockUserManagementLogic.Verify(u => u.GetAllUsers(), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetAllUsers_WithoutAuthentication_ReturnsUnauthorized()
+        {
+            HttpResponseMessage response = _ = _client.GetAsync("/api/users").Result;
+
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+            _mockUserManagementLogic.Verify(u => u.GetAllUsers(), Times.Never);
+        }
+
+        [TestMethod]
+        public void GetAllUsers_WithOperatorRole_ReturnsForbidden()
+        {
+            HttpResponseMessage response = _ = _operatorClient.GetAsync("/api/users").Result;
+
+            Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+            _mockUserManagementLogic.Verify(u => u.GetAllUsers(), Times.Never);
+        }
     }
 }

@@ -81,5 +81,13 @@ namespace DataAccess.Repositories
 
             _context.SaveChanges();
         }
+
+        public List<User> GetAllUsers()
+        {
+            return _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .ToList();
+        }
     }
 }

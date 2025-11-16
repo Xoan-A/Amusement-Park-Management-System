@@ -66,4 +66,12 @@ public class UserController : ControllerBase
         UserResponse updated = _userManagementLogic.ChangeMembershipLevel(userId, request.MembershipLevel);
         return Ok(updated);
     }
+
+    [HttpGet]
+    [Authorize(Roles = "Administrator")]
+    public IActionResult GetAllUsers()
+    {
+        List<UserResponse> users = _userManagementLogic.GetAllUsers();
+        return Ok(users);
+    }
 }

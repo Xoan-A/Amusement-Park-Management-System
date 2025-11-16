@@ -1253,5 +1253,56 @@ namespace TestBusinessLogic
 
             _userManagementLogic.ModifyUser(userId, userId, request);
         }
+
+        [TestMethod]
+        public void GetAllUsers_ShouldReturnListOfUserResponses()
+        {
+            List<User> users = new List<User>
+            {
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "User1",
+                    LastName = "Test1",
+                    Email = "user1@test.com",
+                    Password = "hashed1",
+                    UserRoles = new List<UserRole>
+                    {
+                        new UserRole { Role = new Role { Name = Role.Visitor } }
+                    }
+                },
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "User2",
+                    LastName = "Test2",
+                    Email = "user2@test.com",
+                    Password = "hashed2",
+                    UserRoles = new List<UserRole>
+                    {
+                        new UserRole { Role = new Role { Name = Role.Administrator } }
+                    }
+                }
+            };
+
+            _mockUserRepository.Setup(r => r.GetAllUsers()).Returns(users);
+
+            List<UserResponse> result = _userManagementLogic.GetAllUsers();
+
+            Assert.AreEqual("User1", result[0].Name);
+            Assert.AreEqual("User2", result[1].Name);
+            _mockUserRepository.Verify(r => r.GetAllUsers(), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetAllUsers_ShouldReturnEmptyList_WhenNoUsersExist()
+        {
+            _mockUserRepository.Setup(r => r.GetAllUsers()).Returns(new List<User>());
+
+            List<UserResponse> result = _userManagementLogic.GetAllUsers();
+
+            Assert.AreEqual(0, result.Count);
+            _mockUserRepository.Verify(r => r.GetAllUsers(), Times.Once);
+        }
     }
 }

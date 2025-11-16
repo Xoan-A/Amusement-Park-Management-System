@@ -745,5 +745,26 @@ namespace TestDataAccess
             Assert.AreEqual("newpassword", updatedUser.Password);
             Assert.AreEqual(100, updatedUser.Score);
         }
+
+        [TestMethod]
+        public void GetAllUsers_ShouldReturnAllUsersWithRoles()
+        {
+            List<User> result = _userRepository.GetAllUsers();
+
+            Assert.IsTrue(result.Count >= 2);
+            Assert.IsTrue(result.All(u => u.UserRoles != null));
+            Assert.IsTrue(result.All(u => u.UserRoles.All(ur => ur.Role != null)));
+        }
+
+        [TestMethod]
+        public void GetAllUsers_ShouldReturnEmptyList_WhenNoUsersExist()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            List<User> result = _userRepository.GetAllUsers();
+
+            Assert.AreEqual(0, result.Count);
+        }
     }
 }

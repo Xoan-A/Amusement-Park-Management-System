@@ -247,4 +247,10 @@ public class UserManagementLogic : IUserManagementLogic
 
         return _mapper.Map<UserResponse>(user);
     }
+
+    public List<UserResponse> GetAllUsers()
+    {
+        List<User> users = _userRepository.GetAllUsers();
+        return _mapper.Map<List<UserResponse>>(users);
+    }
 }
