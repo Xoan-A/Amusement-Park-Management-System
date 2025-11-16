@@ -74,7 +74,7 @@ public class PluginLoader : IPluginLoader
             {
                 try
                 {
-                    IConcreteStrategy? instance = Activator.CreateInstance(type) as IConcreteStrategy;
+                    IConcreteStrategy? instance = TryCreateInstanceForDiscovery(type);
                     if (instance != null)
                     {
                         PluginInfo pluginInfo = new PluginInfo
@@ -93,6 +93,58 @@ public class PluginLoader : IPluginLoader
                 }
             }
         }
+    }
+
+    private IConcreteStrategy? TryCreateInstanceForDiscovery(Type type)
+    {
+        // First, try to create instance with parameterless constructor
+        try
+        {
+            return Activator.CreateInstance(type) as IConcreteStrategy;
+        }
+        catch (MissingMethodException)
+        {
+            // No parameterless constructor, try constructors with default parameters
+        }
+
+        // Try to find a constructor and provide default values for its parameters
+        ConstructorInfo[] constructors = type.GetConstructors();
+        foreach (ConstructorInfo constructor in constructors.OrderBy(c => c.GetParameters().Length))
+        {
+            try
+            {
+                ParameterInfo[] parameters = constructor.GetParameters();
+                object[] args = new object[parameters.Length];
+
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    // Provide default values based on parameter type
+                    Type paramType = parameters[i].ParameterType;
+                    if (paramType == typeof(int))
+                        args[i] = 0;
+                    else if (paramType == typeof(string))
+                        args[i] = string.Empty;
+                    else if (paramType == typeof(bool))
+                        args[i] = false;
+                    else if (paramType == typeof(double))
+                        args[i] = 0.0;
+                    else if (paramType == typeof(float))
+                        args[i] = 0.0f;
+                    else if (paramType.IsValueType)
+                        args[i] = Activator.CreateInstance(paramType)!;
+                    else
+                        args[i] = null!;
+                }
+
+                return constructor.Invoke(args) as IConcreteStrategy;
+            }
+            catch (Exception)
+            {
+                continue;
+            }
+        }
+
+        return null;
     }
 
     private void DiscoverPluginsInCurrentAssembly()
