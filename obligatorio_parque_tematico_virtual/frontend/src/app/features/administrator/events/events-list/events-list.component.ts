@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { EventService } from '../../../../core/services/event.service';
 import { EventResponse } from '../../../../core/models';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-events-list',
@@ -19,8 +20,12 @@ export class EventsListComponent implements OnInit {
   searchTerm = '';
   showDeleteModal = false;
   eventToDelete: string | null = null;
+  errorMessage: string | null = null;
 
-  constructor(private eventService: EventService) {}
+  constructor(
+    private eventService: EventService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.loadEvents();
@@ -57,13 +62,15 @@ export class EventsListComponent implements OnInit {
     if (this.eventToDelete) {
       this.eventService.delete(this.eventToDelete).subscribe({
         next: () => {
+          this.toastService.showSuccess('Event deleted successfully');
           this.loadEvents();
           this.eventToDelete = null;
           this.showDeleteModal = false;
+          this.errorMessage = null;
         },
         error: (error) => {
           console.error('Error deleting event', error);
-          alert('Failed to delete event');
+          this.errorMessage = error.error?.message || 'Failed to delete event';
           this.eventToDelete = null;
           this.showDeleteModal = false;
         }

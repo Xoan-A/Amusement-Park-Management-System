@@ -13,12 +13,6 @@
             </div>
           }
 
-          @if (successMessage) {
-            <div class="alert alert-success">
-              {{ successMessage }}
-            </div>
-          }
-
           <form [formGroup]="eventForm" (ngSubmit)="onSubmit()">
             <div class="mb-3">
               <label for="name" class="form-label">Event Name *</label>

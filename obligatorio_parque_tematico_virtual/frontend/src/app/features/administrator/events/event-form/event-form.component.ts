@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { EventService } from '../../../../core/services/event.service';
 import { AttractionService } from '../../../../core/services/attraction.service';
 import { AttractionResponse } from '../../../../core/models';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-event-form',
@@ -18,13 +19,13 @@ export class EventFormComponent implements OnInit {
   attractions: AttractionResponse[] = [];
   selectedAttractions: Set<string> = new Set();
   errorMessage = '';
-  successMessage = '';
 
   constructor(
     private fb: FormBuilder,
     private eventService: EventService,
     private attractionService: AttractionService,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) {
     this.eventForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
@@ -75,7 +76,6 @@ export class EventFormComponent implements OnInit {
 
     this.loading = true;
     this.errorMessage = '';
-    this.successMessage = '';
 
     const eventData = {
       ...this.eventForm.value,
@@ -84,7 +84,7 @@ export class EventFormComponent implements OnInit {
 
     this.eventService.create(eventData).subscribe({
       next: () => {
-        this.successMessage = 'Event created successfully!';
+        this.toastService.showSuccess('Event created successfully!');
         setTimeout(() => this.router.navigate(['/admin/events']), 1500);
       },
       error: (error) => {

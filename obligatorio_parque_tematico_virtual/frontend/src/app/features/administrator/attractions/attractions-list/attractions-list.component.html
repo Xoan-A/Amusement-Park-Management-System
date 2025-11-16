@@ -9,6 +9,13 @@
     </div>
   </div>
 
+  @if (errorMessage) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ errorMessage }}
+      <button type="button" class="btn-close" (click)="errorMessage = null"></button>
+    </div>
+  }
+
   <div class="row mb-3">
     <div class="col-md-6">
       <input

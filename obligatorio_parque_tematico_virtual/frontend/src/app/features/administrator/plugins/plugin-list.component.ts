@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { PluginService } from '../../../core/services/plugin.service';
 import { StrategyService } from '../../../core/services/strategy.service';
 import { PluginResponse, StrategyResponse } from '../../../core/models/responses';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-plugin-list',
@@ -73,17 +74,6 @@ import { PluginResponse, StrategyResponse } from '../../../core/models/responses
         </div>
       </div>
 
-      <!-- Success Message -->
-      @if (successMessage) {
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle-fill"></i> {{ successMessage }}
-        <button
-          type="button"
-          class="btn-close"
-          (click)="successMessage = null"
-        ></button>
-      </div>
-      }
 
       <!-- Current Strategy Info -->
       @if (currentStrategy) {
@@ -223,6 +213,7 @@ export class PluginListComponent implements OnInit {
   private pluginService = inject(PluginService);
   private strategyService = inject(StrategyService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   plugins: PluginResponse[] = [];
   currentStrategy: StrategyResponse | null = null;
@@ -232,7 +223,6 @@ export class PluginListComponent implements OnInit {
   errorMessage: string | null = null;
   selectedFile: File | null = null;
   uploading = false;
-  successMessage: string | null = null;
   comboNValue: number | null = null;
   comboNValueError: string | null = null;
 
@@ -283,7 +273,7 @@ export class PluginListComponent implements OnInit {
         .setStrategy({ strategyName: pluginName, n })
         .subscribe({
           next: () => {
-            this.successMessage = `Strategy "${pluginName}" activated successfully with N=${n} minutes!`;
+            this.toastService.showSuccess(`Strategy "${pluginName}" activated successfully with N=${n} minutes!`);
             this.loadCurrentStrategy();
             this.comboNValue = null;
           },
@@ -294,7 +284,7 @@ export class PluginListComponent implements OnInit {
     } else {
       this.strategyService.setStrategy({ strategyName: pluginName }).subscribe({
         next: () => {
-          this.successMessage = `Strategy "${pluginName}" activated successfully!`;
+          this.toastService.showSuccess(`Strategy "${pluginName}" activated successfully!`);
           this.loadCurrentStrategy();
         },
         error: () => {
@@ -321,7 +311,6 @@ export class PluginListComponent implements OnInit {
 
       this.selectedFile = file;
       this.errorMessage = null;
-      this.successMessage = null;
     }
   }
 
@@ -333,13 +322,12 @@ export class PluginListComponent implements OnInit {
 
     this.uploading = true;
     this.errorMessage = null;
-    this.successMessage = null;
 
     this.pluginService.uploadPlugin(this.selectedFile).subscribe({
       next: () => {
-        this.successMessage = `Strategy "${
+        this.toastService.showSuccess(`Strategy "${
           this.selectedFile!.name
-        }" uploaded successfully!`;
+        }" uploaded successfully!`);
         this.selectedFile = null;
         const fileInput = document.getElementById(
           'fileInput'
@@ -363,6 +351,5 @@ export class PluginListComponent implements OnInit {
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
     this.errorMessage = null;
-    this.successMessage = null;
   }
 }

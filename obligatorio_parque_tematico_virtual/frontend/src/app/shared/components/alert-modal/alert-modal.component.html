@@ -1,0 +1,23 @@
+@if (show) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title d-flex align-items-center">
+            <i class="bi {{ getIcon() }} me-2" style="font-size: 24px;"></i>
+            {{ title }}
+          </h5>
+        </div>
+        <div class="modal-body">
+          {{ message }}
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-primary" (click)="onOk()">
+            {{ okText }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
