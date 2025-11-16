@@ -67,9 +67,9 @@ export class ReportsComponent implements OnInit {
   }
 
   updateChart(data: any): void {
-    if (data && data.attractionVisits) {
-      this.barChartData.labels = data.attractionVisits.map((v: any) => v.attractionName);
-      this.barChartData.datasets[0].data = data.attractionVisits.map((v: any) => v.totalVisits);
+    if (data && data.attractionsVisits) {
+      this.barChartData.labels = data.attractionsVisits.map((v: any) => v.attractionName);
+      this.barChartData.datasets[0].data = data.attractionsVisits.map((v: any) => v.totalVisits);
     }
   }
 }
