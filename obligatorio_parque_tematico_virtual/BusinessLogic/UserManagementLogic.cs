@@ -135,7 +135,7 @@ public class UserManagementLogic : IUserManagementLogic
 
         return _mapper.Map<UserResponse>(user);
     }
-    
+
     public void RegisterEntry(Guid attractionId, RegisterEntryRequest request)
     {
         _parkEntryLogic.RegisterEntry(attractionId, request);
