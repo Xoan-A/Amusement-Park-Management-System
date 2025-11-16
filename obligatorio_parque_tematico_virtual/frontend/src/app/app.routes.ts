@@ -34,6 +34,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/administrator/attractions/attractions-list/attractions-list.component').then(m => m.AttractionsListComponent)
       },
       {
+        path: 'attractions/visits',
+        loadComponent: () => import('./features/administrator/attractions/attraction-visits/attraction-visits.component').then(m => m.AttractionVisitsComponent)
+      },
+      {
         path: 'attractions/new',
         loadComponent: () => import('./features/administrator/attractions/attraction-form/attraction-form.component').then(m => m.AttractionFormComponent)
       },

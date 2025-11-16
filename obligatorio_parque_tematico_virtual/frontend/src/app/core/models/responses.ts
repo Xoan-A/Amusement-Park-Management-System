@@ -110,16 +110,12 @@ export interface TopVisitor {
 }
 
 export interface AttractionsVisitResponse {
-  startDate: string;
-  endDate: string;
   attractionsVisits: AttractionVisitDetail[];
 }
 
 export interface AttractionVisitDetail {
-  attractionId: string;
-  attractionName: string;
-  totalVisits: number;
-  averageStayMinutes: number;
+  attraction: AttractionResponse;
+  visitCount: number;
 }
 
 export interface RewardResponse {

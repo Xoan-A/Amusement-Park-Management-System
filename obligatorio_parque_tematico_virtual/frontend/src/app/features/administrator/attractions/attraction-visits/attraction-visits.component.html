@@ -1,0 +1,92 @@
+<div class="container mt-4">
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <h1>Attraction Visits</h1>
+    </div>
+    <div class="col-md-6 text-end">
+      <a routerLink="/admin/attractions" class="btn btn-secondary">
+        Back to Attractions
+      </a>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <form [formGroup]="dateRangeForm" (ngSubmit)="loadReport()">
+        <div class="row">
+          <div class="col-md-5">
+            <label class="form-label">Start Date *</label>
+            <input
+              type="date"
+              class="form-control"
+              formControlName="startDate"
+              [class.is-invalid]="dateRangeForm.get('startDate')?.invalid && dateRangeForm.get('startDate')?.touched"
+            >
+          </div>
+          <div class="col-md-5">
+            <label class="form-label">End Date *</label>
+            <input
+              type="date"
+              class="form-control"
+              formControlName="endDate"
+              [class.is-invalid]="dateRangeForm.get('endDate')?.invalid && dateRangeForm.get('endDate')?.touched"
+            >
+          </div>
+          <div class="col-md-2">
+            <label class="form-label d-block">&nbsp;</label>
+            <button type="submit" class="btn btn-primary w-100" [disabled]="loading">
+              @if (loading) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              } @else {
+                Generate
+              }
+            </button>
+          </div>
+        </div>
+      </form>
+
+      @if (errorMessage) {
+        <div class="alert alert-danger mt-3 mb-0">
+          {{ errorMessage }}
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (reportData && reportData.attractionsVisits) {
+    @if (reportData.attractionsVisits.length === 0) {
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        No visit data found for the selected date range.
+      </div>
+    } @else {
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Visits Report</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead class="table-light">
+                <tr>
+                  <th>Attraction</th>
+                  <th class="text-end">Visits</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (visit of reportData.attractionsVisits; track visit.attraction.id) {
+                  <tr>
+                    <td>{{ visit.attraction.name }}</td>
+                    <td class="text-end">
+                      <span class="badge bg-primary">{{ visit.visitCount }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>
