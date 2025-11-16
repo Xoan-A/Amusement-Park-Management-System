@@ -42,15 +42,9 @@ namespace TestDomain
         {
             ScoreHistory history = new ScoreHistory();
 
-            Assert.ThrowsException<ArgumentException>(() =>
-            {
-                history.StrategyName = "";
-            });
+            Assert.ThrowsException<ArgumentException>(() => { history.StrategyName = ""; });
 
-            Assert.ThrowsException<ArgumentException>(() =>
-            {
-                history.StrategyName = null;
-            });
+            Assert.ThrowsException<ArgumentException>(() => { history.StrategyName = null; });
         }
 
         [TestMethod]
@@ -135,6 +129,6 @@ namespace TestDomain
             history.RelatedEntityName = null;
 
             Assert.IsNull(history.RelatedEntityName);
-        }    
+        }
     }
 }

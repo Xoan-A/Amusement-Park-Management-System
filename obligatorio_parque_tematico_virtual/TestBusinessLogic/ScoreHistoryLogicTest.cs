@@ -358,6 +358,6 @@ namespace TestBusinessLogic
             Assert.AreEqual(1, result.Count);
             Assert.IsNull(result[0].RelatedEntityName);
             Assert.IsNull(result[0].RelatedEntityId);
-        }        
+        }
     }
 }
