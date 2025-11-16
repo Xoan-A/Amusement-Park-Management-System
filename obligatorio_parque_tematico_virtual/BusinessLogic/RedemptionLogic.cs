@@ -69,6 +69,7 @@ namespace BusinessLogic
                 Points = -reward.PointsCost,
                 Origin = ScoreOrigin.Redemption,
                 RelatedEntityId = reward.Id,
+                RelatedEntityName = reward.Name,
                 StrategyName = "RedemptionStrategy"
             };
 

@@ -141,6 +141,7 @@ import { ScoreOrigin } from '../../../core/models/enums';
                     <th>Date & Time</th>
                     <th>Points</th>
                     <th>Category</th>
+                    <th>Related Entity</th>
                     <th>Strategy</th>
                   </tr>
                 </thead>
@@ -157,6 +158,13 @@ import { ScoreOrigin } from '../../../core/models/enums';
                         <span class="badge" [class]="getOriginBadgeClass(record.origin)">
                           {{ formatOrigin(record.origin) }}
                         </span>
+                      </td>
+                      <td>
+                        @if (record.relatedEntityName) {
+                          <small>{{ record.relatedEntityName }}</small>
+                        } @else {
+                          <small class="text-muted">—</small>
+                        }
                       </td>
                       <td>
                         <small class="text-muted">{{ record.strategyName }}</small>
@@ -193,7 +201,6 @@ export class ScoreHistoryComponent implements OnInit {
   loading = false;
   errorMessage: string | null = null;
 
-  // Filters
   dateFrom = '';
   dateTo = '';
   selectedOrigin = '';

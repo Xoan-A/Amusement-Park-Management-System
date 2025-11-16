@@ -304,5 +304,87 @@ namespace TestBusinessLogic
                 It.IsAny<StrategyRequest>()
             ), Times.Once);
         }
+
+        [TestMethod]
+        public void AddScoreToUser_ShouldCreateScoreHistory_WithAttractionName()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid attractionId = Guid.NewGuid();
+            int calculatedScore = 50;
+
+            User user = new User
+            {
+                Id = userId,
+                Score = 100,
+                DailyScore = 80
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster"
+            };
+
+            ScoreHistory capturedHistory = null;
+
+            _mockActiveStrategy.Setup(s => s.CalculateScore(
+                It.IsAny<User>(),
+                It.IsAny<Attraction>(),
+                It.IsAny<StrategyRequest>()
+            )).Returns(calculatedScore);
+            _mockUserRepository.Setup(r => r.Update(user));
+            _mockScoreHistoryRepository.Setup(r => r.Create(It.IsAny<ScoreHistory>()))
+                .Callback<ScoreHistory>(h => capturedHistory = h);
+
+            DateTime testDate = new DateTime(2025, 9, 1, 12, 0, 0);
+            _dailyScoreLogic.AddScoreToUser(user, attraction, testDate);
+
+            Assert.AreEqual("Roller Coaster", capturedHistory.RelatedEntityName);
+            Assert.AreEqual(ScoreOrigin.AttractionVisit, capturedHistory.Origin);
+        }
+
+        [TestMethod]
+        public void AddScoreToUser_WithEvent_ShouldCreateScoreHistory_WithEventName()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid eventId = Guid.NewGuid();
+            int calculatedScore = 100;
+
+            User user = new User
+            {
+                Id = userId,
+                Score = 100,
+                DailyScore = 80
+            };
+
+            Attraction attraction = new Attraction
+            {
+                Id = Guid.NewGuid(),
+                Name = "Concert"
+            };
+
+            Event attractionEvent = new Event
+            {
+                Id = eventId,
+                Name = "Summer Festival 2025"
+            };
+
+            ScoreHistory capturedHistory = null;
+
+            _mockActiveStrategy.Setup(s => s.CalculateScore(
+                It.IsAny<User>(),
+                It.IsAny<Attraction>(),
+                It.IsAny<StrategyRequest>()
+            )).Returns(calculatedScore);
+            _mockUserRepository.Setup(r => r.Update(user));
+            _mockScoreHistoryRepository.Setup(r => r.Create(It.IsAny<ScoreHistory>()))
+                .Callback<ScoreHistory>(h => capturedHistory = h);
+
+            DateTime testDate = new DateTime(2025, 9, 1, 12, 0, 0);
+            _dailyScoreLogic.AddScoreToUser(user, attraction, testDate, attractionEvent);
+
+            Assert.AreEqual("Summer Festival 2025", capturedHistory.RelatedEntityName);
+            Assert.AreEqual(ScoreOrigin.EventParticipation, capturedHistory.Origin);
+        }
     }
 }

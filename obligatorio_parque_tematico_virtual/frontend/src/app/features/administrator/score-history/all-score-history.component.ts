@@ -132,6 +132,7 @@ import { ScoreOrigin } from '../../../core/models/enums';
                     <th>Visitor</th>
                     <th>Points</th>
                     <th>Origin</th>
+                    <th>Related Entity</th>
                     <th>Strategy</th>
                   </tr>
                 </thead>
@@ -149,6 +150,13 @@ import { ScoreOrigin } from '../../../core/models/enums';
                         <span class="badge" [class]="getOriginBadgeClass(record.origin)">
                           {{ formatOrigin(record.origin) }}
                         </span>
+                      </td>
+                      <td>
+                        @if (record.relatedEntityName) {
+                          <small>{{ record.relatedEntityName }}</small>
+                        } @else {
+                          <small class="text-muted">—</small>
+                        }
                       </td>
                       <td>{{ record.strategyName }}</td>
                     </tr>

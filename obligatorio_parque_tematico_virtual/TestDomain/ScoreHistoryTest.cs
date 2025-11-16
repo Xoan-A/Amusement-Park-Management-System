@@ -115,5 +115,26 @@ namespace TestDomain
 
             Assert.IsNull(history.RelatedEntityId);
         }
+
+        [TestMethod]
+        public void ScoreHistory_SetRelatedEntityName_ValidString_Success()
+        {
+            ScoreHistory history = new ScoreHistory();
+            string entityName = "Roller Coaster";
+
+            history.RelatedEntityName = entityName;
+
+            Assert.AreEqual(entityName, history.RelatedEntityName);
+        }
+
+        [TestMethod]
+        public void ScoreHistory_SetRelatedEntityName_Null_Success()
+        {
+            ScoreHistory history = new ScoreHistory();
+
+            history.RelatedEntityName = null;
+
+            Assert.IsNull(history.RelatedEntityName);
+        }    
     }
 }

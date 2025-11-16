@@ -56,6 +56,7 @@ namespace BusinessLogic
                 Points = score,
                 Origin = attractionEvent != null ? ScoreOrigin.EventParticipation : ScoreOrigin.AttractionVisit,
                 RelatedEntityId = attractionEvent?.Id ?? attraction.Id,
+                RelatedEntityName = attractionEvent?.Name ?? attraction.Name,
                 StrategyName = currentStrategy.Name,
             };
 
