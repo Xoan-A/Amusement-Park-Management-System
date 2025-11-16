@@ -170,13 +170,14 @@ export class DashboardComponent implements OnInit {
   loadScoreHistory(): void {
     this.scoreHistoryService.getMyScoreHistory().subscribe({
       next: (history) => {
-        // Sort by date descending and take the 5 most recent
         this.recentScores = history
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
           .slice(0, 5);
 
-        // Calculate total score
-        this.totalScore = history.reduce((sum, record) => sum + record.points, 0);
+        this.totalScore = history.reduce(
+          (sum, record) => sum + record.points,
+          0
+        );
       },
       error: (error) => {
         console.error('Error loading score history', error);

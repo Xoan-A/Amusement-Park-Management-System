@@ -52,11 +52,10 @@ export const routes: Routes = [
       },
       {
         path: 'reports',
-        loadComponent: () => import('./features/administrator/reports/reports.component').then(m => m.ReportsComponent)
-      },
-      {
-        path: 'strategy',
-        loadComponent: () => import('./features/administrator/strategy/strategy.component').then(m => m.StrategyComponent)
+        loadComponent: () =>
+          import('./features/administrator/reports/reports.component').then(
+            (m) => m.ReportsComponent
+          ),
       },
       {
         path: 'rewards',

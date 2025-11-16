@@ -38,7 +38,7 @@ public class PluginLoaderIntegrationTest
 
         List<PluginInfoResponse> plugins = pluginLoader.LoadPlugins();
 
-        Assert.AreEqual(3, plugins.Count);
+        Assert.AreEqual(4, plugins.Count);
         Assert.IsTrue(plugins.Any(p => p.Name == "PuntuacionPorHora"));
     }
 

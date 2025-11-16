@@ -33,7 +33,9 @@ public static class ServiceFactory
         services.AddScoped<IScoreHistoryLogic, ScoreHistoryLogic>();
         services.AddScoped<IClaimsLogic, ClaimsLogic>();
 
-        string pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+        string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        string projectRoot = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", ".."));
+        string pluginsPath = Path.Combine(projectRoot, "BusinessLogic", "Plugins");
         services.AddSingleton<IPluginLoader>(new BusinessLogic.Plugins.PluginLoader(pluginsPath));
 
         string? connectionString = configuration.GetConnectionString("DefaultConnection");

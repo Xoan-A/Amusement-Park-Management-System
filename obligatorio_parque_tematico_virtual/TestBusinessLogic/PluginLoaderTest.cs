@@ -34,7 +34,7 @@ public class PluginLoaderTest
     {
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        Assert.AreEqual(2, plugins.Count);
+        Assert.AreEqual(3, plugins.Count);
     }
 
     [TestMethod]
@@ -51,7 +51,7 @@ public class PluginLoaderTest
 
         List<PluginInfoResponse> plugins = loader.LoadPlugins();
 
-        Assert.AreEqual(2, plugins.Count);
+        Assert.AreEqual(3, plugins.Count);
     }
 
     [TestMethod]
@@ -62,7 +62,7 @@ public class PluginLoaderTest
 
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        Assert.AreEqual(2, plugins.Count);
+        Assert.AreEqual(3, plugins.Count);
     }
 
     [TestMethod]
@@ -93,7 +93,7 @@ public class PluginLoaderTest
 
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        Assert.AreEqual(2, plugins.Count);
+        Assert.AreEqual(3, plugins.Count);
     }
 
     [TestMethod]
@@ -154,5 +154,107 @@ public class PluginLoaderTest
         {
             Directory.Delete(newPluginsPath, true);
         }
+    }
+
+    [TestMethod]
+    public void CreateStrategyInstance_WithBuiltInPluginPerEvent_ReturnsStrategyInstance()
+    {
+        IConcreteStrategy strategy = _pluginLoader.CreateStrategyInstance("PerEvent");
+
+        Assert.IsNotNull(strategy);
+        Assert.AreEqual("PerEvent", strategy.Name);
+    }
+
+    [TestMethod]
+    public void CreateStrategyInstance_WithBuiltInPluginPerAttraction_ReturnsStrategyInstance()
+    {
+        IConcreteStrategy strategy = _pluginLoader.CreateStrategyInstance("PerAttraction");
+
+        Assert.IsNotNull(strategy);
+        Assert.AreEqual("PerAttraction", strategy.Name);
+    }
+
+    [TestMethod]
+    public void CreateStrategyInstance_WithParametersCombo_ReturnsStrategyInstanceWithCorrectParameter()
+    {
+        Dictionary<string, object> parameters = new Dictionary<string, object>
+        {
+            { "n", 30 }
+        };
+
+        IConcreteStrategy strategy = _pluginLoader.CreateStrategyInstance("Combo", parameters);
+
+        Assert.IsNotNull(strategy);
+        Assert.AreEqual("Combo", strategy.Name);
+    }
+
+    [TestMethod]
+    public void CreateStrategyInstance_WithMismatchedParametersCount_FallsBackToParameterlessConstructor()
+    {
+        Dictionary<string, object> parameters = new Dictionary<string, object>
+        {
+            { "x", 30 },
+            { "y", 40 }
+        };
+
+        IConcreteStrategy strategy = _pluginLoader.CreateStrategyInstance("PerEvent", parameters);
+
+        Assert.IsNotNull(strategy);
+        Assert.AreEqual("PerEvent", strategy.Name);
+    }
+
+    [TestMethod]
+    public void AddPlugin_WithNonReadableStream_ThrowsArgumentException()
+    {
+        MemoryStream stream = new MemoryStream(new byte[] { 0x4D, 0x5A });
+        stream.Close();
+
+        Assert.ThrowsException<ArgumentException>(() =>
+        {
+            _pluginLoader.AddPlugin(stream, "TestPlugin.dll");
+        });
+
+        stream.Dispose();
+    }
+
+    [TestMethod]
+    public void AddPlugin_WithWhitespaceFileName_ThrowsArgumentException()
+    {
+        byte[] fileContent = new byte[] { 0x4D, 0x5A };
+        MemoryStream stream = new MemoryStream(fileContent);
+
+        Assert.ThrowsException<ArgumentException>(() =>
+        {
+            _pluginLoader.AddPlugin(stream, "   ");
+        });
+
+        stream.Dispose();
+    }
+
+    [TestMethod]
+    public void AddPlugin_WithUppercaseDllExtension_SavesFileToPluginsDirectory()
+    {
+        byte[] fileContent = new byte[] { 0x4D, 0x5A };
+        using (MemoryStream stream = new MemoryStream(fileContent))
+        {
+            _pluginLoader.AddPlugin(stream, "TestPlugin.DLL");
+        }
+
+        string expectedPath = Path.Combine(_testPluginsPath, "TestPlugin.DLL");
+        Assert.IsTrue(File.Exists(expectedPath));
+    }
+
+    [TestMethod]
+    public void AddPlugin_WithNullFileName_ThrowsArgumentException()
+    {
+        byte[] fileContent = new byte[] { 0x4D, 0x5A };
+        MemoryStream stream = new MemoryStream(fileContent);
+
+        Assert.ThrowsException<ArgumentException>(() =>
+        {
+            _pluginLoader.AddPlugin(stream, null!);
+        });
+
+        stream.Dispose();
     }
 }
