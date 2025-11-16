@@ -67,11 +67,13 @@ export class AttractionsListComponent implements OnInit {
         next: () => {
           this.loadAttractions();
           this.attractionToDelete = null;
+          this.showDeleteModal = false;
         },
         error: (error) => {
           console.error('Error deleting attraction', error);
           alert('Failed to delete attraction');
           this.attractionToDelete = null;
+          this.showDeleteModal = false;
         }
       });
     }
@@ -79,5 +81,6 @@ export class AttractionsListComponent implements OnInit {
 
   cancelDelete(): void {
     this.attractionToDelete = null;
+    this.showDeleteModal = false;
   }
 }

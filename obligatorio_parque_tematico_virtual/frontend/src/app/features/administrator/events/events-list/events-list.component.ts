@@ -59,11 +59,13 @@ export class EventsListComponent implements OnInit {
         next: () => {
           this.loadEvents();
           this.eventToDelete = null;
+          this.showDeleteModal = false;
         },
         error: (error) => {
           console.error('Error deleting event', error);
           alert('Failed to delete event');
           this.eventToDelete = null;
+          this.showDeleteModal = false;
         }
       });
     }
@@ -71,5 +73,6 @@ export class EventsListComponent implements OnInit {
 
   cancelDelete(): void {
     this.eventToDelete = null;
+    this.showDeleteModal = false;
   }
 }

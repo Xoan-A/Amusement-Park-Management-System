@@ -21,12 +21,10 @@ export class ConfirmationModalComponent {
 
   onConfirm(): void {
     this.confirmed.emit();
-    this.show = false;
   }
 
   onCancel(): void {
     this.cancelled.emit();
-    this.show = false;
   }
 
   onBackdropClick(event: MouseEvent): void {
