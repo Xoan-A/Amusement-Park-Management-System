@@ -34,7 +34,7 @@ public class PluginLoaderTest
     {
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        Assert.AreEqual(2, plugins.Count);
+        Assert.AreEqual(3, plugins.Count);
     }
 
     [TestMethod]
@@ -51,7 +51,7 @@ public class PluginLoaderTest
 
         List<PluginInfoResponse> plugins = loader.LoadPlugins();
 
-        Assert.AreEqual(2, plugins.Count);
+        Assert.AreEqual(3, plugins.Count);
     }
 
     [TestMethod]
@@ -62,7 +62,7 @@ public class PluginLoaderTest
 
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        Assert.AreEqual(2, plugins.Count);
+        Assert.AreEqual(3, plugins.Count);
     }
 
     [TestMethod]
@@ -93,7 +93,7 @@ public class PluginLoaderTest
 
         List<PluginInfoResponse> plugins = _pluginLoader.LoadPlugins();
 
-        Assert.AreEqual(2, plugins.Count);
+        Assert.AreEqual(3, plugins.Count);
     }
 
     [TestMethod]
