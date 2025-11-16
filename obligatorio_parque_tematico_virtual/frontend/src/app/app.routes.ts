@@ -54,13 +54,6 @@ export const routes: Routes = [
         loadComponent: () => import('./features/administrator/users/users-list/users-list.component').then(m => m.UsersListComponent)
       },
       {
-        path: 'reports',
-        loadComponent: () =>
-          import('./features/administrator/reports/reports.component').then(
-            (m) => m.ReportsComponent
-          ),
-      },
-      {
         path: 'rewards',
         loadComponent: () => import('./features/administrator/rewards/rewards-list.component').then(m => m.RewardsListComponent)
       },
