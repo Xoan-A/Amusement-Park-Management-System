@@ -84,6 +84,11 @@ export const routes: Routes = [
       {
         path: 'plugins',
         loadComponent: () => import('./features/administrator/plugins/plugin-list.component').then(m => m.PluginListComponent)
+      },
+      {
+        path: 'strategy',
+        redirectTo: 'plugins',
+        pathMatch: 'full'
       }
     ]
   },

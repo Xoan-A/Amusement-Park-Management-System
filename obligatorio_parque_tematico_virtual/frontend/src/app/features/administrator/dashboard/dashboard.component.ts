@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../core/services/attraction.service';
 import { EventService } from '../../../core/services/event.service';
 import { StrategyService } from '../../../core/services/strategy.service';
@@ -10,7 +9,7 @@ import { MaintenanceService } from '../../../core/services/maintenance.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, RouterLink, ],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {

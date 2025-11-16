@@ -2,14 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { EventService } from '../../../../core/services/event.service';
 import { EventResponse } from '../../../../core/models';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-events-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, NavbarComponent],
+  imports: [CommonModule, RouterLink, FormsModule, ConfirmationModalComponent],
   templateUrl: './events-list.component.html'
 })
 export class EventsListComponent implements OnInit {
@@ -17,6 +17,8 @@ export class EventsListComponent implements OnInit {
   filteredEvents: EventResponse[] = [];
   loading = true;
   searchTerm = '';
+  showDeleteModal = false;
+  eventToDelete: string | null = null;
 
   constructor(private eventService: EventService) {}
 
@@ -47,16 +49,30 @@ export class EventsListComponent implements OnInit {
   }
 
   deleteEvent(id: string): void {
-    if (confirm('Are you sure you want to delete this event?')) {
-      this.eventService.delete(id).subscribe({
+    this.eventToDelete = id;
+    this.showDeleteModal = true;
+  }
+
+  confirmDelete(): void {
+    if (this.eventToDelete) {
+      this.eventService.delete(this.eventToDelete).subscribe({
         next: () => {
           this.loadEvents();
+          this.eventToDelete = null;
+          this.showDeleteModal = false;
         },
         error: (error) => {
           console.error('Error deleting event', error);
           alert('Failed to delete event');
+          this.eventToDelete = null;
+          this.showDeleteModal = false;
         }
       });
     }
+  }
+
+  cancelDelete(): void {
+    this.eventToDelete = null;
+    this.showDeleteModal = false;
   }
 }

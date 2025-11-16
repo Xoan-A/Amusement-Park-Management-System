@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { DateTimeService } from '../../../core/services/datetime.service';
 
 @Component({
   selector: 'app-datetime-management',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent],
+  imports: [CommonModule, ReactiveFormsModule, ],
   templateUrl: './datetime-management.component.html',
   styleUrl: './datetime-management.component.scss'
 })

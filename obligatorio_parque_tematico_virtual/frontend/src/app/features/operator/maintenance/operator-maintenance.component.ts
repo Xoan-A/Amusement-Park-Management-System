@@ -1,15 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
 import { MaintenanceScheduleResponse } from '../../../core/models/responses';
 
 @Component({
   selector: 'app-operator-maintenance',
   standalone: true,
-  imports: [CommonModule, NavbarComponent],
+  imports: [CommonModule, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h2 class="mb-4">Maintenance Schedules</h2>
 

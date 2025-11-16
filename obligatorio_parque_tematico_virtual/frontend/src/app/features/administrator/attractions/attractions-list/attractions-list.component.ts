@@ -2,15 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { AttractionService } from '../../../../core/services/attraction.service';
 import { AttractionResponse, AttractionType } from '../../../../core/models';
 import { EnumToDisplayPipe } from '../../../../shared/pipes/enum-to-display.pipe';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-attractions-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, NavbarComponent, EnumToDisplayPipe],
+  imports: [CommonModule, RouterLink, FormsModule, EnumToDisplayPipe, ConfirmationModalComponent],
   templateUrl: './attractions-list.component.html'
 })
 export class AttractionsListComponent implements OnInit {
@@ -20,6 +20,8 @@ export class AttractionsListComponent implements OnInit {
   searchTerm = '';
   selectedType: string = '';
   attractionTypes = Object.values(AttractionType);
+  showDeleteModal = false;
+  attractionToDelete: string | null = null;
 
   constructor(private attractionService: AttractionService) {}
 
@@ -55,16 +57,30 @@ export class AttractionsListComponent implements OnInit {
   }
 
   deleteAttraction(id: string): void {
-    if (confirm('Are you sure you want to delete this attraction?')) {
-      this.attractionService.delete(id).subscribe({
+    this.attractionToDelete = id;
+    this.showDeleteModal = true;
+  }
+
+  confirmDelete(): void {
+    if (this.attractionToDelete) {
+      this.attractionService.delete(this.attractionToDelete).subscribe({
         next: () => {
           this.loadAttractions();
+          this.attractionToDelete = null;
+          this.showDeleteModal = false;
         },
         error: (error) => {
           console.error('Error deleting attraction', error);
           alert('Failed to delete attraction');
+          this.attractionToDelete = null;
+          this.showDeleteModal = false;
         }
       });
     }
+  }
+
+  cancelDelete(): void {
+    this.attractionToDelete = null;
+    this.showDeleteModal = false;
   }
 }

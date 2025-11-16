@@ -1,16 +1,28 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
+import { AuthService } from '../services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('token');
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
-  if (token) {
-    const clonedRequest = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
+  const clonedRequest = token ? req.clone({
+    setHeaders: {
+      Authorization: `Bearer ${token}`
+    }
+  }) : req;
+
+  return next(clonedRequest).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401 && token) {
+        alert('Your session has expired. Please log in again.');
+        authService.logout();
+        router.navigate(['/login']);
       }
-    });
-    return next(clonedRequest);
-  }
-
-  return next(req);
+      return throwError(() => error);
+    })
+  );
 };
