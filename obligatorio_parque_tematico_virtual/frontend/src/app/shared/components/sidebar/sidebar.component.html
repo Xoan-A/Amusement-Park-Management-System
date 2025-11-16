@@ -77,6 +77,14 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/rewards" routerLinkActive="active" [title]="isCollapsed ? 'Rewards' : ''">
+            <i class="nav-icon bi bi-gift"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Rewards</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" routerLink="/admin/plugins" routerLinkActive="active" [title]="isCollapsed ? 'Strategy' : ''">
             <i class="nav-icon bi bi-bullseye"></i>
             @if (!isCollapsed) {
@@ -169,6 +177,22 @@
             <i class="nav-icon bi bi-ticket-perforated"></i>
             @if (!isCollapsed) {
               <span class="nav-text">My Tickets</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/rewards" routerLinkActive="active" [title]="isCollapsed ? 'Rewards' : ''">
+            <i class="nav-icon bi bi-gift"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">Rewards</span>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/visitor/my-redemptions" routerLinkActive="active" [title]="isCollapsed ? 'My Redemptions' : ''">
+            <i class="nav-icon bi bi-check-circle"></i>
+            @if (!isCollapsed) {
+              <span class="nav-text">My Redemptions</span>
             }
           </a>
         </li>

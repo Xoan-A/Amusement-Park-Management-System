@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { MembershipService } from '../../../core/services/membership.service';
 import { MembershipLevel } from '../../../core/models';
 import { ToastService } from '../../../core/services/toast.service';
 
@@ -81,6 +82,7 @@ export class ProfileComponent implements OnInit {
     private fb: FormBuilder,
     private userService: UserService,
     private authService: AuthService,
+    private membershipService: MembershipService,
     private toastService: ToastService
   ) {
     this.profileForm = this.fb.group({
@@ -141,29 +143,11 @@ export class ProfileComponent implements OnInit {
   }
 
   getMembershipLevelName(level: MembershipLevel): string {
-    switch (level) {
-      case MembershipLevel.Standard:
-        return 'Standard';
-      case MembershipLevel.Premium:
-        return 'Premium';
-      case MembershipLevel.VIP:
-        return 'VIP';
-      default:
-        return 'Standard';
-    }
+    return this.membershipService.getLevelName(level);
   }
 
   getMembershipBadgeClass(level: MembershipLevel): string {
-    switch (level) {
-      case MembershipLevel.VIP:
-        return 'bg-warning text-dark';
-      case MembershipLevel.Premium:
-        return 'bg-primary';
-      case MembershipLevel.Standard:
-        return 'bg-secondary';
-      default:
-        return 'bg-secondary';
-    }
+    return this.membershipService.getBadgeClass(level);
   }
 
   formatDateForInput(date: string | Date | undefined): string {

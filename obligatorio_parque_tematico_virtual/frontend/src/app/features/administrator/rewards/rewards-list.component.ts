@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { RewardService } from '../../../core/services/reward.service';
+import { MembershipService } from '../../../core/services/membership.service';
 import { RewardResponse, MembershipLevel } from '../../../core/models';
 import { ConfirmationModalComponent } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { ToastService } from '../../../core/services/toast.service';
@@ -61,9 +62,9 @@ import { ToastService } from '../../../core/services/toast.service';
                     </td>
                     <td>{{ reward.availableQuantity }}</td>
                     <td>
-                      @if (reward.requiredMembershipLevel) {
+                      @if (reward.requiredMembershipLevel !== null && reward.requiredMembershipLevel !== undefined) {
                         <span class="badge" [ngClass]="getMembershipBadgeClass(reward.requiredMembershipLevel)">
-                          {{ reward.requiredMembershipLevel }}
+                          {{ getMembershipLevelName(reward.requiredMembershipLevel) }}
                         </span>
                       } @else {
                         <span class="text-muted">None</span>
@@ -125,6 +126,7 @@ export class RewardsListComponent implements OnInit {
 
   constructor(
     private rewardService: RewardService,
+    private membershipService: MembershipService,
     private toastService: ToastService
   ) {}
 
@@ -183,15 +185,10 @@ export class RewardsListComponent implements OnInit {
   }
 
   getMembershipBadgeClass(level: MembershipLevel): string {
-    switch (level) {
-      case MembershipLevel.VIP:
-        return 'bg-warning text-dark';
-      case MembershipLevel.Premium:
-        return 'bg-primary';
-      case MembershipLevel.Standard:
-        return 'bg-secondary';
-      default:
-        return 'bg-secondary';
-    }
+    return this.membershipService.getBadgeClass(level);
+  }
+
+  getMembershipLevelName(level: MembershipLevel): string {
+    return this.membershipService.getLevelName(level);
   }
 }

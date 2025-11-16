@@ -16,7 +16,7 @@ export class RedemptionService {
   constructor(private http: HttpClient) {}
 
   redeemReward(request: RedeemRewardRequest): Observable<RedemptionHistoryResponse> {
-    return this.http.post<RedemptionHistoryResponse>(`${this.apiUrl}/redeem`, request);
+    return this.http.post<RedemptionHistoryResponse>(`${this.apiUrl}/redeem/${request.rewardId}`, null);
   }
 
   getMyHistory(dateFrom?: string, dateTo?: string): Observable<RedemptionHistoryResponse[]> {

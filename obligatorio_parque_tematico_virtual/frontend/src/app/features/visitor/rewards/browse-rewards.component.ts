@@ -5,6 +5,7 @@ import { RewardService } from '../../../core/services/reward.service';
 import { RedemptionService } from '../../../core/services/redemption.service';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { MembershipService } from '../../../core/services/membership.service';
 import { RewardResponse, MembershipLevel } from '../../../core/models';
 import { ConfirmationModalComponent } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { ToastService } from '../../../core/services/toast.service';
@@ -71,11 +72,11 @@ import { ToastService } from '../../../core/services/toast.service';
                         <span>{{ reward.availableQuantity }}</span>
                       </div>
 
-                      @if (reward.requiredMembershipLevel) {
+                      @if (reward.requiredMembershipLevel !== null && reward.requiredMembershipLevel !== undefined) {
                         <div class="d-flex justify-content-between">
                           <span><strong>Requires:</strong></span>
                           <span class="badge" [ngClass]="getMembershipBadgeClass(reward.requiredMembershipLevel)">
-                            {{ reward.requiredMembershipLevel }}
+                            {{ getMembershipLevelName(reward.requiredMembershipLevel) }}
                           </span>
                         </div>
                       }
@@ -150,6 +151,7 @@ export class BrowseRewardsComponent implements OnInit {
     private redemptionService: RedemptionService,
     private userService: UserService,
     private authService: AuthService,
+    private membershipService: MembershipService,
     private toastService: ToastService
   ) {}
 
@@ -163,7 +165,7 @@ export class BrowseRewardsComponent implements OnInit {
     this.userService.getById(this.userId).subscribe({
       next: (user) => {
         this.userPoints = user.score;
-        this.userMembershipLevel = user.membershipLevel || null;
+        this.userMembershipLevel = user.membershipLevel ?? MembershipLevel.Standard;
       },
       error: (error) => {
         console.error('Error loading user data', error);
@@ -228,8 +230,8 @@ export class BrowseRewardsComponent implements OnInit {
 
   meetsMembershipRequirement(reward: RewardResponse): boolean {
     if (reward.requiredMembershipLevel === undefined || reward.requiredMembershipLevel === null) return true;
-    if (this.userMembershipLevel === null) return false;
-    return this.userMembershipLevel >= reward.requiredMembershipLevel;
+    const userLevel = this.userMembershipLevel ?? MembershipLevel.Standard;
+    return userLevel >= reward.requiredMembershipLevel;
   }
 
   canRedeem(reward: RewardResponse): boolean {
@@ -239,15 +241,10 @@ export class BrowseRewardsComponent implements OnInit {
   }
 
   getMembershipBadgeClass(level: MembershipLevel): string {
-    switch (level) {
-      case MembershipLevel.VIP:
-        return 'bg-warning text-dark';
-      case MembershipLevel.Premium:
-        return 'bg-primary';
-      case MembershipLevel.Standard:
-        return 'bg-secondary';
-      default:
-        return 'bg-secondary';
-    }
+    return this.membershipService.getBadgeClass(level);
+  }
+
+  getMembershipLevelName(level: MembershipLevel): string {
+    return this.membershipService.getLevelName(level);
   }
 }
