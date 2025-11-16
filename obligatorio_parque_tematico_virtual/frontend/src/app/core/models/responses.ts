@@ -98,11 +98,11 @@ export interface StrategyResponse {
 }
 
 export interface TopTenResponse {
-  visitors: TopVisitor[];
+  topTenUsers: UserResponseData[];
 }
 
-export interface TopVisitor {
-  visitorId: string;
+export interface UserResponseData {
+  id: string;
   name: string;
   lastName: string;
   email: string;
