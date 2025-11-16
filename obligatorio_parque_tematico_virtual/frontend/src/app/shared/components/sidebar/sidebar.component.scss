@@ -52,10 +52,8 @@
       }
     }
 
-    .toggle-icon {
-      display: inline-block;
-      width: 24px;
-      text-align: center;
+    .toggle-btn i {
+      font-size: 1.25rem;
     }
 
     .role-switcher {
@@ -122,9 +120,9 @@
         border-left: 3px solid transparent;
 
         .nav-icon {
-          font-size: 1.25rem;
+          font-size: 1.125rem;
           min-width: 24px;
-          text-align: center;
+          display: inline-block;
         }
 
         .nav-text {
@@ -156,11 +154,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
       font-weight: 500;
 
-      .nav-icon {
-        font-size: 1rem;
+      i {
+        font-size: 1.125rem;
       }
     }
   }
