@@ -84,11 +84,12 @@
                   [class.is-invalid]="eventForm.get('maxCapacity')?.invalid && eventForm.get('maxCapacity')?.touched"
                   id="maxCapacity"
                   formControlName="maxCapacity"
-                  min="1"
+                  min="2"
+                  max="10000"
                 >
                 @if (eventForm.get('maxCapacity')?.invalid && eventForm.get('maxCapacity')?.touched) {
                   <div class="invalid-feedback">
-                    Capacity must be at least 1
+                    Capacity must be between 2 and 10000
                   </div>
                 }
               </div>

@@ -102,7 +102,7 @@ public class EventLogic : IEventLogic
             throw new ArgumentException("Hour must be between 0 and 23.");
         if (newEvent.MaxCapacity <= MinCapacityLimit || newEvent.MaxCapacity > MaxCapacityLimit)
             throw new ArgumentException(
-                $"Max capacity must be greater than 0 and less than or equal to {MaxCapacityLimit}.");
+                $"Max capacity must be greater than 1 and less than or equal to {MaxCapacityLimit}.");
         if (newEvent.Cost <= MinCost)
             throw new ArgumentException("Cost must be greater than 0.");
     }
