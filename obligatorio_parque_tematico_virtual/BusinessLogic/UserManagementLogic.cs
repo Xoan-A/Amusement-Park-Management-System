@@ -125,8 +125,13 @@ public class UserManagementLogic : IUserManagementLogic
         return _mapper.Map<UserResponse>(returnedUser);
     }
 
-    public UserResponse GetUserResponseById(Guid userId)
+    public UserResponse GetUserResponseById(Guid userId, Guid currentUserId, bool isAdmin)
     {
+        if (userId != currentUserId && !isAdmin)
+        {
+            throw new ForbiddenException("You cannot access another user's data");
+        }
+
         User user = _userRepository.GetByIdWithRoles(userId);
         if (user == null)
         {
