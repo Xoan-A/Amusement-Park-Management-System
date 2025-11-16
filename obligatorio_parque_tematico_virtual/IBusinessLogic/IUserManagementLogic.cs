@@ -14,5 +14,6 @@ namespace IBusinessLogic
         UserResponse GetUserResponseById(Guid userId);
         UserResponse ModifyUser(Guid userId, Guid userTokenId, ModifyUserRequest request);
         UserResponse ChangeMembershipLevel(Guid userId, int membershipLevel);
+        List<UserResponse> GetAllUsers();
     }
 }
