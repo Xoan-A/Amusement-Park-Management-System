@@ -12,7 +12,6 @@ import { MaintenanceStatus } from '../../../core/models/enums';
   standalone: true,
   imports: [CommonModule, FormsModule, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Maintenance Schedules</h2>

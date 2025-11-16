@@ -12,7 +12,6 @@ import { CreateRewardResponse, RewardResponse } from '../../../core/models/respo
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <div class="row justify-content-center">
         <div class="col-md-8">

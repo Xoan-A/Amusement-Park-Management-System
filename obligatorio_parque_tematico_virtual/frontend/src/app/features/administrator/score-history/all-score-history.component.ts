@@ -10,7 +10,6 @@ import { ScoreOrigin } from '../../../core/models/enums';
   standalone: true,
   imports: [CommonModule, FormsModule, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h2 class="mb-4">All Score History</h2>
 

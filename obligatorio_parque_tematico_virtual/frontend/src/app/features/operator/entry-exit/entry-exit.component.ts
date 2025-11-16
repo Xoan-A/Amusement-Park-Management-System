@@ -11,7 +11,6 @@ import { AttractionResponse, TicketResponse, TicketType } from '../../../core/mo
   standalone: true,
   imports: [CommonModule, FormsModule, ZXingScannerModule, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h1 class="mb-4">Visitor Entry/Exit Management</h1>
 

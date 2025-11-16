@@ -9,7 +9,6 @@ import { Roles } from '../../../../core/models';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h1 class="mb-4">User Management</h1>
 

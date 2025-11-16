@@ -11,7 +11,6 @@ import { TicketResponse, ScoreHistoryResponse, TicketType } from '../../../core/
   standalone: true,
   imports: [CommonModule, RouterLink, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h1 class="mb-4">Visitor Dashboard</h1>
 

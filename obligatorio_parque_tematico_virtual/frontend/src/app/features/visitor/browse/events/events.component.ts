@@ -9,7 +9,6 @@ import { EventResponse } from '../../../../core/models';
   standalone: true,
   imports: [CommonModule, FormsModule, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h1 class="mb-4">Browse Events</h1>
 

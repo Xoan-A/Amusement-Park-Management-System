@@ -10,7 +10,6 @@ import { AttractionResponse } from '../../../core/models';
   standalone: true,
   imports: [CommonModule, RouterLink, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h1 class="mb-4">Operator Dashboard</h1>
 

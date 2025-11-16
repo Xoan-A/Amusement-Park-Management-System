@@ -10,7 +10,6 @@ import { EnumToDisplayPipe } from '../../../../shared/pipes/enum-to-display.pipe
   standalone: true,
   imports: [CommonModule, FormsModule,  EnumToDisplayPipe],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h1 class="mb-4">Browse Attractions</h1>
 

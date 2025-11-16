@@ -8,7 +8,6 @@ import { MaintenanceScheduleResponse } from '../../../core/models/responses';
   standalone: true,
   imports: [CommonModule, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <h2 class="mb-4">Maintenance Schedules</h2>
 

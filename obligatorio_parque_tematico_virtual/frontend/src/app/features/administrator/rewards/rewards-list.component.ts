@@ -9,7 +9,6 @@ import { RewardResponse, MembershipLevel } from '../../../core/models';
   standalone: true,
   imports: [CommonModule, RouterLink, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Rewards Management</h1>

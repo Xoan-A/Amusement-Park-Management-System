@@ -11,7 +11,6 @@ import { TicketResponse, TicketType } from '../../../../core/models';
   standalone: true,
   imports: [CommonModule, RouterLink, QRCodeComponent, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>My Tickets</h1>
