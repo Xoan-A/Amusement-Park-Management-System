@@ -20,34 +20,37 @@ import { EventResponse } from '../../../../core/models';
             placeholder="Search events..."
             [(ngModel)]="searchTerm"
             (ngModelChange)="applyFilters()"
-          >
+          />
         </div>
       </div>
 
       <div class="row">
         @for (event of filteredEvents; track event.id) {
-          <div class="col-md-6 mb-4">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">{{ event.name }}</h5>
-                <p><strong>Date:</strong> {{ event.date | date:'full' }}</p>
-                <p><strong>Time:</strong> {{ event.hour }}:00</p>
-                <p><strong>Cost:</strong> {{ '$' + event.cost }}</p>
-                <p><strong>Capacity:</strong> {{ event.currentCapacity }} / {{ event.maxCapacity }}</p>
-                <p><strong>Attractions:</strong></p>
-                <ul>
-                  @for (attraction of event.attractions; track attraction.id) {
-                    <li>{{ attraction.name }}</li>
-                  }
-                </ul>
-              </div>
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">{{ event.name }}</h5>
+              <p><strong>Date:</strong> {{ event.date | date : 'fullDate' }}</p>
+              <p><strong>Time:</strong> {{ event.hour }}:00</p>
+              <p><strong>Cost:</strong> {{ '$' + event.cost }}</p>
+              <p>
+                <strong>Capacity:</strong> {{ event.currentCapacity }} /
+                {{ event.maxCapacity }}
+              </p>
+              <p><strong>Attractions:</strong></p>
+              <ul>
+                @for (attraction of event.attractions; track attraction.id) {
+                <li>{{ attraction.name }}</li>
+                }
+              </ul>
             </div>
           </div>
+        </div>
         }
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class EventsComponent implements OnInit {
   events: EventResponse[] = [];
@@ -66,13 +69,15 @@ export class EventsComponent implements OnInit {
         this.events = events || [];
         this.applyFilters();
       },
-      error: (error) => console.error('Error loading events', error)
+      error: (error) => console.error('Error loading events', error),
     });
   }
 
   applyFilters(): void {
-    this.filteredEvents = this.events.filter(event =>
-      !this.searchTerm || event.name.toLowerCase().includes(this.searchTerm.toLowerCase())
+    this.filteredEvents = this.events.filter(
+      (event) =>
+        !this.searchTerm ||
+        event.name.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
   }
 }
