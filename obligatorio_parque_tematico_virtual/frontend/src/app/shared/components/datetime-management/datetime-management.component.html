@@ -40,7 +40,7 @@
           <form [formGroup]="dateTimeForm" (ngSubmit)="onSubmit()">
             <div class="row mb-3">
               <div class="col-md-6">
-                <label for="date" class="form-label fw-bold">Date</label>
+                <label for="date" class="form-label fw-bold">Date (Day/Month/Year only)</label>
                 <input
                   type="date"
                   id="date"
@@ -48,13 +48,14 @@
                   formControlName="date"
                   [class.is-invalid]="dateTimeForm.get('date')?.invalid && dateTimeForm.get('date')?.touched"
                 >
+                <small class="text-muted">Select the date only</small>
                 <div class="invalid-feedback">
                   Date is required
                 </div>
               </div>
 
               <div class="col-md-6">
-                <label for="time" class="form-label fw-bold">Time (Hour)</label>
+                <label for="time" class="form-label fw-bold">Hour (0-23)</label>
                 <input
                   type="number"
                   id="time"
@@ -62,9 +63,10 @@
                   formControlName="time"
                   min="0"
                   max="23"
-                  placeholder="0-23"
+                  placeholder="Enter hour (0-23)"
                   [class.is-invalid]="dateTimeForm.get('time')?.invalid && dateTimeForm.get('time')?.touched"
                 >
+                <small class="text-muted">Enter hour in 24-hour format</small>
                 <div class="invalid-feedback">
                   Hour is required (0-23)
                 </div>
