@@ -6,6 +6,6 @@ namespace IBusinessLogic
         void ValidateBirthDate(DateTime birthDate);
         void ValidateRequiredFields(string name, string lastName, string email, string password);
         void ValidateEmailUniqueness(string email);
-        void ValidateMembershipLevel(string membershipLevel);
+        void ValidateMembershipLevel(int membershipLevel);
     }
 }

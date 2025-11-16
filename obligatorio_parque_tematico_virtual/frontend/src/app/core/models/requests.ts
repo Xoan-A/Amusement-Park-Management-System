@@ -28,11 +28,14 @@ export interface ModifyUserRequest {
   lastName?: string;
   email?: string;
   birthDate?: string;
-  membershipLevel?: MembershipLevel;
 }
 
 export interface AddRolesRequest {
   role: string;
+}
+
+export interface ChangeMembershipLevelRequest {
+  membershipLevel: number;
 }
 
 export interface SetDateTimeRequest {

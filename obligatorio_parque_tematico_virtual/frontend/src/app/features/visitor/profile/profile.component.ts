@@ -52,11 +52,11 @@ import { MembershipLevel } from '../../../core/models';
                   </div>
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Membership Level</label>
-                    <select class="form-select" formControlName="membershipLevel">
-                      <option value="Standard">Standard</option>
-                      <option value="Premium">Premium</option>
-                      <option value="VIP">VIP</option>
-                    </select>
+                    <div class="form-control-plaintext">
+                      <span class="badge" [ngClass]="getMembershipBadgeClass(membershipLevel)">
+                        {{ getMembershipLevelName(membershipLevel) }}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -77,6 +77,7 @@ export class ProfileComponent implements OnInit {
   loading = false;
   successMessage = '';
   errorMessage = '';
+  membershipLevel: MembershipLevel = MembershipLevel.Standard;
 
   constructor(
     private fb: FormBuilder,
@@ -87,17 +88,16 @@ export class ProfileComponent implements OnInit {
       name: [''],
       lastName: [''],
       email: [''],
-      birthDate: [''],
-      membershipLevel: [MembershipLevel.Standard]
+      birthDate: ['']
     });
   }
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
     if (user) {
-      this.profileForm.patchValue({
-        name: user.name,
-        email: user.email
+        this.profileForm.patchValue({
+          name: user.name,
+          email: user.email
       });
     }
   }
@@ -124,5 +124,31 @@ export class ProfileComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  getMembershipLevelName(level: MembershipLevel): string {
+    switch (level) {
+      case MembershipLevel.Standard:
+        return 'Standard';
+      case MembershipLevel.Premium:
+        return 'Premium';
+      case MembershipLevel.VIP:
+        return 'VIP';
+      default:
+        return 'Standard';
+    }
+  }
+
+  getMembershipBadgeClass(level: MembershipLevel): string {
+    switch (level) {
+      case MembershipLevel.VIP:
+        return 'bg-warning text-dark';
+      case MembershipLevel.Premium:
+        return 'bg-primary';
+      case MembershipLevel.Standard:
+        return 'bg-secondary';
+      default:
+        return 'bg-secondary';
+    }
   }
 }

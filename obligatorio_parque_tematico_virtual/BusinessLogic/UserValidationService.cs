@@ -60,10 +60,9 @@ namespace BusinessLogic
                 throw new ArgumentException("Email is already in use.");
         }
 
-        public void ValidateMembershipLevel(string membershipLevel)
+        public void ValidateMembershipLevel(int membershipLevel)
         {
-            if (!Enum.TryParse<MembershipLevel>(membershipLevel, true, out MembershipLevel parsedLevel) ||
-                !Enum.IsDefined(typeof(MembershipLevel), parsedLevel))
+            if (!Enum.IsDefined(typeof(MembershipLevel), membershipLevel))
             {
                 throw new ArgumentException("Invalid membership level.");
             }

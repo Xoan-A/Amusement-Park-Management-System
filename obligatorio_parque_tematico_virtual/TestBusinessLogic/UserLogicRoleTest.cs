@@ -34,7 +34,7 @@ public class UserLogicRoleTest
         _mockValidationService.Setup(v => v.ValidateEmail(It.IsAny<string>())).Returns(true);
         _mockValidationService.Setup(v => v.ValidateBirthDate(It.IsAny<DateTime>()));
         _mockValidationService.Setup(v => v.ValidateEmailUniqueness(It.IsAny<string>()));
-        _mockValidationService.Setup(v => v.ValidateMembershipLevel(It.IsAny<string>()));
+        _mockValidationService.Setup(v => v.ValidateMembershipLevel(It.IsAny<int>()));
 
         var configuration = new MapperConfiguration(cfg =>
         {
@@ -524,7 +524,7 @@ public class UserLogicRoleTest
             LastName = "Doe",
             Email = "test@test.com",
             Password = "password123",
-            MembershipLevel = "Premium",
+            MembershipLevel = 1,
             Roles = new List<string>()
         };
 
@@ -546,7 +546,7 @@ public class UserLogicRoleTest
             LastName = "Doe",
             Email = "test@test.com",
             Password = "password123",
-            MembershipLevel = "VIP",
+            MembershipLevel = 2,
             Roles = new List<string>()
         };
 
@@ -560,45 +560,24 @@ public class UserLogicRoleTest
     {
         _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
         _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
-
-        CreateUserRequest request = new CreateUserRequest
-        {
-            Name = "John",
-            LastName = "Doe",
-            Email = "test@test.com",
-            Password = "password123",
-            MembershipLevel = "InvalidLevel",
-            Roles = new List<string>()
-        };
-
-        Assert.ThrowsException<ArgumentException>(
-            () => _userManagementLogic.CreateUser(request)
-        );
-    }
-
-    [TestMethod]
-    public void CreateUser_ShouldThrowException_WhenMembershipLevelIsNumericButNotDefined()
-    {
-        CreateUserRequest request = new CreateUserRequest
-        {
-            Name = "John",
-            LastName = "Doe",
-            Email = "test@test.com",
-            Password = "password123",
-            MembershipLevel = "99",
-            Roles = new List<string>()
-        };
-
         _mockValidationService.Setup(v => v.ValidateRequiredFields("John", "Doe", "test@test.com", "password123"));
         _mockValidationService.Setup(v => v.ValidateEmail("test@test.com")).Returns(true);
         _mockValidationService.Setup(v => v.ValidateEmailUniqueness("test@test.com"));
-        _mockValidationService.Setup(v => v.ValidateMembershipLevel("99"))
+        _mockValidationService.Setup(v => v.ValidateMembershipLevel(999))
             .Throws(new ArgumentException("Invalid membership level."));
-        _mockUserRepository.Setup(r => r.IsEmailUnique("test@test.com")).Returns(true);
-        _mockPasswordService.Setup(p => p.HashPassword("password123")).Returns("hashedPassword");
+
+        CreateUserRequest request = new CreateUserRequest
+        {
+            Name = "John",
+            LastName = "Doe",
+            Email = "test@test.com",
+            Password = "password123",
+            MembershipLevel = 999,
+            Roles = new List<string>()
+        };
 
         Assert.ThrowsException<ArgumentException>(
             () => _userManagementLogic.CreateUser(request)
         );
-    }
+    }    
 }
