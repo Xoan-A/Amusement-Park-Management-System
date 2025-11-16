@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -16,6 +16,8 @@ export class SidebarComponent implements OnInit {
   activeRole: string | null = null;
   availableRoles: string[] = [];
   isCollapsed = false;
+
+  @Output() collapsedChange = new EventEmitter<boolean>();
 
   constructor(
     public authService: AuthService,
@@ -39,6 +41,7 @@ export class SidebarComponent implements OnInit {
 
   toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
+    this.collapsedChange.emit(this.isCollapsed);
   }
 
   switchRole(event: Event): void {

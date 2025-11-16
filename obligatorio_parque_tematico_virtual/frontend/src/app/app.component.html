@@ -1,6 +1,6 @@
 @if (authService.isAuthenticated()) {
-  <app-sidebar></app-sidebar>
-  <div class="main-content">
+  <app-sidebar (collapsedChange)="onSidebarCollapsedChange($event)"></app-sidebar>
+  <div class="main-content" [class.sidebar-collapsed]="sidebarCollapsed">
     <router-outlet></router-outlet>
   </div>
 } @else {

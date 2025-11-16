@@ -12,6 +12,11 @@ import { AuthService } from './core/services/auth.service';
 })
 export class AppComponent {
   title = 'frontend';
+  sidebarCollapsed = false;
 
   constructor(public authService: AuthService) {}
+
+  onSidebarCollapsedChange(collapsed: boolean): void {
+    this.sidebarCollapsed = collapsed;
+  }
 }

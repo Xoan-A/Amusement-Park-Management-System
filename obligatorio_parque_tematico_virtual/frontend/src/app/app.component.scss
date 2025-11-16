@@ -4,11 +4,8 @@
   padding: 2rem;
   transition: margin-left 0.3s ease;
   background-color: #f8f9fa;
-}
 
-// Adjust main content margin when sidebar is collapsed
-:host ::ng-deep {
-  .sidebar.collapsed ~ .main-content {
+  &.sidebar-collapsed {
     margin-left: 60px;
   }
 }
