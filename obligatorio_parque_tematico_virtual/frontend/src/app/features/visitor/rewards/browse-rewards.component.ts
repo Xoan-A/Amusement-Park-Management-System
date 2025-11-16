@@ -71,11 +71,11 @@ import { ToastService } from '../../../core/services/toast.service';
                         <span>{{ reward.availableQuantity }}</span>
                       </div>
 
-                      @if (reward.requiredMembershipLevel) {
+                      @if (reward.requiredMembershipLevel !== null && reward.requiredMembershipLevel !== undefined) {
                         <div class="d-flex justify-content-between">
                           <span><strong>Requires:</strong></span>
                           <span class="badge" [ngClass]="getMembershipBadgeClass(reward.requiredMembershipLevel)">
-                            {{ reward.requiredMembershipLevel }}
+                            {{ getMembershipLevelName(reward.requiredMembershipLevel) }}
                           </span>
                         </div>
                       }
@@ -163,7 +163,7 @@ export class BrowseRewardsComponent implements OnInit {
     this.userService.getById(this.userId).subscribe({
       next: (user) => {
         this.userPoints = user.score;
-        this.userMembershipLevel = user.membershipLevel || null;
+        this.userMembershipLevel = user.membershipLevel ?? MembershipLevel.Standard;
       },
       error: (error) => {
         console.error('Error loading user data', error);
@@ -228,8 +228,8 @@ export class BrowseRewardsComponent implements OnInit {
 
   meetsMembershipRequirement(reward: RewardResponse): boolean {
     if (reward.requiredMembershipLevel === undefined || reward.requiredMembershipLevel === null) return true;
-    if (this.userMembershipLevel === null) return false;
-    return this.userMembershipLevel >= reward.requiredMembershipLevel;
+    const userLevel = this.userMembershipLevel ?? MembershipLevel.Standard;
+    return userLevel >= reward.requiredMembershipLevel;
   }
 
   canRedeem(reward: RewardResponse): boolean {
@@ -248,6 +248,19 @@ export class BrowseRewardsComponent implements OnInit {
         return 'bg-secondary';
       default:
         return 'bg-secondary';
+    }
+  }
+
+  getMembershipLevelName(level: MembershipLevel): string {
+    switch (level) {
+      case MembershipLevel.VIP:
+        return 'VIP';
+      case MembershipLevel.Premium:
+        return 'Premium';
+      case MembershipLevel.Standard:
+        return 'Standard';
+      default:
+        return 'Unknown';
     }
   }
 }

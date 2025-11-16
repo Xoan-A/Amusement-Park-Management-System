@@ -97,14 +97,16 @@ import { ToastService } from '../../../core/services/toast.service';
                   </div>
 
                   <div class="mb-3">
-                    <label class="form-label">Required Membership Level</label>
-                    <select class="form-select" formControlName="requiredMembershipLevel">
-                      <option [ngValue]="null">None (Available to all)</option>
+                    <label class="form-label">Required Membership Level *</label>
+                    <select class="form-select" formControlName="requiredMembershipLevel" [class.is-invalid]="isFieldInvalid('requiredMembershipLevel')">
                       <option [ngValue]="membershipLevels.Standard">Standard</option>
                       <option [ngValue]="membershipLevels.Premium">Premium</option>
                       <option [ngValue]="membershipLevels.VIP">VIP</option>
                     </select>
                     <div class="form-text">Select the minimum membership level required to redeem this reward</div>
+                    @if (isFieldInvalid('requiredMembershipLevel')) {
+                      <div class="invalid-feedback">Membership level is required</div>
+                    }
                   </div>
 
                   <div class="d-flex justify-content-between mt-4">
@@ -154,7 +156,7 @@ export class RewardFormComponent implements OnInit {
       description: ['', Validators.required],
       pointsCost: [0, [Validators.required, Validators.min(1)]],
       availableQuantity: [0, [Validators.required, Validators.min(0)]],
-      requiredMembershipLevel: [null]
+      requiredMembershipLevel: [this.membershipLevels.Standard, Validators.required]
     });
   }
 
@@ -179,7 +181,7 @@ export class RewardFormComponent implements OnInit {
           description: reward.description,
           pointsCost: reward.pointsCost,
           availableQuantity: reward.availableQuantity,
-          requiredMembershipLevel: reward.requiredMembershipLevel || null
+          requiredMembershipLevel: reward.requiredMembershipLevel ?? this.membershipLevels.Standard
         });
         this.loading = false;
       },

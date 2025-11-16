@@ -61,9 +61,9 @@ import { ToastService } from '../../../core/services/toast.service';
                     </td>
                     <td>{{ reward.availableQuantity }}</td>
                     <td>
-                      @if (reward.requiredMembershipLevel) {
+                      @if (reward.requiredMembershipLevel !== null && reward.requiredMembershipLevel !== undefined) {
                         <span class="badge" [ngClass]="getMembershipBadgeClass(reward.requiredMembershipLevel)">
-                          {{ reward.requiredMembershipLevel }}
+                          {{ getMembershipLevelName(reward.requiredMembershipLevel) }}
                         </span>
                       } @else {
                         <span class="text-muted">None</span>
@@ -192,6 +192,19 @@ export class RewardsListComponent implements OnInit {
         return 'bg-secondary';
       default:
         return 'bg-secondary';
+    }
+  }
+
+  getMembershipLevelName(level: MembershipLevel): string {
+    switch (level) {
+      case MembershipLevel.VIP:
+        return 'VIP';
+      case MembershipLevel.Premium:
+        return 'Premium';
+      case MembershipLevel.Standard:
+        return 'Standard';
+      default:
+        return 'Unknown';
     }
   }
 }
