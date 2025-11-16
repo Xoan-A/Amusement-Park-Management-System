@@ -2,20 +2,15 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { PluginService } from '../../../core/services/plugin.service';
 import { StrategyService } from '../../../core/services/strategy.service';
-import {
-  PluginResponse,
-  StrategyResponse,
-} from '../../../core/models/responses';
+import { PluginResponse, StrategyResponse } from '../../../core/models/responses';
 
 @Component({
   selector: 'app-plugin-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, FormsModule],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Available Scoring Strategy Plugins</h2>
@@ -232,6 +227,8 @@ export class PluginListComponent implements OnInit {
   plugins: PluginResponse[] = [];
   currentStrategy: StrategyResponse | null = null;
   loading = false;
+  showDeleteModal = false;
+  itemToDelete: any = null;
   errorMessage: string | null = null;
   selectedFile: File | null = null;
   uploading = false;
@@ -265,7 +262,7 @@ export class PluginListComponent implements OnInit {
       error: () => {
         this.errorMessage = 'Failed to load available plugins.';
         this.loading = false;
-      },
+      }
     });
   }
 

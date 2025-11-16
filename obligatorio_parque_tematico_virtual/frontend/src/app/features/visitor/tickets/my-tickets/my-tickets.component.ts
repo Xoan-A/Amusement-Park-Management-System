@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { QRCodeComponent } from 'angularx-qrcode';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { TicketService } from '../../../../core/services/ticket.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TicketResponse, TicketType } from '../../../../core/models';
@@ -10,9 +9,8 @@ import { TicketResponse, TicketType } from '../../../../core/models';
 @Component({
   selector: 'app-my-tickets',
   standalone: true,
-  imports: [CommonModule, RouterLink, QRCodeComponent, NavbarComponent],
+  imports: [CommonModule, RouterLink, QRCodeComponent, ],
   template: `
-    <app-navbar></app-navbar>
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>My Tickets</h1>

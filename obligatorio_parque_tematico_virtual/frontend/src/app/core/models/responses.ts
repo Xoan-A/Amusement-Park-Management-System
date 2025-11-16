@@ -112,7 +112,7 @@ export interface TopVisitor {
 export interface AttractionsVisitResponse {
   startDate: string;
   endDate: string;
-  attractionVisits: AttractionVisitDetail[];
+  attractionsVisits: AttractionVisitDetail[];
 }
 
 export interface AttractionVisitDetail {

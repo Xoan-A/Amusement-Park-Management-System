@@ -97,17 +97,14 @@ public class PluginLoader : IPluginLoader
 
     private IConcreteStrategy? TryCreateInstanceForDiscovery(Type type)
     {
-        // First, try to create instance with parameterless constructor
         try
         {
             return Activator.CreateInstance(type) as IConcreteStrategy;
         }
         catch (MissingMethodException)
         {
-            // No parameterless constructor, try constructors with default parameters
         }
 
-        // Try to find a constructor and provide default values for its parameters
         ConstructorInfo[] constructors = type.GetConstructors();
         foreach (ConstructorInfo constructor in constructors.OrderBy(c => c.GetParameters().Length))
         {
@@ -118,7 +115,6 @@ public class PluginLoader : IPluginLoader
 
                 for (int i = 0; i < parameters.Length; i++)
                 {
-                    // Provide default values based on parameter type
                     Type paramType = parameters[i].ParameterType;
                     if (paramType == typeof(int))
                         args[i] = 0;
