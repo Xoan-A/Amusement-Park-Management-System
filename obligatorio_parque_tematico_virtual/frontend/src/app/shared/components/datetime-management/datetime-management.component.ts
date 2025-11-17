@@ -86,7 +86,7 @@ export class DateTimeManagementComponent implements OnInit {
 
   formatDateTime(date: Date | null): string {
     if (!date) return 'Loading...';
-    return date.toLocaleString('en-US', {
+    return date.toLocaleString('es-ES', {
       dateStyle: 'full',
       timeStyle: 'medium'
     });

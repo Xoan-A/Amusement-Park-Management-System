@@ -82,7 +82,7 @@ import { TicketResponse, ScoreHistoryResponse, TicketType } from '../../../core/
                             </div>
                           }
                         </div>
-                        <small class="text-muted ms-2" style="white-space: nowrap;">{{ score.createdAt | date:'short' }}</small>
+                        <small class="text-muted ms-2" style="white-space: nowrap;">{{ score.createdAt | date:'d/M/yyyy HH:mm' }}</small>
                       </div>
                     </div>
                   }
@@ -116,7 +116,7 @@ import { TicketResponse, ScoreHistoryResponse, TicketType } from '../../../core/
                     <tbody>
                       @for (ticket of tickets.slice(0, 5); track ticket.id) {
                         <tr>
-                          <td>{{ ticket.visitDate | date:'short' }}</td>
+                          <td>{{ ticket.visitDate | date:'d/M/yyyy' }}</td>
                           <td>
                             <span class="badge" [class.bg-primary]="ticket.type === ticketType.General" [class.bg-success]="ticket.type === ticketType.EventSpecial">
                               {{ ticket.type === ticketType.General ? 'General' : 'Event Special' }}
