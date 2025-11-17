@@ -37,7 +37,7 @@ public class UserLogicRoleTest
         _mockValidationService.Setup(v => v.ValidateEmailUniqueness(It.IsAny<string>()));
         _mockValidationService.Setup(v => v.ValidateMembershipLevel(It.IsAny<int>()));
 
-        var configuration = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
+        MapperConfiguration configuration = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
         _mapper = configuration.CreateMapper();
 
         _userManagementLogic = new UserManagementLogic(_mockUserRepository.Object, _mockPasswordService.Object,

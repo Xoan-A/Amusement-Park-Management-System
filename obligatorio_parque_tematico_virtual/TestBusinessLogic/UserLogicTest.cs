@@ -31,7 +31,7 @@ namespace TestBusinessLogic
             _mockValidationService = new Mock<IUserValidationService>(MockBehavior.Strict);
             _mockParkEntryLogic = new Mock<IParkEntryLogic>(MockBehavior.Strict);
 
-            var configuration = new MapperConfiguration(cfg =>
+            MapperConfiguration configuration = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<MappingProfile>();
             });

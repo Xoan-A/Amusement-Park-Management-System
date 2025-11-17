@@ -327,5 +327,107 @@ namespace TestBusinessLogic
             Assert.AreEqual(0, attraction.CurrentCapacity);
             _mockAttractionRepository.Verify(r => r.Update(It.IsAny<Attraction>()), Times.Never);
         }
+
+        [TestMethod]
+        public void RegisterEntry_ShouldThrowArgumentException_WhenUserIsInsideAttractionWithoutExit()
+        {
+            Guid attractionId = Guid.NewGuid();
+            Guid anotherAttractionId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+
+            User user = new User { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com" };
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Description = "Fast ride",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 50,
+                CurrentCapacity = 10
+            };
+
+            Attraction anotherAttraction = new Attraction
+            {
+                Id = anotherAttractionId,
+                Name = "Ferris Wheel",
+                Description = "Slow ride",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 100,
+                CurrentCapacity = 20
+            };
+
+            user.RegisterEntry(anotherAttraction, _currentDateTime);
+
+            RegisterEntryRequest request = new RegisterEntryRequest
+            {
+                Qr = qrCode,
+            };
+
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, _currentDateTime, null, attractionId)).Returns(true);
+            _mockTicketLogic.Setup(t => t.GetTicketByQRCode(qrCode)).Returns(new TicketResponse { VisitorId = userId });
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(user);
+
+            ArgumentException exception = Assert.ThrowsException<ArgumentException>(
+                () => _parkEntryLogic.RegisterEntry(attractionId, request)
+            );
+
+            Assert.AreEqual("User is currently inside an attraction.", exception.Message);
+        }
+
+        [TestMethod]
+        public void RegisterEntry_ShouldSucceed_WhenUserHasNoUnfinishedReports()
+        {
+            Guid attractionId = Guid.NewGuid();
+            Guid anotherAttractionId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
+            Guid qrCode = Guid.NewGuid();
+
+            User user = new User { Id = userId, Name = "John", LastName = "Doe", Email = "john@example.com" };
+            Attraction attraction = new Attraction
+            {
+                Id = attractionId,
+                Name = "Roller Coaster",
+                Description = "Fast ride",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 50,
+                CurrentCapacity = 10
+            };
+
+            Attraction anotherAttraction = new Attraction
+            {
+                Id = anotherAttractionId,
+                Name = "Ferris Wheel",
+                Description = "Slow ride",
+                Type = AttractionType.RollerCoaster,
+                MaxCapacity = 100,
+                CurrentCapacity = 20
+            };
+
+            DateTime enterTime = _currentDateTime.AddHours(-1);
+            DateTime exitTime = _currentDateTime.AddMinutes(-30);
+            user.RegisterEntry(anotherAttraction, enterTime);
+            user.RegisterExit(anotherAttraction, exitTime);
+
+            RegisterEntryRequest request = new RegisterEntryRequest
+            {
+                Qr = qrCode,
+            };
+
+            _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
+            _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, _currentDateTime, null, attractionId)).Returns(true);
+            _mockTicketLogic.Setup(t => t.GetTicketByQRCode(qrCode)).Returns(new TicketResponse { VisitorId = userId });
+            _mockUserRepository.Setup(r => r.GetById(userId)).Returns(user);
+            _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
+            _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
+            _mockEventRepository.Setup(r => r.GetEventByAttractionAndDate(attractionId, _currentDateTime.Date)).Returns((Event)null!);
+
+            _parkEntryLogic.RegisterEntry(attractionId, request);
+
+            _mockUserRepository.Verify(r => r.Update(It.IsAny<User>()), Times.Once);
+            _mockAttractionRepository.Verify(r => r.Update(It.IsAny<Attraction>()), Times.Once);
+            Assert.AreEqual(11, attraction.CurrentCapacity);
+        }
     }
 }

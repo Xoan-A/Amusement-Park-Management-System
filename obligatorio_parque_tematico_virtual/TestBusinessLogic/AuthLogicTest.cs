@@ -23,7 +23,7 @@ namespace TestBusinessLogic
             _mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
             _mockPasswordService = new Mock<IPasswordLogic>(MockBehavior.Strict);
 
-            var configuration = new MapperConfiguration(cfg =>
+            MapperConfiguration configuration = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<MappingProfile>();
             });
