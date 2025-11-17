@@ -232,6 +232,7 @@ export class UsersListComponent implements OnInit {
       next: () => {
         this.loadUsers();
         this.closeModals();
+        this.addingRole = false;
       },
       error: (error: any) => {
         this.errorMessage = error.error?.message || 'Failed to add role';
@@ -248,6 +249,7 @@ export class UsersListComponent implements OnInit {
       next: () => {
         this.loadUsers();
         this.closeModals();
+        this.changingMembership = false;
       },
       error: (error: any) => {
         this.errorMessage = error.error?.message || 'Failed to change membership';
