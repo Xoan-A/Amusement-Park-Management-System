@@ -65,7 +65,7 @@
           @for (event of filteredEvents; track event.id) {
             <tr>
               <td>{{ event.name }}</td>
-              <td>{{ event.date | date:'short' }}</td>
+              <td>{{ event.date | date:'d/M/yyyy' }}</td>
               <td>{{ event.hour }}:00</td>
               <td>{{ event.currentCapacity }} / {{ event.maxCapacity }}</td>
               <td>${{ event.cost }}</td>

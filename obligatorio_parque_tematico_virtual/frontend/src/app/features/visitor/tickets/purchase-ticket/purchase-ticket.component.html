@@ -33,7 +33,7 @@
                 <select class="form-select" formControlName="eventId">
                   <option value="">Choose an event...</option>
                   @for (event of events; track event.id) {
-                    <option [value]="event.id">{{ event.name }} - {{ event.date | date:'short' }}</option>
+                    <option [value]="event.id">{{ event.name }} - {{ event.date | date:'d/M/yyyy' }} {{ event.hour }}:00</option>
                   }
                 </select>
               </div>

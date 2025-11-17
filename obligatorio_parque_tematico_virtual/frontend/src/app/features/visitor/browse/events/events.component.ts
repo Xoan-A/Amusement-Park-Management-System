@@ -30,7 +30,7 @@ import { EventResponse } from '../../../../core/models';
           <div class="card">
             <div class="card-body">
               <h5 class="card-title">{{ event.name }}</h5>
-              <p><strong>Date:</strong> {{ event.date | date : 'fullDate' }}</p>
+              <p><strong>Date:</strong> {{ event.date | date : 'd/M/yyyy' }}</p>
               <p><strong>Time:</strong> {{ event.hour }}:00</p>
               <p><strong>Cost:</strong> {{ '$' + event.cost }}</p>
               <p>

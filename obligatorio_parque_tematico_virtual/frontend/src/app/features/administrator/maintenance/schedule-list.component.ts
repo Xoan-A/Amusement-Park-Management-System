@@ -149,7 +149,7 @@ import { ToastService } from '../../../core/services/toast.service';
                 <tr [class.table-danger]="isOverdue(schedule)">
                   <td>{{ schedule.attractionName }}</td>
                   <td>
-                    {{ schedule.scheduledDate | date : 'short' }}
+                    {{ schedule.scheduledDate | date : 'd/M/yyyy HH:mm' }}
                     @if (isOverdue(schedule)) {
                     <span class="badge bg-danger ms-2">OVERDUE</span>
                     }

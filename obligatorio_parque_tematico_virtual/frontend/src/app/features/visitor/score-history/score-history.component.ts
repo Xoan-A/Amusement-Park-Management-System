@@ -173,7 +173,7 @@ import { ScoreOrigin } from '../../../core/models/enums';
                 <tbody>
                   @for (record of filteredHistory; track record.id) {
                     <tr>
-                      <td>{{ record.createdAt | date:'medium' }}</td>
+                      <td>{{ record.createdAt | date:'d/M/yyyy HH:mm' }}</td>
                       <td>
                         <span class="badge" [class]="getPointsBadgeClass(record.points)">
                           {{ record.points > 0 ? '+' + record.points : record.points }}

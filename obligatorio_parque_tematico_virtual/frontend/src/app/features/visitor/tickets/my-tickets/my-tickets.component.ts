@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { QRCodeComponent } from 'angularx-qrcode';
 import { TicketService } from '../../../../core/services/ticket.service';
+import { EventService } from '../../../../core/services/event.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { TicketResponse, TicketType } from '../../../../core/models';
+import { TicketResponse, TicketType, EventResponse } from '../../../../core/models';
 
 @Component({
   selector: 'app-my-tickets',
@@ -43,14 +44,17 @@ import { TicketResponse, TicketType } from '../../../../core/models';
                   </div>
 
                   <div class="text-start">
-                    <p class="mb-1"><strong>Purchase Date:</strong> {{ ticket.purchaseDate | date:'short' }}</p>
-                    <p class="mb-1"><strong>Visit Date:</strong> {{ ticket.visitDate | date:'short' }}</p>
+                    <p class="mb-1"><strong>Purchase Date:</strong> {{ ticket.purchaseDate | date:'d/M/yyyy HH:mm' }}</p>
+                    <p class="mb-1"><strong>Visit Date:</strong> {{ ticket.visitDate | date:'d/M/yyyy' }}</p>
                     <p class="mb-1">
                       <strong>Type:</strong>
                       <span class="badge" [class.bg-primary]="ticket.type === ticketType.General" [class.bg-success]="ticket.type === ticketType.EventSpecial">
                         {{ ticket.type === ticketType.General ? 'General' : 'Event Special' }}
                       </span>
                     </p>
+                    @if (ticket.type === ticketType.EventSpecial && ticket.eventId) {
+                      <p class="mb-1"><strong>Event:</strong> {{ getEventName(ticket.eventId) }}</p>
+                    }
                     <p class="mb-0"><strong>QR Code:</strong> {{ ticket.qrCode }}</p>
                   </div>
                 </div>
@@ -65,21 +69,40 @@ import { TicketResponse, TicketType } from '../../../../core/models';
 })
 export class MyTicketsComponent implements OnInit {
   tickets: TicketResponse[] = [];
+  events: Map<string, EventResponse> = new Map();
   loading = true;
   ticketType = TicketType;
 
   constructor(
     private ticketService: TicketService,
+    private eventService: EventService,
     private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     const userId = this.authService.getUserId();
     if (userId) {
+      this.loadEvents();
       this.loadTickets(userId);
     } else {
       this.loading = false;
     }
+  }
+
+  loadEvents(): void {
+    this.eventService.getAll().subscribe({
+      next: (events) => {
+        events.forEach(event => {
+          this.events.set(event.id, event);
+        });
+      },
+      error: (error) => console.error('Error loading events', error)
+    });
+  }
+
+  getEventName(eventId?: string): string {
+    if (!eventId) return '';
+    return this.events.get(eventId)?.name || 'Unknown Event';
   }
 
   loadTickets(visitorId: string): void {
