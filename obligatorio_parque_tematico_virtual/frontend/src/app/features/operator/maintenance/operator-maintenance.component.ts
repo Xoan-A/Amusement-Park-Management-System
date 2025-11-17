@@ -73,7 +73,7 @@ import { ToastService } from '../../../core/services/toast.service';
                       <tr class="table-danger">
                         <td>{{ schedule.attractionName }}</td>
                         <td>
-                          {{ schedule.scheduledDate | date:'short' }}
+                          {{ schedule.scheduledDate | date:'d/M/yyyy HH:mm' }}
                           <span class="badge bg-danger ms-2">OVERDUE</span>
                         </td>
                         <td>{{ schedule.estimatedDuration }}h</td>
@@ -140,7 +140,7 @@ import { ToastService } from '../../../core/services/toast.service';
                     @for (schedule of upcomingSchedules; track schedule.id) {
                       <tr>
                         <td>{{ schedule.attractionName }}</td>
-                        <td>{{ schedule.scheduledDate | date:'short' }}</td>
+                        <td>{{ schedule.scheduledDate | date:'d/M/yyyy HH:mm' }}</td>
                         <td>{{ schedule.estimatedDuration }}h</td>
                         <td>{{ schedule.description }}</td>
                         <td>
@@ -203,7 +203,7 @@ import { ToastService } from '../../../core/services/toast.service';
                     <tr [class.table-danger]="schedule.isOverdue">
                       <td>{{ schedule.attractionName }}</td>
                       <td>
-                        {{ schedule.scheduledDate | date:'short' }}
+                        {{ schedule.scheduledDate | date:'d/M/yyyy HH:mm' }}
                         @if (schedule.isOverdue) {
                           <span class="badge bg-danger ms-2">OVERDUE</span>
                         }
@@ -265,7 +265,7 @@ import { ToastService } from '../../../core/services/toast.service';
                   @for (schedule of completedSchedules; track schedule.id) {
                     <tr>
                       <td>{{ schedule.attractionName }}</td>
-                      <td>{{ schedule.scheduledDate | date:'short' }}</td>
+                      <td>{{ schedule.scheduledDate | date:'d/M/yyyy HH:mm' }}</td>
                       <td>{{ schedule.estimatedDuration }}h</td>
                       <td>{{ schedule.description }}</td>
                       <td>

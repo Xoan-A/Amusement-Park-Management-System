@@ -158,7 +158,7 @@ import { ScoreOrigin } from '../../../core/models/enums';
                 <tbody>
                   @for (record of filteredHistory; track record.id) {
                     <tr>
-                      <td>{{ record.createdAt | date:'short' }}</td>
+                      <td>{{ record.createdAt | date:'d/M/yyyy HH:mm' }}</td>
                       <td>{{ record.visitorName || 'Unknown' }}</td>
                       <td>
                         <span [class]="getPointsClass(record.points)">
