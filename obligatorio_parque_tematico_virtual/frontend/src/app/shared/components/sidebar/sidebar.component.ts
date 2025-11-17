@@ -2,7 +2,7 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { Roles } from '../../../core/models';
+import { Roles, LoginResponse } from '../../../core/models';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,7 +12,7 @@ import { Roles } from '../../../core/models';
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent implements OnInit {
-  currentUser: any = null;
+  currentUser: LoginResponse | null = null;
   activeRole: string | null = null;
   availableRoles: string[] = [];
   isCollapsed = false;

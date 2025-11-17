@@ -216,7 +216,7 @@ export class PluginListComponent implements OnInit {
   currentStrategy: StrategyResponse | null = null;
   loading = false;
   showDeleteModal = false;
-  itemToDelete: any = null;
+  itemToDelete: PluginResponse | null = null;
   errorMessage: string | null = null;
   selectedFile: File | null = null;
   uploading = false;

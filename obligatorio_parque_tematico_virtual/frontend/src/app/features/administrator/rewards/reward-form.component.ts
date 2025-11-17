@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { RewardService } from '../../../core/services/reward.service';
 import { MembershipLevel } from '../../../core/models';
@@ -210,7 +211,7 @@ export class RewardFormComponent implements OnInit {
         this.toastService.showSuccess(message);
         setTimeout(() => this.router.navigate(['/admin/rewards']), 1500);
       },
-      error: (error: any) => {
+      error: (error: HttpErrorResponse) => {
         this.errorMessage = error.error?.message || `Failed to ${this.isEditMode ? 'update' : 'create'} reward`;
         this.saving = false;
       }

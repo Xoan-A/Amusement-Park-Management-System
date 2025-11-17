@@ -406,7 +406,7 @@ export class EntryExitComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    const request: any = {};
+    const request: { Qr?: string; NFC?: string; EventId?: string } = {};
 
     if (this.entryForm.qrCode) {
       request.Qr = this.entryForm.qrCode;
@@ -417,7 +417,7 @@ export class EntryExitComponent implements OnInit {
     }
 
     if (this.entryForm.eventId) {
-      request.EventId = this.entryForm.eventId;
+      request.EventId = this.entryForm.eventId.toString();
     }
 
     this.attractionService
