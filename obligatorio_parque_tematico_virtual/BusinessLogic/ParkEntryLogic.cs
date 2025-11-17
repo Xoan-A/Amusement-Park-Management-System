@@ -65,6 +65,8 @@ namespace BusinessLogic
             if (user == null)
                 throw new ArgumentException("User not found.");
 
+            ValidateUserNotInAnyAttraction(user);
+
             if (attraction.CurrentCapacity < attraction.MaxCapacity)
             {
                 user.RegisterEntry(attraction, enterDate);
@@ -78,6 +80,16 @@ namespace BusinessLogic
             Event even = _eventRepository.GetEventByAttractionAndDate(attractionId, enterDate.Date);
 
             _dailyScoreLogic.AddScoreToUser(user, attraction, enterDate, even);
+        }
+
+        private void ValidateUserNotInAnyAttraction(User user)
+        {
+            foreach (VisitorReport visitorReport in user.VisitorReports)
+            {
+                Report reportWithoutExit = visitorReport.Reports.FirstOrDefault(r => r.ExitDate == null);
+                if (reportWithoutExit != null)
+                    throw new ArgumentException("User is currently inside an attraction.");
+            }
         }
 
         public void RegisterExit(Guid attractionId, RegisterExitRequest request)
