@@ -27,7 +27,7 @@ public class PluginController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult AddPlugin([FromForm] IFormFile dllFile)
+    public IActionResult AddPlugin(IFormFile dllFile)
     {
         using (Stream stream = dllFile.OpenReadStream())
         {

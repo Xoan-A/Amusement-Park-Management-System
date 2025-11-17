@@ -15,9 +15,6 @@ import { ToastService } from '../../../core/services/toast.service';
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Available Scoring Strategy Plugins</h2>
-        <button class="btn btn-primary" (click)="navigateToStrategySelection()">
-          <i class="bi bi-gear"></i> Change Active Strategy
-        </button>
       </div>
 
       <!-- Upload Strategy Section -->
@@ -31,7 +28,7 @@ import { ToastService } from '../../../core/services/toast.service';
           <div class="row align-items-end">
             <div class="col-md-8">
               <label for="fileInput" class="form-label"
-                >Select Strategy DLL File</label
+                >Select DLL File (DLLs that are not a strategy will be uploaded but not displayed as strategies)</label
               >
               <input
                 type="file"
