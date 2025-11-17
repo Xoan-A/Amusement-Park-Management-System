@@ -60,7 +60,7 @@ namespace BusinessLogic
             {
                 userId = nfc.Value;
             }
-            
+
             User user = _userRepository.GetById(userId);
             if (user == null)
                 throw new ArgumentException("User not found.");
