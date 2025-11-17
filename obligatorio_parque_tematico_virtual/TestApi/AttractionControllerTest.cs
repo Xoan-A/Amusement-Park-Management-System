@@ -352,15 +352,13 @@ public class AttractionControllerTest
     public void RegisterEntry_ValidRequest_ReturnsSuccessMessage()
     {
         Guid attractionId = Guid.NewGuid();
-        Guid userId = Guid.NewGuid();
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            UserId = userId
         };
 
         _mockUserManagementLogic.Setup(s =>
-        s.RegisterEntry(userId, requestBody))
+        s.RegisterEntry(attractionId, requestBody))
         ;
 
         StringContent content =
@@ -385,11 +383,9 @@ public class AttractionControllerTest
     public void RegisterEntry_InvalidAuthentication_ReturnsUnauthorized()
     {
         Guid attractionId = Guid.NewGuid();
-        Guid userId = Guid.NewGuid();
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            UserId = userId
         };
 
         StringContent content =
@@ -405,12 +401,10 @@ public class AttractionControllerTest
     public void RegisterEntry_WithQrCode_ReturnsSuccessMessage()
     {
         Guid attractionId = Guid.NewGuid();
-        Guid userId = Guid.NewGuid();
         Guid qrCode = Guid.NewGuid();
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            UserId = userId,
             Qr = qrCode
         };
 
@@ -438,12 +432,11 @@ public class AttractionControllerTest
     public void RegisterEntry_WithNfc_ReturnsSuccessMessage()
     {
         Guid attractionId = Guid.NewGuid();
-        Guid userId = Guid.NewGuid();
+        Guid nfcId = Guid.NewGuid();
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            UserId = userId,
-            NFC = userId
+            NFC = nfcId
         };
 
         _mockUserManagementLogic.Setup(s => s.RegisterEntry(attractionId, requestBody))
@@ -470,13 +463,11 @@ public class AttractionControllerTest
     public void RegisterEntry_WithEventId_ReturnsSuccessMessage()
     {
         Guid attractionId = Guid.NewGuid();
-        Guid userId = Guid.NewGuid();
         Guid qrCode = Guid.NewGuid();
         Guid eventId = Guid.NewGuid();
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            UserId = userId,
             Qr = qrCode,
             EventId = eventId
         };
@@ -510,7 +501,6 @@ public class AttractionControllerTest
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            UserId = userId,
             NFC = userId,
             EventId = eventId
         };
@@ -544,7 +534,6 @@ public class AttractionControllerTest
 
         RegisterEntryRequest requestBody = new RegisterEntryRequest
         {
-            UserId = userId,
             Qr = qrCode
         };
 
@@ -747,7 +736,6 @@ public class AttractionControllerTest
         Guid attractionId = Guid.NewGuid();
         RegisterEntryRequest request = new RegisterEntryRequest
         {
-            UserId = Guid.NewGuid(),
             Qr = Guid.NewGuid()
         };
 

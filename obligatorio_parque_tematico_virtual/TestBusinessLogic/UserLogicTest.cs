@@ -298,7 +298,7 @@ namespace TestBusinessLogic
         public void RegisterEntry_ShouldDelegateToParkEntryLogic()
         {
             Guid attractionId = Guid.NewGuid();
-            RegisterEntryRequest request = new RegisterEntryRequest { UserId = Guid.NewGuid() };
+            RegisterEntryRequest request = new RegisterEntryRequest { NFC = Guid.NewGuid() };
 
             _mockParkEntryLogic.Setup(p => p.RegisterEntry(attractionId, request));
 
