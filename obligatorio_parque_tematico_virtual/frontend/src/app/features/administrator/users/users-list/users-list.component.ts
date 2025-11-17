@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { UserService } from '../../../../core/services/user.service';
 import { MembershipService } from '../../../../core/services/membership.service';
 import { UserResponse, MembershipLevel, Roles } from '../../../../core/models';
@@ -193,7 +194,7 @@ export class UsersListComponent implements OnInit {
         this.usersList = response || [];
         this.loading = false;
       },
-      error: (error: any) => {
+      error: (error: HttpErrorResponse) => {
         this.errorMessage = error.error?.message || 'Failed to load users';
         this.loading = false;
       }
@@ -234,7 +235,7 @@ export class UsersListComponent implements OnInit {
         this.closeModals();
         this.addingRole = false;
       },
-      error: (error: any) => {
+      error: (error: HttpErrorResponse) => {
         this.errorMessage = error.error?.message || 'Failed to add role';
         this.addingRole = false;
       }
@@ -251,7 +252,7 @@ export class UsersListComponent implements OnInit {
         this.closeModals();
         this.changingMembership = false;
       },
-      error: (error: any) => {
+      error: (error: HttpErrorResponse) => {
         this.errorMessage = error.error?.message || 'Failed to change membership';
         this.changingMembership = false;
       }

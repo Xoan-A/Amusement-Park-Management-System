@@ -279,9 +279,9 @@ export class ScheduleListComponent implements OnInit {
     this.loading = true;
     this.errorMessage = null;
 
-    const params: any = {};
+    const params: { attractionId?: string; status?: string; dateFrom?: string; dateTo?: string } = {};
     if (this.selectedAttractionId)
-      params.attractionId = this.selectedAttractionId;
+      params.attractionId = this.selectedAttractionId.toString();
     if (this.selectedStatus) params.status = this.selectedStatus;
     if (this.dateFrom) params.dateFrom = this.dateFrom;
     if (this.dateTo) params.dateTo = this.dateTo;
