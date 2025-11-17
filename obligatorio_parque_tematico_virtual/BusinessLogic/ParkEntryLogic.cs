@@ -2,6 +2,7 @@ using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using Models.In;
+using Models.Out;
 
 namespace BusinessLogic
 {
@@ -34,7 +35,6 @@ namespace BusinessLogic
         {
             Guid? qr = request.Qr;
             Guid? nfc = request.NFC;
-            Guid userId = request.UserId;
             Guid? eventId = request.EventId;
             DateTime enterDate = _dateTimeLogic.GetCurrentDateTime();
 
@@ -49,6 +49,18 @@ namespace BusinessLogic
             if (!isValidTicket)
                 throw new ArgumentException("User does not have a valid ticket.");
 
+            TicketResponse ticket;
+            Guid userId;
+            if (qr != null)
+            {
+                ticket = _ticketLogic.GetTicketByQRCode(qr.Value);
+                userId = ticket.VisitorId;
+            }
+            else
+            {
+                userId = nfc.Value;
+            }
+            
             User user = _userRepository.GetById(userId);
             if (user == null)
                 throw new ArgumentException("User not found.");
