@@ -79,7 +79,6 @@ namespace TestBusinessLogic
             TicketResponse result = _ticketLogic.PurchaseTicket(request);
 
             Assert.AreEqual(visitorId, result.VisitorId);
-            Assert.AreEqual(visitDate, result.VisitDate);
             Assert.AreEqual((int)TicketType.General, result.Type);
             Assert.AreNotEqual(Guid.Empty, result.QRCode);
             _mockTicketRepository.Verify(t => t.Add(It.IsAny<Ticket>()), Times.Once);

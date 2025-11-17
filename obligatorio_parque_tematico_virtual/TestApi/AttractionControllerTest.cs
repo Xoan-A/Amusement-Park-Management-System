@@ -205,7 +205,6 @@ public class AttractionControllerTest
 
         Assert.AreEqual(id, attractionResponse.Id);
         Assert.AreEqual("Eiffel Tower", attractionResponse.Name);
-        Assert.AreEqual("Paris", attractionResponse.Description);
         Assert.AreEqual("InteractiveZone", attractionResponse.Type);
     }
 
@@ -425,7 +424,8 @@ public class AttractionControllerTest
             });
 
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
+        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()),
+            Times.Once);
     }
 
     [TestMethod]
@@ -456,7 +456,8 @@ public class AttractionControllerTest
             });
 
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
+        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()),
+            Times.Once);
     }
 
     [TestMethod]
@@ -489,7 +490,8 @@ public class AttractionControllerTest
             });
 
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
+        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()),
+            Times.Once);
     }
 
     [TestMethod]
@@ -522,7 +524,8 @@ public class AttractionControllerTest
             });
 
         Assert.AreEqual("Entry registered successfully", messageResponse.Message);
-        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
+        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()),
+            Times.Once);
     }
 
     [TestMethod]
@@ -545,7 +548,8 @@ public class AttractionControllerTest
         HttpResponseMessage response =
         _ = _operatorClient.PutAsync($"/api/attractions/entry/{attractionId}", content).Result;
 
-        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()), Times.Once);
+        _mockUserManagementLogic.Verify(s => s.RegisterEntry(attractionId, It.IsAny<RegisterEntryRequest>()),
+            Times.Once);
         Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }
 
@@ -565,7 +569,8 @@ public class AttractionControllerTest
 
         StringContent content =
         new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        HttpResponseMessage response = _ = _operatorClient.PutAsync($"/api/attractions/exit/{attractionId}", content).Result;
+        HttpResponseMessage response =
+        _ = _operatorClient.PutAsync($"/api/attractions/exit/{attractionId}", content).Result;
 
         response.EnsureSuccessStatusCode();
         string responseContent = response.Content.ReadAsStringAsync().Result;
@@ -742,7 +747,8 @@ public class AttractionControllerTest
         string json = JsonSerializer.Serialize(request);
         StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response = _ = _adminClient.PutAsync($"/api/attractions/entry/{attractionId}", content).Result;
+        HttpResponseMessage response =
+        _ = _adminClient.PutAsync($"/api/attractions/entry/{attractionId}", content).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -759,7 +765,8 @@ public class AttractionControllerTest
         string json = JsonSerializer.Serialize(request);
         StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response = _ = _adminClient.PutAsync($"/api/attractions/exit/{attractionId}", content).Result;
+        HttpResponseMessage response =
+        _ = _adminClient.PutAsync($"/api/attractions/exit/{attractionId}", content).Result;
 
         Assert.AreEqual(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
     }

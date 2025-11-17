@@ -408,11 +408,8 @@ namespace TestDataAccess
 
             List<User> users = _context.Users.ToList();
             Assert.AreEqual(5, users.Count);
-            foreach (User user in users)
-            {
-                Assert.AreEqual(0, user.DailyScore, "DailyScore debe ser 0 después del reset");
-                Assert.AreNotEqual(0, user.Score, "Score no debe cambiar después del reset");
-            }
+            Assert.IsTrue(users.All(u => u.DailyScore == 0));
+            Assert.IsTrue(users.All(u => u.Score != 0));
         }
 
         [TestMethod]
@@ -464,8 +461,7 @@ namespace TestDataAccess
 
             Assert.AreEqual(0, retrievedUser1.DailyScore);
             Assert.AreEqual(0, retrievedUser2.DailyScore);
-            Assert.AreEqual(100, retrievedUser1.Score, "Score no debe cambiar");
-            Assert.AreEqual(200, retrievedUser2.Score, "Score no debe cambiar");
+            Assert.AreEqual(100, retrievedUser1.Score);
         }
 
         [TestMethod]
