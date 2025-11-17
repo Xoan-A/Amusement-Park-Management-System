@@ -403,7 +403,7 @@ export class OperatorMaintenanceComponent implements OnInit {
     if (this.scheduleToComplete) {
       this.loading = true;
 
-      this.maintenanceService.updateScheduleStatus(this.scheduleToComplete, { status: 'Completed' }).subscribe({
+      this.maintenanceService.completeSchedule(this.scheduleToComplete).subscribe({
         next: (response) => {
           this.loading = false;
           this.toastService.showSuccess(response.message || 'Maintenance completed successfully!');
