@@ -140,7 +140,7 @@ namespace BusinessLogic
             if (isValid && ticket?.Type == TicketType.EventSpecial && ticket.EventId != null)
             {
                 Event ticketEvent = _eventRepository.GetById(ticket.EventId.Value);
-                if (ticketEvent.Date.Date != enterDate.Date || ticketEvent.Date.Hour > enterDate.Hour ||
+                if (ticketEvent.Date.Date != enterDate.Date || ticketEvent.Hour > enterDate.Hour ||
                     ticketEvent.Date.Hour + _eventDurationHours < enterDate.Hour)
                     isValid = false;
 

@@ -67,10 +67,9 @@ export interface PurchaseTicketRequest {
 }
 
 export interface RegisterEntryRequest {
-  userId: string;
-  qr?: string;
-  nfc?: string;
-  eventId?: string;
+  Qr?: string;
+  NFC?: string;
+  EventId?: string;
 }
 
 export interface RegisterExitRequest {

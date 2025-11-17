@@ -6,9 +6,6 @@ namespace Models.In
 {
     public class RegisterEntryRequest
     {
-
-        [Required]
-        public Guid UserId { get; set; }
         public Guid? Qr { get; set; }
         public Guid? NFC { get; set; }
         public Guid? EventId { get; set; }

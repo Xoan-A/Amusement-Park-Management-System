@@ -4,6 +4,7 @@ using IBusinessLogic;
 using IDataAccess;
 using BusinessLogic;
 using Models.In;
+using Models.Out;
 
 namespace TestBusinessLogic
 {
@@ -63,13 +64,11 @@ namespace TestBusinessLogic
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 Qr = qrCode,
-                NFC = null,
-                UserId = userId,
-                EventId = null
             };
 
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, _currentDateTime, null, attractionId)).Returns(true);
+            _mockTicketLogic.Setup(t => t.GetTicketByQRCode(qrCode)).Returns(new TicketResponse { VisitorId = userId });
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(user);
             _mockUserRepository.Setup(r => r.Update(It.IsAny<User>()));
             _mockAttractionRepository.Setup(r => r.Update(It.IsAny<Attraction>()));
@@ -92,7 +91,6 @@ namespace TestBusinessLogic
             {
                 Qr = null,
                 NFC = null,
-                UserId = userId,
                 EventId = null
             };
 
@@ -114,7 +112,6 @@ namespace TestBusinessLogic
             {
                 Qr = qrCode,
                 NFC = null,
-                UserId = userId,
                 EventId = null
             };
 
@@ -148,7 +145,6 @@ namespace TestBusinessLogic
             {
                 Qr = qrCode,
                 NFC = null,
-                UserId = userId,
                 EventId = null
             };
 
@@ -182,13 +178,11 @@ namespace TestBusinessLogic
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 Qr = qrCode,
-                NFC = null,
-                UserId = userId,
-                EventId = null
             };
 
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, _currentDateTime, null, attractionId)).Returns(true);
+            _mockTicketLogic.Setup(t => t.GetTicketByQRCode(qrCode)).Returns(new TicketResponse { VisitorId = userId });
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns((User)null!);
 
             ArgumentException exception = Assert.ThrowsException<ArgumentException>(
@@ -219,13 +213,11 @@ namespace TestBusinessLogic
             RegisterEntryRequest request = new RegisterEntryRequest
             {
                 Qr = qrCode,
-                NFC = null,
-                UserId = userId,
-                EventId = null
             };
 
             _mockAttractionRepository.Setup(r => r.GetById(attractionId)).Returns(attraction);
             _mockTicketLogic.Setup(t => t.ValidateTicket(qrCode, null, _currentDateTime, null, attractionId)).Returns(true);
+            _mockTicketLogic.Setup(t => t.GetTicketByQRCode(qrCode)).Returns(new TicketResponse { VisitorId = userId });
             _mockUserRepository.Setup(r => r.GetById(userId)).Returns(user);
 
             ArgumentException exception = Assert.ThrowsException<ArgumentException>(
