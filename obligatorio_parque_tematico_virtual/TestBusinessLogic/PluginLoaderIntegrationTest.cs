@@ -106,12 +106,11 @@ public class PluginLoaderIntegrationTest
     {
         string[] possiblePaths =
         {
-            
             "../../../../ExamplePlugin/bin/Release/net8.0/ExamplePlugin.dll",
             "../../../ExamplePlugin/bin/Release/net8.0/ExamplePlugin.dll",
             "../../ExamplePlugin/bin/Release/net8.0/ExamplePlugin.dll",
             "../ExamplePlugin/bin/Release/net8.0/ExamplePlugin.dll",
-            
+
             "../../../../ExamplePlugin/bin/Debug/net8.0/ExamplePlugin.dll",
             "../../../ExamplePlugin/bin/Debug/net8.0/ExamplePlugin.dll",
             "../../ExamplePlugin/bin/Debug/net8.0/ExamplePlugin.dll",
