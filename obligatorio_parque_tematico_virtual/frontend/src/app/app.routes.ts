@@ -58,6 +58,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/administrator/users/users-list/users-list.component').then(m => m.UsersListComponent)
       },
       {
+        path: 'users/create',
+        loadComponent: () => import('./features/administrator/users/create-user/create-user.component').then(m => m.CreateUserComponent)
+      },
+      {
         path: 'rewards',
         loadComponent: () => import('./features/administrator/rewards/rewards-list.component').then(m => m.RewardsListComponent)
       },

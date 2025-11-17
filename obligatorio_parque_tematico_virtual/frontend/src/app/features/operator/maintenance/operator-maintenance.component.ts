@@ -327,9 +327,9 @@ export class OperatorMaintenanceComponent implements OnInit {
 
   loadActiveSchedules() {
     this.loadingSchedules = true;
-    this.maintenanceService.getAllSchedules({ status: 'InProgress' }).subscribe({
+    this.maintenanceService.getAllSchedules().subscribe({
       next: (schedules) => {
-        this.activeSchedules = schedules;
+        this.activeSchedules = schedules.filter(s => s.status === 'InProgress');
         this.loadingSchedules = false;
       },
       error: () => {
@@ -341,9 +341,9 @@ export class OperatorMaintenanceComponent implements OnInit {
 
   loadCompletedSchedules() {
     this.loadingCompleted = true;
-    this.maintenanceService.getAllSchedules({ status: 'Completed' }).subscribe({
+    this.maintenanceService.getAllSchedules().subscribe({
       next: (schedules) => {
-        this.completedSchedules = schedules.slice(0, 10);
+        this.completedSchedules = schedules.filter(s => s.status === 'Completed').slice(0, 10);
         this.loadingCompleted = false;
       },
       error: () => {
