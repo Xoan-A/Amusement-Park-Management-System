@@ -29,7 +29,7 @@ public class EventLogicTest
         _mockDateTimeLogic = new Mock<IDateTimeLogic>();
         _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).Returns(DateTime.Now);
 
-        var configuration = new MapperConfiguration(cfg =>
+        MapperConfiguration configuration = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile<MappingProfile>();
         });

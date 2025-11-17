@@ -161,7 +161,7 @@ namespace TestBusinessLogic
             {
                 VisitorId = visitorId,
                 VisitDate = visitDate,
-                TicketType = 999 // Invalid ticket type value
+                TicketType = 999
             };
 
             ArgumentException exception = Assert.ThrowsException<ArgumentException>(

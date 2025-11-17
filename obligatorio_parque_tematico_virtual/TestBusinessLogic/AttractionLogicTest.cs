@@ -25,7 +25,7 @@ public class AttractionLogicTest
         _mockAttractionRepository = new Mock<IAttractionRepository>();
         _mockReportRepository = new Mock<IReportRepository>();
 
-        var configuration = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
+        MapperConfiguration configuration = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
         _mapper = configuration.CreateMapper();
 
         _attractionLogic = new AttractionLogic(_mockAttractionRepository.Object, _mockReportRepository.Object, _mapper);

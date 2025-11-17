@@ -106,7 +106,7 @@ public class PluginControllerTest
     [TestMethod]
     public void AddPlugin_WithValidDllFile_ReturnsOk()
     {
-        byte[] fileContent = new byte[] { 0x4D, 0x5A }; // MZ header (simplified DLL)
+        byte[] fileContent = new byte[] { 0x4D, 0x5A };
         MultipartFormDataContent content = new MultipartFormDataContent();
         ByteArrayContent fileContentBytes = new ByteArrayContent(fileContent);
         fileContentBytes.Headers.ContentType =

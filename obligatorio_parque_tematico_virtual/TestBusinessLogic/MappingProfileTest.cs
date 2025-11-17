@@ -13,7 +13,7 @@ namespace TestBusinessLogic
         [TestInitialize]
         public void Setup()
         {
-            var configuration = new MapperConfiguration(cfg =>
+            MapperConfiguration configuration = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<MappingProfile>();
             });
@@ -23,7 +23,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void MappingProfile_ConfigurationIsValid()
         {
-            var configuration = new MapperConfiguration(cfg =>
+            MapperConfiguration configuration = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<MappingProfile>();
             });
@@ -34,9 +34,9 @@ namespace TestBusinessLogic
         [TestMethod]
         public void UserToUserResponse_ShouldMapCorrectly()
         {
-            var role = new Role { Id = 1, Name = "Administrator" };
-            var userRole = new UserRole { Role = role };
-            var user = new User
+            Role role = new Role { Id = 1, Name = "Administrator" };
+            UserRole userRole = new UserRole { Role = role };
+            User user = new User
             {
                 Id = Guid.NewGuid(),
                 Name = "John",
@@ -49,7 +49,7 @@ namespace TestBusinessLogic
                 UserRoles = new List<UserRole> { userRole }
             };
 
-            var result = _mapper.Map<UserResponse>(user);
+            UserResponse result = _mapper.Map<UserResponse>(user);
 
             Assert.AreEqual(user.Id, result.Id);
             Assert.AreEqual(user.Name, result.Name);
@@ -65,7 +65,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void AttractionToAttractionResponse_ShouldMapCorrectly()
         {
-            var attraction = new Attraction
+            Attraction attraction = new Attraction
             {
                 Id = Guid.NewGuid(),
                 Name = "Roller Coaster",
@@ -76,7 +76,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 50
             };
 
-            var result = _mapper.Map<AttractionResponse>(attraction);
+            AttractionResponse result = _mapper.Map<AttractionResponse>(attraction);
 
             Assert.AreEqual(attraction.Id, result.Id);
             Assert.AreEqual(attraction.Name, result.Name);
@@ -91,7 +91,7 @@ namespace TestBusinessLogic
         [TestMethod]
         public void EventToEventResponse_ShouldMapCorrectly()
         {
-            var attraction = new Attraction
+            Attraction attraction = new Attraction
             {
                 Id = Guid.NewGuid(),
                 Name = "Roller Coaster",
@@ -102,7 +102,7 @@ namespace TestBusinessLogic
                 CurrentCapacity = 50
             };
 
-            var eventEntity = new Event
+            Event eventEntity = new Event
             {
                 Id = Guid.NewGuid(),
                 Name = "Summer Festival",
@@ -115,7 +115,7 @@ namespace TestBusinessLogic
 
             eventEntity.AddAttraction(attraction);
 
-            var result = _mapper.Map<EventResponse>(eventEntity);
+            EventResponse result = _mapper.Map<EventResponse>(eventEntity);
 
             Assert.AreEqual(eventEntity.Id, result.Id);
             Assert.AreEqual(eventEntity.Name, result.Name);
