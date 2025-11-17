@@ -38,4 +38,8 @@ export class UserService {
   changeMembershipLevel(userId: string, request: ChangeMembershipLevelRequest): Observable<MessageResponse> {
     return this.http.put<MessageResponse>(`${this.apiUrl}/${userId}/membership`, request);
   }
+
+  getAll(): Observable<UserResponse[]> {
+    return this.http.get<UserResponse[]>(this.apiUrl);
+  }
 }
