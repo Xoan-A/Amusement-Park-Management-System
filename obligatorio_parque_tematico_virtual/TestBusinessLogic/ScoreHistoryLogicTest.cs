@@ -21,13 +21,10 @@ namespace TestBusinessLogic
         public void Setup()
         {
             _mockRepository = new Mock<IScoreHistoryRepository>();
-            
-            MapperConfiguration configuration = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile<MappingProfile>();
-            });
+
+            MapperConfiguration configuration = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
             _mapper = configuration.CreateMapper();
-            
+
             _scoreHistoryLogic = new ScoreHistoryLogic(_mockRepository.Object, _mapper);
             _visitorId = Guid.NewGuid();
         }

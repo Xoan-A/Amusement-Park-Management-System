@@ -20,13 +20,10 @@ namespace TestBusinessLogic
         public void Setup()
         {
             _mockRewardRepository = new Mock<IRewardRepository>();
-            
-            MapperConfiguration configuration = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile<MappingProfile>();
-            });
+
+            MapperConfiguration configuration = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
             _mapper = configuration.CreateMapper();
-            
+
             _rewardLogic = new RewardLogic(_mockRewardRepository.Object, _mapper);
         }
 
