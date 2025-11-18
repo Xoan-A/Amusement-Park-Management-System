@@ -37,11 +37,6 @@ export class ScheduleListComponent implements OnInit {
   loading = false;
   errorMessage: string | null = null;
 
-  selectedAttractionId = '';
-  selectedStatus = '';
-  dateFrom = '';
-  dateTo = '';
-
   showDeleteModal = false;
   showCompleteModal = false;
   scheduleToDelete: string | null = null;
@@ -67,14 +62,7 @@ export class ScheduleListComponent implements OnInit {
     this.loading = true;
     this.errorMessage = null;
 
-    const params: { attractionId?: string; status?: string; dateFrom?: string; dateTo?: string } = {};
-    if (this.selectedAttractionId)
-      params.attractionId = this.selectedAttractionId.toString();
-    if (this.selectedStatus) params.status = this.selectedStatus;
-    if (this.dateFrom) params.dateFrom = this.dateFrom;
-    if (this.dateTo) params.dateTo = this.dateTo;
-
-    this.maintenanceService.getAllSchedules(params).subscribe({
+    this.maintenanceService.getAllSchedules().subscribe({
       next: (schedules) => {
         this.schedules = schedules;
         this.loading = false;
@@ -84,48 +72,6 @@ export class ScheduleListComponent implements OnInit {
         this.loading = false;
       },
     });
-  }
-
-  showOverdueOnly() {
-    this.loading = true;
-    this.clearFilterValues();
-    this.maintenanceService.getOverdueSchedules().subscribe({
-      next: (schedules) => {
-        this.schedules = schedules;
-        this.loading = false;
-      },
-      error: () => {
-        this.errorMessage = 'Failed to load overdue schedules.';
-        this.loading = false;
-      },
-    });
-  }
-
-  showUpcomingOnly() {
-    this.loading = true;
-    this.clearFilterValues();
-    this.maintenanceService.getUpcomingSchedules(7).subscribe({
-      next: (schedules) => {
-        this.schedules = schedules;
-        this.loading = false;
-      },
-      error: () => {
-        this.errorMessage = 'Failed to load upcoming schedules.';
-        this.loading = false;
-      },
-    });
-  }
-
-  clearFilters() {
-    this.clearFilterValues();
-    this.loadSchedules();
-  }
-
-  private clearFilterValues() {
-    this.selectedAttractionId = '';
-    this.selectedStatus = '';
-    this.dateFrom = '';
-    this.dateTo = '';
   }
 
   updateStatus(scheduleId: string, status: string) {
