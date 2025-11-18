@@ -5,13 +5,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-loading-spinner',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="loading-overlay">
-      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-    </div>
-  `,
+  templateUrl: './loading-spinner.component.html',
   styles: []
 })
 export class LoadingSpinnerComponent {}

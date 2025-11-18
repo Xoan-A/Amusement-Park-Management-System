@@ -38,7 +38,11 @@ public static class ServiceFactory
         string pluginsPath = Path.Combine(projectRoot, "BusinessLogic", "Plugins");
         services.AddSingleton<IPluginLoader>(new BusinessLogic.Plugins.PluginLoader(pluginsPath));
 
-        string? connectionString = configuration.GetConnectionString("DefaultConnection");
+        string connectionString = $"Server={Environment.GetEnvironmentVariable("DB_SERVER")};" +
+                                  $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
+                                  $"User ID={Environment.GetEnvironmentVariable("DB_USER")};" +
+                                  $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};" +
+                                  "TrustServerCertificate=True;Encrypt=False;";
         services.AddDbContext<AppDbContext>(options =>
         options.UseSqlServer(connectionString));
         services.AddScoped<IUserRepository, UserRepository>();

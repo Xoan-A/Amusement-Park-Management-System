@@ -2,7 +2,7 @@
 [Bb]in/
 [Oo]bj/
 
-.env*
+# .env* # Commented out for academic purposes 
 
 
 # mstest test results
