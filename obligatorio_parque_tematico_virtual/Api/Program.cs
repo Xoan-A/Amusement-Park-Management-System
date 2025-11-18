@@ -7,7 +7,6 @@ using Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-// Load .env file - try multiple locations to ensure it's found
 var envPaths = new[]
 {
     Path.Combine(Directory.GetCurrentDirectory(), ".env"),
@@ -37,14 +36,11 @@ builder.Services.AddControllers(option => { option.Filters.Add<ExceptionFilter>(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Read JWT configuration from environment variables
 var jwtSecretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
 var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 var jwtExpiration = Environment.GetEnvironmentVariable("JWT_EXPIRATION_HOURS");
 
-// Debug output (remove in production)
-Console.WriteLine($"[DEBUG] JWT_SECRET_KEY loaded: {(!string.IsNullOrEmpty(jwtSecretKey) ? "YES" : "NO")}");
 
 if (string.IsNullOrEmpty(jwtSecretKey))
 {
