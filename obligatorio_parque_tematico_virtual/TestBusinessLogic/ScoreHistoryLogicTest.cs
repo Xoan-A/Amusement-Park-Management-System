@@ -1,6 +1,8 @@
+using AutoMapper;
+using BusinessLogic;
+using BusinessLogic.Mapping;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using BusinessLogic;
 using IDataAccess;
 using Domain;
 using Models.Out;
@@ -11,6 +13,7 @@ namespace TestBusinessLogic
     public class ScoreHistoryLogicTest
     {
         private Mock<IScoreHistoryRepository> _mockRepository = null!;
+        private IMapper _mapper = null!;
         private ScoreHistoryLogic _scoreHistoryLogic = null!;
         private Guid _visitorId;
 
@@ -18,7 +21,11 @@ namespace TestBusinessLogic
         public void Setup()
         {
             _mockRepository = new Mock<IScoreHistoryRepository>();
-            _scoreHistoryLogic = new ScoreHistoryLogic(_mockRepository.Object);
+
+            MapperConfiguration configuration = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
+            _mapper = configuration.CreateMapper();
+
+            _scoreHistoryLogic = new ScoreHistoryLogic(_mockRepository.Object, _mapper);
             _visitorId = Guid.NewGuid();
         }
 

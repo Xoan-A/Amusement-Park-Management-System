@@ -1,3 +1,4 @@
+using AutoMapper;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -11,15 +12,18 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
     private readonly IMaintenanceScheduleRepository _scheduleRepository;
     private readonly IAttractionRepository _attractionRepository;
     private readonly IAttractionLogic _attractionLogic;
+    private readonly IMapper _mapper;
 
     public MaintenanceLogic(
         IMaintenanceScheduleRepository scheduleRepository,
         IAttractionRepository attractionRepository,
-        IAttractionLogic attractionLogic)
+        IAttractionLogic attractionLogic,
+        IMapper mapper)
     {
         _scheduleRepository = scheduleRepository;
         _attractionRepository = attractionRepository;
         _attractionLogic = attractionLogic;
+        _mapper = mapper;
     }
 
     public void DateUpdated(IDateSubject subject)
@@ -189,17 +193,7 @@ public class MaintenanceLogic : IMaintenanceLogic, IDateObserver
 
     private MaintenanceScheduleResponse MapToScheduleResponse(MaintenanceSchedule schedule)
     {
-        return new MaintenanceScheduleResponse
-        {
-            Id = schedule.Id,
-            AttractionId = schedule.AttractionId,
-            AttractionName = schedule.Attraction?.Name ?? "Unknown",
-            ScheduledDate = schedule.ScheduledDate,
-            Description = schedule.Description,
-            EstimatedDuration = schedule.EstimatedDuration,
-            Status = schedule.Status.ToString(),
-            IsOverdue = schedule.IsOverdue
-        };
+        return _mapper.Map<MaintenanceScheduleResponse>(schedule);
     }
 
     #endregion

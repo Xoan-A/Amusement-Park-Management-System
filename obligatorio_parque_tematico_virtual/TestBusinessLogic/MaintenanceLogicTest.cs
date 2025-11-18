@@ -1,8 +1,10 @@
+using AutoMapper;
+using BusinessLogic;
+using BusinessLogic.Mapping;
 using Moq;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
-using BusinessLogic;
 using Models.In;
 using Models.Out;
 
@@ -15,6 +17,7 @@ public class MaintenanceLogicTest
     private Mock<IAttractionRepository> _mockAttractionRepository;
     private Mock<IAttractionLogic> _mockAttractionLogic;
     private Mock<IDateTimeLogic> _mockDateTimeLogic;
+    private IMapper _mapper;
     private IMaintenanceLogic _maintenanceLogic;
 
     [TestInitialize]
@@ -27,10 +30,17 @@ public class MaintenanceLogicTest
 
         _mockDateTimeLogic.Setup(d => d.GetCurrentDateTime()).Returns(new DateTime(2025, 11, 7, 12, 0, 0));
 
+        MapperConfiguration configuration = new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile<MappingProfile>();
+        });
+        _mapper = configuration.CreateMapper();
+
         _maintenanceLogic = new MaintenanceLogic(
             _mockScheduleRepository.Object,
             _mockAttractionRepository.Object,
-            _mockAttractionLogic.Object
+            _mockAttractionLogic.Object,
+            _mapper
         );
     }
 

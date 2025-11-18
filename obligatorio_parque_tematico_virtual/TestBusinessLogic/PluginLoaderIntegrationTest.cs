@@ -1,5 +1,5 @@
 using BusinessLogic.Plugins;
-using IBusinessLogic.Strategy;
+using IBusinessLogic;
 using Models.Out;
 
 namespace TestBusinessLogic;

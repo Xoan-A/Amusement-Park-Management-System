@@ -1,4 +1,6 @@
+using AutoMapper;
 using BusinessLogic;
+using BusinessLogic.Mapping;
 using Domain;
 using IDataAccess;
 using Models.In;
@@ -11,13 +13,18 @@ namespace TestBusinessLogic
     public class RewardLogicTest
     {
         private Mock<IRewardRepository> _mockRewardRepository;
+        private IMapper _mapper;
         private RewardLogic _rewardLogic;
 
         [TestInitialize]
         public void Setup()
         {
             _mockRewardRepository = new Mock<IRewardRepository>();
-            _rewardLogic = new RewardLogic(_mockRewardRepository.Object);
+
+            MapperConfiguration configuration = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
+            _mapper = configuration.CreateMapper();
+
+            _rewardLogic = new RewardLogic(_mockRewardRepository.Object, _mapper);
         }
 
         [TestMethod]
@@ -29,7 +36,7 @@ namespace TestBusinessLogic
                 Description = "Get VIP access for a day",
                 PointsCost = 500,
                 AvailableQuantity = 10,
-                RequiredMembershipLevel = MembershipLevel.Premium
+                RequiredMembershipLevel = (int)MembershipLevel.Premium
             };
 
             _mockRewardRepository.Setup(r => r.GetByName(rewardModelIn.Name)).Returns((Reward?)null);

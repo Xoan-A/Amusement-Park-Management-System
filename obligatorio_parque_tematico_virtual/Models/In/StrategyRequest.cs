@@ -1,4 +1,4 @@
-namespace BusinessLogic;
+namespace Models.In;
 
 public class StrategyRequest
 {

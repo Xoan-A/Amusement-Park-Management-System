@@ -7,7 +7,7 @@ using BusinessLogic;
 using Models.Out;
 using Domain.Exceptions;
 using Models.In;
-using Models.Mapping;
+using BusinessLogic.Mapping;
 
 namespace TestBusinessLogic
 {

@@ -1,3 +1,4 @@
+using AutoMapper;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -9,10 +10,12 @@ namespace BusinessLogic
     public class RewardLogic : IRewardLogic
     {
         private readonly IRewardRepository _rewardRepository;
+        private readonly IMapper _mapper;
 
-        public RewardLogic(IRewardRepository rewardRepository)
+        public RewardLogic(IRewardRepository rewardRepository, IMapper mapper)
         {
             _rewardRepository = rewardRepository;
+            _mapper = mapper;
         }
 
         public RewardModelOut CreateReward(RewardModelIn rewardIn)
@@ -28,6 +31,10 @@ namespace BusinessLogic
                 throw new ArgumentException($"A reward with the name '{rewardIn.Name}' already exists");
             }
 
+            MembershipLevel? membershipLevel = rewardIn.RequiredMembershipLevel.HasValue
+                ? (MembershipLevel)rewardIn.RequiredMembershipLevel.Value
+                : null;
+
             Reward reward = new Reward
             {
                 Id = Guid.NewGuid(),
@@ -35,7 +42,7 @@ namespace BusinessLogic
                 Description = rewardIn.Description,
                 PointsCost = rewardIn.PointsCost,
                 AvailableQuantity = rewardIn.AvailableQuantity,
-                RequiredMembershipLevel = rewardIn.RequiredMembershipLevel
+                RequiredMembershipLevel = membershipLevel
             };
 
             _rewardRepository.Create(reward);
@@ -78,7 +85,9 @@ namespace BusinessLogic
             existingReward.Description = rewardIn.Description;
             existingReward.PointsCost = rewardIn.PointsCost;
             existingReward.AvailableQuantity = rewardIn.AvailableQuantity;
-            existingReward.RequiredMembershipLevel = rewardIn.RequiredMembershipLevel;
+            existingReward.RequiredMembershipLevel = rewardIn.RequiredMembershipLevel.HasValue
+                ? (MembershipLevel)rewardIn.RequiredMembershipLevel.Value
+                : null;
 
             _rewardRepository.Update(existingReward);
 
@@ -104,16 +113,7 @@ namespace BusinessLogic
 
         private RewardModelOut MapToModelOut(Reward reward)
         {
-            return new RewardModelOut
-            {
-                Id = reward.Id,
-                Name = reward.Name,
-                Description = reward.Description,
-                PointsCost = reward.PointsCost,
-                AvailableQuantity = reward.AvailableQuantity,
-                RequiredMembershipLevel = reward.RequiredMembershipLevel,
-                IsAvailable = reward.IsAvailable()
-            };
+            return _mapper.Map<RewardModelOut>(reward);
         }
     }
 }

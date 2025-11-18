@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 using Models.Out;
 
 namespace Api.Controllers;

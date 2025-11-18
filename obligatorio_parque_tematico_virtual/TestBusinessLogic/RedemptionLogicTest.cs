@@ -1,4 +1,6 @@
+using AutoMapper;
 using BusinessLogic;
+using BusinessLogic.Mapping;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -15,6 +17,7 @@ namespace TestBusinessLogic
         private Mock<IRedemptionHistoryRepository> _mockRedemptionHistoryRepository;
         private Mock<IDateTimeLogic> _mockDateTimeLogic;
         private Mock<IScoreHistoryRepository> _mockScoreHistoryRepository;
+        private IMapper _mapper;
         private RedemptionLogic _redemptionLogic;
 
         [TestInitialize]
@@ -27,12 +30,19 @@ namespace TestBusinessLogic
             _mockScoreHistoryRepository = new Mock<IScoreHistoryRepository>();
             _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime()).Returns(DateTime.Now);
 
+            MapperConfiguration configuration = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<MappingProfile>();
+            });
+            _mapper = configuration.CreateMapper();
+
             _redemptionLogic = new RedemptionLogic(
                 _mockRewardRepository.Object,
                 _mockUserRepository.Object,
                 _mockRedemptionHistoryRepository.Object,
                 _mockDateTimeLogic.Object,
-                _mockScoreHistoryRepository.Object
+                _mockScoreHistoryRepository.Object,
+                _mapper
             );
         }
 

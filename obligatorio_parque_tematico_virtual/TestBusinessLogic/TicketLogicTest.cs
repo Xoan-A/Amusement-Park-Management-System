@@ -1,4 +1,6 @@
+using AutoMapper;
 using BusinessLogic;
+using BusinessLogic.Mapping;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -15,6 +17,7 @@ namespace TestBusinessLogic
         private Mock<IUserRepository> _mockUserRepository;
         private Mock<IDateTimeLogic> _mockDateTimeLogic;
         private Mock<IEventRepository> _mockEventRepository;
+        private IMapper _mapper;
         private ITicketLogic _ticketLogic;
 
         [TestInitialize]
@@ -24,8 +27,12 @@ namespace TestBusinessLogic
             _mockUserRepository = new Mock<IUserRepository>();
             _mockDateTimeLogic = new Mock<IDateTimeLogic>();
             _mockEventRepository = new Mock<IEventRepository>();
+
+            MapperConfiguration configuration = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
+            _mapper = configuration.CreateMapper();
+
             _ticketLogic = new TicketLogic(_mockTicketRepository.Object, _mockUserRepository.Object,
-                _mockDateTimeLogic.Object, _mockEventRepository.Object);
+                _mockDateTimeLogic.Object, _mockEventRepository.Object, _mapper);
         }
 
         [TestMethod]

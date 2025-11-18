@@ -6,7 +6,7 @@ using IDataAccess;
 using BusinessLogic;
 using Models.In;
 using Models.Out;
-using Models.Mapping;
+using BusinessLogic.Mapping;
 
 namespace TestBusinessLogic;
 

@@ -5,7 +5,7 @@ using IBusinessLogic;
 using IDataAccess;
 using BusinessLogic;
 using Models.Out;
-using Models.Mapping;
+using BusinessLogic.Mapping;
 
 namespace TestBusinessLogic
 {

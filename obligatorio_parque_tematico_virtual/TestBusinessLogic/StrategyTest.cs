@@ -1,10 +1,9 @@
 using Domain;
 using BusinessLogic;
-using IBusinessLogic.Strategy;
+using IBusinessLogic;
 using Models.In;
 using Moq;
 using IDataAccess;
-using IBusinessLogic;
 
 namespace TestBusinessLogic
 {

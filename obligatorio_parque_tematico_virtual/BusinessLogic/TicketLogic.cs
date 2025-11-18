@@ -1,3 +1,4 @@
+using AutoMapper;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -12,15 +13,17 @@ namespace BusinessLogic
         private readonly IUserRepository _userRepository;
         private readonly IDateTimeLogic _dateTimeLogic;
         private readonly IEventRepository _eventRepository;
+        private readonly IMapper _mapper;
         private readonly int _eventDurationHours = 4;
 
         public TicketLogic(ITicketRepository ticketRepository, IUserRepository userRepository,
-            IDateTimeLogic dateTimeLogic, IEventRepository eventRepository)
+            IDateTimeLogic dateTimeLogic, IEventRepository eventRepository, IMapper mapper)
         {
             _ticketRepository = ticketRepository;
             _userRepository = userRepository;
             _dateTimeLogic = dateTimeLogic;
             _eventRepository = eventRepository;
+            _mapper = mapper;
         }
 
         public TicketResponse PurchaseTicket(PurchaseTicketRequest request)
@@ -153,18 +156,7 @@ namespace BusinessLogic
 
         private TicketResponse MapToTicketResponse(Ticket ticket)
         {
-            return new TicketResponse
-            {
-                Id = ticket.Id,
-                VisitorId = ticket.VisitorId,
-                VisitorName = ticket.Visitor?.Name,
-                VisitorLastName = ticket.Visitor?.LastName,
-                PurchaseDate = ticket.PurchaseDate,
-                VisitDate = ticket.VisitDate,
-                Type = (int)ticket.Type,
-                QRCode = ticket.QRCode,
-                EventId = ticket.EventId
-            };
+            return _mapper.Map<TicketResponse>(ticket);
         }
     }
 }

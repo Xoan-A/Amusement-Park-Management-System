@@ -6,7 +6,7 @@ using DataAccess.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Models.Mapping;
+using BusinessLogic.Mapping;
 
 namespace ApiServiceFactory;
 
