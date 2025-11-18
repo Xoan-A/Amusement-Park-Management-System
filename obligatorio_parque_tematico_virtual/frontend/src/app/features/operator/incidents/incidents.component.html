@@ -1,0 +1,64 @@
+
+    <div class="container mt-4">
+      <h1 class="mb-4">Incident Management</h1>
+
+      @if (errorMessage) {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          {{ errorMessage }}
+          <button type="button" class="btn-close" (click)="errorMessage = null"></button>
+        </div>
+      }
+
+      <div class="row">
+        @for (attraction of attractions; track attraction.id) {
+          <div class="col-md-6 mb-3">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  {{ attraction.name }}
+                  @if (!attraction.isActive) {
+                    <span class="badge bg-danger ms-2">INACTIVE</span>
+                  }
+                </h5>
+              </div>
+              <div class="card-body">
+                @if (attraction.incidents && attraction.incidents.length > 0) {
+                  <ul class="list-group mb-3">
+                    @for (incident of attraction.incidents; track incident) {
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ incident }}
+                        <button
+                          class="btn btn-sm btn-outline-danger"
+                          (click)="removeIncident(attraction.id, incident)"
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="text-muted">No incidents reported</p>
+                }
+
+                <div class="input-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="newIncidents[attraction.id]"
+                    placeholder="Report new incident..."
+                  >
+                  <button
+                    class="btn btn-primary"
+                    (click)="addIncident(attraction.id)"
+                    [disabled]="!newIncidents[attraction.id]"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  

@@ -1,0 +1,148 @@
+
+    <div class="container mt-4">
+      <div class="row mb-4 align-items-center">
+        <div class="col">
+          <h1>Users Management</h1>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-primary" (click)="goToCreateUser()">
+            + Add New User
+          </button>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Users List</h5>
+        </div>
+        <div class="card-body">
+          @if (loading) {
+            <p class="text-muted">Loading users...</p>
+          } @else if (usersList && usersList.length > 0) {
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Roles</th>
+                    <th>Membership Level</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (user of usersList; track user.id) {
+                    <tr>
+                      <td>{{ user.name }} {{ user.lastName }}</td>
+                      <td>{{ user.email }}</td>
+                      <td>
+                        @if (user.userRoles && user.userRoles.length > 0) {
+                          <span class="badge bg-secondary me-1" *ngFor="let role of user.userRoles">
+                            {{ role }}
+                          </span>
+                        } @else {
+                          <span class="text-muted">No roles</span>
+                        }
+                      </td>
+                      <td>
+                        @if (user.userRoles?.includes('Visitor')) {
+                          {{ getMembershipLevelName(user.membershipLevel) }}
+                        } @else {
+                          <span class="text-muted">-</span>
+                        }
+                      </td>
+                      <td>
+                        <button
+                          class="btn btn-sm btn-warning me-2"
+                          (click)="openAddRoleModal(user)"
+                          title="Add Role">
+                          Add Role
+                        </button>
+                        @if (user.userRoles?.includes('Visitor')) {
+                          <button
+                            class="btn btn-sm btn-info"
+                            (click)="openMembershipModal(user)"
+                            title="Change Membership">
+                            Change Membership
+                          </button>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <p class="text-muted">No users available.</p>
+          }
+        </div>
+      </div>
+
+      <!-- Modal Add Role -->
+      @if (showAddRoleModal && selectedUser) {
+        <div class="modal d-block" style="background-color: rgba(0,0,0,0.5);">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Add Role to {{ selectedUser.name }}</h5>
+                <button type="button" class="btn-close" (click)="closeModals()"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label class="form-label">Select Role</label>
+                  <select class="form-select" [(ngModel)]="newRole">
+                    @for (role of availableRoles; track role) {
+                      @if (!selectedUser.userRoles.includes(role)) {
+                        <option [value]="role">{{ role }}</option>
+                      }
+                    }
+                  </select>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="addRole()" [disabled]="addingRole">
+                  {{ addingRole ? 'Adding...' : 'Add Role' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Modal Change Membership -->
+      @if (showMembershipModal && selectedUser) {
+        <div class="modal d-block" style="background-color: rgba(0,0,0,0.5);">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Change Membership - {{ selectedUser.name }}</h5>
+                <button type="button" class="btn-close" (click)="closeModals()"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label class="form-label">Membership Level</label>
+                  <select class="form-select" [(ngModel)]="newMembershipLevel">
+                    <option [value]="0">Standard</option>
+                    <option [value]="1">Premium</option>
+                    <option [value]="2">VIP</option>
+                  </select>
+                </div>
+                <small class="text-muted">
+                  Current: {{ getMembershipLevelName(selectedUser.membershipLevel) }}
+                </small>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="changeMembership()" [disabled]="changingMembership">
+                  {{ changingMembership ? 'Updating...' : 'Update' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <app-top-ten></app-top-ten>
+    </div>
+  

@@ -5,6 +5,30 @@ using ApiServiceFactory;
 using Api.Filters;
 using Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+
+// Load .env file - try multiple locations to ensure it's found
+var envPaths = new[]
+{
+    Path.Combine(Directory.GetCurrentDirectory(), ".env"),
+    Path.Combine(AppContext.BaseDirectory, ".env"),
+    Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".env")
+};
+
+var envPath = envPaths.FirstOrDefault(File.Exists);
+if (envPath != null)
+{
+    DotNetEnv.Env.Load(envPath);
+    Console.WriteLine($"[INFO] Loaded .env from: {envPath}");
+}
+else
+{
+    Console.WriteLine($"[WARNING] .env file not found in any of these locations:");
+    foreach (var path in envPaths)
+    {
+        Console.WriteLine($"  - {path}");
+    }
+}
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +37,28 @@ builder.Services.AddControllers(option => { option.Filters.Add<ExceptionFilter>(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-JwtSettings? jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+// Read JWT configuration from environment variables
+var jwtSecretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
+var jwtExpiration = Environment.GetEnvironmentVariable("JWT_EXPIRATION_HOURS");
+
+// Debug output (remove in production)
+Console.WriteLine($"[DEBUG] JWT_SECRET_KEY loaded: {(!string.IsNullOrEmpty(jwtSecretKey) ? "YES" : "NO")}");
+
+if (string.IsNullOrEmpty(jwtSecretKey))
+{
+    throw new InvalidOperationException("JWT_SECRET_KEY not configured in .env file or environment variables");
+}
+
+var jwtSettings = new JwtSettings
+{
+    SecretKey = jwtSecretKey,
+    Issuer = jwtIssuer ?? throw new InvalidOperationException("JWT_ISSUER not configured"),
+    Audience = jwtAudience ?? throw new InvalidOperationException("JWT_AUDIENCE not configured"),
+    ExpirationHours = int.Parse(jwtExpiration ?? "1")
+};
+builder.Services.AddSingleton(Options.Create(jwtSettings));
 
 builder.Services.AddServices(builder.Configuration);
 
