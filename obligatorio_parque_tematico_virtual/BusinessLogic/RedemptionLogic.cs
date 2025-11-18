@@ -1,3 +1,4 @@
+using AutoMapper;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -12,19 +13,22 @@ namespace BusinessLogic
         private readonly IRedemptionHistoryRepository _redemptionHistoryRepository;
         private readonly IDateTimeLogic _dateTimeLogic;
         private readonly IScoreHistoryRepository _scoreHistoryRepository;
+        private readonly IMapper _mapper;
 
         public RedemptionLogic(
             IRewardRepository rewardRepository,
             IUserRepository userRepository,
             IRedemptionHistoryRepository redemptionHistoryRepository,
             IDateTimeLogic dateTimeLogic,
-            IScoreHistoryRepository scoreHistoryRepository)
+            IScoreHistoryRepository scoreHistoryRepository,
+            IMapper mapper)
         {
             _rewardRepository = rewardRepository;
             _userRepository = userRepository;
             _redemptionHistoryRepository = redemptionHistoryRepository;
             _dateTimeLogic = dateTimeLogic;
             _scoreHistoryRepository = scoreHistoryRepository;
+            _mapper = mapper;
         }
 
         public RedemptionHistoryModelOut RedeemReward(Guid visitorId, Guid rewardId)
@@ -139,31 +143,18 @@ namespace BusinessLogic
 
         private List<RedemptionHistoryModelOut> MapToModelOutList(List<RedemptionHistory> redemptions)
         {
-            return redemptions.Select(r => new RedemptionHistoryModelOut
-            {
-                Id = r.Id,
-                VisitorId = r.VisitorId,
-                RewardId = r.RewardId,
-                RedeemedAt = r.RedeemedAt,
-                PointsSpent = r.PointsSpent,
-                RewardName = r.Reward?.Name,
-                VisitorName = r.Visitor?.Name
-            }).ToList();
+            return _mapper.Map<List<RedemptionHistoryModelOut>>(redemptions);
         }
 
         private RedemptionHistoryModelOut MapToModelOut(RedemptionHistory redemption, string? visitorName,
             string? rewardName)
         {
-            return new RedemptionHistoryModelOut
-            {
-                Id = redemption.Id,
-                VisitorId = redemption.VisitorId,
-                RewardId = redemption.RewardId,
-                RedeemedAt = redemption.RedeemedAt,
-                PointsSpent = redemption.PointsSpent,
-                RewardName = rewardName,
-                VisitorName = visitorName
-            };
+            RedemptionHistoryModelOut mapped = _mapper.Map<RedemptionHistoryModelOut>(redemption);
+            if (visitorName != null)
+                mapped.VisitorName = visitorName;
+            if (rewardName != null)
+                mapped.RewardName = rewardName;
+            return mapped;
         }
     }
 }

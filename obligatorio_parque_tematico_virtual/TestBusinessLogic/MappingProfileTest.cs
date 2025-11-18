@@ -1,6 +1,6 @@
 using AutoMapper;
 using Domain;
-using Models.Mapping;
+using BusinessLogic.Mapping;
 using Models.Out;
 
 namespace TestBusinessLogic

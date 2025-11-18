@@ -1,3 +1,4 @@
+using AutoMapper;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -8,10 +9,12 @@ namespace BusinessLogic
     public class ScoreHistoryLogic : IScoreHistoryLogic
     {
         private readonly IScoreHistoryRepository _scoreHistoryRepository;
+        private readonly IMapper _mapper;
 
-        public ScoreHistoryLogic(IScoreHistoryRepository scoreHistoryRepository)
+        public ScoreHistoryLogic(IScoreHistoryRepository scoreHistoryRepository, IMapper mapper)
         {
             _scoreHistoryRepository = scoreHistoryRepository;
+            _mapper = mapper;
         }
 
         public List<ScoreHistoryModelOut> GetMyScoreHistory(Guid visitorId)
@@ -41,18 +44,7 @@ namespace BusinessLogic
 
         private List<ScoreHistoryModelOut> MapToModelOut(List<ScoreHistory> histories)
         {
-            return histories.Select(h => new ScoreHistoryModelOut
-            {
-                Id = h.Id,
-                VisitorId = h.VisitorId,
-                VisitorName = h.Visitor?.Name,
-                Points = h.Points,
-                Origin = h.Origin.ToString(),
-                StrategyName = h.StrategyName,
-                RelatedEntityId = h.RelatedEntityId,
-                RelatedEntityName = h.RelatedEntityName,
-                CreatedAt = h.CreatedAt
-            }).ToList();
+            return _mapper.Map<List<ScoreHistoryModelOut>>(histories);
         }
     }
 }

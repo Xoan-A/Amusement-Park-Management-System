@@ -1,3 +1,4 @@
+using AutoMapper;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
@@ -9,10 +10,12 @@ namespace BusinessLogic
     public class RewardLogic : IRewardLogic
     {
         private readonly IRewardRepository _rewardRepository;
+        private readonly IMapper _mapper;
 
-        public RewardLogic(IRewardRepository rewardRepository)
+        public RewardLogic(IRewardRepository rewardRepository, IMapper mapper)
         {
             _rewardRepository = rewardRepository;
+            _mapper = mapper;
         }
 
         public RewardModelOut CreateReward(RewardModelIn rewardIn)
@@ -110,18 +113,7 @@ namespace BusinessLogic
 
         private RewardModelOut MapToModelOut(Reward reward)
         {
-            return new RewardModelOut
-            {
-                Id = reward.Id,
-                Name = reward.Name,
-                Description = reward.Description,
-                PointsCost = reward.PointsCost,
-                AvailableQuantity = reward.AvailableQuantity,
-                RequiredMembershipLevel = reward.RequiredMembershipLevel.HasValue
-                    ? (int)reward.RequiredMembershipLevel.Value
-                    : null,
-                IsAvailable = reward.IsAvailable()
-            };
+            return _mapper.Map<RewardModelOut>(reward);
         }
     }
 }
