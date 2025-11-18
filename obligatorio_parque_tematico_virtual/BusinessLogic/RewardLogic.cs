@@ -28,6 +28,10 @@ namespace BusinessLogic
                 throw new ArgumentException($"A reward with the name '{rewardIn.Name}' already exists");
             }
 
+            MembershipLevel? membershipLevel = rewardIn.RequiredMembershipLevel.HasValue
+                ? (MembershipLevel)rewardIn.RequiredMembershipLevel.Value
+                : null;
+
             Reward reward = new Reward
             {
                 Id = Guid.NewGuid(),
@@ -35,7 +39,7 @@ namespace BusinessLogic
                 Description = rewardIn.Description,
                 PointsCost = rewardIn.PointsCost,
                 AvailableQuantity = rewardIn.AvailableQuantity,
-                RequiredMembershipLevel = rewardIn.RequiredMembershipLevel
+                RequiredMembershipLevel = membershipLevel
             };
 
             _rewardRepository.Create(reward);
@@ -78,7 +82,9 @@ namespace BusinessLogic
             existingReward.Description = rewardIn.Description;
             existingReward.PointsCost = rewardIn.PointsCost;
             existingReward.AvailableQuantity = rewardIn.AvailableQuantity;
-            existingReward.RequiredMembershipLevel = rewardIn.RequiredMembershipLevel;
+            existingReward.RequiredMembershipLevel = rewardIn.RequiredMembershipLevel.HasValue
+                ? (MembershipLevel)rewardIn.RequiredMembershipLevel.Value
+                : null;
 
             _rewardRepository.Update(existingReward);
 
@@ -111,7 +117,9 @@ namespace BusinessLogic
                 Description = reward.Description,
                 PointsCost = reward.PointsCost,
                 AvailableQuantity = reward.AvailableQuantity,
-                RequiredMembershipLevel = reward.RequiredMembershipLevel,
+                RequiredMembershipLevel = reward.RequiredMembershipLevel.HasValue
+                    ? (int)reward.RequiredMembershipLevel.Value
+                    : null,
                 IsAvailable = reward.IsAvailable()
             };
         }

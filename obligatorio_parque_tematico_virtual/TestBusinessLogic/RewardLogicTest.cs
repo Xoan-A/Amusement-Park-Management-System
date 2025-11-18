@@ -29,7 +29,7 @@ namespace TestBusinessLogic
                 Description = "Get VIP access for a day",
                 PointsCost = 500,
                 AvailableQuantity = 10,
-                RequiredMembershipLevel = MembershipLevel.Premium
+                RequiredMembershipLevel = (int)MembershipLevel.Premium
             };
 
             _mockRewardRepository.Setup(r => r.GetByName(rewardModelIn.Name)).Returns((Reward?)null);

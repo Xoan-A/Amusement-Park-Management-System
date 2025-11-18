@@ -207,7 +207,7 @@ public class RewardControllerTest
             Description = "New reward description",
             PointsCost = 500,
             AvailableQuantity = 10,
-            RequiredMembershipLevel = MembershipLevel.Premium
+            RequiredMembershipLevel = (int)MembershipLevel.Premium
         };
 
         RewardModelOut createdReward = new RewardModelOut
@@ -302,7 +302,7 @@ public class RewardControllerTest
             Description = "Updated description",
             PointsCost = 600,
             AvailableQuantity = 8,
-            RequiredMembershipLevel = MembershipLevel.VIP
+            RequiredMembershipLevel = (int)MembershipLevel.VIP
         };
 
         RewardModelOut updatedReward = new RewardModelOut
