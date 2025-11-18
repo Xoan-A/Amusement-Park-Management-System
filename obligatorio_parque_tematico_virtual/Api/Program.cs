@@ -27,23 +27,12 @@ builder.Services.AddControllers(option => { option.Filters.Add<ExceptionFilter>(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var jwtSecretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
-var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
-var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
-var jwtExpiration = Environment.GetEnvironmentVariable("JWT_EXPIRATION_HOURS");
-
-
-if (string.IsNullOrEmpty(jwtSecretKey))
-{
-    throw new InvalidOperationException("JWT_SECRET_KEY not configured in .env file or environment variables");
-}
-
 var jwtSettings = new JwtSettings
 {
-    SecretKey = jwtSecretKey,
-    Issuer = jwtIssuer ?? throw new InvalidOperationException("JWT_ISSUER not configured"),
-    Audience = jwtAudience ?? throw new InvalidOperationException("JWT_AUDIENCE not configured"),
-    ExpirationHours = int.Parse(jwtExpiration ?? "1")
+    SecretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")!,
+    Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")!,
+    Audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")!,
+    ExpirationHours = int.Parse(Environment.GetEnvironmentVariable("JWT_EXPIRATION_HOURS") ?? "1")
 };
 builder.Services.AddSingleton(Options.Create(jwtSettings));
 
