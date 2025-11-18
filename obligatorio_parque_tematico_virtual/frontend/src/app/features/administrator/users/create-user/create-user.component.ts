@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../../../core/services/user.service';
+import { MembershipLevel } from '../../../../core/models/enums';
 
 @Component({
   selector: 'app-create-user',
@@ -41,6 +42,10 @@ export class CreateUserComponent {
       ...this.userForm.value,
       roles: [this.userForm.value.role]
     };
+
+    if (this.userForm.value.role === 'Visitor') {
+      userData.membershipLevel = MembershipLevel.Standard;
+    }
 
     this.userService.create(userData).subscribe({
       next: () => {
