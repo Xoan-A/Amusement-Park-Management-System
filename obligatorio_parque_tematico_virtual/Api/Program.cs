@@ -18,20 +18,6 @@ var envPath = envPaths.FirstOrDefault(File.Exists);
 if (envPath != null)
 {
     DotNetEnv.Env.Load(envPath);
-    Console.WriteLine($"[INFO] Loaded .env from: {envPath}");
-}
-else
-{
-    var hasEnvVars = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("JWT_SECRET_KEY"));
-
-    if (!hasEnvVars)
-    {
-        Console.WriteLine($"[WARNING] .env file not found in any of these locations:");
-        foreach (var path in envPaths)
-        {
-            Console.WriteLine($"  - {path}");
-        }
-    }
 }
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
