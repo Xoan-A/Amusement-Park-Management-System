@@ -5,6 +5,20 @@ using ApiServiceFactory;
 using Api.Filters;
 using Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+
+var envPaths = new[]
+{
+    Path.Combine(Directory.GetCurrentDirectory(), ".env"),
+    Path.Combine(AppContext.BaseDirectory, ".env"),
+    Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".env")
+};
+
+var envPath = envPaths.FirstOrDefault(File.Exists);
+if (envPath != null)
+{
+    DotNetEnv.Env.Load(envPath);
+}
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +27,14 @@ builder.Services.AddControllers(option => { option.Filters.Add<ExceptionFilter>(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-JwtSettings? jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+var jwtSettings = new JwtSettings
+{
+    SecretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")!,
+    Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")!,
+    Audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")!,
+    ExpirationHours = int.Parse(Environment.GetEnvironmentVariable("JWT_EXPIRATION_HOURS") ?? "1")
+};
+builder.Services.AddSingleton(Options.Create(jwtSettings));
 
 builder.Services.AddServices(builder.Configuration);
 

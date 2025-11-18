@@ -1,0 +1,96 @@
+
+    <div class="container mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Rewards Management</h1>
+        <a routerLink="/admin/rewards/create" class="btn btn-primary">
+          Create New Reward
+        </a>
+      </div>
+
+      @if (errorMessage) {
+        <div class="alert alert-danger alert-dismissible">
+          {{ errorMessage }}
+          <button type="button" class="btn-close" (click)="errorMessage=''"></button>
+        </div>
+      }
+
+      @if (loading) {
+        <div class="text-center my-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      } @else {
+        @if (rewards.length === 0) {
+          <div class="alert alert-info">
+            No rewards found. Create your first reward to get started!
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Points Cost</th>
+                  <th>Available Quantity</th>
+                  <th>Membership Required</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (reward of rewards; track reward.id) {
+                  <tr>
+                    <td><strong>{{ reward.name }}</strong></td>
+                    <td>{{ reward.description }}</td>
+                    <td>
+                      <span class="badge bg-info">{{ reward.pointsCost }} pts</span>
+                    </td>
+                    <td>{{ reward.availableQuantity }}</td>
+                    <td>
+                      @if (reward.requiredMembershipLevel !== null && reward.requiredMembershipLevel !== undefined) {
+                        <span class="badge" [ngClass]="getMembershipBadgeClass(reward.requiredMembershipLevel)">
+                          {{ getMembershipLevelName(reward.requiredMembershipLevel) }}
+                        </span>
+                      } @else {
+                        <span class="text-muted">None</span>
+                      }
+                    </td>
+                    <td>
+                      @if (reward.isAvailable) {
+                        <span class="badge bg-success">Available</span>
+                      } @else {
+                        <span class="badge bg-secondary">Out of Stock</span>
+                      }
+                    </td>
+                    <td>
+                      <div class="btn-group" role="group">
+                        <a [routerLink]="['/admin/rewards/edit', reward.id]"
+                           class="btn btn-sm btn-outline-primary">
+                          Edit
+                        </a>
+                        <button (click)="deleteReward(reward)"
+                                class="btn btn-sm btn-outline-danger"
+                                [disabled]="deleting === reward.id">
+                          {{ deleting === reward.id ? 'Deleting...' : 'Delete' }}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    </div>
+
+    <app-confirmation-modal
+      [show]="showDeleteModal"
+      title="Delete Reward"
+      [message]="deleteMessage"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()">
+    </app-confirmation-modal>
+  

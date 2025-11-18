@@ -29,6 +29,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Include=".env" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\Models\Models.csproj" />
       <ProjectReference Include="..\BusinessLogic\BusinessLogic.csproj" />
       <ProjectReference Include="..\Api\Api.csproj" />
