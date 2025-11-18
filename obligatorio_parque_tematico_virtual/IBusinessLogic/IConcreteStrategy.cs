@@ -1,7 +1,7 @@
 using Models.In;
 using Domain;
 
-namespace IBusinessLogic.Strategy;
+namespace IBusinessLogic;
 
 public interface IConcreteStrategy
 {

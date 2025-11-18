@@ -1,4 +1,4 @@
-using IBusinessLogic.Strategy;
+using IBusinessLogic;
 using Domain;
 using BusinessLogic;
 using Models.In;
