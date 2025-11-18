@@ -22,10 +22,15 @@ if (envPath != null)
 }
 else
 {
-    Console.WriteLine($"[WARNING] .env file not found in any of these locations:");
-    foreach (var path in envPaths)
+    var hasEnvVars = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("JWT_SECRET_KEY"));
+
+    if (!hasEnvVars)
     {
-        Console.WriteLine($"  - {path}");
+        Console.WriteLine($"[WARNING] .env file not found in any of these locations:");
+        foreach (var path in envPaths)
+        {
+            Console.WriteLine($"  - {path}");
+        }
     }
 }
 
