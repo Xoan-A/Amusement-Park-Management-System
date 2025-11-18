@@ -21,9 +21,6 @@
       <ProjectReference Include="..\ApiServiceFactory\ApiServiceFactory.csproj" />
       <ProjectReference Include="..\Models\Models.csproj" />
       <ProjectReference Include="..\IBusinessLogic\IBusinessLogic.csproj" />
-      <ProjectReference Include="..\BusinessLogic\BusinessLogic.csproj" />
-      <ProjectReference Include="..\IDataAccess\IDataAccess.csproj" />
-      <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
     </ItemGroup>
 
 </Project>

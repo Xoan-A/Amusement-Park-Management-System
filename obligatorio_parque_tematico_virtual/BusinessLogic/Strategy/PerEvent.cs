@@ -1,5 +1,6 @@
 using Domain;
 using IBusinessLogic.Strategy;
+using Models.In;
 
 namespace BusinessLogic;
 

@@ -1,5 +1,3 @@
-using Domain;
-
 namespace Models.Out;
 
 public class TopTenResponse

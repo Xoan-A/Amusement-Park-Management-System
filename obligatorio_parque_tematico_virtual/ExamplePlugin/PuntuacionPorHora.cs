@@ -1,7 +1,7 @@
 using IBusinessLogic.Strategy;
 using Domain;
 using BusinessLogic;
-using BusinessLogic.Plugins;
+using Models.In;
 
 namespace ExamplePlugin;
 public class PuntuacionPorHora : IConcreteStrategy

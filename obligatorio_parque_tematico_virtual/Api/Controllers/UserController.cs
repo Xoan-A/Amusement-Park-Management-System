@@ -3,7 +3,6 @@ using IBusinessLogic;
 using Microsoft.AspNetCore.Authorization;
 using Models.In;
 using Models.Out;
-using System.Security.Claims;
 
 namespace Api.Controllers;
 

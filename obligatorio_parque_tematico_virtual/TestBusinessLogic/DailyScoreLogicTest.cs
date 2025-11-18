@@ -4,6 +4,7 @@ using IBusinessLogic;
 using IBusinessLogic.Strategy;
 using IDataAccess;
 using BusinessLogic;
+using Models.In;
 
 namespace TestBusinessLogic
 {
