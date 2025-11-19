@@ -146,9 +146,6 @@ export class AuthService {
     this.setActiveRole(selectedRole);
   }
 
-  /**
-   * Set the active role and persist to sessionStorage
-   */
   setActiveRole(role: string): void {
     const userRoles = this.getUserRoles();
 
@@ -161,30 +158,18 @@ export class AuthService {
     this.activeRoleSubject.next(role);
   }
 
-  /**
-   * Get the current active role
-   */
   getActiveRole(): string | null {
     return this.activeRoleSubject.value;
   }
 
-  /**
-   * Get all available roles for the current user
-   */
   getAvailableRoles(): string[] {
     return this.getUserRoles();
   }
 
-  /**
-   * Check if user has multiple roles
-   */
   hasMultipleRoles(): boolean {
     return this.getUserRoles().length > 1;
   }
 
-  /**
-   * Switch to a different role and navigate appropriately
-   */
   switchRole(newRole: string): void {
     const currentRoute = this.router.url;
     const userRoles = this.getUserRoles();
@@ -206,9 +191,6 @@ export class AuthService {
     }
   }
 
-  /**
-   * Get role prefix from current route (e.g., '/admin/dashboard' -> 'admin')
-   */
   private getRolePrefixFromRoute(route: string): string | null {
     if (route.startsWith('/admin/')) return 'admin';
     if (route.startsWith('/operator/')) return 'operator';
@@ -216,9 +198,6 @@ export class AuthService {
     return null;
   }
 
-  /**
-   * Get route prefix for a given role
-   */
   private getRolePrefixForRole(role: string): string {
     switch (role) {
       case Roles.ADMINISTRATOR:
