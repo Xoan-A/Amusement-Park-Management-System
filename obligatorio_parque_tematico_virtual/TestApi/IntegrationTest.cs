@@ -10,6 +10,7 @@ using DataAccess.Context;
 using Microsoft.Data.Sqlite;
 using IDataAccess;
 using DataAccess.Repositories;
+using Api;
 
 namespace ApiTests
 {

@@ -1,10 +1,10 @@
 using AutoMapper;
 using Domain;
 using IBusinessLogic;
+using IBusinessLogic.Exceptions;
 using IDataAccess;
 using Models.In;
 using Models.Out;
-using Domain.Exceptions;
 
 namespace BusinessLogic;
 

@@ -14,6 +14,7 @@ using DataAccess.Context;
 using IDataAccess;
 using Microsoft.Data.Sqlite;
 using DataAccess.Repositories;
+using Api;
 
 namespace TestApi
 {

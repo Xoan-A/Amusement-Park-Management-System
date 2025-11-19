@@ -10,6 +10,7 @@ using DataAccess.Context;
 using Microsoft.Data.Sqlite;
 using System.Net;
 using Microsoft.IdentityModel.Tokens;
+using Api;
 
 namespace ApiTests;
 

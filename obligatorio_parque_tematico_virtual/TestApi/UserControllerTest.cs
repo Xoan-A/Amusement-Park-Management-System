@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using IBusinessLogic;
+using IBusinessLogic.Exceptions;
 using Models.In;
 using Models.Out;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +15,8 @@ using DataAccess.Context;
 using Microsoft.Data.Sqlite;
 using Domain;
 using BusinessLogic;
-using Domain.Exceptions;
 using Microsoft.IdentityModel.Tokens;
+using Api;
 
 namespace ApiTests
 {

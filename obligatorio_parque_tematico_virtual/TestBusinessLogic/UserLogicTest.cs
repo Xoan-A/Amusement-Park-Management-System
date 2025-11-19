@@ -2,10 +2,10 @@ using AutoMapper;
 using Moq;
 using Domain;
 using IBusinessLogic;
+using IBusinessLogic.Exceptions;
 using IDataAccess;
 using BusinessLogic;
 using Models.Out;
-using Domain.Exceptions;
 using Models.In;
 using BusinessLogic.Mapping;
 

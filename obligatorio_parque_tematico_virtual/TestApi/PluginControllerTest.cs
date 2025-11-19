@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using Microsoft.Data.Sqlite;
 using Models.Out;
-using System.Net.Http.Json;
+using Api;
 
 namespace ApiTests;
 

@@ -1,6 +1,6 @@
-using Domain.Exceptions;
+using IBusinessLogic.Exceptions;
 
-namespace TestDomain;
+namespace TestBusinessLogic;
 
 [TestClass]
 public class ForbiddenExceptionTest

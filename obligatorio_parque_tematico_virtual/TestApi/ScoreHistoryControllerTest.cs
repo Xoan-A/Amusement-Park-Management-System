@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using Microsoft.Data.Sqlite;
 using Models.Out;
+using Api;
 
 namespace ApiTests;
 
