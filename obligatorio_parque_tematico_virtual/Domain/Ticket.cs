@@ -9,6 +9,6 @@ namespace Domain
         public TicketType Type { get; set; }
         public Guid QRCode { get; set; }
         public Guid? EventId { get; set; }
-        public virtual User Visitor { get; set; }
+        public User Visitor { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-namespace Domain.Exceptions;
+namespace IBusinessLogic.Exceptions;
 
 public class ForbiddenException : Exception
 {

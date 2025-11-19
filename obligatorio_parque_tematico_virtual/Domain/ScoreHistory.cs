@@ -26,6 +26,6 @@ namespace Domain
             }
         }
 
-        public virtual User? Visitor { get; set; }
+        public User? Visitor { get; set; }
     }
 }

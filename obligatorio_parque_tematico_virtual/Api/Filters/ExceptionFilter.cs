@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Domain.Exceptions;
+using IBusinessLogic.Exceptions;
 
 namespace Api.Filters;
 

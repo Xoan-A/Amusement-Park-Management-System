@@ -13,14 +13,14 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        var envPaths = new[]
+        String[] envPaths = new[]
         {
             Path.Combine(Directory.GetCurrentDirectory(), ".env"),
             Path.Combine(AppContext.BaseDirectory, ".env"),
             Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".env")
         };
 
-        var envPath = envPaths.FirstOrDefault(File.Exists);
+        String envPath = envPaths.FirstOrDefault(File.Exists);
         if (envPath != null)
         {
             DotNetEnv.Env.Load(envPath);
@@ -33,7 +33,7 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        var jwtSettings = new JwtSettings
+        JwtSettings jwtSettings = new JwtSettings
         {
             SecretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")!,
             Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")!,

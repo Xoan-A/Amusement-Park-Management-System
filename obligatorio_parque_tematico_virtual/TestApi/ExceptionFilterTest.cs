@@ -68,7 +68,7 @@ public class ExceptionFilterTest
     [TestMethod]
     public void OnException_WhenExceptionIsUnauthorized_ShouldResponse401()
     {
-        _context.Exception = new Domain.Exceptions.UnauthorizedException("Unauthorized access");
+        _context.Exception = new IBusinessLogic.Exceptions.UnauthorizedException("Unauthorized access");
         _attribute.OnException(_context);
 
         ObjectResult? response = _context.Result as ObjectResult;
@@ -80,7 +80,7 @@ public class ExceptionFilterTest
     [TestMethod]
     public void OnException_WhenExceptionIsForbidden_ShouldResponse403()
     {
-        _context.Exception = new Domain.Exceptions.ForbiddenException("Forbidden access");
+        _context.Exception = new IBusinessLogic.Exceptions.ForbiddenException("Forbidden access");
         _attribute.OnException(_context);
 
         ObjectResult? response = _context.Result as ObjectResult;

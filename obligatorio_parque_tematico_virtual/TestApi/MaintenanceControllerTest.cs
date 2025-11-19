@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using Microsoft.Data.Sqlite;
 using Microsoft.IdentityModel.Tokens;
+using Api;
 
 namespace ApiTests;
 
