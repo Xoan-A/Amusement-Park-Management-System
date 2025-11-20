@@ -19,26 +19,26 @@ public class EventController : ControllerBase
 
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetEvents()
+    public IActionResult GetEvents()
     {
-        List<EventResponse> events = await _eventLogic.GetAllEvents();
+        List<EventResponse> events = _eventLogic.GetAllEvents();
 
         return Ok(events);
     }
 
     [HttpGet("{id}")]
     [Authorize]
-    public async Task<IActionResult> GetEventById(Guid id)
+    public IActionResult GetEventById(Guid id)
     {
-        EventResponse eventResponse = await _eventLogic.GetEventById(id);
+        EventResponse eventResponse = _eventLogic.GetEventById(id);
         return Ok(eventResponse);
     }
 
     [HttpPost]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> CreateEvent([FromBody] EventRequest newEvent)
+    public IActionResult CreateEvent([FromBody] EventRequest newEvent)
     {
-        Guid newId = await _eventLogic.CreateEvent(newEvent);
+        Guid newId = _eventLogic.CreateEvent(newEvent);
 
         CreateEventResponse response = new CreateEventResponse
         {
@@ -51,9 +51,9 @@ public class EventController : ControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DeleteEventById(Guid id)
+    public IActionResult DeleteEventById(Guid id)
     {
-        await _eventLogic.DeleteEvent(id);
+        _eventLogic.DeleteEvent(id);
         return NoContent();
     }
 }

@@ -6,6 +6,7 @@ using DataAccess.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using BusinessLogic.Mapping;
 
 namespace ApiServiceFactory;
 
@@ -13,20 +14,37 @@ public static class ServiceFactory
 {
     public static void AddServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddAutoMapper(typeof(MappingProfile));
+
         services.AddSingleton<IPasswordLogic, PasswordLogic>();
         services.AddSingleton<ITokenLogic, TokenLogic>();
         services.AddScoped<IStrategyRepository, StrategyRepository>();
         services.AddScoped<IActiveStrategy, ActiveStrategy>();
         services.AddScoped<IAuthLogic, AuthLogic>();
-        services.AddScoped<IUserLogic, UserLogic>();
+        services.AddScoped<IUserValidationService, UserValidationService>();
+        services.AddScoped<IParkEntryLogic, ParkEntryLogic>();
+        services.AddScoped<IUserManagementLogic, UserManagementLogic>();
         services.AddScoped<ITicketLogic, TicketLogic>();
         services.AddScoped<IAttractionLogic, AttractionLogic>();
         services.AddScoped<IAttractionLogicEntity, AttractionLogic>();
         services.AddScoped<IEventLogic, EventLogic>();
+        services.AddScoped<IRewardLogic, RewardLogic>();
+        services.AddScoped<IRedemptionLogic, RedemptionLogic>();
+        services.AddScoped<IScoreHistoryLogic, ScoreHistoryLogic>();
+        services.AddScoped<IClaimsLogic, ClaimsLogic>();
 
-        string? connectionString = configuration.GetConnectionString("DefaultConnection");
+        string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        string projectRoot = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", ".."));
+        string pluginsPath = Path.Combine(projectRoot, "BusinessLogic", "Plugins");
+        services.AddSingleton<IPluginLoader>(new BusinessLogic.Plugins.PluginLoader(pluginsPath));
+
+        string connectionString = $"Server={Environment.GetEnvironmentVariable("DB_SERVER")};" +
+                                  $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
+                                  $"User ID={Environment.GetEnvironmentVariable("DB_USER")};" +
+                                  $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};" +
+                                  "TrustServerCertificate=True;Encrypt=False;";
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(connectionString));
+        options.UseSqlServer(connectionString));
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
@@ -34,6 +52,14 @@ public static class ServiceFactory
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IDateTimeRepository, DateTimeRepository>();
+        services.AddScoped<IRewardRepository, RewardRepository>();
+        services.AddScoped<IRedemptionHistoryRepository, RedemptionHistoryRepository>();
+        services.AddScoped<IMaintenanceScheduleRepository, MaintenanceScheduleRepository>();
+        services.AddScoped<IScoreHistoryRepository, ScoreHistoryRepository>();
+        services.AddScoped<IDailyScoreLogic, DailyScoreLogic>();
+        services.AddScoped<IMaintenanceLogic, MaintenanceLogic>();
+        services.AddScoped<IDateObserver, DailyScoreLogic>();
+        services.AddScoped<IDateObserver, MaintenanceLogic>();
         services.AddScoped<IDateTimeLogic, DateTimeLogic>();
     }
 }

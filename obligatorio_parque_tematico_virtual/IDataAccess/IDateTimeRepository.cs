@@ -2,6 +2,6 @@ namespace IDataAccess;
 
 public interface IDateTimeRepository
 {
-    Task<DateTime?> GetConfiguredDateTime();
-    Task SetConfiguredDateTime(DateTime dateTime);
+    DateTime? GetConfiguredDateTime();
+    void SetConfiguredDateTime(DateTime dateTime);
 }

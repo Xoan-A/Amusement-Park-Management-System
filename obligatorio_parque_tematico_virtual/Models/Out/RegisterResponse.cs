@@ -1,5 +1,3 @@
-using System;
-
 namespace Models.Out
 {
     public class RegisterResponse

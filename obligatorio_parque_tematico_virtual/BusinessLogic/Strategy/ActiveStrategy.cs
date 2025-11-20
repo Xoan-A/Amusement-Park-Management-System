@@ -1,6 +1,5 @@
 using Domain;
 using IBusinessLogic;
-using IBusinessLogic.Strategy;
 using IDataAccess;
 using Models.In;
 
@@ -10,44 +9,63 @@ public class ActiveStrategy : IActiveStrategy
 {
     private IConcreteStrategy Strategy;
     private readonly IStrategyRepository _strategyRepository;
+    private readonly IPluginLoader _pluginLoader;
 
-    public ActiveStrategy(IStrategyRepository strategyRepository)
+    public ActiveStrategy(IStrategyRepository strategyRepository, IPluginLoader pluginLoader)
     {
         _strategyRepository = strategyRepository;
+        _pluginLoader = pluginLoader;
         LoadStrategyFromDatabase();
     }
 
     private void LoadStrategyFromDatabase()
     {
-        StrategyConfiguration? config = _strategyRepository.Get().GetAwaiter().GetResult();
+        StrategyConfiguration? config = _strategyRepository.Get();
         if (config != null)
         {
-            Strategy = config.StrategyName switch
+            try
             {
-                "PerAttraction" => new PerAttraction(),
-                "PerEvent" => new PerEvent(),
-                "Combo" => new Combo(config.N ?? throw new ArgumentException("N is required for Combo strategy")),
-                _ => new PerAttraction()
-            };
+                Dictionary<string, object>? parameters = null;
+                if (config.StrategyName == "Combo")
+                {
+                    if (config.N == null)
+                        throw new ArgumentException("N is required for Combo strategy");
+                    parameters = new Dictionary<string, object> { ["n"] = config.N.Value };
+                }
+
+                Strategy = _pluginLoader.CreateStrategyInstance(config.StrategyName, parameters);
+            }
+            catch (KeyNotFoundException)
+            {
+                Strategy = _pluginLoader.CreateStrategyInstance("PerAttraction");
+            }
         }
         else
         {
-            Strategy = new PerAttraction();
+            Strategy = _pluginLoader.CreateStrategyInstance("PerAttraction");
         }
     }
 
-    public async Task SetStrategy(SetStrategyRequest setStrategyRequest)
+    public void SetStrategy(SetStrategyRequest setStrategyRequest)
     {
-        IConcreteStrategy strategy = setStrategyRequest.StrategyName switch
+        Dictionary<string, object>? parameters = null;
+        if (setStrategyRequest.StrategyName == "Combo")
         {
-            "PerAttraction" => new PerAttraction(),
-            "PerEvent" => new PerEvent(),
-            "Combo" => new Combo(
-                setStrategyRequest.N ?? throw new ArgumentException("N is required for Combo strategy")),
-            _ => throw new ArgumentException($"Invalid strategy name: {setStrategyRequest.StrategyName}")
-        };
+            if (setStrategyRequest.N == null)
+                throw new ArgumentException("N is required for Combo strategy");
+            parameters = new Dictionary<string, object> { ["n"] = setStrategyRequest.N.Value };
+        }
 
-        Strategy = strategy;
+        try
+        {
+            IConcreteStrategy strategy =
+            _pluginLoader.CreateStrategyInstance(setStrategyRequest.StrategyName, parameters);
+            Strategy = strategy;
+        }
+        catch (KeyNotFoundException)
+        {
+            throw new ArgumentException($"Invalid strategy name: {setStrategyRequest.StrategyName}");
+        }
 
         StrategyConfiguration config = new StrategyConfiguration
         {
@@ -55,16 +73,16 @@ public class ActiveStrategy : IActiveStrategy
             StrategyName = setStrategyRequest.StrategyName,
             N = setStrategyRequest.N,
         };
-        await _strategyRepository.Update(config);
+        _strategyRepository.Update(config);
     }
 
-    public Task<IConcreteStrategy> GetStrategy()
+    public IConcreteStrategy GetStrategy()
     {
         LoadStrategyFromDatabase();
         if (Strategy == null)
             throw new InvalidOperationException("Strategy not set");
 
-        return Task.FromResult(Strategy);
+        return Strategy;
     }
 
     public static int BasicCalculation(User visitor, Attraction attraction)

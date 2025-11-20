@@ -1,6 +1,7 @@
 using DataAccess.Context;
 using Domain;
 using IDataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories;
 
@@ -11,11 +12,6 @@ public class RoleRepository : IRoleRepository
     public RoleRepository(AppDbContext context)
     {
         _context = context;
-    }
-
-    public List<Role> GetAll()
-    {
-        return _context.Roles.ToList();
     }
 
     public Role? GetByName(string name)

@@ -16,27 +16,19 @@ public class IncidentController : ControllerBase
         _attractionLogic = attractionLogic;
     }
 
-    [HttpGet]
-    [Authorize(Roles = "Operator")]
-    public async Task<IActionResult> GetAttractionIncidents(Guid id)
-    {
-        List<string> incidents = await _attractionLogic.GetAttractionIncidents(id);
-        return Ok(incidents);
-    }
-
     [HttpPut]
     [Authorize(Roles = "Operator")]
-    public async Task<IActionResult> AddIncident(Guid id, [FromBody] IncidentRequest request)
+    public IActionResult AddIncident(Guid id, [FromBody] IncidentRequest request)
     {
-        await _attractionLogic.AddIncident(id, request.Incident);
+        _attractionLogic.AddIncident(id, request.Incident);
         return Ok(new { Message = "Incident reported successfully" });
     }
 
     [HttpDelete]
     [Authorize(Roles = "Operator")]
-    public async Task<IActionResult> RemoveIncident(Guid id, [FromQuery] IncidentRequest request)
+    public IActionResult RemoveIncident(Guid id, [FromQuery] IncidentRequest request)
     {
-        await _attractionLogic.RemoveIncident(id, request.Incident);
+        _attractionLogic.RemoveIncident(id, request.Incident);
         return NoContent();
     }
 }

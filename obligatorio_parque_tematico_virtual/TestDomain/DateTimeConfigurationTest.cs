@@ -12,7 +12,6 @@ namespace TestDomain
 
             DateTimeConfiguration config = new DateTimeConfiguration(testDate);
 
-            Assert.IsNotNull(config);
             Assert.AreEqual(testDate, config.CurrentDateTime);
         }
 

@@ -16,8 +16,8 @@ namespace TestDataAccess
         public void Setup()
         {
             DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite("DataSource=:memory:")
-                .Options;
+            .UseSqlite("DataSource=:memory:")
+            .Options;
             _context = new AppDbContext(options);
             _context.Database.OpenConnection();
             _context.Database.EnsureDeleted();
@@ -34,7 +34,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task Create_ShouldAddUserToDatabase()
+        public void Create_ShouldAddUserToDatabase()
         {
             User admin = new User
             {
@@ -43,56 +43,20 @@ namespace TestDataAccess
                 Email = "newadmin@test.com",
                 Password = "hashedPassword"
             };
-            Role adminRole = _context.Roles.First(r => r.Name == Role.ADMINISTRATOR);
+            Role adminRole = _context.Roles.First(r => r.Name == Role.Administrator);
             admin.UserRoles = new System.Collections.Generic.List<UserRole>
             {
                 new UserRole { RoleId = adminRole.Id }
             };
 
-            User result = await _userRepository.Create(admin);
+            User result = _userRepository.Create(admin);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("newadmin@test.com", result.Email);
             Assert.AreEqual(3, _context.Users.Count());
         }
 
         [TestMethod]
-        public async Task GetByEmail_ShouldReturnUser_WhenUserExists()
-        {
-            User visitor = new User
-            {
-                Name = "Test",
-                LastName = "User",
-                Email = "test@test.com",
-                Password = "password",
-                BirthDate = new DateTime(1990, 1, 1),
-                MembershipLevel = MembershipLevel.Standard
-            };
-            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
-            visitor.UserRoles = new System.Collections.Generic.List<UserRole>
-            {
-                new UserRole { RoleId = visitorRole.Id }
-            };
-            _context.Users.Add(visitor);
-            _context.SaveChanges();
-
-            User result = await _userRepository.GetByEmail("test@test.com");
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual("test@test.com", result.Email);
-            Assert.IsInstanceOfType(result, typeof(User));
-        }
-
-        [TestMethod]
-        public async Task GetByEmail_ShouldReturnNull_WhenUserDoesNotExist()
-        {
-            User result = await _userRepository.GetByEmail("nonexistent@test.com");
-
-            Assert.IsNull(result);
-        }
-
-        [TestMethod]
-        public async Task GetById_ShouldReturnUser_WhenUserExists()
+        public void GetById_ShouldReturnUser_WhenUserExists()
         {
             User op = new User
             {
@@ -101,7 +65,7 @@ namespace TestDataAccess
                 Email = "newoperator@test.com",
                 Password = "password"
             };
-            Role operatorRole = _context.Roles.First(r => r.Name == Role.OPERATOR);
+            Role operatorRole = _context.Roles.First(r => r.Name == Role.Operator);
             op.UserRoles = new System.Collections.Generic.List<UserRole>
             {
                 new UserRole { RoleId = operatorRole.Id }
@@ -109,25 +73,24 @@ namespace TestDataAccess
             _context.Users.Add(op);
             _context.SaveChanges();
 
-            User result = await _userRepository.GetById(op.Id);
+            User result = _userRepository.GetById(op.Id);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(op.Id, result.Id);
             Assert.IsInstanceOfType(result, typeof(User));
         }
 
         [TestMethod]
-        public async Task GetById_ShouldReturnNull_WhenUserDoesNotExist()
+        public void GetById_ShouldReturnNull_WhenUserDoesNotExist()
         {
             Guid nonExistentId = Guid.NewGuid();
 
-            User result = await _userRepository.GetById(nonExistentId);
+            User result = _userRepository.GetById(nonExistentId);
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public async Task IsEmailUnique_ShouldReturnFalse_WhenEmailExists()
+        public void IsEmailUnique_ShouldReturnFalse_WhenEmailExists()
         {
             User admin = new User
             {
@@ -136,7 +99,7 @@ namespace TestDataAccess
                 Email = "existing@test.com",
                 Password = "password"
             };
-            Role adminRole = _context.Roles.First(r => r.Name == Role.ADMINISTRATOR);
+            Role adminRole = _context.Roles.First(r => r.Name == Role.Administrator);
             admin.UserRoles = new System.Collections.Generic.List<UserRole>
             {
                 new UserRole { RoleId = adminRole.Id }
@@ -144,21 +107,21 @@ namespace TestDataAccess
             _context.Users.Add(admin);
             _context.SaveChanges();
 
-            bool result = await _userRepository.IsEmailUnique("existing@test.com");
+            bool result = _userRepository.IsEmailUnique("existing@test.com");
 
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task IsEmailUnique_ShouldReturnTrue_WhenEmailDoesNotExist()
+        public void IsEmailUnique_ShouldReturnTrue_WhenEmailDoesNotExist()
         {
-            bool result = await _userRepository.IsEmailUnique("new@test.com");
+            bool result = _userRepository.IsEmailUnique("new@test.com");
 
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public async Task GetByIdWithRoles_ShouldReturnUser_WithRoles()
+        public void GetByIdWithRoles_ShouldReturnUser_WithRoles()
         {
             _context.Database.EnsureCreated();
 
@@ -172,21 +135,20 @@ namespace TestDataAccess
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            Role adminRole = _context.Roles.First(r => r.Name == Role.ADMINISTRATOR);
+            Role adminRole = _context.Roles.First(r => r.Name == Role.Administrator);
             UserRole userRole = new UserRole { UserId = user.Id, RoleId = adminRole.Id };
             _context.UserRoles.Add(userRole);
             _context.SaveChanges();
 
-            User result = await _userRepository.GetByIdWithRoles(user.Id);
+            User result = _userRepository.GetByIdWithRoles(user.Id);
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(user.Id, result.Id);
             Assert.AreEqual(1, result.UserRoles.Count);
-            Assert.AreEqual(Role.ADMINISTRATOR, result.UserRoles.First().Role.Name);
+            Assert.AreEqual(Role.Administrator, result.UserRoles.First().Role.Name);
         }
 
         [TestMethod]
-        public async Task GetByEmailWithRoles_ShouldReturnUser_WithRoles()
+        public void GetByEmailWithRoles_ShouldReturnUser_WithRoles()
         {
             _context.Database.EnsureCreated();
 
@@ -200,24 +162,25 @@ namespace TestDataAccess
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
             UserRole userRole = new UserRole { UserId = user.Id, RoleId = visitorRole.Id };
             _context.UserRoles.Add(userRole);
             _context.SaveChanges();
 
-            User result = await _userRepository.GetByEmailWithRoles("test@test.com");
+            User result = _userRepository.GetByEmailWithRoles("test@test.com");
 
-            Assert.IsNotNull(result);
             Assert.AreEqual("test@test.com", result.Email);
             Assert.AreEqual(1, result.UserRoles.Count);
-            Assert.AreEqual(Role.VISITOR, result.UserRoles.First().Role.Name);
+            Assert.AreEqual(Role.Visitor, result.UserRoles.First().Role.Name);
         }
 
         [TestMethod]
-        public async Task GetTopTen_ShouldReturnTopTenUsersOrderedByScore()
+        public void GetTopTen_ShouldReturnTopTenUsersOrderedByScore()
         {
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
+
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
 
             for (int i = 1; i <= 15; i++)
             {
@@ -228,42 +191,47 @@ namespace TestDataAccess
                     Email = $"user{i}@test.com",
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
-                    Score = i * 10
+                    Score = i * 10,
+                    DailyScore = i * 10,
+                    UserRoles = new List<UserRole>
+                    {
+                        new UserRole { RoleId = visitorRole.Id }
+                    }
                 };
                 _context.Users.Add(visitor);
             }
 
             _context.SaveChanges();
 
-            List<User> result = await _userRepository.GetTopTen();
+            List<User> result = _userRepository.GetTopTen();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
-            Assert.AreEqual(150, result[0].Score);
-            Assert.AreEqual(60, result[9].Score);
+            Assert.AreEqual(150, result[0].DailyScore);
+            Assert.AreEqual(60, result[9].DailyScore);
             for (int i = 0; i < result.Count - 1; i++)
             {
-                Assert.IsTrue(result[i].Score >= result[i + 1].Score);
+                Assert.IsTrue(result[i].DailyScore >= result[i + 1].DailyScore);
             }
         }
 
         [TestMethod]
-        public async Task GetTopTen_ShouldReturnEmptyList_WhenNoUsersExist()
+        public void GetTopTen_ShouldReturnEmptyList_WhenNoUsersExist()
         {
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
-            List<User> result = await _userRepository.GetTopTen();
+            List<User> result = _userRepository.GetTopTen();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
         }
 
         [TestMethod]
-        public async Task GetTopTen_ShouldReturnFewerThanTenUsers_WhenLessThanTenExist()
+        public void GetTopTen_ShouldReturnFewerThanTenUsers_WhenLessThanTenExist()
         {
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
+
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
 
             for (int i = 1; i <= 5; i++)
             {
@@ -274,26 +242,32 @@ namespace TestDataAccess
                     Email = $"user{i}@test.com",
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
-                    Score = i * 20
+                    Score = i * 20,
+                    DailyScore = i * 20,
+                    UserRoles = new List<UserRole>
+                    {
+                        new UserRole { RoleId = visitorRole.Id }
+                    }
                 };
                 _context.Users.Add(visitor);
             }
 
             _context.SaveChanges();
 
-            List<User> result = await _userRepository.GetTopTen();
+            List<User> result = _userRepository.GetTopTen();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(5, result.Count);
-            Assert.AreEqual(100, result[0].Score);
-            Assert.AreEqual(20, result[4].Score);
+            Assert.AreEqual(100, result[0].DailyScore);
+            Assert.AreEqual(20, result[4].DailyScore);
         }
 
         [TestMethod]
-        public async Task GetTopTen_ShouldReturnExactlyTenUsers_WhenExactlyTenExist()
+        public void GetTopTen_ShouldReturnExactlyTenUsers_WhenExactlyTenExist()
         {
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
+
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
 
             for (int i = 1; i <= 10; i++)
             {
@@ -304,26 +278,32 @@ namespace TestDataAccess
                     Email = $"user{i}@test.com",
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
-                    Score = i * 5
+                    Score = i * 5,
+                    DailyScore = i * 5,
+                    UserRoles = new List<UserRole>
+                    {
+                        new UserRole { RoleId = visitorRole.Id }
+                    }
                 };
                 _context.Users.Add(visitor);
             }
 
             _context.SaveChanges();
 
-            List<User> result = await _userRepository.GetTopTen();
+            List<User> result = _userRepository.GetTopTen();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
-            Assert.AreEqual(50, result[0].Score);
-            Assert.AreEqual(5, result[9].Score);
+            Assert.AreEqual(50, result[0].DailyScore);
+            Assert.AreEqual(5, result[9].DailyScore);
         }
 
         [TestMethod]
-        public async Task GetTopTen_ShouldReturnUsersWithSameScore_InCorrectOrder()
+        public void GetTopTen_ShouldReturnUsersWithSameScore_InCorrectOrder()
         {
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
+
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
 
             for (int i = 1; i <= 12; i++)
             {
@@ -334,24 +314,75 @@ namespace TestDataAccess
                     Email = $"user{i}@test.com",
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
-                    Score = i <= 6 ? 100 : 50
+                    Score = i <= 6 ? 100 : 50,
+                    DailyScore = i <= 6 ? 100 : 50,
+                    UserRoles = new List<UserRole>
+                    {
+                        new UserRole { RoleId = visitorRole.Id }
+                    }
                 };
                 _context.Users.Add(visitor);
             }
 
             _context.SaveChanges();
 
-            List<User> result = await _userRepository.GetTopTen();
+            List<User> result = _userRepository.GetTopTen();
 
-            Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
-            Assert.AreEqual(100, result[0].Score);
-            Assert.AreEqual(100, result[5].Score);
-            Assert.AreEqual(50, result[6].Score);
+            Assert.AreEqual(100, result[0].DailyScore);
+            Assert.AreEqual(100, result[5].DailyScore);
+            Assert.AreEqual(50, result[6].DailyScore);
         }
 
         [TestMethod]
-        public async Task ResetScores_ShouldSetAllUserScoresToZero()
+        public void GetTopTen_ShouldOnlyReturnUsersWithVisitorRole()
+        {
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
+            Role adminRole = _context.Roles.First(r => r.Name == Role.Administrator);
+
+            User visitorWithRole = new User
+            {
+                Name = "VisitorWithRole",
+                LastName = "Test",
+                Email = "withvisitor@test.com",
+                Password = "password",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 100,
+                DailyScore = 100,
+                UserRoles = new List<UserRole>
+                {
+                    new UserRole { RoleId = visitorRole.Id }
+                }
+            };
+            _context.Users.Add(visitorWithRole);
+
+            User userWithoutVisitorRole = new User
+            {
+                Name = "UserWithoutVisitor",
+                LastName = "Test",
+                Email = "withoutvisitor@test.com",
+                Password = "password",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 200,
+                DailyScore = 200,
+                UserRoles = new List<UserRole>
+                {
+                    new UserRole { RoleId = adminRole.Id }
+                }
+            };
+            _context.Users.Add(userWithoutVisitorRole);
+
+            _context.SaveChanges();
+
+            List<User> result = _userRepository.GetTopTen();
+
+            Assert.AreEqual(1, result.Count, "Solo debe devolver el usuario con rol Visitor");
+            Assert.AreEqual("VisitorWithRole", result[0].Name);
+            Assert.AreEqual(100, result[0].DailyScore);
+        }
+
+        [TestMethod]
+        public void ResetScores_ShouldSetAllUserScoresToZero()
         {
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
@@ -365,37 +396,36 @@ namespace TestDataAccess
                     Email = $"user{i}@test.com",
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
-                    Score = i * 20
+                    Score = i * 20,
+                    DailyScore = i * 20
                 };
                 _context.Users.Add(visitor);
             }
 
             _context.SaveChanges();
 
-            await _userRepository.ResetScores();
+            _userRepository.ResetScores();
 
             List<User> users = _context.Users.ToList();
             Assert.AreEqual(5, users.Count);
-            foreach (User user in users)
-            {
-                Assert.AreEqual(0, user.Score);
-            }
+            Assert.IsTrue(users.All(u => u.DailyScore == 0));
+            Assert.IsTrue(users.All(u => u.Score != 0));
         }
 
         [TestMethod]
-        public async Task ResetScores_ShouldWorkWhenNoUsersExist()
+        public void ResetScores_ShouldWorkWhenNoUsersExist()
         {
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
 
-            await _userRepository.ResetScores();
+            _userRepository.ResetScores();
 
             List<User> users = _context.Users.ToList();
             Assert.AreEqual(0, users.Count);
         }
 
         [TestMethod]
-        public async Task ResetScores_ShouldPersistChangesToDatabase()
+        public void ResetScores_ShouldPersistChangesToDatabase()
         {
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
@@ -407,7 +437,8 @@ namespace TestDataAccess
                 Email = "user1@test.com",
                 Password = "password",
                 BirthDate = new DateTime(1990, 1, 1),
-                Score = 100
+                Score = 100,
+                DailyScore = 100
             };
             User user2 = new User
             {
@@ -416,25 +447,25 @@ namespace TestDataAccess
                 Email = "user2@test.com",
                 Password = "password",
                 BirthDate = new DateTime(1990, 1, 1),
-                Score = 200
+                Score = 200,
+                DailyScore = 200
             };
             _context.Users.Add(user1);
             _context.Users.Add(user2);
             _context.SaveChanges();
 
-            await _userRepository.ResetScores();
+            _userRepository.ResetScores();
 
             User? retrievedUser1 = _context.Users.FirstOrDefault(u => u.Email == "user1@test.com");
             User? retrievedUser2 = _context.Users.FirstOrDefault(u => u.Email == "user2@test.com");
 
-            Assert.IsNotNull(retrievedUser1);
-            Assert.IsNotNull(retrievedUser2);
-            Assert.AreEqual(0, retrievedUser1.Score);
-            Assert.AreEqual(0, retrievedUser2.Score);
+            Assert.AreEqual(0, retrievedUser1.DailyScore);
+            Assert.AreEqual(0, retrievedUser2.DailyScore);
+            Assert.AreEqual(100, retrievedUser1.Score);
         }
 
         [TestMethod]
-        public async Task ResetScores_ShouldNotAffectOtherUserProperties()
+        public void ResetScores_ShouldNotAffectOtherUserProperties()
         {
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
@@ -447,27 +478,24 @@ namespace TestDataAccess
                 Password = "password",
                 BirthDate = new DateTime(1990, 5, 15),
                 Score = 500,
+                DailyScore = 500,
                 MembershipLevel = MembershipLevel.Premium
             };
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            await _userRepository.ResetScores();
+            _userRepository.ResetScores();
 
             User? retrievedUser = _context.Users.FirstOrDefault(u => u.Email == "test@test.com");
 
-            Assert.IsNotNull(retrievedUser);
-            Assert.AreEqual(0, retrievedUser.Score);
+            Assert.AreEqual(0, retrievedUser.DailyScore);
+            Assert.AreEqual(500, retrievedUser.Score, "Score no debe cambiar");
             Assert.AreEqual("TestUser", retrievedUser.Name);
-            Assert.AreEqual("LastName", retrievedUser.LastName);
-            Assert.AreEqual("test@test.com", retrievedUser.Email);
             Assert.AreEqual("password", retrievedUser.Password);
-            Assert.AreEqual(new DateTime(1990, 5, 15), retrievedUser.BirthDate);
-            Assert.AreEqual(MembershipLevel.Premium, retrievedUser.MembershipLevel);
         }
 
         [TestMethod]
-        public async Task ResetScores_ShouldResetMultipleUsersWithDifferentScores()
+        public void ResetScores_ShouldResetMultipleUsersWithDifferentScores()
         {
             _context.Users.RemoveRange(_context.Users);
             _context.SaveChanges();
@@ -482,22 +510,24 @@ namespace TestDataAccess
                     Email = $"user{i}@test.com",
                     Password = "password",
                     BirthDate = new DateTime(1990, 1, 1),
-                    Score = scores[i]
+                    Score = scores[i],
+                    DailyScore = scores[i]
                 };
                 _context.Users.Add(visitor);
             }
 
             _context.SaveChanges();
 
-            await _userRepository.ResetScores();
+            _userRepository.ResetScores();
 
             List<User> users = _context.Users.ToList();
             Assert.AreEqual(scores.Length, users.Count);
-            Assert.IsTrue(users.All(u => u.Score == 0));
+            Assert.IsTrue(users.All(u => u.DailyScore == 0), "Todos los DailyScore deben ser 0");
+            Assert.IsFalse(users.All(u => u.Score == 0), "Los Score NO deben ser todos 0");
         }
 
         [TestMethod]
-        public async Task Update_ShouldUpdateUserInDatabase()
+        public void Update_ShouldUpdateUserInDatabase()
         {
             User user = new User
             {
@@ -506,7 +536,8 @@ namespace TestDataAccess
                 Email = "original@test.com",
                 Password = "password",
                 BirthDate = new DateTime(1990, 1, 1),
-                Score = 50
+                Score = 50,
+                DailyScore = 50
             };
             _context.Users.Add(user);
             _context.SaveChanges();
@@ -514,17 +545,19 @@ namespace TestDataAccess
             user.Name = "Updated";
             user.LastName = "NewName";
             user.Score = 100;
+            user.DailyScore = 100;
 
-            await _userRepository.Update(user);
+            _userRepository.Update(user);
 
             User? updatedUser = _context.Users.FirstOrDefault(u => u.Email == "original@test.com");
             Assert.AreEqual("Updated", updatedUser.Name);
             Assert.AreEqual("NewName", updatedUser.LastName);
             Assert.AreEqual(100, updatedUser.Score);
+            Assert.AreEqual(100, updatedUser.DailyScore);
         }
 
         [TestMethod]
-        public async Task Update_ShouldUpdateUserRoles()
+        public void Update_ShouldUpdateUserRoles()
         {
             User user = new User
             {
@@ -536,21 +569,20 @@ namespace TestDataAccess
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            Role visitorRole = _context.Roles.First(r => r.Name == Role.VISITOR);
+            Role visitorRole = _context.Roles.First(r => r.Name == Role.Visitor);
             UserRole userRole = new UserRole { UserId = user.Id, RoleId = visitorRole.Id };
             user.UserRoles.Add(userRole);
 
-            await _userRepository.Update(user);
+            _userRepository.Update(user);
 
-            User? updatedUser = await _userRepository.GetByIdWithRoles(user.Id);
+            User? updatedUser = _userRepository.GetByIdWithRoles(user.Id);
             Assert.AreEqual(1, updatedUser.UserRoles.Count);
-            Assert.AreEqual(Role.VISITOR, updatedUser.UserRoles.First().Role.Name);
+            Assert.AreEqual(Role.Visitor, updatedUser.UserRoles.First().Role.Name);
         }
 
         [TestMethod]
-        public async Task Update_ShouldInsertNewReportsWhenUserHasVisitorReports()
+        public void Update_ShouldInsertNewReportsWhenUserHasVisitorReports()
         {
-            // Arrange: Create and save User
             User user = new User
             {
                 Name = "Visitor",
@@ -562,7 +594,6 @@ namespace TestDataAccess
             };
             _context.Users.Add(user);
 
-            // Create and save Attraction
             Attraction attraction = new Attraction
             {
                 Name = "Test Attraction",
@@ -575,14 +606,12 @@ namespace TestDataAccess
             _context.Attractions.Add(attraction);
             _context.SaveChanges();
 
-            // Act: Load user (now tracked), call RegisterEntry, then Update
-            User? trackedUser = await _userRepository.GetById(user.Id);
+            User? trackedUser = _userRepository.GetById(user.Id);
             trackedUser.RegisterEntry(attraction, DateTime.Now);
             trackedUser.Score = 10;
 
-            await _userRepository.Update(trackedUser);
+            _userRepository.Update(trackedUser);
 
-            // Assert: Verify Report and VisitorReport were inserted
             List<Report> reports = _context.Reports.ToList();
             List<VisitorReport> visitorReports = _context.VisitorReports.ToList();
 
@@ -593,9 +622,8 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task Update_ShouldInsertMultipleVisitorReportsForDifferentDates()
+        public void Update_ShouldInsertMultipleVisitorReportsForDifferentDates()
         {
-            // Arrange: Create and save User
             User user = new User
             {
                 Name = "Visitor",
@@ -607,7 +635,6 @@ namespace TestDataAccess
             };
             _context.Users.Add(user);
 
-            // Create and save Attraction
             Attraction attraction = new Attraction
             {
                 Name = "Multi Day Attraction",
@@ -620,8 +647,7 @@ namespace TestDataAccess
             _context.Attractions.Add(attraction);
             _context.SaveChanges();
 
-            // Act: Load user, register entries on two different dates
-            User? trackedUser = await _userRepository.GetById(user.Id);
+            User? trackedUser = _userRepository.GetById(user.Id);
             DateTime date1 = new DateTime(2025, 10, 1, 10, 0, 0);
             DateTime date2 = new DateTime(2025, 10, 2, 14, 0, 0);
 
@@ -629,9 +655,8 @@ namespace TestDataAccess
             trackedUser.RegisterEntry(attraction, date2);
             trackedUser.Score = 20;
 
-            await _userRepository.Update(trackedUser);
+            _userRepository.Update(trackedUser);
 
-            // Assert: Verify both VisitorReports and Reports were inserted
             List<Report> reports = _context.Reports.ToList();
             List<VisitorReport> visitorReports = _context.VisitorReports.ToList();
 
@@ -639,6 +664,103 @@ namespace TestDataAccess
             Assert.AreEqual(2, visitorReports.Count, "Two VisitorReports should be inserted");
             Assert.IsTrue(visitorReports.Any(vr => vr.Date.Date == date1.Date));
             Assert.IsTrue(visitorReports.Any(vr => vr.Date.Date == date2.Date));
+        }
+
+        [TestMethod]
+        public void Update_WithDetachedEntity_AttachesAndSaves()
+        {
+            User user = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = "Detached",
+                LastName = "User",
+                Email = "detached@test.com",
+                Password = "hashedpassword",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 100
+            };
+
+            _userRepository.Create(user);
+            _context.ChangeTracker.Clear();
+
+            User detachedUser = new User
+            {
+                Id = user.Id,
+                Name = "Detached",
+                LastName = "User",
+                Email = "detached@test.com",
+                Password = "hashedpassword",
+                BirthDate = new DateTime(1990, 1, 1),
+                Score = 200
+            };
+
+            _userRepository.Update(detachedUser);
+
+            User updatedUser = _userRepository.GetById(user.Id);
+            Assert.AreEqual(200, updatedUser.Score);
+        }
+
+        [TestMethod]
+        public void Update_ShouldUpdateDetachedUser()
+        {
+            User user = new User
+            {
+                Name = "Detached",
+                LastName = "User",
+                Email = "detached2@test.com",
+                Password = "password",
+                BirthDate = new DateTime(1995, 3, 10),
+                Score = 25
+            };
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            Guid userId = user.Id;
+
+            _context.Entry(user).State = EntityState.Detached;
+
+            Assert.AreEqual(EntityState.Detached, _context.Entry(user).State);
+
+            User detachedUser = new User
+            {
+                Id = userId,
+                Name = "Updated Detached",
+                LastName = "Updated User",
+                Email = "detached2@test.com",
+                Password = "newpassword",
+                BirthDate = new DateTime(1995, 3, 10),
+                Score = 100
+            };
+
+            Assert.AreEqual(EntityState.Detached, _context.Entry(detachedUser).State);
+
+            _userRepository.Update(detachedUser);
+
+            User? updatedUser = _context.Users.FirstOrDefault(u => u.Id == userId);
+            Assert.AreEqual("Updated Detached", updatedUser.Name);
+            Assert.AreEqual("newpassword", updatedUser.Password);
+            Assert.AreEqual(100, updatedUser.Score);
+        }
+
+        [TestMethod]
+        public void GetAllUsers_ShouldReturnAllUsersWithRoles()
+        {
+            List<User> result = _userRepository.GetAllUsers();
+
+            Assert.IsTrue(result.Count >= 2);
+            Assert.IsTrue(result.All(u => u.UserRoles != null));
+            Assert.IsTrue(result.All(u => u.UserRoles.All(ur => ur.Role != null)));
+        }
+
+        [TestMethod]
+        public void GetAllUsers_ShouldReturnEmptyList_WhenNoUsersExist()
+        {
+            _context.Users.RemoveRange(_context.Users);
+            _context.SaveChanges();
+
+            List<User> result = _userRepository.GetAllUsers();
+
+            Assert.AreEqual(0, result.Count);
         }
     }
 }

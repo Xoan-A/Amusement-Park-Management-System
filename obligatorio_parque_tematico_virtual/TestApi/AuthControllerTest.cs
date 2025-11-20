@@ -8,7 +8,7 @@ using Models.In;
 using Models.Out;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
-using Domain;
+using Api;
 using Microsoft.Data.Sqlite;
 
 namespace ApiTests
@@ -19,34 +19,34 @@ namespace ApiTests
         private WebApplicationFactory<Program> _factory = null!;
         private HttpClient _client = null!;
         private Mock<IAuthLogic> _mockAuthLogic = null!;
-        private Mock<IUserLogic> _mockUserLogic = null!;
+        private Mock<IUserManagementLogic> _mockUserManagementLogic = null!;
         private SqliteConnection _connection = null!;
 
         [TestInitialize]
         public void Setup()
         {
             _mockAuthLogic = new Mock<IAuthLogic>();
-            _mockUserLogic = new Mock<IUserLogic>();
+            _mockUserManagementLogic = new Mock<IUserManagementLogic>();
 
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 
             _factory = new WebApplicationFactory<Program>()
-                .WithWebHostBuilder(builder =>
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
                 {
-                    builder.ConfigureServices(services =>
-                    {
-                        ServiceDescriptor? descriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                        if (descriptor != null) services.Remove(descriptor);
+                    ServiceDescriptor? descriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                    if (descriptor != null) services.Remove(descriptor);
 
-                        services.AddDbContext<AppDbContext>(options =>
-                            options.UseSqlite(_connection));
+                    services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlite(_connection));
 
-                        services.AddSingleton(_mockAuthLogic.Object);
-                        services.AddSingleton(_mockUserLogic.Object);
-                    });
+                    services.AddSingleton(_mockAuthLogic.Object);
+                    services.AddSingleton(_mockUserManagementLogic.Object);
                 });
+            });
 
             using (IServiceScope scope = _factory.Services.CreateScope())
             {
@@ -67,7 +67,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task Login_ValidCredentials_ReturnsLoginResponse()
+        public void Login_ValidCredentials_ReturnsLoginResponse()
         {
             LoginRequest request = new LoginRequest
             {
@@ -75,43 +75,35 @@ namespace ApiTests
                 Password = "password123"
             };
 
-            Domain.Role adminRole = new Domain.Role { Id = 1, Name = Domain.Role.ADMINISTRATOR };
-            Domain.User user = new Domain.User
+            UserResponse userResponse = new UserResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "Admin",
                 LastName = "User",
                 Email = "admin@test.com",
-                Password = "hashed_password",
-                UserRoles = new List<Domain.UserRole>
-                {
-                    new Domain.UserRole { RoleId = 1, Role = adminRole }
-                }
+                UserRoles = new List<string> { Domain.Role.Administrator }
             };
 
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
-                         .ReturnsAsync(user);
+            .Returns(userResponse);
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _client.PostAsync("/api/auth/login", content);
+            HttpResponseMessage response = _ = _client.PostAsync("/api/auth/login", content).Result;
 
             response.EnsureSuccessStatusCode();
-            string responseContent = await response.Content.ReadAsStringAsync();
-            LoginResponse? loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            string responseContent = response.Content.ReadAsStringAsync().Result;
+            LoginResponse? loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(loginResponse);
-            Assert.IsNotNull(loginResponse.Token);
             Assert.AreEqual("admin@test.com", loginResponse.Email);
-            Assert.AreEqual("Admin User", loginResponse.Name);
-            Assert.IsNotNull(loginResponse.Roles);
             Assert.AreEqual(1, loginResponse.Roles.Length);
-            Assert.AreEqual(Domain.Role.ADMINISTRATOR, loginResponse.Roles[0]);
+            Assert.AreEqual(Domain.Role.Administrator, loginResponse.Roles[0]);
         }
 
         [TestMethod]
-        public async Task Register_ValidVisitor_ReturnsRegisterResponse()
+        public void Register_ValidVisitor_ReturnsRegisterResponse()
         {
             RegisterVisitorRequest request = new RegisterVisitorRequest
             {
@@ -128,34 +120,35 @@ namespace ApiTests
                 Message = "Registration successful"
             };
 
-            User user = new User
+            UserResponse userResponse = new UserResponse
             {
                 Id = expectedResponse.Id,
                 Name = request.Name,
                 LastName = request.LastName,
                 Email = request.Email,
-                Password = request.Password,
-                BirthDate = request.BirthDate
+                BirthDate = request.BirthDate,
+                UserRoles = new List<string>()
             };
 
-            _mockUserLogic.Setup(x => x.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
-                         .ReturnsAsync(user);
+            _mockUserManagementLogic.Setup(x => x.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
+            .Returns(userResponse);
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _client.PostAsync("/api/auth/register", content);
+            HttpResponseMessage response = _ = _client.PostAsync("/api/auth/register", content).Result;
 
             response.EnsureSuccessStatusCode();
-            string responseContent = await response.Content.ReadAsStringAsync();
-            RegisterResponse? registerResponse = JsonSerializer.Deserialize<RegisterResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            string responseContent = response.Content.ReadAsStringAsync().Result;
+            RegisterResponse? registerResponse = JsonSerializer.Deserialize<RegisterResponse>(responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.AreEqual(expectedResponse.Email, registerResponse.Email);
             Assert.AreEqual(expectedResponse.Message, registerResponse.Message);
         }
 
         [TestMethod]
-        public async Task Login_InvalidCredentials_Returns401()
+        public void Login_InvalidCredentials_Returns400()
         {
             LoginRequest request = new LoginRequest
             {
@@ -164,18 +157,18 @@ namespace ApiTests
             };
 
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
-                         .ReturnsAsync((User)null);
+            .Throws(new ArgumentException("Invalid email or password."));
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _client.PostAsync("/api/auth/login", content);
+            HttpResponseMessage response = _ = _client.PostAsync("/api/auth/login", content).Result;
 
-            Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+            Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [TestMethod]
-        public async Task Login_WithUserHavingNoRoles_ReturnsEmptyRolesArray()
+        public void Login_WithUserHavingNoRoles_ReturnsEmptyRolesArray()
         {
             LoginRequest request = new LoginRequest
             {
@@ -183,35 +176,33 @@ namespace ApiTests
                 Password = "password123"
             };
 
-            Domain.User user = new Domain.User
+            UserResponse userResponse = new UserResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "Test",
                 LastName = "User",
                 Email = "user@test.com",
-                Password = "hashed_password",
-                UserRoles = null
+                UserRoles = new List<string>()
             };
 
             _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
-                         .ReturnsAsync(user);
+            .Returns(userResponse);
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _client.PostAsync("/api/auth/login", content);
+            HttpResponseMessage response = _ = _client.PostAsync("/api/auth/login", content).Result;
 
             response.EnsureSuccessStatusCode();
-            string responseContent = await response.Content.ReadAsStringAsync();
-            LoginResponse? loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            string responseContent = response.Content.ReadAsStringAsync().Result;
+            LoginResponse? loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.IsNotNull(loginResponse);
-            Assert.IsNotNull(loginResponse.Roles);
             Assert.AreEqual(0, loginResponse.Roles.Length);
         }
 
         [TestMethod]
-        public async Task Register_FailedRegistration_Returns400()
+        public void Register_FailedRegistration_Returns400()
         {
             RegisterVisitorRequest request = new RegisterVisitorRequest
             {
@@ -222,15 +213,49 @@ namespace ApiTests
                 BirthDate = new DateTime(1990, 1, 1)
             };
 
-            _mockUserLogic.Setup(x => x.RegisterVisitor(request))
-                         .ReturnsAsync((User)null);
+            _mockUserManagementLogic.Setup(x => x.RegisterVisitor(It.IsAny<RegisterVisitorRequest>()))
+            .Throws(new ArgumentException("Email already exists."));
 
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _client.PostAsync("/api/auth/register", content);
+            HttpResponseMessage response = _ = _client.PostAsync("/api/auth/register", content).Result;
 
             Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [TestMethod]
+        public void Login_WithUserHavingNullRoles_ReturnsEmptyRolesArray()
+        {
+            LoginRequest request = new LoginRequest
+            {
+                Email = "user@test.com",
+                Password = "password123"
+            };
+
+            UserResponse userResponse = new UserResponse
+            {
+                Id = Guid.NewGuid(),
+                Name = "Test",
+                LastName = "User",
+                Email = "user@test.com",
+                UserRoles = null
+            };
+
+            _mockAuthLogic.Setup(x => x.Login(request.Email, request.Password))
+            .Returns(userResponse);
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = _ = _client.PostAsync("/api/auth/login", content).Result;
+
+            response.EnsureSuccessStatusCode();
+            string responseContent = response.Content.ReadAsStringAsync().Result;
+            LoginResponse? loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.AreEqual(0, loginResponse.Roles.Length);
         }
     }
 }

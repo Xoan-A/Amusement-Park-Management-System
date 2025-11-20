@@ -3,29 +3,60 @@ using IDataAccess;
 
 namespace BusinessLogic
 {
-    public class DateTimeLogic : IDateTimeLogic
+    public class DateTimeLogic : IDateTimeLogic, IDateSubject
     {
         private readonly IDateTimeRepository _dateTimeRepository;
+        private readonly List<IDateObserver> _observers = new List<IDateObserver>();
+        private DateTime _previousDateTime;
+        private DateTime _currentDateTime;
 
-        public DateTimeLogic(IDateTimeRepository dateTimeRepository)
+        public DateTimeLogic(IDateTimeRepository dateTimeRepository, IEnumerable<IDateObserver> observers)
         {
             _dateTimeRepository = dateTimeRepository;
+
+            foreach (IDateObserver observer in observers)
+            {
+                Attach(observer);
+            }
         }
 
-        public async Task<DateTime> GetCurrentDateTime()
+        public void Attach(IDateObserver observer)
         {
-            return await _dateTimeRepository.GetConfiguredDateTime() ?? DateTime.Now;
+            if (!_observers.Contains(observer))
+            {
+                _observers.Add(observer);
+            }
         }
 
-        public async Task SetDateTime(DateTime dateTime)
+        public void Detach(IDateObserver observer)
         {
-            await _dateTimeRepository.SetConfiguredDateTime(dateTime);
+            _observers.Remove(observer);
         }
 
-        public async Task SetDateTime(string dateTimeString)
+        public void NotifyDateChange()
         {
-            DateTime dateTime = DateTime.Parse(dateTimeString);
-            await _dateTimeRepository.SetConfiguredDateTime(dateTime);
+            foreach (IDateObserver observer in _observers)
+            {
+                observer.DateUpdated(this);
+            }
+        }
+
+        public DateTime GetPreviousDateTime()
+        {
+            return _previousDateTime;
+        }
+
+        public DateTime GetCurrentDateTime()
+        {
+            return _dateTimeRepository.GetConfiguredDateTime() ?? DateTime.Now;
+        }
+
+        public void SetDateTime(DateTime dateTime)
+        {
+            _previousDateTime = _dateTimeRepository.GetConfiguredDateTime() ?? DateTime.Now;
+            _dateTimeRepository.SetConfiguredDateTime(dateTime);
+            _currentDateTime = dateTime;
+            NotifyDateChange();
         }
     }
 }

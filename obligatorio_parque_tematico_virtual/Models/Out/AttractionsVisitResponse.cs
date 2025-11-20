@@ -1,8 +1,6 @@
-﻿using Domain;
-
-namespace Models.Out;
+﻿namespace Models.Out;
 
 public class AttractionsVisitResponse
 {
-    public List<(AttractionResponse, int)> AttractionsVisits { get; set; } = new List<(AttractionResponse, int)>();
+    public List<AttractionVisitDetail> AttractionsVisits { get; set; } = new List<AttractionVisitDetail>();
 }

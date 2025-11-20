@@ -14,8 +14,10 @@ public class ReportRepository : IReportRepository
         _context = context;
     }
 
-    public async Task<List<Report>> GetAllReports()
+    public List<Report> GetAllReports()
     {
-        return await _context.Reports.ToListAsync();
+        return _context.Reports
+        .Include(r => r.Attraction)
+        .Include(r => r.VisitorReport).ToList();
     }
 }

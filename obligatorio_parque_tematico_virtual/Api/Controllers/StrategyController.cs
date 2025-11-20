@@ -1,5 +1,4 @@
 using IBusinessLogic;
-using IBusinessLogic.Strategy;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.In;
@@ -12,19 +11,19 @@ namespace Api.Controllers;
 public class StrategyController : ControllerBase
 {
     private readonly IActiveStrategy _activeStrategy;
-    private readonly IUserLogic _userLogic;
+    private readonly IUserManagementLogic _userManagementLogic;
 
-    public StrategyController(IActiveStrategy activeStrategy, IUserLogic userLogic)
+    public StrategyController(IActiveStrategy activeStrategy, IUserManagementLogic userManagementLogic)
     {
         _activeStrategy = activeStrategy;
-        _userLogic = userLogic;
+        _userManagementLogic = userManagementLogic;
     }
 
     [HttpGet]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetStrategy()
+    public IActionResult GetStrategy()
     {
-        IConcreteStrategy strategy = await _activeStrategy.GetStrategy();
+        IConcreteStrategy strategy = _activeStrategy.GetStrategy();
 
         StrategyResponse response = new StrategyResponse
         {
@@ -36,9 +35,9 @@ public class StrategyController : ControllerBase
 
     [HttpPut]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> SetStrategy([FromBody] SetStrategyRequest setStrategyRequest)
+    public IActionResult SetStrategy([FromBody] SetStrategyRequest setStrategyRequest)
     {
-        await _activeStrategy.SetStrategy(setStrategyRequest);
+        _activeStrategy.SetStrategy(setStrategyRequest);
 
         MessageResponse response = new MessageResponse
         {
@@ -50,9 +49,9 @@ public class StrategyController : ControllerBase
 
     [HttpGet("topTen")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetTopTen()
+    public IActionResult GetTopTen()
     {
-        TopTenResponse response = await _userLogic.GetTopTenUsers();
+        TopTenResponse response = _userManagementLogic.GetTopTenUsers();
         return Ok(response);
     }
 }

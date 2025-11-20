@@ -14,35 +14,33 @@ namespace DataAccess.Repositories
             _context = context;
         }
 
-        public async Task<Ticket> AddAsync(Ticket ticket)
+        public Ticket Add(Ticket ticket)
         {
             _context.Tickets.Add(ticket);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return ticket;
         }
 
-        public async Task<Ticket> GetByIdAsync(Guid id)
+        public Ticket GetById(Guid id)
         {
-            return await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
+            return _context.Tickets
+            .Include(t => t.Visitor)
+            .FirstOrDefault(t => t.Id == id);
         }
 
-        public async Task<IEnumerable<Ticket>> GetByVisitorIdAsync(Guid visitorId)
+        public IEnumerable<Ticket> GetByVisitorId(Guid visitorId)
         {
-            return await _context.Tickets
-                .Where(t => t.VisitorId == visitorId)
-                .ToListAsync();
+            return _context.Tickets
+            .Include(t => t.Visitor)
+            .Where(t => t.VisitorId == visitorId)
+            .ToList();
         }
 
-        public async Task<Ticket> GetByQRCodeAsync(Guid qrCode)
+        public Ticket GetByQRCode(Guid qrCode)
         {
-            return await _context.Tickets.FirstOrDefaultAsync(t => t.QRCode == qrCode);
-        }
-
-        public async Task<IEnumerable<Ticket>> GetByVisitDateAsync(DateTime visitDate)
-        {
-            return await _context.Tickets
-                .Where(t => t.VisitDate.Date == visitDate.Date)
-                .ToListAsync();
+            return _context.Tickets
+            .Include(t => t.Visitor)
+            .FirstOrDefault(t => t.QRCode == qrCode);
         }
     }
 }

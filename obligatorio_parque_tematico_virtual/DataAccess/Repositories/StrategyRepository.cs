@@ -14,14 +14,14 @@ public class StrategyRepository : IStrategyRepository
         _context = context;
     }
 
-    public async Task<StrategyConfiguration?> Get()
+    public StrategyConfiguration? Get()
     {
-        return await _context.StrategyConfigurations.FirstOrDefaultAsync(s => s.Id == 1);
+        return _context.StrategyConfigurations.FirstOrDefault(s => s.Id == 1);
     }
 
-    public async Task Update(StrategyConfiguration strategyConfiguration)
+    public void Update(StrategyConfiguration strategyConfiguration)
     {
-        StrategyConfiguration? existing = await _context.StrategyConfigurations.FirstOrDefaultAsync(s => s.Id == 1);
+        StrategyConfiguration? existing = _context.StrategyConfigurations.FirstOrDefault(s => s.Id == 1);
 
         if (existing != null)
         {
@@ -31,9 +31,9 @@ public class StrategyRepository : IStrategyRepository
         else
         {
             strategyConfiguration.Id = 1;
-            await _context.StrategyConfigurations.AddAsync(strategyConfiguration);
+            _context.StrategyConfigurations.Add(strategyConfiguration);
         }
 
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
     }
 }

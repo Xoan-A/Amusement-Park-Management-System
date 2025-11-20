@@ -4,7 +4,14 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <!-- Exclude generated code and migrations from coverage -->
+        <CodeAnalysisExcludeGeneratedCode>true</CodeAnalysisExcludeGeneratedCode>
     </PropertyGroup>
+
+    <!-- Exclude migrations from code coverage -->
+    <ItemGroup>
+        <Compile Update="Migrations\**\*.cs" ExcludeFromCodeCoverage="true" />
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10" />

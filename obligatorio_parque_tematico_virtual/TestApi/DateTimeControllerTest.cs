@@ -9,6 +9,7 @@ using Models.Out;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using Microsoft.Data.Sqlite;
+using Api;
 
 namespace ApiTests
 {
@@ -29,20 +30,20 @@ namespace ApiTests
             _mockDateTimeLogic = new Mock<IDateTimeLogic>();
 
             _factory = new WebApplicationFactory<Program>()
-                .WithWebHostBuilder(builder =>
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
                 {
-                    builder.ConfigureServices(services =>
-                    {
-                        ServiceDescriptor? descriptor = services.SingleOrDefault(
-                            d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                        if (descriptor != null) services.Remove(descriptor);
+                    ServiceDescriptor? descriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                    if (descriptor != null) services.Remove(descriptor);
 
-                        services.AddDbContext<AppDbContext>(options =>
-                            options.UseSqlite(_connection));
+                    services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlite(_connection));
 
-                        services.AddSingleton(_mockDateTimeLogic.Object);
-                    });
+                    services.AddSingleton(_mockDateTimeLogic.Object);
                 });
+            });
 
             using (IServiceScope scope = _factory.Services.CreateScope())
             {
@@ -63,7 +64,7 @@ namespace ApiTests
         }
 
         [TestMethod]
-        public async Task GetDateTime_ReturnsCurrentDateTime()
+        public void GetDateTime_ReturnsCurrentDateTime()
         {
             DateTime expectedDateTime = new DateTime(2024, 1, 1, 12, 0, 0);
             DateTimeResponse expectedResponse = new DateTimeResponse
@@ -72,19 +73,20 @@ namespace ApiTests
             };
 
             _mockDateTimeLogic.Setup(x => x.GetCurrentDateTime())
-                             .ReturnsAsync(expectedDateTime);
+            .Returns(expectedDateTime);
 
-            HttpResponseMessage response = await _client.GetAsync("/api/datetime");
+            HttpResponseMessage response = _ = _client.GetAsync("/api/datetime").Result;
 
             response.EnsureSuccessStatusCode();
-            string responseContent = await response.Content.ReadAsStringAsync();
-            DateTimeResponse? dateTimeResponse = JsonSerializer.Deserialize<DateTimeResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            string responseContent = response.Content.ReadAsStringAsync().Result;
+            DateTimeResponse? dateTimeResponse = JsonSerializer.Deserialize<DateTimeResponse>(responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             Assert.AreEqual(expectedResponse.CurrentDateTime, dateTimeResponse.CurrentDateTime);
         }
 
         [TestMethod]
-        public async Task SetDateTime_ValidDateTime_ReturnsSuccess()
+        public void SetDateTime_ValidDateTime_ReturnsSuccess()
         {
             SetDateTimeRequest request = new SetDateTimeRequest
             {
@@ -97,10 +99,26 @@ namespace ApiTests
             string json = JsonSerializer.Serialize(request);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _client.PutAsync("/api/datetime", content);
+            HttpResponseMessage response = _ = _client.PutAsync("/api/datetime", content).Result;
 
             response.EnsureSuccessStatusCode();
             _mockDateTimeLogic.Verify(x => x.SetDateTime(expectedDateTime), Times.Once);
+        }
+
+        [TestMethod]
+        public void SetDateTime_InvalidFormat_Returns500()
+        {
+            SetDateTimeRequest request = new SetDateTimeRequest
+            {
+                DateTime = "invalid-date-format"
+            };
+
+            string json = JsonSerializer.Serialize(request);
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = _ = _client.PutAsync("/api/datetime", content).Result;
+
+            Assert.AreEqual(System.Net.HttpStatusCode.InternalServerError, response.StatusCode);
         }
     }
 }

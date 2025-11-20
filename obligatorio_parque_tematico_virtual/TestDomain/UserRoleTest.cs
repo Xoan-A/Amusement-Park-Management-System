@@ -31,8 +31,6 @@ public class UserRoleTest
         userRole.User = user;
         userRole.Role = role;
 
-        Assert.IsNotNull(userRole.User);
-        Assert.IsNotNull(userRole.Role);
         Assert.AreEqual(user, userRole.User);
         Assert.AreEqual(role, userRole.Role);
     }

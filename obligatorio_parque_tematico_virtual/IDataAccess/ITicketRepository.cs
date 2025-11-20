@@ -7,10 +7,9 @@ namespace IDataAccess
 {
     public interface ITicketRepository
     {
-        Task<Ticket> AddAsync(Ticket ticket);
-        Task<Ticket> GetByIdAsync(Guid id);
-        Task<IEnumerable<Ticket>> GetByVisitorIdAsync(Guid visitorId);
-        Task<Ticket> GetByQRCodeAsync(Guid qrCode);
-        Task<IEnumerable<Ticket>> GetByVisitDateAsync(DateTime visitDate);
+        Ticket Add(Ticket ticket);
+        Ticket GetById(Guid id);
+        IEnumerable<Ticket> GetByVisitorId(Guid visitorId);
+        Ticket GetByQRCode(Guid qrCode);
     }
 }

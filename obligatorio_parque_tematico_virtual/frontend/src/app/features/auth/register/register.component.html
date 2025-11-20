@@ -1,0 +1,181 @@
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
+  <div class="row w-100">
+    <div class="col-12 col-md-8 col-lg-6 mx-auto">
+      <div class="card shadow">
+        <div class="card-body p-5">
+          <div class="text-center mb-4">
+            <h2 class="fw-bold">Create Visitor Account</h2>
+            <p class="text-muted">Join Parque Temático Virtual</p>
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              {{ errorMessage }}
+              <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
+            </div>
+          }
+
+          @if (successMessage) {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              {{ successMessage }}
+            </div>
+          }
+
+          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="name" class="form-label">First Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="name?.invalid && name?.touched"
+                  id="name"
+                  formControlName="name"
+                  placeholder="Enter your first name"
+                >
+                @if (name?.invalid && name?.touched) {
+                  <div class="invalid-feedback">
+                    @if (name?.errors?.['required']) {
+                      First name is required
+                    }
+                    @if (name?.errors?.['minlength']) {
+                      First name must be at least 2 characters
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="lastName?.invalid && lastName?.touched"
+                  id="lastName"
+                  formControlName="lastName"
+                  placeholder="Enter your last name"
+                >
+                @if (lastName?.invalid && lastName?.touched) {
+                  <div class="invalid-feedback">
+                    @if (lastName?.errors?.['required']) {
+                      Last name is required
+                    }
+                    @if (lastName?.errors?.['minlength']) {
+                      Last name must be at least 2 characters
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                [class.is-invalid]="email?.invalid && email?.touched"
+                id="email"
+                formControlName="email"
+                placeholder="Enter your email"
+              >
+              @if (email?.invalid && email?.touched) {
+                <div class="invalid-feedback">
+                  @if (email?.errors?.['required']) {
+                    Email is required
+                  }
+                  @if (email?.errors?.['email']) {
+                    Please enter a valid email address
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  [class.is-invalid]="password?.invalid && password?.touched"
+                  id="password"
+                  formControlName="password"
+                  placeholder="Enter password"
+                >
+                @if (password?.invalid && password?.touched) {
+                  <div class="invalid-feedback">
+                    @if (password?.errors?.['required']) {
+                      Password is required
+                    }
+                    @if (password?.errors?.['minlength']) {
+                      Password must be at least 6 characters
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  [class.is-invalid]="confirmPassword?.invalid && confirmPassword?.touched"
+                  id="confirmPassword"
+                  formControlName="confirmPassword"
+                  placeholder="Confirm password"
+                >
+                @if (confirmPassword?.invalid && confirmPassword?.touched) {
+                  <div class="invalid-feedback">
+                    @if (confirmPassword?.errors?.['required']) {
+                      Please confirm your password
+                    }
+                    @if (confirmPassword?.errors?.['passwordMismatch']) {
+                      Passwords do not match
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="birthDate" class="form-label">Birth Date *</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [class.is-invalid]="birthDate?.invalid && birthDate?.touched"
+                  id="birthDate"
+                  formControlName="birthDate"
+                >
+                @if (birthDate?.invalid && birthDate?.touched) {
+                  <div class="invalid-feedback">
+                    Birth date is required
+                  </div>
+                }
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary w-100 mb-3"
+              [disabled]="loading"
+            >
+              @if (loading) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Creating account...
+              } @else {
+                Create Account
+              }
+            </button>
+          </form>
+
+          <div class="text-center">
+            <p class="mb-0">
+              Already have an account?
+              <a routerLink="/login" class="text-decoration-none">Sign in</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

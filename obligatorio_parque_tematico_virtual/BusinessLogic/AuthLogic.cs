@@ -1,6 +1,8 @@
+using AutoMapper;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
+using Models.Out;
 
 namespace BusinessLogic
 {
@@ -8,33 +10,29 @@ namespace BusinessLogic
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordLogic _passwordLogic;
+        private readonly IMapper _mapper;
 
-        public AuthLogic(IUserRepository userRepository, IPasswordLogic passwordLogic)
+        public AuthLogic(IUserRepository userRepository, IPasswordLogic passwordLogic, IMapper mapper)
         {
             _userRepository = userRepository;
             _passwordLogic = passwordLogic;
+            _mapper = mapper;
         }
 
-        public async Task<User> Login(string email, string password)
+        public UserResponse Login(string email, string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-            {
-                return null;
-            }
+                throw new ArgumentException("Email and password must be provided.");
 
-            User user = await _userRepository.GetByEmailWithRoles(email);
+            User user = _userRepository.GetByEmailWithRoles(email);
             if (user == null)
-            {
-                return null;
-            }
+                throw new ArgumentException("Invalid email or password.");
 
             bool isPasswordValid = _passwordLogic.VerifyPassword(password, user.Password);
             if (!isPasswordValid)
-            {
-                return null;
-            }
+                throw new ArgumentException("Invalid email or password.");
 
-            return user;
+            return _mapper.Map<UserResponse>(user);
         }
     }
 }

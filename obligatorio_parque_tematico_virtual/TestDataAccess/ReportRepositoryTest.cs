@@ -16,8 +16,8 @@ public class ReportRepositoryTest
     public void Setup()
     {
         DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite("DataSource=:memory:")
-            .Options;
+        .UseSqlite("DataSource=:memory:")
+        .Options;
         _context = new AppDbContext(options);
         _context.Database.OpenConnection();
         _context.Database.EnsureDeleted();
@@ -33,7 +33,7 @@ public class ReportRepositoryTest
     }
 
     [TestMethod]
-    public async Task GetAllReports_ShouldReturnAllReportsWithAttractions()
+    public void GetAllReports_ShouldReturnAllReportsWithAttractions()
     {
         Guid attraction1Id = Guid.NewGuid();
         Guid attraction2Id = Guid.NewGuid();
@@ -60,9 +60,9 @@ public class ReportRepositoryTest
             CurrentCapacity = 0
         };
 
-        await _context.Attractions.AddAsync(attraction1);
-        await _context.Attractions.AddAsync(attraction2);
-        await _context.SaveChangesAsync();
+        _context.Attractions.Add(attraction1);
+        _context.Attractions.Add(attraction2);
+        _context.SaveChanges();
 
         User user = new User
         {
@@ -76,8 +76,8 @@ public class ReportRepositoryTest
             Score = 100
         };
 
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
+        _context.Users.Add(user);
+        _context.SaveChanges();
 
         Guid visitorReport1Id = Guid.NewGuid();
         Guid visitorReport2Id = Guid.NewGuid();
@@ -96,9 +96,9 @@ public class ReportRepositoryTest
             VisitorId = user.Id
         };
 
-        await _context.VisitorReports.AddAsync(visitorReport1);
-        await _context.VisitorReports.AddAsync(visitorReport2);
-        await _context.SaveChangesAsync();
+        _context.VisitorReports.Add(visitorReport1);
+        _context.VisitorReports.Add(visitorReport2);
+        _context.SaveChanges();
 
         Report report1 = new Report
         {
@@ -118,11 +118,11 @@ public class ReportRepositoryTest
             VisitorReportId = visitorReport2Id
         };
 
-        await _context.Reports.AddAsync(report1);
-        await _context.Reports.AddAsync(report2);
-        await _context.SaveChangesAsync();
+        _context.Reports.Add(report1);
+        _context.Reports.Add(report2);
+        _context.SaveChanges();
 
-        List<Report> reports = await _reportRepository.GetAllReports();
+        List<Report> reports = _reportRepository.GetAllReports();
 
         Assert.AreEqual(2, reports.Count);
         Assert.IsTrue(reports.Any(r => r.Id == report1.Id && r.Attraction.Name == "A"));
@@ -130,9 +130,9 @@ public class ReportRepositoryTest
     }
 
     [TestMethod]
-    public async Task GetAllReports_ShouldReturnEmptyList_WhenNoReportsExist()
+    public void GetAllReports_ShouldReturnEmptyList_WhenNoReportsExist()
     {
-        List<Report> reports = await _reportRepository.GetAllReports();
+        List<Report> reports = _reportRepository.GetAllReports();
 
         Assert.AreEqual(0, reports.Count);
     }

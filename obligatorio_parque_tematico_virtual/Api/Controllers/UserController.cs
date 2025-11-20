@@ -3,7 +3,6 @@ using IBusinessLogic;
 using Microsoft.AspNetCore.Authorization;
 using Models.In;
 using Models.Out;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace Api.Controllers;
 
@@ -11,34 +10,39 @@ namespace Api.Controllers;
 [Route("api/users")]
 public class UserController : ControllerBase
 {
-    private readonly IUserLogic _userLogic;
+    private readonly IUserManagementLogic _userManagementLogic;
+    private readonly IClaimsLogic _claimsLogic;
 
-    public UserController(IUserLogic userLogic)
+    public UserController(IUserManagementLogic userManagementLogic, IClaimsLogic claimsLogic)
     {
-        _userLogic = userLogic;
+        _userManagementLogic = userManagementLogic;
+        _claimsLogic = claimsLogic;
     }
 
     [HttpGet("{userId}")]
-    [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetUserById(Guid userId)
+    [Authorize]
+    public IActionResult GetUserById(Guid userId)
     {
-        UserResponse user = await _userLogic.GetUserResponseById(userId);
+        Guid currentUserId = _claimsLogic.GetCurrentUserId(User);
+        bool isAdmin = User.IsInRole("Administrator");
+
+        UserResponse user = _userManagementLogic.GetUserResponseById(userId, currentUserId, isAdmin);
         return Ok(user);
     }
 
     [HttpPost]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
+    public IActionResult CreateUser([FromBody] CreateUserRequest request)
     {
-        UserResponse user = await _userLogic.CreateUser(request);
+        UserResponse user = _userManagementLogic.CreateUser(request);
         return CreatedAtAction(nameof(GetUserById), new { userId = user.Id }, user);
     }
 
     [HttpPut("{userId}/roles")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> AddRoleToUser(Guid userId, [FromBody] AddRolesRequest request)
+    public IActionResult AddRoleToUser(Guid userId, [FromBody] AddRolesRequest request)
     {
-        await _userLogic.AddRoleToUser(userId, request.Role);
+        _userManagementLogic.AddRoleToUser(userId, request.Role);
 
         MessageResponse response = new MessageResponse
         {
@@ -50,10 +54,26 @@ public class UserController : ControllerBase
 
     [HttpPut("{userId}")]
     [Authorize]
-    public async Task<IActionResult> ModifyUser(Guid userId, [FromBody] ModifyUserRequest request)
+    public IActionResult ModifyUser(Guid userId, [FromBody] ModifyUserRequest request)
     {
-        string actorSubClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        UserResponse updated = await _userLogic.ModifyUser(userId, actorSubClaim, request);
+        Guid userTokenId = _claimsLogic.GetCurrentUserId(User);
+        UserResponse updated = _userManagementLogic.ModifyUser(userId, userTokenId, request);
         return Ok(updated);
+    }
+
+    [HttpPut("{userId}/membership")]
+    [Authorize(Roles = "Administrator")]
+    public IActionResult ChangeMembershipLevel(Guid userId, [FromBody] ChangeMembershipLevelRequest request)
+    {
+        UserResponse updated = _userManagementLogic.ChangeMembershipLevel(userId, request.MembershipLevel);
+        return Ok(updated);
+    }
+
+    [HttpGet]
+    [Authorize(Roles = "Administrator")]
+    public IActionResult GetAllUsers()
+    {
+        List<UserResponse> users = _userManagementLogic.GetAllUsers();
+        return Ok(users);
     }
 }

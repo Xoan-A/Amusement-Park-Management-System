@@ -11,9 +11,9 @@ namespace Api.Controllers;
 public class AttractionController : ControllerBase
 {
     private readonly IAttractionLogic _attractionLogic;
-    private readonly IUserLogic _userService;
+    private readonly IUserManagementLogic _userService;
 
-    public AttractionController(IAttractionLogic attractionLogic, IUserLogic userService)
+    public AttractionController(IAttractionLogic attractionLogic, IUserManagementLogic userService)
     {
         _attractionLogic = attractionLogic;
         _userService = userService;
@@ -21,42 +21,30 @@ public class AttractionController : ControllerBase
 
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetAttractions()
+    public IActionResult GetAttractions()
     {
-        List<AttractionResponse> attractions = await _attractionLogic.GetAllAttractions();
-        AllAttractionsResponse response = new AllAttractionsResponse();
-
-        foreach (AttractionResponse attraction in attractions)
+        List<AttractionResponse> attractions = _attractionLogic.GetAllAttractions();
+        AllAttractionsResponse response = new AllAttractionsResponse
         {
-            response.Attractions.Add(new AttractionResponse()
-            {
-                Id = attraction.Id,
-                Name = attraction.Name,
-                Description = attraction.Description,
-                Type = attraction.Type.ToString(),
-                MinAge = attraction.MinAge,
-                MaxCapacity = attraction.MaxCapacity,
-                CurrentCapacity = attraction.CurrentCapacity,
-                IsActive = attraction.IsActive
-            });
-        }
+            Attractions = attractions
+        };
 
         return Ok(response);
     }
 
     [HttpGet("{id}")]
     [Authorize]
-    public async Task<IActionResult> GetAttractionById(Guid id)
+    public IActionResult GetAttractionById(Guid id)
     {
-        AttractionResponse attraction = await _attractionLogic.GetAttractionById(id);
+        AttractionResponse attraction = _attractionLogic.GetAttractionById(id);
         return Ok(attraction);
     }
 
     [HttpPost]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> CreateAttraction([FromBody] AttractionRequest newAttraction)
+    public IActionResult CreateAttraction([FromBody] AttractionRequest newAttraction)
     {
-        Guid newId = await _attractionLogic.CreateAttraction(newAttraction);
+        Guid newId = _attractionLogic.CreateAttraction(newAttraction);
 
         CreateAttractionResponse response = new CreateAttractionResponse
         {
@@ -68,9 +56,9 @@ public class AttractionController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdateAttraction(Guid id, [FromBody] AttractionRequest updatedAttraction)
+    public IActionResult UpdateAttraction(Guid id, [FromBody] AttractionRequest updatedAttraction)
     {
-        await _attractionLogic.UpdateAttraction(id, updatedAttraction);
+        _attractionLogic.UpdateAttraction(id, updatedAttraction);
         MessageResponse response = new MessageResponse
         {
             Message = "Attraction updated successfully"
@@ -80,17 +68,17 @@ public class AttractionController : ControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DeleteAttraction(Guid id)
+    public IActionResult DeleteAttraction(Guid id)
     {
-        await _attractionLogic.DeleteAttraction(id);
+        _attractionLogic.DeleteAttraction(id);
         return NoContent();
     }
 
     [HttpPut("entry/{id}")]
     [Authorize(Roles = "Operator")]
-    public async Task<IActionResult> RegisterEntry(Guid id, [FromBody] RegisterEntryRequest registerEntryRequest)
+    public IActionResult RegisterEntry(Guid id, [FromBody] RegisterEntryRequest registerEntryRequest)
     {
-        await _userService.RegisterEntry(id, registerEntryRequest);
+        _userService.RegisterEntry(id, registerEntryRequest);
 
         MessageResponse response = new MessageResponse
         {
@@ -101,9 +89,9 @@ public class AttractionController : ControllerBase
 
     [HttpPut("exit/{id}")]
     [Authorize(Roles = "Operator")]
-    public async Task<IActionResult> RegisterExit(Guid id, [FromBody] RegisterExitRequest registerExitRequest)
+    public IActionResult RegisterExit(Guid id, [FromBody] RegisterExitRequest registerExitRequest)
     {
-        await _userService.RegisterExit(id, registerExitRequest);
+        _userService.RegisterExit(id, registerExitRequest);
 
         MessageResponse response = new MessageResponse
         {
@@ -112,24 +100,16 @@ public class AttractionController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("capacity/{id}")]
-    [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetCapacity(Guid id)
-    {
-        CapacityResponse capacity = await _attractionLogic.GetCapacity(id);
-        return Ok(capacity);
-    }
-
     [HttpGet("visits")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetAttractionsVisits([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+    public IActionResult GetAttractionsVisits([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
     {
         AttractionsVisitsRequest request = new AttractionsVisitsRequest
         {
             StartDate = startDate,
             EndDate = endDate
         };
-        AttractionsVisitResponse visits = await _attractionLogic.GetAllAttractionsVisits(request);
+        AttractionsVisitResponse visits = _attractionLogic.GetAllAttractionsVisits(request);
         return Ok(visits);
     }
 }

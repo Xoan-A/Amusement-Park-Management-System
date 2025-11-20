@@ -15,6 +15,10 @@ namespace DataAccess.Context
         public virtual DbSet<Report> Reports { get; set; }
         public virtual DbSet<StrategyConfiguration> StrategyConfigurations { get; set; }
         public virtual DbSet<DateTimeConfiguration> DateTimeConfigurations { get; set; }
+        public virtual DbSet<Reward> Rewards { get; set; }
+        public virtual DbSet<RedemptionHistory> RedemptionHistories { get; set; }
+        public virtual DbSet<MaintenanceSchedule> MaintenanceSchedules { get; set; }
+        public virtual DbSet<ScoreHistory> ScoreHistories { get; set; }
 
         public AppDbContext()
         {
@@ -48,9 +52,9 @@ namespace DataAccess.Context
                 .HasForeignKey(ur => ur.RoleId);
 
             modelBuilder.Entity<Role>().HasData(
-                new Role { Id = 1, Name = Role.ADMINISTRATOR },
-                new Role { Id = 2, Name = Role.OPERATOR },
-                new Role { Id = 3, Name = Role.VISITOR }
+                new Role { Id = 1, Name = Role.Administrator },
+                new Role { Id = 2, Name = Role.Operator },
+                new Role { Id = 3, Name = Role.Visitor }
             );
 
             Guid adminId = Guid.Parse("11111111-1111-1111-1111-111111111111");
@@ -91,6 +95,28 @@ namespace DataAccess.Context
             modelBuilder.Entity<Event>()
                 .HasIndex(e => e.Name)
                 .IsUnique();
+
+            modelBuilder.Entity<Reward>()
+                .HasIndex(r => r.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<RedemptionHistory>()
+                .HasOne(rh => rh.Visitor)
+                .WithMany()
+                .HasForeignKey(rh => rh.VisitorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RedemptionHistory>()
+                .HasOne(rh => rh.Reward)
+                .WithMany()
+                .HasForeignKey(rh => rh.RewardId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MaintenanceSchedule>()
+                .HasOne(ms => ms.Attraction)
+                .WithMany()
+                .HasForeignKey(ms => ms.AttractionId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<EventAttraction>()
                 .HasKey(ea => new { ea.EventId, ea.AttractionId });
@@ -141,6 +167,12 @@ namespace DataAccess.Context
                     N = null,
                 }
             );
+
+            modelBuilder.Entity<ScoreHistory>()
+                .HasOne(sh => sh.Visitor)
+                .WithMany()
+                .HasForeignKey(sh => sh.VisitorId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
         }

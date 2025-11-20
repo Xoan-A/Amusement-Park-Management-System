@@ -1,4 +1,5 @@
-﻿using Domain;
+﻿using AutoMapper;
+using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using Models.In;
@@ -10,6 +11,7 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
 {
     private readonly IAttractionRepository _attractionRepository;
     private readonly IReportRepository _reportRepository;
+    private readonly IMapper _mapper;
 
     private readonly int _nameMaxLength = 100;
     private readonly int _maxDescriptionLength = 500;
@@ -20,93 +22,102 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
     private readonly int _minCurrentCapacity = 0;
     private readonly int _noIncidents = 0;
 
-    public AttractionLogic(IAttractionRepository attractionRepository, IReportRepository reportRepository)
+    public AttractionLogic(IAttractionRepository attractionRepository, IReportRepository reportRepository, IMapper mapper)
     {
         _attractionRepository = attractionRepository;
         _reportRepository = reportRepository;
+        _mapper = mapper;
     }
 
-    public async Task<AttractionResponse> GetAttractionById(Guid id)
+    public AttractionResponse GetAttractionById(Guid id)
     {
-        Attraction attraction = await _attractionRepository.GetById(id);
+        Attraction attraction = _attractionRepository.GetById(id);
         if (attraction == null)
         {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {id}");
+            throw new KeyNotFoundException($"Attraction with id {id} not found");
         }
 
-        return new AttractionResponse()
-        {
-            Id = attraction.Id,
-            Name = attraction.Name,
-            Description = attraction.Description,
-            Type = attraction.Type.ToString(),
-            MinAge = attraction.MinAge,
-            MaxCapacity = attraction.MaxCapacity,
-            CurrentCapacity = attraction.CurrentCapacity,
-            IsActive = attraction.IsActive
-        };
+        return _mapper.Map<AttractionResponse>(attraction);
     }
 
-    public async Task<List<AttractionResponse>> GetAllAttractions()
+    public List<AttractionResponse> GetAllAttractions()
     {
-        List<Attraction> attractions = await _attractionRepository.GetAll();
-        return attractions.Select(attraction => new AttractionResponse()
-        {
-            Id = attraction.Id,
-            Name = attraction.Name,
-            Description = attraction.Description,
-            Type = attraction.Type.ToString(),
-            MinAge = attraction.MinAge,
-            MaxCapacity = attraction.MaxCapacity,
-            CurrentCapacity = attraction.CurrentCapacity,
-            IsActive = attraction.IsActive
-        }).ToList();
+        List<Attraction> attractions = _attractionRepository.GetAll();
+        return _mapper.Map<List<AttractionResponse>>(attractions);
     }
 
-    public async Task<Guid> CreateAttraction(AttractionRequest newAttraction)
+    public Guid CreateAttraction(AttractionRequest newAttraction)
     {
-        await ValidateAttractionRequest(newAttraction);
+        ValidateAttractionRequest(newAttraction);
+
+        if (!Enum.TryParse<AttractionType>(newAttraction.Type, out AttractionType attractionType) ||
+            !Enum.IsDefined(typeof(AttractionType), attractionType))
+        {
+            throw new ArgumentException($"Invalid attraction type: {newAttraction.Type}");
+        }
+
         Attraction attraction = new Attraction()
         {
             Name = newAttraction.Name,
             Description = newAttraction.Description,
-            Type = Enum.Parse<AttractionType>(newAttraction.Type),
+            Type = attractionType,
             MinAge = newAttraction.MinAge,
             MaxCapacity = newAttraction.MaxCapacity,
             CurrentCapacity = 0,
         };
-        await _attractionRepository.Create(attraction);
+        _attractionRepository.Create(attraction);
 
         return attraction.Id;
     }
 
-    public async Task UpdateAttraction(Guid id, AttractionRequest existingAttraction)
+    public void UpdateAttraction(Guid id, AttractionRequest existingAttraction)
     {
-        await ValidateAttractionRequest(existingAttraction, true);
-        Attraction attraction = await _attractionRepository.GetById(id);
+        ValidateAttractionRequest(existingAttraction, true, id);
+        Attraction attraction = _attractionRepository.GetById(id);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"Attraction with id {id} not found");
+        }
+
+        if (!Enum.TryParse<AttractionType>(existingAttraction.Type, out AttractionType attractionType) ||
+            !Enum.IsDefined(typeof(AttractionType), attractionType))
+        {
+            throw new ArgumentException($"Invalid attraction type: {existingAttraction.Type}");
+        }
+
         attraction.Name = existingAttraction.Name;
         attraction.Description = existingAttraction.Description;
-        attraction.Type = Enum.Parse<AttractionType>(existingAttraction.Type);
+        attraction.Type = attractionType;
         attraction.MinAge = existingAttraction.MinAge;
         attraction.MaxCapacity = existingAttraction.MaxCapacity;
         attraction.CurrentCapacity = existingAttraction.CurrentCapacity ?? attraction.CurrentCapacity;
-        await _attractionRepository.Update(attraction);
+        _attractionRepository.Update(attraction);
     }
 
-    public async Task DeleteAttraction(Guid id)
+    public void DeleteAttraction(Guid id)
     {
-        Attraction attraction = await _attractionRepository.GetById(id);
-        await _attractionRepository.Delete(attraction);
+        Attraction attraction = _attractionRepository.GetById(id);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"Attraction with id {id} not found");
+        }
+
+        _attractionRepository.Delete(attraction);
     }
 
-    public async Task<Attraction> GetAttractionEntityById(Guid expectedAttractionId)
+    public Attraction GetAttractionEntityById(Guid expectedAttractionId)
     {
-        return await _attractionRepository.GetById(expectedAttractionId);
+        return _attractionRepository.GetById(expectedAttractionId);
     }
 
-    public async Task<CapacityResponse> GetCapacity(Guid id)
+    public CapacityResponse GetCapacity(Guid id)
     {
-        Attraction attraction = await _attractionRepository.GetById(id);
+        Attraction attraction = _attractionRepository.GetById(id);
+        if (attraction == null)
+        {
+            throw new KeyNotFoundException($"Attraction with id {id} not found");
+        }
+
         return new CapacityResponse()
         {
             Id = attraction.Id,
@@ -115,85 +126,82 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         };
     }
 
-    public async Task<List<string>> GetAttractionIncidents(Guid attractionId)
+    public List<string> GetAttractionIncidents(Guid attractionId)
     {
-        Attraction attraction = await _attractionRepository.GetById(attractionId);
+        Attraction attraction = _attractionRepository.GetById(attractionId);
         if (attraction == null)
         {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+            throw new KeyNotFoundException($"Attraction with id {attractionId} not found");
         }
 
         if (attraction.Incidents.Count == _noIncidents)
         {
-            throw new KeyNotFoundException($"La atracción con id {attractionId} no tiene incidencias");
+            throw new KeyNotFoundException($"Attraction with id {attractionId} has no incidents");
         }
 
         return attraction.Incidents;
     }
 
-    public async Task AddIncident(Guid attractionId, string incidence)
+    public void AddIncident(Guid attractionId, string incidence)
     {
-        Attraction attraction = await _attractionRepository.GetById(attractionId);
+        Attraction attraction = _attractionRepository.GetById(attractionId);
         if (attraction == null)
         {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+            throw new KeyNotFoundException($"Attraction with id {attractionId} not found");
         }
 
         attraction.AddIncident(incidence);
-        await _attractionRepository.Update(attraction);
+        _attractionRepository.Update(attraction);
     }
 
-    public async Task RemoveIncident(Guid attractionId, string incidence)
+    public void RemoveIncident(Guid attractionId, string incidence)
     {
-        Attraction attraction = await _attractionRepository.GetById(attractionId);
+        Attraction attraction = _attractionRepository.GetById(attractionId);
         if (attraction == null)
         {
-            throw new KeyNotFoundException($"No se encontró la atracción con id {attractionId}");
+            throw new KeyNotFoundException($"Attraction with id {attractionId} not found");
         }
 
         attraction.RemoveIncident(incidence);
-        await _attractionRepository.Update(attraction);
+        _attractionRepository.Update(attraction);
     }
 
-    public async Task<AttractionsVisitResponse> GetAllAttractionsVisits(AttractionsVisitsRequest request)
+    public AttractionsVisitResponse GetAllAttractionsVisits(AttractionsVisitsRequest request)
     {
         DateTime startDate = request.StartDate;
         DateTime endDate = request.EndDate;
 
         if (startDate > endDate)
         {
-            throw new ArgumentException("La fecha de inicio no puede ser posterior a la fecha de fin.");
+            throw new ArgumentException("Start date cannot be after end date.");
         }
 
-        List<Report> reports = await _reportRepository.GetAllReports();
-        List<Report> filteredReports = reports.Where(r => r.EnterDate >= startDate && r.EnterDate <= endDate).ToList();
+        List<Report> reports = _reportRepository.GetAllReports();
+        List<Report> filteredReports =
+        reports.Where(r => r.EnterDate.Date >= startDate.Date && r.EnterDate.Date <= endDate.Date).ToList();
 
         AttractionsVisitResponse attractionsVisits = new AttractionsVisitResponse();
-        System.Collections.Generic.IEnumerable<System.Linq.IGrouping<Guid, Report>> groupedReports = filteredReports.GroupBy(r => r.AttractionId);
+        System.Collections.Generic.IEnumerable<System.Linq.IGrouping<Guid, Report>> groupedReports =
+        filteredReports.GroupBy(r => r.AttractionId);
         foreach (System.Linq.IGrouping<Guid, Report> group in groupedReports)
         {
             Attraction attraction = group.First().Attraction;
             int visitCount = group.Count();
-            AttractionResponse attractionRes = new AttractionResponse()
+            AttractionResponse attractionRes = _mapper.Map<AttractionResponse>(attraction);
+            attractionsVisits.AttractionsVisits.Add(new AttractionVisitDetail
             {
-                Id = attraction.Id,
-                Name = attraction.Name,
-                Description = attraction.Description,
-                Type = attraction.Type.ToString(),
-                MinAge = attraction.MinAge,
-                MaxCapacity = attraction.MaxCapacity,
-                CurrentCapacity = attraction.CurrentCapacity,
-                IsActive = attraction.IsActive
-            };
-            attractionsVisits.AttractionsVisits.Add((attractionRes, visitCount));
+                Attraction = attractionRes,
+                VisitCount = visitCount
+            });
         }
 
         return attractionsVisits;
     }
 
-    private async Task ValidateAttractionRequest(AttractionRequest request, bool checkCurrentCapacity = false)
+    private void ValidateAttractionRequest(AttractionRequest request, bool checkCurrentCapacity = false,
+        Guid? excludeAttractionId = null)
     {
-        if (!await IsValidNameAsync(request.Name))
+        if (!IsValidName(request.Name, excludeAttractionId))
         {
             throw new ArgumentException("Invalid or duplicate attraction name.");
         }
@@ -222,16 +230,24 @@ public class AttractionLogic : IAttractionLogic, IAttractionLogicEntity
         }
     }
 
-    private async Task<bool> IsAttractionNameUnique(string name)
+    private bool IsAttractionNameUnique(string name, Guid? excludeId = null)
     {
-        return await _attractionRepository.IsNameUnique(name);
+        Attraction existingAttraction = _attractionRepository.GetByName(name);
+
+        if (existingAttraction == null)
+            return true;
+
+        if (excludeId.HasValue && existingAttraction.Id == excludeId.Value)
+            return true;
+
+        return false;
     }
 
-    private async Task<bool> IsValidNameAsync(string name)
+    private bool IsValidName(string name, Guid? excludeAttractionId = null)
     {
         return !string.IsNullOrWhiteSpace(name)
                && name.Length <= _nameMaxLength
-               && await IsAttractionNameUnique(name);
+               && IsAttractionNameUnique(name, excludeAttractionId);
     }
 
     private bool IsValidDescription(string description)

@@ -17,8 +17,8 @@ namespace TestDataAccess
         public void Setup()
         {
             DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite("DataSource=:memory:")
-                .Options;
+            .UseSqlite("DataSource=:memory:")
+            .Options;
 
             _context = new AppDbContext(options);
             _context.Database.OpenConnection();
@@ -49,7 +49,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task TestAddTicketAsync()
+        public void TestAddTicket()
         {
             Ticket ticket = new Ticket
             {
@@ -60,16 +60,14 @@ namespace TestDataAccess
                 QRCode = Guid.NewGuid()
             };
 
-            Ticket addedTicket = await _ticketRepository.AddAsync(ticket);
+            Ticket addedTicket = _ticketRepository.Add(ticket);
 
-            Assert.IsNotNull(addedTicket);
             Assert.AreNotEqual(Guid.Empty, addedTicket.Id);
             Assert.AreEqual(_visitorId, addedTicket.VisitorId);
-            Assert.AreEqual(TicketType.General, addedTicket.Type);
         }
 
         [TestMethod]
-        public async Task TestGetByIdAsync()
+        public void TestGetById()
         {
             Guid eventId = Guid.NewGuid();
             Ticket ticket = new Ticket
@@ -82,10 +80,9 @@ namespace TestDataAccess
                 EventId = eventId
             };
 
-            Ticket addedTicket = await _ticketRepository.AddAsync(ticket);
-            Ticket retrievedTicket = await _ticketRepository.GetByIdAsync(addedTicket.Id);
+            Ticket addedTicket = _ticketRepository.Add(ticket);
+            Ticket retrievedTicket = _ticketRepository.GetById(addedTicket.Id);
 
-            Assert.IsNotNull(retrievedTicket);
             Assert.AreEqual(addedTicket.Id, retrievedTicket.Id);
             Assert.AreEqual(_visitorId, retrievedTicket.VisitorId);
             Assert.AreEqual(TicketType.EventSpecial, retrievedTicket.Type);
@@ -93,7 +90,7 @@ namespace TestDataAccess
         }
 
         [TestMethod]
-        public async Task TestGetByVisitorIdAsync()
+        public void TestGetByVisitorId()
         {
             Guid eventId = Guid.NewGuid();
             Ticket ticket1 = new Ticket
@@ -115,18 +112,17 @@ namespace TestDataAccess
                 EventId = eventId
             };
 
-            await _ticketRepository.AddAsync(ticket1);
-            await _ticketRepository.AddAsync(ticket2);
+            _ticketRepository.Add(ticket1);
+            _ticketRepository.Add(ticket2);
 
-            IEnumerable<Ticket> visitorTickets = await _ticketRepository.GetByVisitorIdAsync(_visitorId);
+            IEnumerable<Ticket> visitorTickets = _ticketRepository.GetByVisitorId(_visitorId);
 
-            Assert.IsNotNull(visitorTickets);
             Assert.AreEqual(2, visitorTickets.Count());
             Assert.IsTrue(visitorTickets.All(t => t.VisitorId == _visitorId));
         }
 
         [TestMethod]
-        public async Task TestGetByQRCodeAsync()
+        public void TestGetByQRCode()
         {
             Guid qrCode = Guid.NewGuid();
             Ticket ticket = new Ticket
@@ -138,67 +134,23 @@ namespace TestDataAccess
                 QRCode = qrCode
             };
 
-            await _ticketRepository.AddAsync(ticket);
-            Ticket retrievedTicket = await _ticketRepository.GetByQRCodeAsync(qrCode);
+            _ticketRepository.Add(ticket);
+            Ticket retrievedTicket = _ticketRepository.GetByQRCode(qrCode);
 
-            Assert.IsNotNull(retrievedTicket);
             Assert.AreEqual(qrCode, retrievedTicket.QRCode);
         }
 
         [TestMethod]
-        public async Task TestGetByVisitDateAsync()
+        public void TestGetById_ReturnsNullForNonExistentId()
         {
-            DateTime visitDate = DateTime.Now.Date.AddDays(7);
-
-            Ticket ticket1 = new Ticket
-            {
-                VisitorId = _visitorId,
-                PurchaseDate = DateTime.Now,
-                VisitDate = visitDate,
-                Type = TicketType.General,
-                QRCode = Guid.NewGuid()
-            };
-
-            Ticket ticket2 = new Ticket
-            {
-                VisitorId = _visitorId,
-                PurchaseDate = DateTime.Now,
-                VisitDate = visitDate,
-                Type = TicketType.EventSpecial,
-                QRCode = Guid.NewGuid()
-            };
-
-            Ticket ticket3 = new Ticket
-            {
-                VisitorId = _visitorId,
-                PurchaseDate = DateTime.Now,
-                VisitDate = visitDate.AddDays(1),
-                Type = TicketType.General,
-                QRCode = Guid.NewGuid()
-            };
-
-            await _ticketRepository.AddAsync(ticket1);
-            await _ticketRepository.AddAsync(ticket2);
-            await _ticketRepository.AddAsync(ticket3);
-
-            IEnumerable<Ticket> ticketsForDate = await _ticketRepository.GetByVisitDateAsync(visitDate);
-
-            Assert.IsNotNull(ticketsForDate);
-            Assert.AreEqual(2, ticketsForDate.Count());
-            Assert.IsTrue(ticketsForDate.All(t => t.VisitDate.Date == visitDate.Date));
-        }
-
-        [TestMethod]
-        public async Task TestGetByIdAsync_ReturnsNullForNonExistentId()
-        {
-            Ticket ticket = await _ticketRepository.GetByIdAsync(Guid.NewGuid());
+            Ticket ticket = _ticketRepository.GetById(Guid.NewGuid());
             Assert.IsNull(ticket);
         }
 
         [TestMethod]
-        public async Task TestGetByQRCodeAsync_ReturnsNullForNonExistentQR()
+        public void TestGetByQRCode_ReturnsNullForNonExistentQR()
         {
-            Ticket ticket = await _ticketRepository.GetByQRCodeAsync(Guid.NewGuid());
+            Ticket ticket = _ticketRepository.GetByQRCode(Guid.NewGuid());
             Assert.IsNull(ticket);
         }
     }

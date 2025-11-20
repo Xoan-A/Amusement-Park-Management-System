@@ -1,7 +1,9 @@
+using AutoMapper;
 using Domain;
 using IBusinessLogic;
 using IDataAccess;
 using Models.In;
+using Models.Out;
 
 namespace BusinessLogic
 {
@@ -11,35 +13,61 @@ namespace BusinessLogic
         private readonly IUserRepository _userRepository;
         private readonly IDateTimeLogic _dateTimeLogic;
         private readonly IEventRepository _eventRepository;
+        private readonly IMapper _mapper;
         private readonly int _eventDurationHours = 4;
 
         public TicketLogic(ITicketRepository ticketRepository, IUserRepository userRepository,
-            IDateTimeLogic dateTimeLogic, IEventRepository eventRepository)
+            IDateTimeLogic dateTimeLogic, IEventRepository eventRepository, IMapper mapper)
         {
             _ticketRepository = ticketRepository;
             _userRepository = userRepository;
             _dateTimeLogic = dateTimeLogic;
             _eventRepository = eventRepository;
+            _mapper = mapper;
         }
 
-        public async Task<Ticket> PurchaseTicketAsync(PurchaseTicketRequest request)
+        public TicketResponse PurchaseTicket(PurchaseTicketRequest request)
         {
             Guid visitorId = request.VisitorId;
             DateTime visitDate = request.VisitDate;
             TicketType ticketType = (TicketType)request.TicketType;
-            ;
             Guid? eventId = request.EventId;
 
-            User visitor = await _userRepository.GetById(visitorId);
-            if (visitor == null)
+            if (!Enum.IsDefined(typeof(TicketType), ticketType))
             {
-                return null;
+                throw new ArgumentException($"Invalid ticket type: {request.TicketType}");
             }
 
-            DateTime currentDateTime = await _dateTimeLogic.GetCurrentDateTime();
+            if (ticketType == TicketType.EventSpecial)
+            {
+                if (eventId == null)
+                {
+                    throw new ArgumentException("EventSpecial ticket type requires an event ID");
+                }
+
+                Event ticketEvent = _eventRepository.GetById(eventId.Value);
+                if (ticketEvent == null)
+                {
+                    throw new KeyNotFoundException($"Event with ID {eventId} not found");
+                }
+
+                if (ticketEvent.Date.Date != visitDate.Date)
+                {
+                    throw new ArgumentException(
+                        $"Visit date must match the event date ({ticketEvent.Date.Date:yyyy-MM-dd})");
+                }
+            }
+
+            User visitor = _userRepository.GetById(visitorId);
+            if (visitor == null)
+            {
+                throw new KeyNotFoundException($"Visitor with ID {visitorId} not found");
+            }
+
+            DateTime currentDateTime = _dateTimeLogic.GetCurrentDateTime();
             if (visitDate.Date < currentDateTime.Date)
             {
-                return null;
+                throw new ArgumentException("Visit date cannot be in the past");
             }
 
             Ticket newTicket = new Ticket
@@ -52,25 +80,47 @@ namespace BusinessLogic
                 EventId = eventId
             };
 
-            return await _ticketRepository.AddAsync(newTicket);
+            Ticket addedTicket = _ticketRepository.Add(newTicket);
+            Ticket savedTicket = _ticketRepository.GetById(addedTicket.Id);
+
+            return MapToTicketResponse(savedTicket);
         }
 
-        public async Task<Ticket> GetTicketByIdAsync(Guid id)
+        public TicketResponse GetTicketById(Guid id)
         {
-            return await _ticketRepository.GetByIdAsync(id);
+            Ticket ticket = _ticketRepository.GetById(id);
+            if (ticket == null)
+            {
+                throw new KeyNotFoundException($"Ticket with ID {id} not found");
+            }
+
+            return MapToTicketResponse(ticket);
         }
 
-        public async Task<IEnumerable<Ticket>> GetVisitorTicketsAsync(Guid visitorId)
+        public IEnumerable<TicketResponse> GetVisitorTickets(Guid visitorId)
         {
-            return await _ticketRepository.GetByVisitorIdAsync(visitorId);
+            User visitor = _userRepository.GetById(visitorId);
+            if (visitor == null)
+            {
+                throw new KeyNotFoundException($"Visitor with ID {visitorId} not found");
+            }
+
+            IEnumerable<Ticket> tickets = _ticketRepository.GetByVisitorId(visitorId);
+            return tickets.Select(MapToTicketResponse);
         }
 
-        public async Task<Ticket> GetTicketByQRCodeAsync(Guid qrCode)
+        public TicketResponse GetTicketByQRCode(Guid qrCode)
         {
-            return await _ticketRepository.GetByQRCodeAsync(qrCode);
+            Ticket ticket = _ticketRepository.GetByQRCode(qrCode);
+            if (ticket == null)
+            {
+                throw new KeyNotFoundException($"Ticket with QR code {qrCode} not found");
+            }
+
+            return MapToTicketResponse(ticket);
         }
 
-        public async Task<bool> ValidateTicketAsync(Guid? qr, Guid? nfc, DateTime enterDate, Guid? eventId)
+        public bool ValidateTicket(Guid? qr, Guid? nfc, DateTime enterDate, Guid? eventId, Guid attractionId)
         {
             bool isValid = false;
 
@@ -80,25 +130,33 @@ namespace BusinessLogic
             Ticket? ticket;
             if (qr != null)
             {
-                ticket = await GetTicketByQRCodeAsync(qr.Value);
+                ticket = _ticketRepository.GetByQRCode(qr.Value);
                 isValid = ticket != null && ticket.VisitDate.Date == enterDate.Date && ticket.EventId == eventId;
             }
             else
             {
-                IEnumerable<Ticket> tickets = await GetVisitorTicketsAsync(nfc!.Value);
+                IEnumerable<Ticket> tickets = _ticketRepository.GetByVisitorId(nfc!.Value);
                 ticket = tickets.FirstOrDefault(t => t.VisitDate.Date == enterDate.Date && t.EventId == eventId);
                 isValid = ticket != null;
             }
 
-            if (isValid && ticket is { EventId: not null })
+            if (isValid && ticket?.Type == TicketType.EventSpecial && ticket.EventId != null)
             {
-                Event ticketEvent = await _eventRepository.GetById(ticket.EventId.Value);
-                if (ticketEvent.Date.Date != enterDate.Date || ticketEvent.Date.Hour > enterDate.Hour ||
+                Event ticketEvent = _eventRepository.GetById(ticket.EventId.Value);
+                if (ticketEvent.Date.Date != enterDate.Date || ticketEvent.Hour > enterDate.Hour ||
                     ticketEvent.Date.Hour + _eventDurationHours < enterDate.Hour)
+                    isValid = false;
+
+                if (isValid && !ticketEvent.Attractions.Any(ea => ea.AttractionId == attractionId))
                     isValid = false;
             }
 
             return isValid;
+        }
+
+        private TicketResponse MapToTicketResponse(Ticket ticket)
+        {
+            return _mapper.Map<TicketResponse>(ticket);
         }
     }
 }

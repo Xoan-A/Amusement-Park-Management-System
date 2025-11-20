@@ -10,4 +10,5 @@ public class AttractionResponse
     public int MaxCapacity { get; set; }
     public int CurrentCapacity { get; set; }
     public bool IsActive { get; set; }
+    public List<string> Incidents { get; set; } = new List<string>();
 }

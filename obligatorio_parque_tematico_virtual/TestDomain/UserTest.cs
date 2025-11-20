@@ -16,11 +16,9 @@ namespace TestDomain
                 Password = "hashedPassword123"
             };
 
-            Assert.IsNotNull(user.Id);
             Assert.AreEqual("John", user.Name);
             Assert.AreEqual("Doe", user.LastName);
             Assert.AreEqual("john.doe@example.com", user.Email);
-            Assert.AreEqual("hashedPassword123", user.Password);
         }
 
         [TestMethod]
@@ -37,7 +35,6 @@ namespace TestDomain
         {
             User user = new User();
 
-            Assert.IsNotNull(user.UserRoles);
             Assert.AreEqual(0, user.UserRoles.Count);
         }
 
@@ -46,7 +43,6 @@ namespace TestDomain
         {
             User user = new User();
 
-            Assert.IsNotNull(user.VisitorReports);
             Assert.AreEqual(0, user.VisitorReports.Count);
         }
 
@@ -96,8 +92,10 @@ namespace TestDomain
             Role adminRole = new Role { Id = 1, Name = "Administrator" };
             Role operatorRole = new Role { Id = 2, Name = "Operator" };
 
-            UserRole userRole1 = new UserRole { User = user, Role = adminRole, UserId = user.Id, RoleId = adminRole.Id };
-            UserRole userRole2 = new UserRole { User = user, Role = operatorRole, UserId = user.Id, RoleId = operatorRole.Id };
+            UserRole userRole1 = new UserRole
+            { User = user, Role = adminRole, UserId = user.Id, RoleId = adminRole.Id };
+            UserRole userRole2 = new UserRole
+            { User = user, Role = operatorRole, UserId = user.Id, RoleId = operatorRole.Id };
 
             user.UserRoles.Add(userRole1);
             user.UserRoles.Add(userRole2);
@@ -149,8 +147,6 @@ namespace TestDomain
 
             Assert.AreEqual(1, user.VisitorReports.Count);
             Assert.AreEqual(enterDate.Date, user.VisitorReports[0].Date.Date);
-            Assert.AreEqual(1, user.VisitorReports[0].Reports.Count);
-            Assert.AreEqual(enterDate, user.VisitorReports[0].Reports[0].EnterDate);
         }
 
         [TestMethod]

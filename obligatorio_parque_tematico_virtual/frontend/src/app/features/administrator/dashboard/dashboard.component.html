@@ -1,0 +1,109 @@
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="mb-4">Administrator Dashboard</h1>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else {
+    <div class="row g-4">
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">Total Attractions</h5>
+            <p class="display-4 text-primary">{{ totalAttractions }}</p>
+            <a routerLink="/admin/attractions" class="btn btn-primary btn-sm">Manage Attractions</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">Total Events</h5>
+            <p class="display-4 text-success">{{ totalEvents }}</p>
+            <a routerLink="/admin/events" class="btn btn-success btn-sm">Manage Events</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">Current Strategy</h5>
+            <p class="display-6 text-info">{{ currentStrategy || 'N/A' }}</p>
+            <a routerLink="/admin/strategy" class="btn btn-info btn-sm">Manage Strategy</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card text-center" [class.border-danger]="overdueMaintenanceCount > 0">
+          <div class="card-body">
+            <h5 class="card-title">Overdue Maintenance</h5>
+            <p class="display-4" [class.text-danger]="overdueMaintenanceCount > 0" [class.text-muted]="overdueMaintenanceCount === 0">
+              {{ overdueMaintenanceCount }}
+            </p>
+            <a routerLink="/admin/maintenance/schedules" class="btn btn-sm" [class.btn-danger]="overdueMaintenanceCount > 0" [class.btn-outline-secondary]="overdueMaintenanceCount === 0">
+              View Schedules
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Quick Actions</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <a routerLink="/admin/attractions/new" class="btn btn-outline-primary">
+                Add New Attraction
+              </a>
+              <a routerLink="/admin/events/new" class="btn btn-outline-success">
+                Create New Event
+              </a>
+              <a routerLink="/admin/maintenance/schedules/create" class="btn btn-outline-warning">
+                Schedule Maintenance
+              </a>
+              <a routerLink="/admin/users" class="btn btn-outline-secondary">
+                Manage Users
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Analytics</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <a routerLink="/admin/users" class="btn btn-outline-warning">
+                View Top 10 Visitors
+              </a>
+              <a routerLink="/admin/score-history" class="btn btn-outline-secondary">
+                View All Score History
+              </a>
+              <a routerLink="/admin/strategy" class="btn btn-outline-dark">
+                Manage Strategy
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

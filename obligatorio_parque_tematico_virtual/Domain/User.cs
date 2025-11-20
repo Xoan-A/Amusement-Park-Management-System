@@ -12,6 +12,7 @@ namespace Domain
         public MembershipLevel? MembershipLevel { get; set; }
         public ICollection<UserRole> UserRoles { get; set; }
         public int Score { get; set; }
+        public int DailyScore { get; set; }
 
         public User()
         {

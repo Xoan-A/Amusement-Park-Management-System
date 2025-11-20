@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using IBusinessLogic;
 using Models.In;
 using Models.Out;
-using Domain.Exceptions;
 
 namespace Api.Controllers
 {
@@ -11,33 +10,28 @@ namespace Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthLogic _authLogic;
-        private readonly IUserLogic _userLogic;
+        private readonly IUserManagementLogic _userManagementLogic;
         private readonly ITokenLogic _tokenLogic;
 
-        public AuthController(IAuthLogic authLogic, IUserLogic userLogic, ITokenLogic tokenLogic)
+        public AuthController(IAuthLogic authLogic, IUserManagementLogic userManagementLogic, ITokenLogic tokenLogic)
         {
             _authLogic = authLogic;
-            _userLogic = userLogic;
+            _userManagementLogic = userManagementLogic;
             _tokenLogic = tokenLogic;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public IActionResult Login([FromBody] LoginRequest request)
         {
-            Domain.User user = await _authLogic.Login(request.Email, request.Password);
-
-            if (user == null)
-            {
-                throw new UnauthorizedException("Invalid email or password");
-            }
-
+            UserResponse user = _authLogic.Login(request.Email, request.Password);
 
             string token = _tokenLogic.GenerateToken(user);
-            string[] roles = user.UserRoles?.Select(ur => ur.Role.Name).ToArray() ?? new string[0];
+            string[] roles = user.UserRoles?.ToArray() ?? new string[0];
 
             LoginResponse response = new LoginResponse
             {
                 Token = token,
+                Id = user.Id,
                 Email = user.Email,
                 Roles = roles,
                 Name = $"{user.Name} {user.LastName}"
@@ -47,14 +41,9 @@ namespace Api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterVisitorRequest request)
+        public IActionResult Register([FromBody] RegisterVisitorRequest request)
         {
-            Domain.User visitor = await _userLogic.RegisterVisitor(request);
-
-            if (visitor == null)
-            {
-                return BadRequest(new { Message = "Registration failed" });
-            }
+            UserResponse visitor = _userManagementLogic.RegisterVisitor(request);
 
             RegisterResponse response = new RegisterResponse
             {

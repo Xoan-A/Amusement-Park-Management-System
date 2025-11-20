@@ -1,0 +1,50 @@
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-6 mx-auto">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Purchase Ticket</h2>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger">{{ errorMessage }}</div>
+          }
+          @if (successMessage) {
+            <div class="alert alert-success">{{ successMessage }}</div>
+          }
+
+          <form [formGroup]="ticketForm" (ngSubmit)="purchaseTicket()">
+            <div class="mb-3">
+              <label class="form-label">Visit Date *</label>
+              <input type="date" class="form-control" formControlName="visitDate">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Ticket Type *</label>
+              <select class="form-select" formControlName="type">
+                <option [value]="0">General Admission</option>
+                <option [value]="1">Event Special</option>
+              </select>
+            </div>
+
+            @if (ticketForm.value.type == 1) {
+              <div class="mb-3">
+                <label class="form-label">Select Event *</label>
+                <select class="form-select" formControlName="eventId">
+                  <option value="">Choose an event...</option>
+                  @for (event of events; track event.id) {
+                    <option [value]="event.id">{{ event.name }} - {{ event.date | date:'d/M/yyyy' }} {{ event.hour }}:00</option>
+                  }
+                </select>
+              </div>
+            }
+
+            <button type="submit" class="btn btn-primary w-100" [disabled]="loading || ticketForm.invalid">
+              {{ loading ? 'Processing...' : 'Purchase Ticket' }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

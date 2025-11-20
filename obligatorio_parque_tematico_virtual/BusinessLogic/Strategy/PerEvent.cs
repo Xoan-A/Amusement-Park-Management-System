@@ -1,5 +1,6 @@
 using Domain;
-using IBusinessLogic.Strategy;
+using IBusinessLogic;
+using Models.In;
 
 namespace BusinessLogic;
 
@@ -11,7 +12,7 @@ public class PerEvent : IConcreteStrategy
     {
         int score = ActiveStrategy.BasicCalculation(visitor, attraction);
 
-        if (strategyRequest.IsSepcialEvent)
+        if (strategyRequest.IsSpecialEvent)
             score *= 2;
 
         return score;

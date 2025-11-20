@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using Api.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -42,20 +42,6 @@ public class ExceptionFilterTest
     }
 
     [TestMethod]
-    public void OnException_WhenExceptionIsNotImplemented_ShouldResponseNotImplemented()
-    {
-        _context.Exception = new NotImplementedException();
-        _attribute.OnException(_context);
-
-        IActionResult? response = _context.Result;
-        ObjectResult? concreteResponse = response as ObjectResult;
-
-        Assert.AreEqual((int)HttpStatusCode.NotImplemented, concreteResponse.StatusCode);
-        Assert.AreEqual("501", concreteResponse.StatusCode.ToString());
-        Assert.AreEqual("The method or operation is not implemented.", GetMessage(concreteResponse.Value));
-    }
-
-    [TestMethod]
     public void OnException_WhenExceptionIsKeyNotFound_ShouldResponseNotFound()
     {
         _context.Exception = new KeyNotFoundException("Attraction not found");
@@ -82,7 +68,7 @@ public class ExceptionFilterTest
     [TestMethod]
     public void OnException_WhenExceptionIsUnauthorized_ShouldResponse401()
     {
-        _context.Exception = new Domain.Exceptions.UnauthorizedException("Unauthorized access");
+        _context.Exception = new IBusinessLogic.Exceptions.UnauthorizedException("Unauthorized access");
         _attribute.OnException(_context);
 
         ObjectResult? response = _context.Result as ObjectResult;
@@ -94,7 +80,7 @@ public class ExceptionFilterTest
     [TestMethod]
     public void OnException_WhenExceptionIsForbidden_ShouldResponse403()
     {
-        _context.Exception = new Domain.Exceptions.ForbiddenException("Forbidden access");
+        _context.Exception = new IBusinessLogic.Exceptions.ForbiddenException("Forbidden access");
         _attribute.OnException(_context);
 
         ObjectResult? response = _context.Result as ObjectResult;

@@ -15,8 +15,8 @@ public class RoleRepositoryTest
     public void Setup()
     {
         DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite("DataSource=:memory:")
-            .Options;
+        .UseSqlite("DataSource=:memory:")
+        .Options;
 
         _context = new AppDbContext(options);
         _context.Database.OpenConnection();
@@ -33,21 +33,11 @@ public class RoleRepositoryTest
     }
 
     [TestMethod]
-    public void GetAll_ShouldReturnAllRoles()
-    {
-        List<Role> roles = _repository.GetAll();
-
-        Assert.IsNotNull(roles);
-        Assert.AreEqual(3, roles.Count);
-    }
-
-    [TestMethod]
     public void GetByName_ShouldReturnRole_WhenRoleExists()
     {
-        Role? role = _repository.GetByName(Role.ADMINISTRATOR);
+        Role? role = _repository.GetByName(Role.Administrator);
 
-        Assert.IsNotNull(role);
-        Assert.AreEqual(Role.ADMINISTRATOR, role.Name);
+        Assert.AreEqual(Role.Administrator, role.Name);
     }
 
     [TestMethod]
@@ -61,27 +51,24 @@ public class RoleRepositoryTest
     [TestMethod]
     public void SeedData_ShouldContainAdministratorRole()
     {
-        Role? role = _repository.GetByName(Role.ADMINISTRATOR);
+        Role? role = _repository.GetByName(Role.Administrator);
 
-        Assert.IsNotNull(role);
         Assert.AreEqual("Administrator", role.Name);
     }
 
     [TestMethod]
     public void SeedData_ShouldContainOperatorRole()
     {
-        Role? role = _repository.GetByName(Role.OPERATOR);
+        Role? role = _repository.GetByName(Role.Operator);
 
-        Assert.IsNotNull(role);
-        Assert.AreEqual("Operator", role.Name);
+        Assert.AreEqual(Role.Operator, role.Name);
     }
 
     [TestMethod]
     public void SeedData_ShouldContainVisitorRole()
     {
-        Role? role = _repository.GetByName(Role.VISITOR);
+        Role? role = _repository.GetByName(Role.Visitor);
 
-        Assert.IsNotNull(role);
-        Assert.AreEqual("Visitor", role.Name);
+        Assert.AreEqual(Role.Visitor, role.Name);
     }
 }

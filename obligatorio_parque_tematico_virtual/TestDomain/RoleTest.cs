@@ -24,18 +24,18 @@ public class RoleTest
     [TestMethod]
     public void Role_ShouldHaveAdministratorConstant()
     {
-        Assert.AreEqual("Administrator", Role.ADMINISTRATOR);
+        Assert.AreEqual("Administrator", Role.Administrator);
     }
 
     [TestMethod]
     public void Role_ShouldHaveOperatorConstant()
     {
-        Assert.AreEqual("Operator", Role.OPERATOR);
+        Assert.AreEqual("Operator", Role.Operator);
     }
 
     [TestMethod]
     public void Role_ShouldHaveVisitorConstant()
     {
-        Assert.AreEqual("Visitor", Role.VISITOR);
+        Assert.AreEqual("Visitor", Role.Visitor);
     }
 }

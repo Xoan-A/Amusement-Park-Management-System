@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Domain.Exceptions;
+using IBusinessLogic.Exceptions;
 
 namespace Api.Filters;
 
@@ -8,7 +8,7 @@ public class ExceptionFilter : IExceptionFilter
 {
     public void OnException(ExceptionContext context)
     {
-        if (context.Exception is UnauthorizedException)
+        if (context.Exception is UnauthorizedException || context.Exception is UnauthorizedAccessException)
         {
             context.Result = new ObjectResult(new { Message = context.Exception.Message })
             {
@@ -36,11 +36,11 @@ public class ExceptionFilter : IExceptionFilter
                 StatusCode = 400
             };
         }
-        else if (context.Exception is NotImplementedException)
+        else if (context.Exception is InvalidOperationException)
         {
             context.Result = new ObjectResult(new { Message = context.Exception.Message })
             {
-                StatusCode = 501
+                StatusCode = 400
             };
         }
         else
