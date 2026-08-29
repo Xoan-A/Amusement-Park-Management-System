@@ -39,7 +39,7 @@
           <div class="card-body">
             <h5 class="card-title">Current Strategy</h5>
             <p class="display-6 text-info">{{ currentStrategy || 'N/A' }}</p>
-            <a routerLink="/admin/strategy" class="btn btn-info btn-sm">Manage Strategy</a>
+            <a routerLink="/admin/strategy" class="btn btn-primary btn-sm">Manage Strategy</a>
           </div>
         </div>
       </div>
@@ -51,7 +51,7 @@
             <p class="display-4" [class.text-danger]="overdueMaintenanceCount > 0" [class.text-muted]="overdueMaintenanceCount === 0">
               {{ overdueMaintenanceCount }}
             </p>
-            <a routerLink="/admin/maintenance/schedules" class="btn btn-sm" [class.btn-danger]="overdueMaintenanceCount > 0" [class.btn-outline-secondary]="overdueMaintenanceCount === 0">
+            <a routerLink="/admin/maintenance/schedules" class="btn btn-sm" [class.btn-danger]="overdueMaintenanceCount > 0" [class.btn-secondary]="overdueMaintenanceCount === 0">
               View Schedules
             </a>
           </div>
@@ -67,16 +67,16 @@
           </div>
           <div class="card-body">
             <div class="d-grid gap-2">
-              <a routerLink="/admin/attractions/new" class="btn btn-outline-primary">
+              <a routerLink="/admin/attractions/new" class="btn btn-primary">
                 Add New Attraction
               </a>
-              <a routerLink="/admin/events/new" class="btn btn-outline-success">
+              <a routerLink="/admin/events/new" class="btn btn-success">
                 Create New Event
               </a>
-              <a routerLink="/admin/maintenance/schedules/create" class="btn btn-outline-warning">
+              <a routerLink="/admin/maintenance/schedules/create" class="btn btn-warning text-dark">
                 Schedule Maintenance
               </a>
-              <a routerLink="/admin/users" class="btn btn-outline-secondary">
+              <a routerLink="/admin/users" class="btn btn-secondary">
                 Manage Users
               </a>
             </div>
@@ -91,13 +91,13 @@
           </div>
           <div class="card-body">
             <div class="d-grid gap-2">
-              <a routerLink="/admin/users" class="btn btn-outline-warning">
+              <a routerLink="/admin/users" class="btn btn-warning text-dark">
                 View Top 10 Visitors
               </a>
-              <a routerLink="/admin/score-history" class="btn btn-outline-secondary">
+              <a routerLink="/admin/score-history" class="btn btn-secondary">
                 View All Score History
               </a>
-              <a routerLink="/admin/strategy" class="btn btn-outline-dark">
+              <a routerLink="/admin/strategy" class="btn btn-dark">
                 Manage Strategy
               </a>
             </div>

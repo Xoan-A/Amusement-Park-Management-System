@@ -3,7 +3,7 @@
     <h1>Available Rewards</h1>
     <div>
       <span class="badge bg-primary fs-5 me-2">Your Points: {{ userPoints }}</span>
-      <a routerLink="/visitor/my-redemptions" class="btn btn-outline-primary">
+      <a routerLink="/visitor/my-redemptions" class="btn btn-primary">
         My Redemption History
       </a>
     </div>
@@ -71,11 +71,11 @@
                       Out of Stock
                     </button>
                   } @else if (!hasEnoughPoints(reward)) {
-                    <button class="btn btn-outline-danger" disabled>
+                    <button class="btn btn-danger" disabled>
                       Insufficient Points
                     </button>
                   } @else if (!meetsMembershipRequirement(reward)) {
-                    <button class="btn btn-outline-warning" disabled>
+                    <button class="btn btn-warning text-dark" disabled>
                       Membership Required
                     </button>
                   } @else {

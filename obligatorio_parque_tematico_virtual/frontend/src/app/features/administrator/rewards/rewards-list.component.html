@@ -67,11 +67,11 @@
                     <td>
                       <div class="btn-group" role="group">
                         <a [routerLink]="['/admin/rewards/edit', reward.id]"
-                           class="btn btn-sm btn-outline-primary">
+                           class="btn btn-sm btn-primary">
                           Edit
                         </a>
                         <button (click)="deleteReward(reward)"
-                                class="btn btn-sm btn-outline-danger"
+                                class="btn btn-sm btn-danger"
                                 [disabled]="deleting === reward.id">
                           {{ deleting === reward.id ? 'Deleting...' : 'Delete' }}
                         </button>

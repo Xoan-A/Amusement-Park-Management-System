@@ -11,14 +11,14 @@
 
       <!-- Filter Buttons -->
       <div class="mb-3">
-        <button class="btn btn-outline-danger me-2" (click)="toggleOverdue()">
+        <button class="btn btn-danger me-2" (click)="toggleOverdue()">
           <i class="bi bi-exclamation-triangle"></i>
           {{ showOverdue ? 'Hide' : 'Show' }} Overdue
           @if (overdueSchedules.length > 0) {
             <span class="badge bg-danger ms-1">{{ overdueSchedules.length }}</span>
           }
         </button>
-        <button class="btn btn-outline-info" (click)="toggleUpcoming()">
+        <button class="btn btn-primary" (click)="toggleUpcoming()">
           <i class="bi bi-calendar-event"></i>
           {{ showUpcoming ? 'Hide' : 'Show' }} Upcoming (7 days)
           @if (upcomingSchedules.length > 0) {
